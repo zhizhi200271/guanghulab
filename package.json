@@ -6,19 +6,29 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:contract": "node scripts/contract-check.js",
+    "test:route-align": "node scripts/route-align-check.js",
+    "test:smoke": "jest --config jest.smoke.config.js --forceExit",
+    "start:test": "NODE_ENV=test node src/index.js",
+    "brain:sync": "node scripts/process-broadcasts.js",
+    "brain:daily-check": "node scripts/daily-check.js",
+    "brain:update-memory": "node scripts/update-memory.js",
+    "broadcast:distribute": "node scripts/distribute-broadcasts.js"
   },
   "dependencies": {
+    "next": "15.3.2",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "next": "15.3.2"
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4"
+    "glob": "^10.5.0",
+    "jest": "^29.7.0",
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }
