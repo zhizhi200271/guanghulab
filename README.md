@@ -1,5 +1,30 @@
 # 光湖系统 · 模块代码总仓库
 
+## 仓库链接与访问方式
+
+**仓库地址：** https://github.com/qinfendebingshuo/guanghulab
+
+### 如何访问与克隆
+
+```bash
+# HTTPS（推荐，无需配置 SSH Key）
+git clone https://github.com/qinfendebingshuo/guanghulab.git
+
+# SSH（需先在 GitHub 账号中添加 SSH 公钥）
+git clone git@github.com:qinfendebingshuo/guanghulab.git
+```
+
+### 首次使用步骤
+1. 打开仓库链接：https://github.com/qinfendebingshuo/guanghulab
+2. 点击右上角 **Fork** 按钮，将仓库 fork 到自己账号（推荐）；  
+   或直接联系仓库管理员（qinfendebingshuo）申请 **Collaborator** 写入权限。
+3. 克隆到本地，进入自己负责的模块文件夹，按上传规范提交代码并发起 Pull Request。
+
+> **注意：** 仓库目前为私有（Private）状态，访问前请确认已被添加为 Collaborator，否则无法看到仓库内容。  
+> 如未收到邀请，请联系管理员。
+
+---
+
 ## 仓库结构
 每个模块一个文件夹，开发者将代码上传到对应文件夹中。
 
