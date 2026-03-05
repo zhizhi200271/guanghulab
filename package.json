@@ -10,7 +10,10 @@
     "test:contract": "node scripts/contract-check.js",
     "test:route-align": "node scripts/route-align-check.js",
     "test:smoke": "jest --config jest.smoke.config.js --forceExit",
-    "start:test": "NODE_ENV=test node src/index.js"
+    "start:test": "NODE_ENV=test node src/index.js",
+    "brain:sync": "node scripts/process-broadcasts.js",
+    "brain:daily-check": "node scripts/daily-check.js",
+    "brain:update-memory": "node scripts/update-memory.js"
   },
   "dependencies": {
     "next": "15.3.2",
