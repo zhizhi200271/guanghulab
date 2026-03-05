@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# HLI 运行时产物
+/logs
+/reports/*
+!/reports/.gitkeep
