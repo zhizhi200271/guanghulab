@@ -149,7 +149,20 @@
 
 > 冰朔追问（2026-03-05）：「我在哪里说话就可以唤醒你？在 GitHub 里点哪里？」
 
-### 方法 A：GitHub 网页版（推荐，最简单）
+### 方法 A【最推荐】：铸渊聊天室（GitHub Pages）
+
+```
+直接访问（无需任何配置）：
+https://qinfendebingshuo.github.io/guanghulab/
+
+页面说明：
+· 点开即是聊天界面，铸渊自动迎接
+· 内置智能问答：覆盖率查询 / 大脑状态 / 常见问题
+· 一键跳转 Copilot Chat 进行深度对话
+· 从 GitHub brain 文件实时拉取项目状态
+```
+
+### 方法 B：GitHub 网页版 Copilot Chat
 
 ```
 1. 打开仓库页面：

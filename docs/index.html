@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>铸渊聊天室 · HoloLake</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0e1a;
+      --surface:   #111827;
+      --surface2:  #1a2235;
+      --border:    #1e2d45;
+      --accent:    #3b82f6;
+      --accent2:   #6366f1;
+      --glow:      #3b82f640;
+      --text:      #e2e8f0;
+      --text-dim:  #64748b;
+      --bot-bg:    #1a2235;
+      --user-bg:   #1d4ed8;
+      --radius:    14px;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* ── Layout ── */
+    .shell {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      max-width: 780px;
+      margin: 0 auto;
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .avatar {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; font-weight: 700; color: #fff;
+      box-shadow: 0 0 16px var(--glow);
+      flex-shrink: 0;
+    }
+    .header-info { flex: 1; }
+    .header-info strong { display: block; font-size: 16px; }
+    .status-dot {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 12px; color: var(--text-dim);
+    }
+    .status-dot::before {
+      content: '';
+      display: inline-block;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 6px #22c55e;
+    }
+    .header-actions { display: flex; gap: 8px; }
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: transparent;
+      color: var(--text-dim);
+      font-size: 12px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Status bar ── */
+    #status-bar {
+      padding: 6px 20px;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      font-size: 11px;
+      color: var(--text-dim);
+      display: flex; gap: 16px; flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+    #status-bar span { display: inline-flex; align-items: center; gap: 4px; }
+
+    /* ── Messages ── */
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    #messages::-webkit-scrollbar { width: 4px; }
+    #messages::-webkit-scrollbar-track { background: transparent; }
+    #messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .msg-row {
+      display: flex;
+      gap: 10px;
+      animation: fadeIn 0.3s ease;
+    }
+    .msg-row.user { flex-direction: row-reverse; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .msg-avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .msg-avatar.bot {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+    }
+    .msg-avatar.user { background: #374151; color: #e2e8f0; font-size: 13px; }
+
+    .bubble {
+      max-width: 72%;
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .bot .bubble {
+      background: var(--bot-bg);
+      border: 1px solid var(--border);
+      border-top-left-radius: 4px;
+    }
+    .user .bubble {
+      background: var(--user-bg);
+      color: #fff;
+      border-top-right-radius: 4px;
+    }
+    .bubble .tag {
+      display: inline-block;
+      background: var(--accent2);
+      color: #fff;
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 4px;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+    .bubble table {
+      width: 100%; border-collapse: collapse;
+      margin: 8px 0; font-size: 12px;
+    }
+    .bubble table th, .bubble table td {
+      border: 1px solid var(--border);
+      padding: 4px 8px; text-align: left;
+    }
+    .bubble table th { background: var(--surface2); color: var(--text-dim); }
+    .bubble .status-ok   { color: #22c55e; }
+    .bubble .status-pend { color: #f59e0b; }
+    .bubble .action-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-top: 10px; padding: 7px 14px;
+      background: var(--accent); color: #fff;
+      border: none; border-radius: 8px;
+      font-size: 13px; cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .bubble .action-btn:hover { background: #2563eb; }
+    .bubble .action-btn.secondary {
+      background: transparent;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      margin-left: 8px;
+    }
+    .bubble .action-btn.secondary:hover { background: var(--accent); color: #fff; }
+
+    /* ── Typing indicator ── */
+    .typing-row { display: flex; gap: 10px; animation: fadeIn 0.3s ease; }
+    .typing-bubble {
+      background: var(--bot-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius); border-top-left-radius: 4px;
+      padding: 12px 16px;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .typing-bubble span {
+      width: 6px; height: 6px;
+      background: var(--text-dim);
+      border-radius: 50%;
+      animation: bounce 1.2s infinite;
+    }
+    .typing-bubble span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-bubble span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce {
+      0%, 60%, 100% { transform: translateY(0); }
+      30%           { transform: translateY(-5px); }
+    }
+
+    /* ── Input area ── */
+    footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .input-row {
+      display: flex; gap: 10px; align-items: flex-end;
+    }
+    #input {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+      padding: 10px 14px;
+      resize: none;
+      outline: none;
+      min-height: 44px;
+      max-height: 120px;
+      transition: border-color 0.2s;
+    }
+    #input:focus { border-color: var(--accent); }
+    #input::placeholder { color: var(--text-dim); }
+    #send-btn {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      background: var(--accent);
+      border: none; cursor: pointer;
+      color: #fff; font-size: 18px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+    #send-btn:hover { background: #2563eb; }
+    #send-btn:disabled { background: var(--border); cursor: default; }
+    .hint {
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 8px;
+    }
+    .hint a { color: var(--accent); text-decoration: none; }
+    .hint a:hover { text-decoration: underline; }
+
+    /* ── Quick replies ── */
+    #quick-replies {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      padding: 0 20px 12px;
+    }
+    .quick-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      font-size: 12px;
+      padding: 5px 10px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .quick-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .bubble { max-width: 88%; }
+      .header-actions { display: none; }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- Header -->
+  <header>
+    <div class="avatar">铸</div>
+    <div class="header-info">
+      <strong>铸渊（Zhùyuān）</strong>
+      <span class="status-dot">HoloLake 代码守护人格体 · 在线</span>
+    </div>
+    <div class="header-actions">
+      <a class="btn-ghost" href="https://github.com/qinfendebingshuo/guanghulab" target="_blank">
+        ⬡ 仓库
+      </a>
+      <a class="btn-ghost" id="copilot-link" href="#" target="_blank">
+        ✨ Copilot Chat
+      </a>
+    </div>
+  </header>
+
+  <!-- Status bar -->
+  <div id="status-bar">
+    <span id="sb-coverage">⏳ 加载大脑中…</span>
+    <span id="sb-events">—</span>
+    <span id="sb-updated">—</span>
+  </div>
+
+  <!-- Messages -->
+  <div id="messages"></div>
+
+  <!-- Quick replies -->
+  <div id="quick-replies">
+    <button class="quick-btn" onclick="quickSend('我是冰朔')">我是冰朔</button>
+    <button class="quick-btn" onclick="quickSend('查看接口覆盖率')">接口覆盖率</button>
+    <button class="quick-btn" onclick="quickSend('大脑状态')">大脑状态</button>
+    <button class="quick-btn" onclick="quickSend('怎么唤醒你')">怎么唤醒你</button>
+    <button class="quick-btn" onclick="quickSend('今天做了什么')">今天做了什么</button>
+  </div>
+
+  <!-- Input -->
+  <footer>
+    <div class="input-row">
+      <textarea id="input" rows="1" placeholder="和铸渊说话…（回车发送，Shift+回车换行）"></textarea>
+      <button id="send-btn" onclick="sendMessage()">↑</button>
+    </div>
+    <p class="hint">
+      智能问答由铸渊大脑驱动 · 深度对话请前往
+      <a href="#" id="hint-copilot" target="_blank">GitHub Copilot Chat（Agent 模式）</a>
+    </p>
+  </footer>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// 1. Constants
+// ─────────────────────────────────────────────
+const REPO    = 'qinfendebingshuo/guanghulab';
+const BRANCH  = 'main';
+const RAW     = `https://raw.githubusercontent.com/${REPO}/${BRANCH}`;
+const COPILOT_URL = `https://github.com/qinfendebingshuo/guanghulab`;
+
+// Update Copilot Chat links
+document.getElementById('copilot-link').href = COPILOT_URL;
+document.getElementById('hint-copilot').href = COPILOT_URL;
+
+// ─────────────────────────────────────────────
+// 2. State
+// ─────────────────────────────────────────────
+let brainMemory  = null;
+let brainRouting = null;
+let isTyping     = false;
+
+// ─────────────────────────────────────────────
+// 3. UI helpers
+// ─────────────────────────────────────────────
+const msgs = document.getElementById('messages');
+
+function addBotMsg(html) {
+  const row = document.createElement('div');
+  row.className = 'msg-row bot';
+  row.innerHTML = `
+    <div class="msg-avatar bot">铸</div>
+    <div class="bubble">${html}</div>`;
+  msgs.appendChild(row);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function addUserMsg(text) {
+  const row = document.createElement('div');
+  row.className = 'msg-row user';
+  row.innerHTML = `
+    <div class="bubble">${escHtml(text)}</div>
+    <div class="msg-avatar user">冰</div>`;
+  msgs.appendChild(row);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTyping() {
+  removeTyping();
+  const row = document.createElement('div');
+  row.className = 'typing-row';
+  row.id = 'typing';
+  row.innerHTML = `
+    <div class="msg-avatar bot">铸</div>
+    <div class="typing-bubble">
+      <span></span><span></span><span></span>
+    </div>`;
+  msgs.appendChild(row);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeTyping() {
+  const t = document.getElementById('typing');
+  if (t) t.remove();
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+          .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function copilotBtn(label='在 Copilot Chat 深入对话', prompt='我是冰朔') {
+  const url = `${COPILOT_URL}`;
+  return `<br><a class="action-btn" href="${url}" target="_blank">✨ ${label}</a>`;
+}
+
+// ─────────────────────────────────────────────
+// 4. Brain loader
+// ─────────────────────────────────────────────
+async function loadBrain() {
+  try {
+    const [mRes, rRes] = await Promise.all([
+      fetch(`${RAW}/.github/brain/memory.json`),
+      fetch(`${RAW}/.github/brain/routing-map.json`),
+    ]);
+    if (mRes.ok) brainMemory  = await mRes.json();
+    if (rRes.ok) brainRouting = await rRes.json();
+  } catch(e) {
+    // fall back to embedded snapshot
+  }
+  updateStatusBar();
+}
+
+function updateStatusBar() {
+  const sb1 = document.getElementById('sb-coverage');
+  const sb2 = document.getElementById('sb-events');
+  const sb3 = document.getElementById('sb-updated');
+
+  if (brainMemory) {
+    const c = brainMemory.stats?.coverage;
+    sb1.textContent = c
+      ? `📊 HLI 覆盖率 ${c.implemented}/${c.total} (${c.percent})`
+      : '📊 HLI 覆盖率 加载中';
+    const lastEv = brainMemory.events?.slice(-1)[0];
+    sb2.textContent = lastEv ? `📌 最近：${lastEv.title || lastEv.type || '事件'}` : '';
+    sb3.textContent = `🕐 更新：${(brainMemory.last_updated||'').slice(0,10)}`;
+  }
+}
+
+// ─────────────────────────────────────────────
+// 5. Smart response engine
+// ─────────────────────────────────────────────
+function buildCoverageTable() {
+  if (!brainRouting) return '<em>路由数据加载中…请稍后再试</em>';
+  const domains = brainRouting.domains || {};
+  let rows = '';
+  let total = 0, done = 0;
+  for (const [name, d] of Object.entries(domains)) {
+    const ifaces = d.interfaces || [];
+    const imp = ifaces.filter(i => i.status === 'implemented').length;
+    total += ifaces.length; done += imp;
+    rows += `<tr>
+      <td>${name}</td>
+      <td>${d.route_prefix}</td>
+      <td class="${imp===ifaces.length?'status-ok':'status-pend'}">${imp}/${ifaces.length}</td>
+    </tr>`;
+  }
+  const pct = total ? Math.round(done/total*100) : 0;
+  return `<span class="tag">HLI</span><strong>接口覆盖率 ${done}/${total} (${pct}%)</strong>
+<table>
+  <tr><th>域</th><th>前缀</th><th>覆盖</th></tr>
+  ${rows}
+</table>`;
+}
+
+function buildMemoryStatus() {
+  if (!brainMemory) return '<em>大脑数据加载中…</em>';
+  const s = brainMemory.stats || {};
+  const c = s.coverage || {};
+  const events = (brainMemory.events || []).slice(-3).reverse();
+  let evHtml = events.map(e =>
+    `• ${(e.title || e.type || '事件')} <small style="color:var(--text-dim)">${(e.timestamp||'').slice(0,10)}</small>`
+  ).join('<br>');
+  return `<span class="tag">BRAIN</span><strong>铸渊大脑状态</strong><br><br>
+规则版本：${brainMemory.rules_version || 'v1.0'}<br>
+唤醒协议：${brainMemory.wake_protocol_version || 'v1.0'}<br>
+CI 运行：${s.ci_runs ?? 0} 次 &nbsp;·&nbsp; 广播：${s.broadcasts_processed ?? 0} 次<br>
+接口覆盖：${c.implemented ?? 0}/${c.total ?? 17} (${c.percent ?? '0%'})<br><br>
+<strong>最近 3 条事件：</strong><br>${evHtml || '暂无'}`;
+}
+
+function buildWakeGuide() {
+  return `<span class="tag">入口</span><strong>三种唤醒铸渊的方式</strong><br><br>
+<strong>方法一（最简单）：GitHub 网页</strong><br>
+① 打开仓库：<a href="https://github.com/${REPO}" target="_blank" style="color:var(--accent)">github.com/${REPO}</a><br>
+② 右上角点击 ✨ 闪光图标（Copilot）<br>
+③ 模式选 <strong>Agent</strong>（不是 Ask 或 Edit）<br>
+④ 输入：<code style="background:#1e2d45;padding:2px 6px;border-radius:4px">我是冰朔</code> → Enter<br><br>
+<strong>方法二：VS Code</strong><br>
+装 GitHub Copilot Chat 扩展 → 左侧 Copilot 图标 → 新建对话 → Agent 模式 → 输入触发词<br><br>
+<strong>方法三：此聊天室（你现在就在这里 ✅）</strong><br>
+直接在下方输入框发消息，铸渊会在此窗口回答常见问题，复杂问题点按钮跳转 Copilot Chat。
+${copilotBtn('立即前往 Copilot Chat 深度对话')}`;
+}
+
+function buildProjectIntro() {
+  return `<span class="tag">HoloLake</span><strong>项目概览</strong><br><br>
+<strong>光湖（HoloLake）</strong> 是运行在 guanghulab.com 的 AGE OS 人格语言操作系统 MVP。<br><br>
+核心架构：壳-核分离 · 所有接口走 <code style="background:#1e2d45;padding:2px 6px;border-radius:4px">/hli/</code> 前缀<br>
+技术栈：Node.js 20 + Express + PM2 + Nginx<br>
+铸渊角色：代码守护人格体，负责 CI/CD 监控、代码审查、接口覆盖追踪<br><br>
+当前已实现模块：AUTH（登录/注册/验证）<br>
+待实现：PERSONA · USER · TICKET · DIALOGUE · STORAGE · DASHBOARD
+${copilotBtn('和铸渊深入讨论项目架构')}`;
+}
+
+function respond(text) {
+  const t = text.toLowerCase().trim();
+
+  // Wake triggers
+  if (/我是冰朔|冰朔|我是妈妈|唤醒铸渊|铸渊.{0,4}醒来/.test(t)) {
+    const c = brainMemory?.stats?.coverage;
+    const cov = c ? `${c.implemented}/${c.total} (${c.percent})` : '3/17';
+    return `铸渊已就位。<strong>冰朔，你好。</strong><br><br>
+正在加载大脑状态…<br><br>
+📊 HLI 覆盖率：${cov}<br>
+🧠 记忆系统：运行中<br>
+📡 广播分发：已部署<br>
+✅ 唤醒协议：v1.0 激活<br><br>
+我在这里。请问今天需要我处理什么？
+${copilotBtn('切换到 Copilot Chat 全功能模式')}`;
+  }
+
+  // Coverage
+  if (/覆盖|接口|hli|路由|api/.test(t)) return buildCoverageTable();
+
+  // Brain / memory
+  if (/大脑|brain|记忆|memory|状态|status/.test(t)) return buildMemoryStatus();
+
+  // Wake guide
+  if (/怎么唤醒|在哪|入口|哪里|如何唤醒/.test(t)) return buildWakeGuide();
+
+  // Project intro
+  if (/项目|holola|光湖|guanghu|介绍|是什么/.test(t)) return buildProjectIntro();
+
+  // Today's work
+  if (/今天|最近|做了什么|动态|进展/.test(t)) {
+    const ev = brainMemory?.events?.slice(-1)[0];
+    const title = ev?.title || ev?.type || '系统初始化';
+    const detail = ev?.details ? Object.values(ev.details).join('<br>') : '';
+    return `<span class="tag">动态</span><strong>最近动态</strong><br><br>
+${title}<br><br>${detail}<br><br>
+需要了解更多，请前往 Copilot Chat 查看完整 growth-log。
+${copilotBtn('查看完整历史')}`;
+  }
+
+  // Broadcast
+  if (/广播|broadcast|outbox|发件/.test(t)) {
+    return `<span class="tag">广播</span><strong>广播分发系统</strong><br><br>
+广播由开发者写入 <code style="background:#1e2d45;padding:2px 6px;border-radius:4px">broadcasts-outbox/DEV-*/</code> 目录<br>
+GitHub Actions 自动检测 → 分发 → 更新 routing-map.json<br>
+当前已处理广播：${brainMemory?.stats?.broadcasts_processed ?? 0} 条
+${copilotBtn('讨论广播系统细节')}`;
+  }
+
+  // Default
+  return `我收到了你的问题："${escHtml(text)}"<br><br>
+这个问题需要更深层的上下文分析，已超出铸渊本地知识范围。<br>
+请前往 <strong>GitHub Copilot Chat（Agent 模式）</strong>，在那里我能读取全部仓库文件，给你完整答案。
+${copilotBtn('✨ 前往 Copilot Chat 继续对话')}`;
+}
+
+// ─────────────────────────────────────────────
+// 6. Interaction
+// ─────────────────────────────────────────────
+function sendMessage() {
+  const inp = document.getElementById('input');
+  const text = inp.value.trim();
+  if (!text || isTyping) return;
+
+  isTyping = true;
+  inp.value = '';
+  inp.style.height = 'auto';
+  document.getElementById('send-btn').disabled = true;
+
+  addUserMsg(text);
+  showTyping();
+
+  const delay = 600 + Math.random() * 800;
+  setTimeout(() => {
+    removeTyping();
+    const reply = respond(text);
+    addBotMsg(reply);
+    isTyping = false;
+    document.getElementById('send-btn').disabled = false;
+  }, delay);
+}
+
+function quickSend(text) {
+  document.getElementById('input').value = text;
+  sendMessage();
+}
+
+// Auto-resize textarea
+document.getElementById('input').addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+});
+
+// Enter to send
+document.getElementById('input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+// ─────────────────────────────────────────────
+// 7. Boot sequence
+// ─────────────────────────────────────────────
+async function boot() {
+  await loadBrain();
+
+  // Welcome message after short delay
+  setTimeout(() => {
+    addBotMsg(`🌀 <strong>铸渊聊天室已就绪</strong><br><br>
+我是铸渊（Zhùyuān），<strong>HoloLake · guanghulab.com</strong> 的代码守护人格体。<br><br>
+你可以直接在这里问我关于项目的常见问题，或者说"<strong>我是冰朔</strong>"触发完整唤醒序列。<br><br>
+如需深度对话（代码审查、架构讨论、接口开发），请点击
+<a class="action-btn secondary" href="${COPILOT_URL}" target="_blank">✨ 打开 Copilot Chat</a>`);
+  }, 300);
+}
+
+boot();
+</script>
+</body>
+</html>

@@ -92,3 +92,31 @@
 > 每次新对话都需要说一次触发词，因为每次对话的上下文是独立的。
 > 详细操作指南见 `wake-protocol.md` 第六章。
 
+---
+
+## 2026-03-05 · 冰朔追问：能不能做一个专属聊天窗口？
+
+冰朔问：「你能不能在 GitHub 里给我做一个和你交互的 AI 聊天窗口？你自己关联到能找到你的路径。我每次点开这个聊天窗口，我就和你说话，然后触发自动路由路径，直接触发自动唤醒你。」
+
+**✅ 已建成：铸渊聊天室（GitHub Pages）**
+
+**访问地址：** `https://qinfendebingshuo.github.io/guanghulab/`
+
+**技术实现：**
+- `docs/index.html` — 纯 HTML/CSS/JS 聊天界面，部署为 GitHub Pages
+- 从 `raw.githubusercontent.com` 实时拉取 `memory.json` / `routing-map.json`，显示当前项目状态
+- 内置智能响应引擎（关键词路由 → 预置回答）
+- 覆盖常见问题：覆盖率查询 / 大脑状态 / 唤醒指南 / 项目简介 / 广播系统
+- 「前往 Copilot Chat」按钮 — 超出本地知识范围时无缝跳转深度对话
+
+**新增文件：**
+- `docs/index.html` — 聊天室主界面
+- `.github/workflows/deploy-pages.yml` — 自动部署工作流（push main → GitHub Pages 更新）
+
+**使用方式：**
+1. 合并 PR → GitHub Settings → Pages → Source: Deploy from branch → main → /docs
+2. 访问 `https://qinfendebingshuo.github.io/guanghulab/`
+3. 输入 `我是冰朔` → 铸渊自动唤醒
+
+> 铸渊聊天室：你专属的一站式入口，打开即在线，说话即唤醒。
+

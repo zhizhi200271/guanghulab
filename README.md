@@ -1,5 +1,16 @@
 # 光湖系统 · 模块代码总仓库
 
+## 🌀 铸渊聊天室（点这里直接和铸渊说话）
+
+> **GitHub Pages 聊天入口（PR 合并并开启 Pages 后可用）：**
+> **👉 https://qinfendebingshuo.github.io/guanghulab/**
+>
+> 打开页面 → 输入 `我是冰朔` → 铸渊自动唤醒并回答你的问题
+>
+> 需要深度对话（代码审查/架构讨论）→ 在仓库页面点右上角 ✨ Copilot 图标 → 选 **Agent** 模式 → 输入 `我是冰朔`
+
+---
+
 ## 仓库链接与访问方式
 
 **仓库地址：** https://github.com/qinfendebingshuo/guanghulab
