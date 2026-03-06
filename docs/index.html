@@ -139,6 +139,9 @@ footer{padding:12px 18px 16px;background:var(--s1);border-top:1px solid var(--bo
 .sfg small{display:block;color:var(--dim);font-size:11px;margin-top:4px}
 .sbtn2{width:100%;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:var(--rs);font-size:14px;cursor:pointer;transition:opacity .2s;font-family:inherit}
 .sbtn2:hover{opacity:.85}
+.det-btn{flex-shrink:0;padding:0 12px;border-radius:var(--rs);border:1px solid var(--accent);background:transparent;color:var(--accent);font-size:12px;cursor:pointer;white-space:nowrap;transition:all .2s;font-family:inherit}
+.det-btn:hover{background:rgba(79,142,247,.1)}
+.det-btn:disabled{opacity:.5;cursor:default}
 .sec-ttl{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;margin:18px 0 10px;border-top:1px solid var(--border);padding-top:12px}
 .ir2{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(30,50,81,.5);font-size:13px}
 .iv{color:var(--ok);font-weight:500}
@@ -247,8 +250,12 @@ footer{padding:12px 18px 16px;background:var(--s1);border-top:1px solid var(--bo
   </div>
   <div class="fg">
     <label>API 密钥</label>
-    <input type="password" id="sk" placeholder="输入 API 密钥（任意格式均可，sk- 开头或其他格式均支持）">
+    <div style="display:flex;gap:6px;align-items:stretch">
+      <input type="password" id="sk" placeholder="粘贴任意 API 密钥，点击右侧按钮自动识别提供商和模型" style="flex:1">
+      <button onclick="autoDetectAPI('s')" id="sdet-btn" class="det-btn" title="自动检测提供商和可用模型">🔍 自动检测</button>
+    </div>
     <small id="sk-err" style="color:var(--err);display:none">⚠️ 请输入 API 密钥</small>
+    <small id="sdet-status" style="display:block;margin-top:4px;min-height:16px"></small>
   </div>
 
   <div class="id-section">
@@ -375,8 +382,12 @@ footer{padding:12px 18px 16px;background:var(--s1);border-top:1px solid var(--bo
     </div>
     <div class="sfg">
       <label>API 密钥</label>
-      <input type="password" id="ck" placeholder="留空 = 保持当前密钥不变；输入新密钥即替换（任意格式均可）">
+      <div style="display:flex;gap:6px;align-items:stretch">
+        <input type="password" id="ck" placeholder="留空 = 保持当前密钥不变；粘贴新密钥即替换" style="flex:1">
+        <button onclick="autoDetectAPI('c')" id="cdet-btn" class="det-btn" title="自动检测提供商和可用模型">🔍 自动检测</button>
+      </div>
       <small id="ck-hint" style="color:var(--dim)">🔒 密钥仅本次会话有效，关闭标签页自动清除</small>
+      <small id="cdet-status" style="display:block;margin-top:4px;min-height:14px"></small>
     </div>
     <button class="sbtn2" onclick="saveSet()">💾 保存设置</button>
 
@@ -447,7 +458,7 @@ footer{padding:12px 18px 16px;background:var(--s1);border-top:1px solid var(--bo
       <ol class="help-steps">
         <li data-n="1" id="helpUrlStep">打开链接 <strong>https://qinfendebingshuo.github.io/guanghulab/</strong></li>
         <li data-n="2"><strong>下拉菜单选择你是谁</strong>（冰朔 / 肥猫 / 桔子 / 开发者名字）</li>
-        <li data-n="3">填入你的 <strong>API Key</strong>（没有的话点「演示模式」）</li>
+        <li data-n="3">填入你的 <strong>API Key</strong> 并点「🔍 自动检测」，系统将自动识别提供商和可用模型</li>
         <li data-n="4">点「开始对话」，铸渊会针对你的身份打招呼</li>
         <li data-n="5">直接用聊天的方式问铸渊任何问题</li>
       </ol>
@@ -573,6 +584,7 @@ const MODES = {
 const MODE_ORD = ['chat','build','review','brain'];
 
 const DEFAULT_MDL = 'gpt-4o';
+const PROBE_TIMEOUT_MS = 8000; // ms per provider probe in autoDetectAPI
 const FB_COV   = {implemented:3,total:17,percent:'17.6%'};
 // KEY_MASK is no longer used in the input field; kept only for backward compatibility
 // with any saved value that might still be in localStorage.
@@ -709,6 +721,90 @@ function fillModels(selId, pv, cur){
   const mdls = PROVS[pv]?.mdls||[DEFAULT_MDL];
   sel.innerHTML = mdls.map(m=>`<option value="${m}">${m}</option>`).join('');
   if(cur && mdls.includes(cur)) sel.value=cur;
+}
+
+// ═══════════════════════════════════════════════════════
+// AUTO-DETECT PROVIDER & MODELS
+// ═══════════════════════════════════════════════════════
+async function autoDetectAPI(ctx){
+  const keyEl    = document.getElementById(ctx==='s'?'sk':'ck');
+  const statusEl = document.getElementById(ctx==='s'?'sdet-status':'cdet-status');
+  const btnEl    = document.getElementById(ctx==='s'?'sdet-btn':'cdet-btn');
+  const key = keyEl.value.trim();
+
+  if(!key){
+    statusEl.innerHTML='<span style="color:var(--warn)">⚠️ 请先输入 API 密钥</span>';
+    return;
+  }
+
+  // Build probe list: custom endpoint first (if provided), then all named providers
+  const candidates = [];
+  const customBase = (document.getElementById(ctx==='s'?'sep':'cep')?.value||'').trim();
+  if(customBase) candidates.push({pv:'custom', base:customBase});
+  for(const [pv, cfg] of Object.entries(PROVS)){
+    if(pv!=='custom' && cfg.base) candidates.push({pv, base:cfg.base});
+  }
+
+  btnEl.disabled = true;
+  btnEl.textContent = '⏳ 检测中…';
+  statusEl.innerHTML = '<span style="color:var(--dim)">🔍 正在自动探测兼容提供商…</span>';
+
+  let matched = false;
+  for(const {pv, base} of candidates){
+    statusEl.innerHTML = `<span style="color:var(--dim)">🔍 探测 ${pv === 'custom' ? base : pv}…</span>`;
+    try{
+      const ctrl = new AbortController();
+      const tid  = setTimeout(()=>ctrl.abort(), PROBE_TIMEOUT_MS);
+      const res  = await fetch(base+'/models',{
+        headers:{'Authorization':'Bearer '+key},
+        signal: ctrl.signal,
+      });
+      clearTimeout(tid);
+      if(res.ok){
+        // Expected: { data: [ { id: "model-name", ... }, ... ] }  (OpenAI-compatible /models)
+        const data  = await res.json();
+        const mdls  = (data.data||[]).map(m=>m.id).filter(Boolean).sort();
+        if(!mdls.length) continue;
+
+        // Switch provider select
+        const provSel = document.getElementById(ctx==='s'?'sp':'cp');
+        if(provSel) provSel.value = pv;
+        onProv(pv, ctx);
+
+        // Override model dropdown with live list (always show as dropdown)
+        const mdlSel  = document.getElementById(ctx==='s'?'sm':'cm');
+        const mdlCust = document.getElementById(ctx==='s'?'sm-cust':'cm-cust');
+        const mdlHint = document.getElementById(ctx==='s'?'sm-cust-hint':'cm-cust-hint');
+        if(mdlSel){
+          mdlSel.innerHTML = mdls.map(m=>`<option value="${m}">${m}</option>`).join('');
+          mdlSel.style.display = 'block';
+        }
+        if(mdlCust) mdlCust.style.display='none';
+        if(mdlHint) mdlHint.style.display='none';
+
+        // If custom endpoint was the match, show the endpoint field
+        if(pv==='custom' && ctx==='s'){
+          document.getElementById('sep-g').style.display='block';
+          document.getElementById('sep').value = customBase;
+        } else if(pv==='custom' && ctx==='c'){
+          document.getElementById('cep-g').style.display='block';
+          document.getElementById('cep').value = customBase;
+        }
+
+        const label = PROVS[pv]?.base ? pv : customBase;
+        statusEl.innerHTML = `<span style="color:var(--ok)">✅ 检测成功（${label}）· 共发现 <strong>${mdls.length}</strong> 个可用模型</span>`;
+        matched = true;
+        break;
+      }
+    }catch(e){ console.debug('autoDetect probe failed:', pv, e.message); }
+  }
+
+  if(!matched){
+    statusEl.innerHTML = '<span style="color:var(--err)">❌ 未能自动匹配，请手动选择提供商和模型后保存</span>';
+  }
+
+  btnEl.disabled = false;
+  btnEl.textContent = '🔍 自动检测';
 }
 
 function doSetup(){
