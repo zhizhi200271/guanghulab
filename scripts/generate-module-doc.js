@@ -126,7 +126,16 @@ function readModuleInfo(dir) {
   return info;
 }
 
-// ========== 生成结构状态徽章 ==========
+// ========== 生成与 GitHub 一致的 Markdown anchor ==========
+// GitHub 规则：小写 → 保留字母/数字/空格/连字符/中文 → 空格转连字符
+function toGitHubAnchor(headingText) {
+  return headingText
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s-]/gu, '') // 去除非字母/数字/空格/连字符（支持 Unicode）
+    .replace(/\s+/g, '-');             // 空格转连字符
+}
+
+
 function structureBadge(info) {
   const checks = [
     info.hasSrc ? '✅ src/' : '⚠️ src/',
@@ -160,7 +169,9 @@ function generateDoc() {
   for (const collab of COLLABORATOR_MODULES) {
     const moduleCount = collab.dirs.filter(d => fs.existsSync(d)).length;
     const badge = moduleCount > 0 ? `（${moduleCount} 个模块）` : '（待上传）';
-    lines.push(`- [${collab.devId} · ${collab.emoji} ${collab.name}](#${collab.devId.toLowerCase().replaceAll('-', '')}--${encodeURIComponent(collab.name)}) ${badge}`);
+    const headingText = `${collab.devId} · ${collab.emoji} ${collab.name}`;
+    const anchor = toGitHubAnchor(headingText);
+    lines.push(`- [${headingText}](#${anchor}) ${badge}`);
   }
   lines.push('');
   lines.push('---');
