@@ -241,10 +241,12 @@ footer{padding:12px 18px 16px;background:var(--s1);border-top:1px solid var(--bo
   <div class="fg">
     <label>模型</label>
     <select id="sm"></select>
+    <input type="text" id="sm-cust" placeholder="输入模型名称，如 gpt-4o、claude-3-5-sonnet-20241022、deepseek-chat" style="display:none;margin-top:6px">
+    <small id="sm-cust-hint" style="display:none;color:var(--dim);font-size:11px;margin-top:4px">自定义模式：直接输入你的服务商支持的任意模型名称</small>
   </div>
   <div class="fg">
     <label>API 密钥</label>
-    <input type="password" id="sk" placeholder="sk-… 或对应格式的密钥">
+    <input type="password" id="sk" placeholder="输入 API 密钥（任意格式均可，sk- 开头或其他格式均支持）">
     <small id="sk-err" style="color:var(--err);display:none">⚠️ 请输入 API 密钥</small>
   </div>
 
@@ -366,10 +368,12 @@ footer{padding:12px 18px 16px;background:var(--s1);border-top:1px solid var(--bo
     <div class="sfg">
       <label>模型</label>
       <select id="cm"></select>
+      <input type="text" id="cm-cust" placeholder="输入模型名称，如 gpt-4o、claude-3-5-sonnet-20241022、deepseek-chat" style="display:none;margin-top:6px">
+      <small id="cm-cust-hint" style="display:none;color:var(--dim);font-size:11px;margin-top:4px">自定义模式：直接输入你的服务商支持的任意模型名称</small>
     </div>
     <div class="sfg">
       <label>API 密钥</label>
-      <input type="password" id="ck" placeholder="留空 = 保持当前密钥不变；输入新密钥即替换">
+      <input type="password" id="ck" placeholder="留空 = 保持当前密钥不变；输入新密钥即替换（任意格式均可）">
       <small id="ck-hint" style="color:var(--dim)">🔒 密钥仅本次会话有效，关闭标签页自动清除</small>
     </div>
     <button class="sbtn2" onclick="saveSet()">💾 保存设置</button>
@@ -565,6 +569,7 @@ const MODES = {
 };
 const MODE_ORD = ['chat','build','review','brain'];
 
+const DEFAULT_MDL = 'gpt-4o';
 const FB_COV   = {implemented:3,total:17,percent:'17.6%'};
 // KEY_MASK is no longer used in the input field; kept only for backward compatibility
 // with any saved value that might still be in localStorage.
@@ -589,7 +594,7 @@ const _initBase = _initProv === 'custom'
 const A = {
   key:   sessionStorage.getItem('zy_key')||'',
   base:  _initBase,
-  mdl:   ls('zy_mdl')||'gpt-4o',
+  mdl:   ls('zy_mdl')||DEFAULT_MDL,
   prov:  _initProv,
   demo:  false,
   brain: null,
@@ -620,7 +625,7 @@ async function boot(){
   if(new URLSearchParams(location.search).get('reset')==='1'){
     RESET_KEYS.forEach(k => localStorage.removeItem(k));
     sessionStorage.removeItem('zy_key');
-    A.key=''; A.base=PROVS['yunwu'].base; A.mdl='gpt-4o'; A.prov='yunwu'; A.demo=false;
+    A.key=''; A.base=PROVS['yunwu'].base; A.mdl=DEFAULT_MDL; A.prov='yunwu'; A.demo=false;
     A.userName=''; A.ghUser=''; A.role='guest';
     // Remove ?reset=1 from the URL so a subsequent refresh does not trigger another reset.
     history.replaceState(null,'',location.pathname);
@@ -657,22 +662,39 @@ function showApp(){
 function initSetupUI(){
   const pv = A.prov||'yunwu';
   document.getElementById('sp').value = pv;
-  fillModels('sm', pv, A.mdl);
-  if(pv==='custom'){
+  const isCustom = pv==='custom';
+  document.getElementById('sm').style.display          = isCustom?'none':'block';
+  document.getElementById('sm-cust').style.display     = isCustom?'block':'none';
+  document.getElementById('sm-cust-hint').style.display= isCustom?'block':'none';
+  if(isCustom){
+    document.getElementById('sm-cust').value = A.mdl||DEFAULT_MDL;
     document.getElementById('sep-g').style.display='block';
     document.getElementById('sep').value = A.base;
+  } else {
+    fillModels('sm', pv, A.mdl);
   }
 }
 
 function onProv(pv,ctx){
-  const mdlSel = ctx==='s'?'sm':'cm';
-  const epGrp  = ctx==='s'?'sep-g':'cep-g';
-  const epInp  = ctx==='s'?'sep':'cep';
-  const cur = ctx==='s'? A.mdl : document.getElementById('cm')?.value;
-  fillModels(mdlSel, pv, cur);
-  const show = pv==='custom';
-  document.getElementById(epGrp).style.display = show?'block':'none';
-  if(!show){
+  const mdlSel  = ctx==='s'?'sm':'cm';
+  const mdlCust = ctx==='s'?'sm-cust':'cm-cust';
+  const mdlHint = ctx==='s'?'sm-cust-hint':'cm-cust-hint';
+  const epGrp   = ctx==='s'?'sep-g':'cep-g';
+  const epInp   = ctx==='s'?'sep':'cep';
+  const cur     = ctx==='s'? A.mdl : document.getElementById('cm')?.value;
+  const isCustom = pv==='custom';
+  // Toggle model input: dropdown for known providers, text input for custom
+  document.getElementById(mdlSel).style.display  = isCustom?'none':'block';
+  document.getElementById(mdlCust).style.display = isCustom?'block':'none';
+  document.getElementById(mdlHint).style.display = isCustom?'block':'none';
+  if(isCustom){
+    const custInp = document.getElementById(mdlCust);
+    if(custInp && !custInp.value) custInp.value = cur||DEFAULT_MDL;
+  } else {
+    fillModels(mdlSel, pv, cur);
+  }
+  document.getElementById(epGrp).style.display = isCustom?'block':'none';
+  if(!isCustom){
     const ep = document.getElementById(epInp);
     if(ep) ep.value = PROVS[pv]?.base||'';
   }
@@ -681,7 +703,7 @@ function onProv(pv,ctx){
 function fillModels(selId, pv, cur){
   const sel = document.getElementById(selId);
   if(!sel) return;
-  const mdls = PROVS[pv]?.mdls||['gpt-4o'];
+  const mdls = PROVS[pv]?.mdls||[DEFAULT_MDL];
   sel.innerHTML = mdls.map(m=>`<option value="${m}">${m}</option>`).join('');
   if(cur && mdls.includes(cur)) sel.value=cur;
 }
@@ -692,7 +714,9 @@ function doSetup(){
   if(!k){errEl.style.display='block';return;}
   errEl.style.display='none';
   const pv = document.getElementById('sp').value;
-  const md = document.getElementById('sm').value;
+  const md = pv==='custom'
+    ? ((document.getElementById('sm-cust')?.value||'').trim()||DEFAULT_MDL)
+    : document.getElementById('sm').value;
   let base = PROVS[pv]?.base||'';
   if(pv==='custom') base=(document.getElementById('sep')?.value||'').trim()||base;
   A.key=k; A.base=base; A.mdl=md; A.prov=pv; A.demo=false;
@@ -720,7 +744,17 @@ function doDemo(){
 function initSettingsPanel(){
   const pv = A.prov||'yunwu';
   document.getElementById('cp').value = pv;
-  fillModels('cm', pv, A.mdl);
+  const isCustom = pv==='custom';
+  document.getElementById('cm').style.display          = isCustom?'none':'block';
+  document.getElementById('cm-cust').style.display     = isCustom?'block':'none';
+  document.getElementById('cm-cust-hint').style.display= isCustom?'block':'none';
+  if(isCustom){
+    document.getElementById('cm-cust').value = A.mdl||DEFAULT_MDL;
+    document.getElementById('cep-g').style.display='block';
+    document.getElementById('cep').value = A.base;
+  } else {
+    fillModels('cm', pv, A.mdl);
+  }
   // Always show EMPTY field — never prefill with a mask string.
   // Empty on save = keep old key; any typed value = replace key.
   document.getElementById('ck').value = '';
@@ -730,17 +764,15 @@ function initSettingsPanel(){
       ? '🕐 密钥本次会话有效（末4位：…'+(A.key.length>=4?A.key.slice(-4):A.key)+'）· 留空保持不变，输入新值即替换 · 关闭标签页自动清除'
       : '🔒 密钥仅本次会话有效，关闭标签页自动清除，请输入后保存';
   }
-  if(pv==='custom'){
-    document.getElementById('cep-g').style.display='block';
-    document.getElementById('cep').value = A.base;
-  }
   if(A.userName) document.getElementById('cuid').value=A.userName;
   if(A.ghUser)   document.getElementById('cghuser').value=A.ghUser;
 }
 
 function saveSet(){
   const pv  = document.getElementById('cp').value;
-  const md  = document.getElementById('cm').value;
+  const md  = pv==='custom'
+    ? ((document.getElementById('cm-cust')?.value||'').trim()||A.mdl||DEFAULT_MDL)
+    : document.getElementById('cm').value;
   const raw = document.getElementById('ck').value.trim();
   // Empty field = keep existing key; any non-empty input = use as new key.
   // Never use KEY_MASK string comparison — that caused mixed-input bugs.
