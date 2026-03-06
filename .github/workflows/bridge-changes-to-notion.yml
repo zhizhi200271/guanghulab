@@ -1,0 +1,66 @@
+name: 铸渊 · Bridge E · GitHub Changes → Notion
+
+# 管道 E：main 分支有 push 或 PR 创建/关闭 → 变更摘要同步到 Notion 变更日志数据库
+# 依赖 Secrets：
+#   NOTION_TOKEN           Notion 集成 token（见仓库 Settings → Secrets → Actions）
+#   NOTION_CHANGES_DB_ID   「GitHub 变更日志」Notion 数据库 ID
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, closed]
+
+jobs:
+  bridge-changes-to-notion:
+    name: 📡 Bridge E · GitHub Changes → Notion
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2   # 获取前一次 commit 以便 diff
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # ── commit push 分支 ──────────────────────────────────
+      - name: 📡 同步 commit 变更到 Notion
+        if: github.event_name == 'push'
+        env:
+          NOTION_TOKEN:         ${{ secrets.NOTION_TOKEN }}
+          NOTION_CHANGES_DB_ID: ${{ secrets.NOTION_CHANGES_DB_ID }}
+          EVENT_TYPE:           commit
+          COMMIT_SHA:           ${{ github.sha }}
+          COMMIT_MSG:           ${{ github.event.head_commit.message }}
+          COMMITTER:            ${{ github.event.head_commit.author.username || github.actor }}
+          COMMIT_TIMESTAMP:     ${{ github.event.head_commit.timestamp }}
+          CHANGED_FILES:        ${{ join(github.event.commits[0].added, ',') }}
+        run: |
+          # 从 git diff 提取完整变更文件列表（更完整）
+          CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null | tr '\n' ',' | sed 's/,$//')
+          export CHANGED_FILES="${CHANGED:-$CHANGED_FILES}"
+          node scripts/notion-bridge.js changes
+
+      # ── PR 分支 ───────────────────────────────────────────
+      - name: 📡 同步 PR 变更到 Notion
+        if: github.event_name == 'pull_request'
+        env:
+          NOTION_TOKEN:         ${{ secrets.NOTION_TOKEN }}
+          NOTION_CHANGES_DB_ID: ${{ secrets.NOTION_CHANGES_DB_ID }}
+          EVENT_TYPE:           pr
+          PR_NUMBER:            ${{ github.event.pull_request.number }}
+          PR_TITLE:             ${{ github.event.pull_request.title }}
+          PR_ACTION:            ${{ github.event.action }}
+          PR_MERGED:            ${{ github.event.pull_request.merged }}
+          COMMITTER:            ${{ github.event.pull_request.user.login }}
+          COMMIT_TIMESTAMP:     ${{ github.event.pull_request.updated_at }}
+          COMMIT_SHA:           ${{ github.event.pull_request.head.sha }}
+          COMMIT_MSG:           ${{ github.event.pull_request.title }}
+        run: node scripts/notion-bridge.js changes

@@ -1,0 +1,35 @@
+name: 铸渊 · Bridge A · SYSLOG → Notion
+
+# 管道 A：syslog-inbox/ 有新文件 push → 同步到 Notion 数据库
+# 依赖 Secrets：
+#   NOTION_TOKEN          Notion 集成 token（见仓库 Settings → Secrets → Actions）
+#   NOTION_SYSLOG_DB_ID   「GitHub SYSLOG 收件箱」Notion 数据库 ID
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'syslog-inbox/**'
+  workflow_dispatch:
+
+jobs:
+  bridge-syslog-to-notion:
+    name: 📥 Bridge A · SYSLOG → Notion
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 🔗 同步 syslog-inbox 到 Notion
+        env:
+          NOTION_TOKEN:        ${{ secrets.NOTION_TOKEN }}
+          NOTION_SYSLOG_DB_ID: ${{ secrets.NOTION_SYSLOG_DB_ID }}
+        run: node scripts/notion-bridge.js syslog
