@@ -110,7 +110,9 @@ jobs:
             "command -v rsync || { echo '⚠️ 远程服务器未安装 rsync，尝试安装...' && \
               (sudo apt-get update -qq && sudo apt-get install -y rsync 2>/dev/null || \
                sudo yum install -y rsync 2>/dev/null || \
-               echo '❌ 无法自动安装 rsync，请手动在服务器上安装: sudo apt-get install rsync'); }"
+               { echo '❌ 无法自动安装 rsync（可能缺少 sudo 权限）'; \
+                 echo '请手动在服务器上安装: sudo apt-get install rsync 或 sudo yum install rsync'; \
+                 exit 1; }); }"
           echo "✅ 远程服务器 rsync 检查完成"
 
       - name: 🔒 部署前安全检查
