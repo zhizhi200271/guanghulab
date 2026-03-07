@@ -323,12 +323,13 @@ footer{padding:12px 18px 16px;background:var(--s1);border-top:1px solid var(--bo
   <div class="fg">
     <label>选择 AI 提供商</label>
     <select id="sp" onchange="onProv(this.value,'s')">
+      <option value="proxy">🔌 后端代理（国内直连·推荐）</option>
       <option value="yunwu">☁️ 云雾 AI（团队推荐）</option>
       <option value="openai">OpenAI (ChatGPT)</option>
       <option value="gemini">🔮 Google Gemini</option>
-      <option value="deepseek">DeepSeek（深度求索）</option>
-      <option value="moonshot">Moonshot（Kimi）</option>
-      <option value="zhipu">智谱 AI（GLM）</option>
+      <option value="deepseek">DeepSeek（深度求索·国内直连）</option>
+      <option value="moonshot">Moonshot（Kimi·国内直连）</option>
+      <option value="zhipu">智谱 AI（GLM·国内直连）</option>
       <option value="custom">自定义 / 其他兼容接口</option>
     </select>
   </div>
@@ -514,12 +515,13 @@ footer{padding:12px 18px 16px;background:var(--s1);border-top:1px solid var(--bo
     <div class="sfg">
       <label>AI 提供商</label>
       <select id="cp" onchange="onProv(this.value,'c')">
+        <option value="proxy">🔌 后端代理（国内直连·推荐）</option>
         <option value="yunwu">☁️ 云雾 AI（团队推荐）</option>
         <option value="openai">OpenAI (ChatGPT)</option>
         <option value="gemini">🔮 Google Gemini</option>
-        <option value="deepseek">DeepSeek（深度求索）</option>
-        <option value="moonshot">Moonshot（Kimi）</option>
-        <option value="zhipu">智谱 AI（GLM）</option>
+        <option value="deepseek">DeepSeek（深度求索·国内直连）</option>
+        <option value="moonshot">Moonshot（Kimi·国内直连）</option>
+        <option value="zhipu">智谱 AI（GLM·国内直连）</option>
         <option value="custom">自定义</option>
       </select>
     </div>
@@ -719,6 +721,7 @@ const ROLE_MAP = {
 };
 
 const PROVS = {
+  proxy:    {base:'/api',                                                          mdls:['deepseek-chat','gpt-4o','moonshot-v1-8k','glm-4'],isProxy:true},
   yunwu:    {base:'https://api.yunwu.ai/v1',                                    mdls:['gpt-4o','gpt-4o-mini','claude-3-5-sonnet-20241022','deepseek-chat','gemini-1.5-pro']},
   openai:   {base:'https://api.openai.com/v1',                                  mdls:['gpt-4o','gpt-4o-mini','gpt-4-turbo','gpt-3.5-turbo']},
   gemini:   {base:'https://generativelanguage.googleapis.com/v1beta/openai',    mdls:['gemini-2.0-flash','gemini-2.0-flash-lite','gemini-1.5-pro','gemini-1.5-flash']},
@@ -1105,7 +1108,8 @@ async function boot(){
   localStorage.removeItem('zy_key');
   initSetupUI();
   if(A.userName) A.userMeta = ROLE_MAP[A.userName]||null;
-  if(A.key||A.demo){
+  const isProxy = PROVS[A.prov]?.isProxy;
+  if(A.key||A.demo||isProxy){
     showApp();
   } else {
     if(A.userName) document.getElementById('suid').value=A.userName;
@@ -1164,8 +1168,10 @@ function onProv(pv,ctx){
   const mdlHint = ctx==='s'?'sm-cust-hint':'cm-cust-hint';
   const epGrp   = ctx==='s'?'sep-g':'cep-g';
   const epInp   = ctx==='s'?'sep':'cep';
+  const keyInp  = ctx==='s'?'sk':'ck';
   const cur     = ctx==='s'? A.mdl : document.getElementById('cm')?.value;
   const isCustom = pv==='custom';
+  const isProxy  = PROVS[pv]?.isProxy;
   document.getElementById(mdlSel).style.display  = isCustom?'none':'block';
   document.getElementById(mdlCust).style.display = isCustom?'block':'none';
   document.getElementById(mdlHint).style.display = isCustom?'block':'none';
@@ -1180,6 +1186,9 @@ function onProv(pv,ctx){
     const ep = document.getElementById(epInp);
     if(ep) ep.value = PROVS[pv]?.base||'';
   }
+  // Proxy mode: API key is optional (managed server-side)
+  const ki = document.getElementById(keyInp);
+  if(ki) ki.placeholder = isProxy ? '后端代理模式 — 无需填写 API 密钥（服务器端统一管理）' : (ctx==='s'?'粘贴任意 API 密钥，点击右侧按钮自动识别提供商和模型':'留空 = 保持当前密钥不变；粘贴新密钥即替换');
 }
 
 function fillModels(selId, pv, cur){
@@ -1270,18 +1279,21 @@ async function autoDetectAPI(ctx){
 }
 
 function doSetup(){
+  const pv = document.getElementById('sp').value;
+  const isProxy = PROVS[pv]?.isProxy;
   const k  = document.getElementById('sk').value.trim();
   const errEl = document.getElementById('sk-err');
-  if(!k){errEl.style.display='block';return;}
+  // Proxy mode doesn't require an API key
+  if(!k && !isProxy){errEl.style.display='block';return;}
   errEl.style.display='none';
-  const pv = document.getElementById('sp').value;
   const md = pv==='custom'
     ? ((document.getElementById('sm-cust')?.value||'').trim()||DEFAULT_MDL)
     : document.getElementById('sm').value;
   let base = PROVS[pv]?.base||'';
   if(pv==='custom') base=(document.getElementById('sep')?.value||'').trim()||base;
   A.key=k; A.base=base; A.mdl=md; A.prov=pv; A.demo=false;
-  sessionStorage.setItem('zy_key', k); lss('zy_base',base); lss('zy_mdl',md); lss('zy_prov',pv);
+  if(k) sessionStorage.setItem('zy_key', k);
+  lss('zy_base',base); lss('zy_mdl',md); lss('zy_prov',pv);
   const un = document.getElementById('suid').value;
   const gh = (document.getElementById('sghuser')?.value||'').trim();
   setIdentity(un, gh);
@@ -1568,14 +1580,17 @@ async function streamReply(txt){
   updSendBtn();
   const el=addStreamBubble();
   try{
-    const res=await fetch(A.base+'/chat/completions',{
+    const isProxy = PROVS[A.prov]?.isProxy;
+    const url = isProxy ? (A.base+'/chat') : (A.base+'/chat/completions');
+    const headers = {'Content-Type':'application/json'};
+    if(!isProxy && A.key) headers['Authorization'] = 'Bearer '+A.key;
+    const reqBody = isProxy
+      ? {provider:A.prov==='proxy'?undefined:A.prov, model:A.mdl, messages:[{role:'system',content:sysPrompt()},...A.msgs], stream:true, temperature:0.8, max_tokens:2000, system:sysPrompt()}
+      : {model:A.mdl, messages:[{role:'system',content:sysPrompt()},...A.msgs], stream:true, temperature:0.8, max_tokens:2000};
+    const res=await fetch(url,{
       method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+A.key},
-      body:JSON.stringify({
-        model:A.mdl,
-        messages:[{role:'system',content:sysPrompt()},...A.msgs],
-        stream:true,temperature:0.8,max_tokens:2000,
-      }),
+      headers:headers,
+      body:JSON.stringify(reqBody),
     });
     if(!res.ok){
       const provLabel = A.prov==='custom' ? A.base : (A.prov+'('+A.base+')');

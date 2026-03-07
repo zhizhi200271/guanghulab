@@ -18,7 +18,8 @@
     "esp:process": "node scripts/esp-email-processor.js",
     "psp:inspect": "node scripts/psp-inspection.js",
     "repo:map": "node scripts/generate-repo-map.js",
-    "deploy:agent": "node scripts/bingshuo-deploy-agent.js"
+    "deploy:agent": "node scripts/bingshuo-deploy-agent.js",
+    "proxy:start": "node backend-integration/api-proxy.js"
   },
   "dependencies": {
     "imapflow": "^1.2.12",
