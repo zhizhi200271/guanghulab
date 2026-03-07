@@ -48,7 +48,7 @@ jobs:
         contains(github.event.comment.body, '部署诊断') ||
         contains(github.event.comment.body, '检查部署')
       )) ||
-      (github.event_name == 'issues' && contains(toJSON(github.event.issue.labels), 'bingshuo-deploy'))
+      (github.event_name == 'issues' && contains(join(github.event.issue.labels.*.name, ','), 'bingshuo-deploy'))
 
     steps:
       - name: 📥 检出代码

@@ -92,7 +92,7 @@ function githubAPI(method, path, data) {
 async function getRecentRuns() {
   const since = new Date(Date.now() - HOURS_BACK * 60 * 60 * 1000).toISOString();
   const result = await githubAPI('GET',
-    `/repos/${OWNER}/${REPO_NAME}/actions/runs?per_page=100&created=>${since}`
+    `/repos/${OWNER}/${REPO_NAME}/actions/runs?per_page=100&created=%3E${since}`
   );
   if (result.status !== 200) {
     console.error('❌ 获取工作流运行记录失败:', result.status);
@@ -108,17 +108,6 @@ async function getJobsForRun(runId) {
   );
   if (result.status !== 200) return [];
   return result.data.jobs || [];
-}
-
-// === 获取某个作业的日志（最后200行）===
-async function getJobLog(jobId) {
-  // GitHub API 返回日志的重定向URL
-  const result = await githubAPI('GET',
-    `/repos/${OWNER}/${REPO_NAME}/actions/jobs/${jobId}/logs`
-  );
-  // 日志接口返回 302 重定向，但我们的简单 HTTPS 客户端无法跟随
-  // 改用 jobs 接口获取步骤信息作为替代
-  return null;
 }
 
 // === 从 jobs 中提取失败信息 ===
@@ -392,10 +381,13 @@ async function postReport(report) {
       `/repos/${OWNER}/${REPO_NAME}/issues/${ISSUE_NUMBER}/labels`,
       { labels: ['🧊deploy-report', '✅answered'] }
     );
-    // 移除 pending 标签
-    await githubAPI('DELETE',
+    // 移除 pending 标签（如果不存在会返回404，属正常情况）
+    const removeResult = await githubAPI('DELETE',
       `/repos/${OWNER}/${REPO_NAME}/issues/${ISSUE_NUMBER}/labels/${encodeURIComponent('pending')}`
-    ).catch(() => null);
+    );
+    if (removeResult.status !== 200 && removeResult.status !== 404) {
+      console.warn('⚠️ 移除 pending 标签时出现异常:', removeResult.status);
+    }
 
     console.log(`✅ 报告已发布到 Issue #${ISSUE_NUMBER}`);
   } else {
