@@ -293,13 +293,13 @@ async function main() {
   }
 
   // ── 输出汇总 ──────────────────────────────────────────
-  const fmt = (r) => r.ok ? `✅（page_id: ${r.pageId}）` : `❌（${r.error}）`;
+  const formatResult = (r) => r.ok ? `✅（page_id: ${r.pageId}）` : `❌（${r.error}）`;
 
   console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log('✅ YM-TEST-20260307-001 连通性测试完成');
-  console.log(`· 信号日志写入：${signalLogSkipped ? '⚠️ 跳过（SIGNAL_LOG_DB_ID 未配置）' : fmt(results.signalLog)}`);
-  console.log(`· 变更日志写入：${fmt(results.changeLog)}`);
-  console.log(`· SYSLOG收件箱写入：${fmt(results.syslogInbox)}`);
+  console.log(`· 信号日志写入：${signalLogSkipped ? '⚠️ 跳过（SIGNAL_LOG_DB_ID 未配置）' : formatResult(results.signalLog)}`);
+  console.log(`· 变更日志写入：${formatResult(results.changeLog)}`);
+  console.log(`· SYSLOG收件箱写入：${formatResult(results.syslogInbox)}`);
   console.log(`· 总结：数据桥状态 = ${bridgeStatus}`);
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
