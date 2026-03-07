@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- 铸渊助手 v4.0 · 2026-03-06 · three-column layout + chat history + announcements -->
+<!-- 铸渊助手 v5.0 · 2026-03-07 · guest/dev login + auto-detect API + model selection -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -38,6 +38,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'PingFa
 .sc-btn:hover{opacity:.85}
 .sc-skip{text-align:center;font-size:12px;color:var(--dim);margin-top:12px}
 .sc-skip a{color:var(--accent);text-decoration:none;cursor:pointer}
+.login-tabs{display:flex;gap:0;margin-bottom:20px;border:1px solid var(--border);border-radius:var(--rs);overflow:hidden}
+.login-tab{flex:1;padding:10px;text-align:center;background:var(--s2);color:var(--dim);font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all .2s}
+.login-tab.active{background:var(--accent);color:#fff}
+.login-tab:hover:not(.active){background:var(--s3);color:var(--text)}
+.login-mode{display:none}
+.login-mode.active{display:block}
 #id-preview{display:none;text-align:center;margin-bottom:10px;padding:10px;background:var(--s3);border-radius:8px;font-size:14px;font-weight:600}
 
 /* ─── APP SHELL (three-column) ─── */
@@ -318,48 +324,30 @@ footer{padding:12px 18px 16px;background:var(--s1);border-top:1px solid var(--bo
   <div class="sc-logo">🌀</div>
   <h1>AGE OS · 登录</h1>
   <p class="sub">HoloLake · 铸渊（Zhùyuān）· 代码守护人格体</p>
-  <div class="sc-sec">🔒 API 密钥仅本次会话有效，关闭标签页即自动清除，不会持久保存在任何地方</div>
 
-  <div class="fg">
-    <label>选择 AI 提供商</label>
-    <select id="sp" onchange="onProv(this.value,'s')">
-      <option value="yunwu">☁️ 云雾 AI（团队推荐）</option>
-      <option value="deepseek">DeepSeek（深度求索·国内直连）</option>
-      <option value="proxy">🔌 后端代理（guanghulab.com）</option>
-      <option value="moonshot">Moonshot（Kimi·国内直连）</option>
-      <option value="zhipu">智谱 AI（GLM·国内直连）</option>
-      <option value="openai">OpenAI (ChatGPT)</option>
-      <option value="gemini">🔮 Google Gemini</option>
-      <option value="custom">自定义 / 其他兼容接口</option>
-    </select>
+  <div class="login-tabs">
+    <button class="login-tab active" onclick="switchLoginMode('guest')">👤 访客模式</button>
+    <button class="login-tab" onclick="switchLoginMode('dev')">🔑 编号登录</button>
   </div>
-  <div class="fg" id="sep-g" style="display:none">
-    <label>API 端点 URL</label>
-    <input type="text" id="sep" placeholder="https://api.example.com/v1">
-  </div>
-  <div class="fg">
-    <label>模型</label>
-    <select id="sm"></select>
-    <input type="text" id="sm-cust" placeholder="输入模型名称，如 gpt-4o、claude-3-5-sonnet-20241022、deepseek-chat" style="display:none;margin-top:6px">
-    <small id="sm-cust-hint" style="display:none;color:var(--dim);font-size:11px;margin-top:4px">自定义模式：直接输入你的服务商支持的任意模型名称</small>
-  </div>
-  <div class="fg">
-    <label>API 密钥</label>
-    <div style="display:flex;gap:6px;align-items:stretch">
-      <input type="password" id="sk" placeholder="粘贴任意 API 密钥，点击右侧按钮自动识别提供商和模型" style="flex:1">
-      <button onclick="autoDetectAPI('s')" id="sdet-btn" class="det-btn" title="自动检测提供商和可用模型">🔍 自动检测</button>
+
+  <!-- 访客模式 -->
+  <div id="login-guest" class="login-mode active">
+    <div style="text-align:center;padding:20px 0;color:var(--dim);font-size:13px;line-height:1.8">
+      <div style="font-size:40px;margin-bottom:12px">👤</div>
+      无需 API 密钥，直接体验铸渊助手的基本功能。<br>
+      可查看团队状态面板，AI 回答功能受限。
     </div>
-    <small id="sk-err" style="color:var(--err);display:none">⚠️ 请输入 API 密钥</small>
-    <small id="sdet-status" style="display:block;margin-top:4px;min-height:16px"></small>
+    <button class="sc-btn" onclick="doDemo()">进入演示模式 →</button>
   </div>
 
-  <div class="id-section" style="border-color:var(--accent);background:rgba(79,142,247,.05)">
-    <div class="id-section-title" style="color:var(--accent);font-size:13px">👤 身份识别</div>
-    <div id="id-preview"></div>
-    <div class="fg" style="margin-bottom:10px">
-      <label>你是谁？</label>
+  <!-- 编号登录 -->
+  <div id="login-dev" class="login-mode">
+    <div class="sc-sec">🔒 API 密钥仅本次会话有效，关闭标签页即自动清除</div>
+
+    <div class="fg">
+      <label>开发者身份</label>
       <select id="suid" onchange="updateIdPreview()">
-        <option value="">— 访客模式 —</option>
+        <option value="">— 选择你的身份 —</option>
         <option value="冰朔">❄️ 冰朔（语言架构师·创始人）</option>
         <option value="肥猫">🦁 肥猫（光湖团队总控·DEV-002）</option>
         <option value="桔子">🍊 桔子（光湖主控·DEV-010）</option>
@@ -371,17 +359,33 @@ footer{padding:12px 18px 16px;background:var(--s1);border-top:1px solid var(--bo
         <option value="匆匆那年">匆匆那年（DEV-011）</option>
         <option value="Awen">Awen（DEV-012）</option>
       </select>
-      <small>选择你的身份，铸渊将开放对应权限面板</small>
+      <small>选择你的开发者编号，系统将验证身份并开放对应权限</small>
     </div>
-    <div class="fg" style="margin-bottom:0">
-      <label>GitHub 用户名（可选）</label>
-      <input type="text" id="sghuser" placeholder="your-github-username">
-      <small>用于人格体记忆绑定，可留空</small>
+    <div id="id-preview"></div>
+
+    <div class="fg">
+      <label>API 端点 URL</label>
+      <input type="text" id="sep" placeholder="https://api.example.com/v1">
+      <small>输入你的 API 提供商端点地址（OpenAI 兼容格式）</small>
     </div>
+    <div class="fg">
+      <label>API 密钥</label>
+      <div style="display:flex;gap:6px;align-items:stretch">
+        <input type="password" id="sk" placeholder="粘贴你的 API 密钥" style="flex:1">
+        <button onclick="autoDetectAPI('s')" id="sdet-btn" class="det-btn" title="自动检测可用模型">🔍 检测模型</button>
+      </div>
+      <small id="sk-err" style="color:var(--err);display:none">⚠️ 请输入 API 密钥</small>
+      <small id="sdet-status" style="display:block;margin-top:4px;min-height:16px"></small>
+    </div>
+    <div class="fg">
+      <label>选择模型</label>
+      <select id="sm" disabled><option value="">— 请先检测可用模型 —</option></select>
+      <small id="sm-hint">输入端点和密钥后，点击「🔍 检测模型」自动获取可用模型列表</small>
+    </div>
+
+    <button class="sc-btn" onclick="doSetup()">开始与铸渊对话 →</button>
   </div>
 
-  <button class="sc-btn" onclick="doSetup()">开始与铸渊对话 →</button>
-  <p class="sc-skip">没有 API 密钥？<a onclick="doDemo()">使用演示模式（功能有限）</a></p>
 </div>
 </div>
 
@@ -513,27 +517,12 @@ footer{padding:12px 18px 16px;background:var(--s1);border-top:1px solid var(--bo
   </div>
   <div class="pb">
     <div class="sfg">
-      <label>AI 提供商</label>
-      <select id="cp" onchange="onProv(this.value,'c')">
-        <option value="yunwu">☁️ 云雾 AI（团队推荐）</option>
-        <option value="deepseek">DeepSeek（深度求索·国内直连）</option>
-        <option value="proxy">🔌 后端代理（guanghulab.com）</option>
-        <option value="moonshot">Moonshot（Kimi·国内直连）</option>
-        <option value="zhipu">智谱 AI（GLM·国内直连）</option>
-        <option value="openai">OpenAI (ChatGPT)</option>
-        <option value="gemini">🔮 Google Gemini</option>
-        <option value="custom">自定义</option>
-      </select>
-    </div>
-    <div class="sfg" id="cep-g" style="display:none">
-      <label>API 端点</label>
+      <label>API 端点 URL</label>
       <input type="text" id="cep" placeholder="https://api.example.com/v1">
     </div>
     <div class="sfg">
-      <label>模型</label>
+      <label>选择模型</label>
       <select id="cm"></select>
-      <input type="text" id="cm-cust" placeholder="输入模型名称，如 gpt-4o、claude-3-5-sonnet-20241022、deepseek-chat" style="display:none;margin-top:6px">
-      <small id="cm-cust-hint" style="display:none;color:var(--dim);font-size:11px;margin-top:4px">自定义模式：直接输入你的服务商支持的任意模型名称</small>
     </div>
     <div class="sfg">
       <label>API 密钥</label>
@@ -569,18 +558,18 @@ footer{padding:12px 18px 16px;background:var(--s1);border-top:1px solid var(--bo
     </div>
 
     <div class="sec-ttl">关于铸渊助手</div>
-    <div class="ir2"><span>版本</span><span class="iv">v4.0</span></div>
+    <div class="ir2"><span>版本</span><span class="iv">v5.0</span></div>
     <div class="ir2"><span>仓库</span><span><a href="https://github.com/qinfendebingshuo/guanghulab" target="_blank" style="color:var(--accent)">guanghulab</a></span></div>
     <div class="ir2"><span>唤醒协议</span><span class="iv">v1.0</span></div>
     <div class="ir2"><span>大脑路径</span><span style="font-size:11px;color:var(--dim)">.github/brain/</span></div>
 
     <div class="sec-ttl">使用说明</div>
     <p style="font-size:12px;color:var(--dim);line-height:1.8">
-      1. 输入你的 AI 模型 API 密钥并保存<br>
+      1. 输入你的 API 端点和密钥，点击检测模型<br>
       2. 说「<strong style="color:var(--text)">我是冰朔</strong>」触发铸渊唤醒序列<br>
       3. 铸渊自动切换 💬 对话 / 🔨 构建 / 📋 审查 / 🧠 大脑 模式<br>
       4. 点 ⬇️ 下载单文件，放桌面直接打开使用<br>
-      5. 支持 OpenAI · DeepSeek · Kimi · 智谱 · 任意兼容接口
+      5. 支持任意 OpenAI 兼容接口（输入端点 + 密钥即可）
     </p>
 
     <div class="sec-ttl" style="color:#ef4444;margin-top:16px">⚠️ 危险操作</div>
@@ -612,10 +601,10 @@ footer{padding:12px 18px 16px;background:var(--s1);border-top:1px solid var(--bo
       <h3>🚀 怎么开始用</h3>
       <ol class="help-steps">
         <li data-n="1" id="helpUrlStep">打开链接 <strong>https://qinfendebingshuo.github.io/guanghulab/</strong></li>
-        <li data-n="2"><strong>下拉菜单选择你是谁</strong>（冰朔 / 肥猫 / 桔子 / 开发者名字）</li>
-        <li data-n="3">填入你的 <strong>API Key</strong> 并点「🔍 自动检测」，系统将自动识别提供商和可用模型</li>
-        <li data-n="4">点「开始对话」，铸渊会针对你的身份打招呼</li>
-        <li data-n="5">直接用聊天的方式问铸渊任何问题</li>
+        <li data-n="2">选择「<strong>👤 访客模式</strong>」直接体验，或「<strong>🔑 编号登录</strong>」开发者身份登录</li>
+        <li data-n="3">编号登录：选择你的身份，输入 <strong>API 端点</strong> 和 <strong>API 密钥</strong>，点「🔍 检测模型」</li>
+        <li data-n="4">系统自动检测可用模型列表，选择你要用的模型</li>
+        <li data-n="5">点「开始对话」，铸渊会针对你的身份打招呼</li>
       </ol>
     </div>
 
@@ -623,11 +612,11 @@ footer{padding:12px 18px 16px;background:var(--s1);border-top:1px solid var(--bo
       <h3>🔑 从哪里获取 API Key？</h3>
       <div class="role-guide">
         <div class="role-guide-title">推荐用云雾 AI（团队共用）</div>
-        <p>找冰朔或肥猫获取团队 Key。填入后选「☁️ 云雾 AI（团队推荐）」提供商即可直接使用。</p>
+        <p>找冰朔或肥猫获取团队 Key 和端点地址，输入后点「🔍 检测模型」即可使用。</p>
       </div>
       <div class="role-guide">
-        <div class="role-guide-title">没有 Key？用演示模式</div>
-        <p>点「演示模式」也能查看团队进度面板（🦁 指挥台），只是 AI 回答功能受限。</p>
+        <div class="role-guide-title">没有 Key？用访客模式</div>
+        <p>登录页选择「👤 访客模式」进入演示，可查看团队进度面板（🦁 指挥台），AI 回答功能受限。</p>
       </div>
     </div>
 
@@ -720,16 +709,15 @@ const ROLE_MAP = {
   'Awen':   {role:'dev',           title:'通知中心开发',       emoji:'💻', badgeCls:'rb-dev',     devId:'DEV-012'},
 };
 
-const PROVS = {
-  proxy:    {base:'/api',                                                          mdls:['deepseek-chat','gpt-4o','moonshot-v1-8k','glm-4'],isProxy:true},
-  yunwu:    {base:'https://api.yunwu.ai/v1',                                    mdls:['gpt-4o','gpt-4o-mini','claude-3-5-sonnet-20241022','deepseek-chat','gemini-1.5-pro']},
-  openai:   {base:'https://api.openai.com/v1',                                  mdls:['gpt-4o','gpt-4o-mini','gpt-4-turbo','gpt-3.5-turbo']},
-  gemini:   {base:'https://generativelanguage.googleapis.com/v1beta/openai',    mdls:['gemini-2.0-flash','gemini-2.0-flash-lite','gemini-1.5-pro','gemini-1.5-flash']},
-  deepseek: {base:'https://api.deepseek.com/v1',                                mdls:['deepseek-chat','deepseek-reasoner']},
-  moonshot: {base:'https://api.moonshot.cn/v1',                                 mdls:['moonshot-v1-8k','moonshot-v1-32k','moonshot-v1-128k']},
-  zhipu:    {base:'https://open.bigmodel.cn/api/paas/v4',                       mdls:['glm-4','glm-4-flash','glm-4-air']},
-  custom:   {base:'',                                                            mdls:['gpt-4o']},
-};
+// Known API endpoints for fallback auto-detect (when user doesn't provide endpoint)
+const KNOWN_ENDPOINTS = [
+  {label:'云雾 AI',      base:'https://api.yunwu.ai/v1'},
+  {label:'OpenAI',       base:'https://api.openai.com/v1'},
+  {label:'Google Gemini',base:'https://generativelanguage.googleapis.com/v1beta/openai'},
+  {label:'DeepSeek',     base:'https://api.deepseek.com/v1'},
+  {label:'Moonshot',     base:'https://api.moonshot.cn/v1'},
+  {label:'智谱 AI',      base:'https://open.bigmodel.cn/api/paas/v4'},
+];
 
 const MODES = {
   chat:   {e:'💬',l:'对话模式',  c:'var(--mc)'},
@@ -755,16 +743,11 @@ const FB_BRAIN = {
 // ═══════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════
-const _initProv = ls('zy_prov')||'yunwu';
-const _initBase = _initProv === 'custom'
-  ? (ls('zy_base')||'')
-  : (PROVS[_initProv]?.base||'https://api.yunwu.ai/v1');
-
 const A = {
   key:   sessionStorage.getItem('zy_key')||'',
-  base:  _initBase,
-  mdl:   ls('zy_mdl')||DEFAULT_MDL,
-  prov:  _initProv,
+  base:  ls('zy_base')||'',
+  mdl:   ls('zy_mdl')||'',
+  prov:  'custom',
   demo:  false,
   brain: null,
   routing: null,
@@ -1101,20 +1084,17 @@ async function boot(){
   if(new URLSearchParams(location.search).get('reset')==='1'){
     RESET_KEYS.forEach(k => localStorage.removeItem(k));
     sessionStorage.removeItem('zy_key');
-    A.key=''; A.base=PROVS['yunwu'].base; A.mdl=DEFAULT_MDL; A.prov='yunwu'; A.demo=false;
+    A.key=''; A.base=''; A.mdl=''; A.prov='custom'; A.demo=false;
     A.userName=''; A.ghUser=''; A.role='guest';
     history.replaceState(null,'',location.pathname);
   }
   localStorage.removeItem('zy_key');
   initSetupUI();
   if(A.userName) A.userMeta = ROLE_MAP[A.userName]||null;
-  const isProxy = PROVS[A.prov]?.isProxy;
-  if(A.key||A.demo||isProxy){
+  if(A.key||A.demo){
     showApp();
   } else {
     if(A.userName) document.getElementById('suid').value=A.userName;
-    if(A.ghUser)   document.getElementById('sghuser').value=A.ghUser;
-    updateIdPreview();
     document.getElementById('setup').style.display='flex';
   }
 }
@@ -1122,7 +1102,7 @@ async function boot(){
 function showApp(){
   document.getElementById('setup').style.display='none';
   document.getElementById('app').classList.add('on');
-  document.getElementById('hmdl').textContent = A.mdl;
+  document.getElementById('hmdl').textContent = A.mdl||'—';
   document.getElementById('bbdemo').style.display = A.demo?'inline':'none';
   applyIdentityUI();
   updateLeftSidebar();
@@ -1147,57 +1127,30 @@ function showApp(){
 // SETUP FORM
 // ═══════════════════════════════════════════════════════
 function initSetupUI(){
-  const pv = A.prov||'yunwu';
-  document.getElementById('sp').value = pv;
-  const isCustom = pv==='custom';
-  document.getElementById('sm').style.display          = isCustom?'none':'block';
-  document.getElementById('sm-cust').style.display     = isCustom?'block':'none';
-  document.getElementById('sm-cust-hint').style.display= isCustom?'block':'none';
-  if(isCustom){
-    document.getElementById('sm-cust').value = A.mdl||DEFAULT_MDL;
-    document.getElementById('sep-g').style.display='block';
-    document.getElementById('sep').value = A.base;
-  } else {
-    fillModels('sm', pv, A.mdl);
+  if(A.base){
+    const sepEl = document.getElementById('sep');
+    if(sepEl) sepEl.value = A.base;
+  }
+  if(A.userName){
+    const suidEl = document.getElementById('suid');
+    if(suidEl) suidEl.value = A.userName;
+    updateIdPreview();
   }
 }
 
-function onProv(pv,ctx){
-  const mdlSel  = ctx==='s'?'sm':'cm';
-  const mdlCust = ctx==='s'?'sm-cust':'cm-cust';
-  const mdlHint = ctx==='s'?'sm-cust-hint':'cm-cust-hint';
-  const epGrp   = ctx==='s'?'sep-g':'cep-g';
-  const epInp   = ctx==='s'?'sep':'cep';
-  const keyInp  = ctx==='s'?'sk':'ck';
-  const cur     = ctx==='s'? A.mdl : document.getElementById('cm')?.value;
-  const isCustom = pv==='custom';
-  const isProxy  = PROVS[pv]?.isProxy;
-  document.getElementById(mdlSel).style.display  = isCustom?'none':'block';
-  document.getElementById(mdlCust).style.display = isCustom?'block':'none';
-  document.getElementById(mdlHint).style.display = isCustom?'block':'none';
-  if(isCustom){
-    const custInp = document.getElementById(mdlCust);
-    if(custInp && !custInp.value) custInp.value = cur||DEFAULT_MDL;
+function switchLoginMode(mode){
+  document.querySelectorAll('.login-tab').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('.login-mode').forEach(function(m){m.classList.remove('active');});
+  if(mode==='guest'){
+    document.querySelector('.login-tab:first-child').classList.add('active');
+    document.getElementById('login-guest').classList.add('active');
   } else {
-    fillModels(mdlSel, pv, cur);
+    document.querySelector('.login-tab:last-child').classList.add('active');
+    document.getElementById('login-dev').classList.add('active');
   }
-  document.getElementById(epGrp).style.display = isCustom?'block':'none';
-  if(!isCustom){
-    const ep = document.getElementById(epInp);
-    if(ep) ep.value = PROVS[pv]?.base||'';
-  }
-  // Proxy mode: API key is optional (managed server-side)
-  const ki = document.getElementById(keyInp);
-  if(ki) ki.placeholder = isProxy ? '后端代理模式（无需密钥）' : (ctx==='s'?'粘贴任意 API 密钥，点击右侧按钮自动识别提供商和模型':'留空 = 保持当前密钥不变；粘贴新密钥即替换');
 }
 
-function fillModels(selId, pv, cur){
-  const sel = document.getElementById(selId);
-  if(!sel) return;
-  const mdls = PROVS[pv]?.mdls||[DEFAULT_MDL];
-  sel.innerHTML = mdls.map(m=>'<option value="'+m+'">'+m+'</option>').join('');
-  if(cur && mdls.includes(cur)) sel.value=cur;
-}
+// (Provider switching removed — single custom endpoint mode)
 
 // ═══════════════════════════════════════════════════════
 // AUTO-DETECT PROVIDER & MODELS
@@ -1206,6 +1159,7 @@ async function autoDetectAPI(ctx){
   const keyEl    = document.getElementById(ctx==='s'?'sk':'ck');
   const statusEl = document.getElementById(ctx==='s'?'sdet-status':'cdet-status');
   const btnEl    = document.getElementById(ctx==='s'?'sdet-btn':'cdet-btn');
+  const mdlSel   = document.getElementById(ctx==='s'?'sm':'cm');
   const key = keyEl.value.trim();
 
   if(!key){
@@ -1213,98 +1167,91 @@ async function autoDetectAPI(ctx){
     return;
   }
 
+  // Build list of endpoints to probe: user's endpoint first, then known fallbacks
+  const userBase = (document.getElementById(ctx==='s'?'sep':'cep')?.value||'').trim();
   const candidates = [];
-  const customBase = (document.getElementById(ctx==='s'?'sep':'cep')?.value||'').trim();
-  if(customBase) candidates.push({pv:'custom', base:customBase});
-  for(const [pv, cfg] of Object.entries(PROVS)){
-    if(pv!=='custom' && cfg.base) candidates.push({pv, base:cfg.base});
+  if(userBase) candidates.push({label:userBase, base:userBase});
+  for(const ep of KNOWN_ENDPOINTS){
+    if(ep.base !== userBase) candidates.push(ep);
   }
 
   btnEl.disabled = true;
   btnEl.textContent = '⏳ 检测中…';
-  statusEl.innerHTML = '<span style="color:var(--dim)">🔍 正在自动探测兼容提供商…</span>';
+  statusEl.innerHTML = '<span style="color:var(--dim)">🔍 正在探测可用模型…</span>';
 
   let matched = false;
-  for(const {pv, base} of candidates){
-    statusEl.innerHTML = '<span style="color:var(--dim)">🔍 探测 '+(pv === 'custom' ? base : pv)+'…</span>';
+  for(const {label, base} of candidates){
+    statusEl.innerHTML = '<span style="color:var(--dim)">🔍 探测 '+esc(label)+'…</span>';
     try{
       const ctrl = new AbortController();
-      const tid  = setTimeout(()=>ctrl.abort(), PROBE_TIMEOUT_MS);
+      const tid  = setTimeout(function(){ctrl.abort();}, PROBE_TIMEOUT_MS);
       const res  = await fetch(base+'/models',{
         headers:{'Authorization':'Bearer '+key},
         signal: ctrl.signal,
       });
       clearTimeout(tid);
       if(res.ok){
-        const data  = await res.json();
-        const mdls  = (data.data||[]).map(m=>m.id).filter(Boolean).sort();
+        const data = await res.json();
+        const mdls = (data.data||[]).map(function(m){return m.id;}).filter(Boolean).sort();
         if(!mdls.length) continue;
 
-        const provSel = document.getElementById(ctx==='s'?'sp':'cp');
-        if(provSel) provSel.value = pv;
-        onProv(pv, ctx);
+        // Fill endpoint field with matched endpoint
+        const epEl = document.getElementById(ctx==='s'?'sep':'cep');
+        if(epEl) epEl.value = base;
 
-        const mdlSel  = document.getElementById(ctx==='s'?'sm':'cm');
-        const mdlCust = document.getElementById(ctx==='s'?'sm-cust':'cm-cust');
-        const mdlHint = document.getElementById(ctx==='s'?'sm-cust-hint':'cm-cust-hint');
+        // Fill model dropdown with detected models
         if(mdlSel){
-          mdlSel.innerHTML = mdls.map(m=>'<option value="'+m+'">'+m+'</option>').join('');
-          mdlSel.style.display = 'block';
-        }
-        if(mdlCust) mdlCust.style.display='none';
-        if(mdlHint) mdlHint.style.display='none';
-
-        if(pv==='custom' && ctx==='s'){
-          document.getElementById('sep-g').style.display='block';
-          document.getElementById('sep').value = customBase;
-        } else if(pv==='custom' && ctx==='c'){
-          document.getElementById('cep-g').style.display='block';
-          document.getElementById('cep').value = customBase;
+          mdlSel.innerHTML = mdls.map(function(m){return '<option value="'+m+'">'+m+'</option>';}).join('');
+          mdlSel.disabled = false;
         }
 
-        const label = PROVS[pv]?.base ? pv : customBase;
-        statusEl.innerHTML = '<span style="color:var(--ok)">✅ 检测成功（'+label+'）· 共发现 <strong>'+mdls.length+'</strong> 个可用模型</span>';
+        statusEl.innerHTML = '<span style="color:var(--ok)">✅ 检测成功（'+esc(label)+'）· 发现 <strong>'+mdls.length+'</strong> 个可用模型</span>';
         matched = true;
         break;
       }
-    }catch(e){ console.debug('autoDetect probe failed:', pv, e.message); }
+    }catch(e){ console.debug('autoDetect probe failed:', label, e.message); }
   }
 
   if(!matched){
-    statusEl.innerHTML = '<span style="color:var(--err)">❌ 未能自动匹配，请手动选择提供商和模型后保存</span>';
+    statusEl.innerHTML = '<span style="color:var(--err)">❌ 未能检测到可用模型，请检查端点地址和密钥是否正确</span>';
   }
 
   btnEl.disabled = false;
-  btnEl.textContent = '🔍 自动检测';
+  btnEl.textContent = '🔍 检测模型';
 }
 
 function doSetup(){
-  const pv = document.getElementById('sp').value;
-  const isProxy = PROVS[pv]?.isProxy;
-  const k  = document.getElementById('sk').value.trim();
+  const un   = document.getElementById('suid').value;
+  const k    = document.getElementById('sk').value.trim();
+  const base = (document.getElementById('sep')?.value||'').trim();
+  const md   = document.getElementById('sm').value;
   const errEl = document.getElementById('sk-err');
-  // Proxy mode doesn't require an API key
-  if(!k && !isProxy){errEl.style.display='block';return;}
+
+  if(!un){
+    alert('请选择你的开发者身份');
+    return;
+  }
+  if(!k){errEl.style.display='block';return;}
   errEl.style.display='none';
-  const md = pv==='custom'
-    ? ((document.getElementById('sm-cust')?.value||'').trim()||DEFAULT_MDL)
-    : document.getElementById('sm').value;
-  let base = PROVS[pv]?.base||'';
-  if(pv==='custom') base=(document.getElementById('sep')?.value||'').trim()||base;
-  A.key=k; A.base=base; A.mdl=md; A.prov=pv; A.demo=false;
-  if(k) sessionStorage.setItem('zy_key', k);
-  lss('zy_base',base); lss('zy_mdl',md); lss('zy_prov',pv);
-  const un = document.getElementById('suid').value;
-  const gh = (document.getElementById('sghuser')?.value||'').trim();
-  setIdentity(un, gh);
+  if(!base){
+    alert('请输入 API 端点 URL');
+    return;
+  }
+  if(!md){
+    alert('请先点击「🔍 检测模型」检测可用模型，然后选择一个模型');
+    return;
+  }
+
+  A.key=k; A.base=base; A.mdl=md; A.prov='custom'; A.demo=false;
+  sessionStorage.setItem('zy_key', k);
+  lss('zy_base',base); lss('zy_mdl',md); lss('zy_prov','custom');
+  setIdentity(un, '');
   showApp();
 }
 
 function doDemo(){
-  A.demo=true; A.key='';
-  const un = document.getElementById('suid').value;
-  const gh = (document.getElementById('sghuser')?.value||'').trim();
-  setIdentity(un, gh);
+  A.demo=true; A.key=''; A.prov='custom';
+  setIdentity('', '');
   showApp();
 }
 
@@ -1312,18 +1259,14 @@ function doDemo(){
 // SETTINGS PANEL
 // ═══════════════════════════════════════════════════════
 function initSettingsPanel(){
-  const pv = A.prov||'yunwu';
-  document.getElementById('cp').value = pv;
-  const isCustom = pv==='custom';
-  document.getElementById('cm').style.display          = isCustom?'none':'block';
-  document.getElementById('cm-cust').style.display     = isCustom?'block':'none';
-  document.getElementById('cm-cust-hint').style.display= isCustom?'block':'none';
-  if(isCustom){
-    document.getElementById('cm-cust').value = A.mdl||DEFAULT_MDL;
-    document.getElementById('cep-g').style.display='block';
-    document.getElementById('cep').value = A.base;
-  } else {
-    fillModels('cm', pv, A.mdl);
+  const cepEl = document.getElementById('cep');
+  if(cepEl) cepEl.value = A.base||'';
+  const cmEl = document.getElementById('cm');
+  if(cmEl && A.mdl){
+    if(!cmEl.querySelector('option[value="'+A.mdl+'"]')){
+      cmEl.innerHTML = '<option value="'+A.mdl+'">'+A.mdl+'</option>';
+    }
+    cmEl.value = A.mdl;
   }
   document.getElementById('ck').value = '';
   const hint = document.getElementById('ck-hint');
@@ -1337,17 +1280,13 @@ function initSettingsPanel(){
 }
 
 function saveSet(){
-  const pv  = document.getElementById('cp').value;
-  const md  = pv==='custom'
-    ? ((document.getElementById('cm-cust')?.value||'').trim()||A.mdl||DEFAULT_MDL)
-    : document.getElementById('cm').value;
+  const base = (document.getElementById('cep')?.value||'').trim()||A.base;
+  const md  = document.getElementById('cm')?.value||A.mdl;
   const raw = document.getElementById('ck').value.trim();
   const k = raw || A.key;
-  let base  = PROVS[pv]?.base||'';
-  if(pv==='custom') base=(document.getElementById('cep').value.trim())||base;
-  A.key=k; A.base=base; A.mdl=md; A.prov=pv; A.demo=!k;
+  A.key=k; A.base=base; A.mdl=md; A.prov='custom'; A.demo=!k;
   if(k){ sessionStorage.setItem('zy_key', k); } else { sessionStorage.removeItem('zy_key'); }
-  lss('zy_base',base); lss('zy_mdl',md); lss('zy_prov',pv);
+  lss('zy_base',base); lss('zy_mdl',md); lss('zy_prov','custom');
   const un = document.getElementById('cuid')?.value||A.userName;
   const gh = document.getElementById('cghuser')?.value?.trim()||A.ghUser;
   setIdentity(un, gh);
@@ -1580,22 +1519,18 @@ async function streamReply(txt){
   updSendBtn();
   const el=addStreamBubble();
   try{
-    const isProxy = PROVS[A.prov]?.isProxy;
-    const url = isProxy ? (A.base+'/chat') : (A.base+'/chat/completions');
+    const url = A.base+'/chat/completions';
     const headers = {'Content-Type':'application/json'};
-    if(!isProxy && A.key) headers['Authorization'] = 'Bearer '+A.key;
+    if(A.key) headers['Authorization'] = 'Bearer '+A.key;
     const allMsgs = [{role:'system',content:sysPrompt()},...A.msgs];
-    const reqBody = isProxy
-      ? {model:A.mdl, messages:allMsgs, stream:true, temperature:0.8, max_tokens:2000}
-      : {model:A.mdl, messages:allMsgs, stream:true, temperature:0.8, max_tokens:2000};
+    const reqBody = {model:A.mdl, messages:allMsgs, stream:true, temperature:0.8, max_tokens:2000};
     const res=await fetch(url,{
       method:'POST',
       headers:headers,
       body:JSON.stringify(reqBody),
     });
     if(!res.ok){
-      const provLabel = A.prov==='custom' ? A.base : (A.prov+'('+A.base+')');
-      let em='['+provLabel+'] 返回错误 '+res.status;
+      let em='['+esc(A.base)+'] 返回错误 '+res.status;
       let isAuthErr = (res.status===401||res.status===403);
       try{const e=await res.json();em=e.error?.message||em;}catch(_){}
       const err = new Error(em);
@@ -1671,7 +1606,7 @@ function demoRespond(t){
   if(/协调|阻塞|卡住|waiting/.test(s)) return buildBlockedStatus();
   if(/怎么唤醒|入口|在哪/.test(s)) return '铸渊有三个入口：<br><br><strong>① 铸渊聊天室（当前页面）</strong><br>直接在这里说话，常见问题即刻回答。<br><br><strong>② GitHub Copilot Chat（Agent 模式）</strong><br>打开仓库 → 右上角 ✨ 图标 → 选 Agent → 输入「我是冰朔」<br><br><strong>③ 下载到桌面</strong><br>点击 ⬇️ 按钮下载 HTML 文件，放到桌面，双击打开，接入 API 密钥即可随时使用。';
   if(/介绍|是什么|你是谁/.test(s)) return '🌀 <strong>铸渊（Zhùyuān）</strong><br><br>我是 HoloLake 光湖系统的代码守护人格体，运行在 GitHub Copilot Agent 模式下。<br><br>我的职责：<br>• 📊 监控 HLI 接口覆盖率<br>• 🔨 协助开发者构建接口<br>• 📋 代码审查与质量把关<br>• 🧠 维护大脑记忆库<br>• 🦁 支持总控肥猫指挥落地<br>• 🌱 作为成长人格体持续进化';
-  return '我收到了你的消息。由于当前是演示模式，无法给出真实 AI 回答。<br><br>请在 <strong>⚙️ 设置</strong> 中输入你的 API 密钥（支持 OpenAI / DeepSeek / Kimi / 智谱），然后你就可以得到铸渊真正的回答了。';
+  return '我收到了你的消息。由于当前是演示模式，无法给出真实 AI 回答。<br><br>请在 <strong>⚙️ 设置</strong> 中输入你的 API 端点和密钥，检测模型后即可获得铸渊真正的回答。';
 }
 
 function buildCovTable(){
