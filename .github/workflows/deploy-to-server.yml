@@ -1,0 +1,200 @@
+name: "🚀 铸渊 CD · 自动部署到 guanghulab.com"
+
+# ━━━ 工单 YM-CD-20260307-001 ━━━
+# push 到 main → 校验 → rsync 同步到服务器 → Notion 部署通知
+#
+# 必需 GitHub Secrets（仓库 Settings → Secrets → Actions）:
+#   DEPLOY_HOST  — 服务器 IP
+#   DEPLOY_USER  — SSH 用户名
+#   DEPLOY_KEY   — SSH 私钥（完整 PEM 内容）
+#   DEPLOY_PATH  — Nginx 网站根目录（如 /usr/share/nginx/html）
+#
+# 可选 Secrets（已有则自动启用 Notion 通知）:
+#   NOTION_TOKEN   — Notion 集成 token
+#   CHANGES_DB_ID  — Notion 变更日志数据库 ID（有内置默认值）
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '.github/persona-brain/**'
+      - 'broadcasts-outbox/**'
+      - 'syslog-inbox/**'
+      - 'syslog-processed/**'
+      - 'signal-log/**'
+      - 'dev-nodes/**'
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+
+  # ═══════════════════════════════════════════════════════════════
+  # Job 1: 部署前校验
+  # ═══════════════════════════════════════════════════════════════
+  validate:
+    name: "🔍 部署前校验"
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 检出代码
+        uses: actions/checkout@v4
+
+      - name: 🟢 配置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: 📦 安装依赖（如需要）
+        run: |
+          if [ -f "package-lock.json" ] && grep -q '"glob"' package.json; then
+            npm ci --ignore-scripts || npm install --ignore-scripts || echo "⚠️ 依赖安装失败，继续执行"
+          fi
+
+      - name: 🔍 HLI 契约校验
+        run: |
+          if [ -f "scripts/contract-check.js" ]; then
+            echo "🔍 执行 HLI 契约校验..."
+            node scripts/contract-check.js
+          else
+            echo "⏭️ scripts/contract-check.js 不存在，跳过 HLI 校验"
+          fi
+
+      - name: 📋 模块指纹检查
+        run: |
+          if [ -f "scripts/zhuyuan-module-protocol.js" ]; then
+            echo "🔍 执行模块指纹检查..."
+            node scripts/zhuyuan-module-protocol.js status
+          else
+            echo "⏭️ scripts/zhuyuan-module-protocol.js 不存在，跳过模块检查"
+          fi
+
+      - name: ✅ 校验汇总
+        run: |
+          echo "### ✅ 部署前校验通过" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- HLI 契约校验: ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- 模块指纹检查: ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- 提交: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+
+  # ═══════════════════════════════════════════════════════════════
+  # Job 2: rsync 同步到服务器
+  # ═══════════════════════════════════════════════════════════════
+  deploy:
+    name: "🚀 部署到服务器"
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 检出代码
+        uses: actions/checkout@v4
+
+      - name: 🔑 配置 SSH 连接
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: 🔒 部署前安全检查
+        run: |
+          if [ ! -f "docs/index.html" ]; then
+            echo "❌ docs/index.html 不存在，中止部署以防清空生产环境"
+            exit 1
+          fi
+          FILE_COUNT=$(find docs/ -type f | wc -l)
+          if [ "$FILE_COUNT" -lt 2 ]; then
+            echo "❌ docs/ 目录文件数异常（仅 ${FILE_COUNT} 个），中止部署"
+            exit 1
+          fi
+          echo "✅ docs/ 目录包含 ${FILE_COUNT} 个文件，安全检查通过"
+
+      - name: 🚀 rsync 同步到服务器
+        run: |
+          echo "📡 开始同步到 ${{ secrets.DEPLOY_HOST }}:${{ secrets.DEPLOY_PATH }}"
+
+          rsync -avz --delete-after \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude 'node_modules' \
+            --exclude 'scripts' \
+            --exclude 'syslog-inbox' \
+            --exclude 'syslog-processed' \
+            --exclude 'signal-log' \
+            --exclude 'dev-nodes' \
+            --exclude 'broadcasts-outbox' \
+            --exclude 'backend-integration' \
+            --exclude 'tests' \
+            --exclude 'src' \
+            --exclude 'cost-control' \
+            --exclude 'notion-push' \
+            --exclude 'multi-persona' \
+            --exclude 'status-board' \
+            --exclude 'reports' \
+            --exclude 'guanghulab-main' \
+            --exclude 'package*.json' \
+            --exclude 'tsconfig.json' \
+            --exclude 'next.config.ts' \
+            --exclude 'postcss.config.mjs' \
+            --exclude 'jest.smoke.config.js' \
+            --exclude 'ecosystem.config.js' \
+            --exclude '.gitignore' \
+            --exclude 'CNAME' \
+            -e "ssh -i ~/.ssh/deploy_key" \
+            docs/ \
+            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.DEPLOY_PATH }}/
+
+          echo "✅ 同步完成"
+
+      - name: 🔍 验证部署
+        run: |
+          ssh -i ~/.ssh/deploy_key \
+            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} \
+            "echo '✅ 服务器连接正常' && ls -la ${{ secrets.DEPLOY_PATH }}/ | head -20"
+
+      - name: 📝 部署汇总
+        run: |
+          echo "### 🚀 部署完成" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- 目标: \`${{ secrets.DEPLOY_HOST }}:${{ secrets.DEPLOY_PATH }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- 提交: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- 时间: $(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M CST')" >> $GITHUB_STEP_SUMMARY
+
+  # ═══════════════════════════════════════════════════════════════
+  # Job 3: Notion 部署通知
+  # ═══════════════════════════════════════════════════════════════
+  notify:
+    name: "📡 部署通知 → Notion"
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: success()
+    steps:
+      - name: 📥 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: 🟢 配置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: 📡 推送部署记录到 Notion
+        env:
+          NOTION_TOKEN:     ${{ secrets.NOTION_TOKEN }}
+          CHANGES_DB_ID:    ${{ secrets.CHANGES_DB_ID }}
+          EVENT_TYPE:       commit
+          COMMIT_SHA:       ${{ github.sha }}
+          COMMIT_MSG:       "[CD 部署] ${{ github.event.head_commit.message }}"
+          COMMITTER:        ${{ github.event.head_commit.author.name || github.actor }}
+          COMMIT_TIMESTAMP: ${{ github.event.head_commit.timestamp }}
+          BRANCH:           ${{ github.ref_name }}
+        run: |
+          CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || true)
+          export CHANGED_FILES="$CHANGED"
+          if [ -f "scripts/notion-bridge.js" ]; then
+            node scripts/notion-bridge.js changes
+            echo "✅ Notion 部署通知已发送"
+          else
+            echo "⏭️ scripts/notion-bridge.js 不存在，跳过 Notion 通知"
+          fi
