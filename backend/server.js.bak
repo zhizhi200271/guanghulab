@@ -10,19 +10,17 @@ app.use(express.json());
 const notionRoutes = require('./routes/notion');
 const feishuRoutes = require('./routes/feishu');
 const routerRoutes = require('./routes/router');
-const coldstartRoutes = require('./routes/coldstart');
 
 app.use('/notion', notionRoutes);
 app.use('/feishu', feishuRoutes);
 app.use('/router', routerRoutes);
-app.use('/api/coldstart', coldstartRoutes);
 
 app.get('/', (req, res) => {
   res.json({
     status: 'ok',
     message: 'HoloLake 后端服务运行中',
     version: '0.2.0',
-    routes: ['/notion/test', '/feishu/test', '/router/test', '/router/chat', '/api/coldstart']
+    routes: ['/notion/test', '/feishu/test', '/router/test', '/router/chat']
   });
 });
 
