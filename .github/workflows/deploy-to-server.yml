@@ -281,6 +281,8 @@ jobs:
               if ! grep -rq 'location /api/' /etc/nginx/sites-available/ /etc/nginx/conf.d/ /etc/nginx/snippets/ 2>/dev/null; then
                 echo '🔄 添加 API + WebSocket 反向代理...'
                 sudo mkdir -p /etc/nginx/snippets
+                # 注意：\$ 在本地 shell 中转义为 $，远程 shell 的单引号保护不再展开，
+                # 最终写入文件的 Nginx 变量为 $host、$http_upgrade 等
                 printf '%s\n' \
                   '# guanghulab 反向代理（由 CD 工作流自动生成）' \
                   '' \
@@ -308,8 +310,8 @@ jobs:
                   '}' \
                   | sudo tee /etc/nginx/snippets/guanghulab-proxy.conf > /dev/null
 
-                # 在 server 块中加入 include 指令
-                NGINX_MAIN=\$(grep -rl 'server_name' /etc/nginx/sites-available/ /etc/nginx/sites-enabled/ 2>/dev/null | head -1)
+                # 在 server 块中加入 include 指令（仅搜索 sites-available 避免 symlink 重复）
+                NGINX_MAIN=\$(grep -rl 'server_name' /etc/nginx/sites-available/ 2>/dev/null | head -1)
                 if [ -z \"\$NGINX_MAIN\" ]; then
                   NGINX_MAIN='/etc/nginx/sites-available/default'
                 fi
