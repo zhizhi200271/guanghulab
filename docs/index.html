@@ -1579,14 +1579,14 @@ function trimMessagesForContext(sysMsgs, msgs, isGuest){
   const reserve = CONTEXT_CONFIG.systemPromptReserve;
   const sysTokens = sysMsgs.reduce((n,m)=>n+estimateTokens(m.content),0);
   const budget = limit - Math.max(sysTokens, reserve);
-  if(budget<=0) return sysMsgs;
 
   // 从最新消息向前累加，滑动窗口裁剪最早消息
+  // 预算不足时至少保留最近一条用户消息
   const kept=[];
   let used=0;
   for(let i=msgs.length-1;i>=0;i--){
     const t=estimateTokens(msgs[i].content);
-    if(used+t>budget) break;
+    if(used+t>budget && kept.length>0) break;
     kept.unshift(msgs[i]);
     used+=t;
   }

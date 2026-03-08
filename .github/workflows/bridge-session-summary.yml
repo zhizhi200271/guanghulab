@@ -8,8 +8,8 @@ name: Generate Session Summary for Notion
 
 on:
   schedule:
-    - cron: '50 23 * * *'
-    - cron: '50 14 * * *'
+    - cron: '50 23 * * *'  # 07:50 Beijing Time
+    - cron: '50 14 * * *'  # 22:50 Beijing Time
   workflow_dispatch:
 
 permissions:
