@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- 铸渊助手 v5.2 · 2026-03-08 · 128k context + synesthesia style + SPA scaffold -->
+<!-- 铸渊助手 v5.3 · 2026-03-08 · team login + server proxy + 128k context -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -339,12 +339,41 @@ footer{padding:12px 18px 16px;padding-bottom:max(16px,env(safe-area-inset-bottom
   <p class="sub">HoloLake · 铸渊（Zhùyuān）· 代码守护人格体</p>
 
   <div class="login-tabs">
-    <button class="login-tab active" onclick="switchLoginMode('guest')">👤 访客模式</button>
-    <button class="login-tab" onclick="switchLoginMode('dev')">🔑 编号登录</button>
+    <button class="login-tab active" onclick="switchLoginMode('team')">🏠 团队登录</button>
+    <button class="login-tab" onclick="switchLoginMode('guest')">👤 访客模式</button>
+    <button class="login-tab" onclick="switchLoginMode('dev')">🔧 自定义 API</button>
+  </div>
+
+  <!-- 团队登录（默认）：选择开发者身份即可，使用服务器端 API -->
+  <div id="login-team" class="login-mode active">
+    <div style="text-align:center;padding:12px 0;color:var(--dim);font-size:13px;line-height:1.8">
+      <div style="font-size:40px;margin-bottom:8px">🌀</div>
+      光湖团队成员专属入口。<br>
+      选择你的开发者编号，系统自动分配对应权限。<br>
+      <span style="color:var(--ok)">✅ 无需 API 密钥 · 128k 完整上下文 · 服务器端代理</span>
+    </div>
+    <div class="fg">
+      <label>选择你的身份</label>
+      <select id="tuid" onchange="updateTeamIdPreview()">
+        <option value="">— 选择你的开发者编号 —</option>
+        <option value="冰朔">❄️ 冰朔（语言架构师·创始人）</option>
+        <option value="肥猫">🦁 肥猫（光湖团队总控·DEV-002）</option>
+        <option value="桔子">🍊 桔子（光湖主控·DEV-010）</option>
+        <option value="页页">页页（DEV-001）</option>
+        <option value="燕樊">燕樊（DEV-003）</option>
+        <option value="之之">之之·秋秋（DEV-004）</option>
+        <option value="小草莓">小草莓（DEV-005）</option>
+        <option value="花尔">花尔（DEV-009）</option>
+        <option value="匆匆那年">匆匆那年（DEV-011）</option>
+        <option value="Awen">Awen（DEV-012）</option>
+      </select>
+    </div>
+    <div id="team-id-preview"></div>
+    <button class="sc-btn" onclick="doTeamLogin()">进入铸渊对话 →</button>
   </div>
 
   <!-- 访客模式 -->
-  <div id="login-guest" class="login-mode active">
+  <div id="login-guest" class="login-mode">
     <div style="text-align:center;padding:20px 0;color:var(--dim);font-size:13px;line-height:1.8">
       <div style="font-size:40px;margin-bottom:12px">👤</div>
       无需 API 密钥，使用 DeepSeek 模型体验铸渊助手。<br>
@@ -353,7 +382,7 @@ footer{padding:12px 18px 16px;padding-bottom:max(16px,env(safe-area-inset-bottom
     <button class="sc-btn" onclick="doDemo()">进入访客对话 →</button>
   </div>
 
-  <!-- 编号登录 -->
+  <!-- 自定义 API（高级·使用自己的 API 密钥） -->
   <div id="login-dev" class="login-mode">
     <div class="sc-sec">🔒 API 密钥仅本次会话有效，关闭标签页即自动清除</div>
 
@@ -614,22 +643,22 @@ footer{padding:12px 18px 16px;padding-bottom:max(16px,env(safe-area-inset-bottom
       <h3>🚀 怎么开始用</h3>
       <ol class="help-steps">
         <li data-n="1" id="helpUrlStep">打开链接 <strong>https://qinfendebingshuo.github.io/guanghulab/</strong></li>
-        <li data-n="2">选择「<strong>👤 访客模式</strong>」直接体验，或「<strong>🔑 编号登录</strong>」开发者身份登录</li>
-        <li data-n="3">编号登录：选择你的身份，输入 <strong>API 端点</strong> 和 <strong>API 密钥</strong>，点「🔍 检测模型」</li>
-        <li data-n="4">系统自动检测可用模型列表，选择你要用的模型</li>
-        <li data-n="5">点「开始对话」，铸渊会针对你的身份打招呼</li>
+        <li data-n="2">选择「<strong>🏠 团队登录</strong>」选择你的开发者编号，无需 API 密钥</li>
+        <li data-n="3">系统自动使用服务器端 API 代理，128k 完整上下文</li>
+        <li data-n="4">点「进入铸渊对话」，铸渊会针对你的身份打招呼</li>
+        <li data-n="5">也可用「👤 访客模式」体验，或「🔧 自定义 API」使用自己的密钥</li>
       </ol>
     </div>
 
     <div class="help-section">
-      <h3>🔑 从哪里获取 API Key？</h3>
+      <h3>🏠 团队登录说明</h3>
       <div class="role-guide">
-        <div class="role-guide-title">推荐用云雾 AI（团队共用）</div>
-        <p>找冰朔或肥猫获取团队 Key 和端点地址，输入后点「🔍 检测模型」即可使用。</p>
+        <div class="role-guide-title">团队成员（推荐）</div>
+        <p>选择「🏠 团队登录」→ 选择你的开发者编号 → 直接进入对话。无需 API 密钥，系统使用服务器端代理。</p>
       </div>
       <div class="role-guide">
-        <div class="role-guide-title">没有 Key？用访客模式</div>
-        <p>登录页选择「👤 访客模式」进入演示，可查看团队进度面板（🦁 指挥台），AI 回答功能受限。</p>
+        <div class="role-guide-title">没有开发者编号？用访客模式</div>
+        <p>登录页选择「👤 访客模式」进入体验，可查看团队进度面板（🦁 指挥台），AI 回答功能受限。</p>
       </div>
     </div>
 
@@ -772,6 +801,19 @@ const GUEST_API = {
   rateLimit: { maxPerMin: 6, count: 0, resetAt: 0 },
 };
 
+// ═══════════════════════════════════════════════════════
+// 团队模式 API 配置（服务器端代理 · 无需用户提供 API 密钥）
+// 通过 api-proxy 中转，密钥由服务器环境变量 YUNWU_API_KEY 管理
+// 团队成员享有完整 128k 上下文 + 更高 token 限制
+// ═══════════════════════════════════════════════════════
+const TEAM_API = {
+  proxyUrl: '/api/chat',
+  model: 'deepseek-chat',
+  provider: 'yunwu',
+  maxTokens: 2000,
+  temperature: 0.8,
+};
+
 const FB_BRAIN = {
   identity:'铸渊（Zhùyuān）· GitHub 代码守护人格体',
   wake_triggers:['我是冰朔','冰朔','我是妈妈','唤醒铸渊','铸渊，醒来'],
@@ -788,6 +830,7 @@ const A = {
   mdl:   ls('zy_mdl')||'',
   prov:  'custom',
   demo:  false,
+  teamMode: ls('zy_teammode')==='1',
   brain: null,
   routing: null,
   devStatus: null,
@@ -1207,11 +1250,15 @@ function initSetupUI(){
 function switchLoginMode(mode){
   document.querySelectorAll('.login-tab').forEach(function(t){t.classList.remove('active');});
   document.querySelectorAll('.login-mode').forEach(function(m){m.classList.remove('active');});
-  if(mode==='guest'){
-    document.querySelector('.login-tab:first-child').classList.add('active');
+  var tabs = document.querySelectorAll('.login-tab');
+  if(mode==='team'){
+    tabs[0].classList.add('active');
+    document.getElementById('login-team').classList.add('active');
+  } else if(mode==='guest'){
+    tabs[1].classList.add('active');
     document.getElementById('login-guest').classList.add('active');
   } else {
-    document.querySelector('.login-tab:last-child').classList.add('active');
+    tabs[2].classList.add('active');
     document.getElementById('login-dev').classList.add('active');
   }
 }
@@ -1316,9 +1363,43 @@ function doSetup(){
 }
 
 function doDemo(){
-  A.demo=true; A.key=''; A.prov='custom';
+  A.demo=true; A.teamMode=false; A.key=''; A.prov='custom';
   A.mdl=GUEST_API.model;
+  lss('zy_teammode','0');
   setIdentity('', '');
+  showApp();
+}
+
+function updateTeamIdPreview(){
+  const un = document.getElementById('tuid').value;
+  const el = document.getElementById('team-id-preview');
+  if(!un||!el) return;
+  const meta = ROLE_MAP[un];
+  if(meta){
+    el.innerHTML = '<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 14px;margin:8px 0;font-size:13px">'
+      + meta.emoji+' <strong>'+esc(un)+'</strong> · '+meta.title
+      + (meta.devId ? ' · <code>'+meta.devId+'</code>' : '')
+      + '<br><span style="color:var(--ok);font-size:12px">✅ 使用服务器端 API 代理 · 128k 上下文 · 无需密钥</span>'
+      + '</div>';
+  } else {
+    el.innerHTML = '';
+  }
+}
+
+function doTeamLogin(){
+  const un = document.getElementById('tuid').value;
+  if(!un){
+    alert('请选择你的开发者身份');
+    return;
+  }
+  // 团队模式：使用服务器代理，不需要 API 密钥
+  A.demo = true;
+  A.teamMode = true;
+  A.key = '';
+  A.prov = 'custom';
+  A.mdl = TEAM_API.model;
+  lss('zy_teammode','1');
+  setIdentity(un, '');
   showApp();
 }
 
@@ -1606,7 +1687,13 @@ async function send(){
   setMode(detectMode(txt));
   userMsg(txt);
   if(A.demo){
-    if(GUEST_API.enabled){
+    if(A.teamMode){
+      try{ await teamStreamReply(txt); }
+      catch(e){ console.warn('[团队API] 降级到访客模式:',e.message);
+        try{ await guestStreamReply(txt); }
+        catch(e2){ await demoReply(txt); }
+      }
+    } else if(GUEST_API.enabled){
       try{ await guestStreamReply(txt); }
       catch(e){ console.warn('[访客API] 降级到演示模式:',e.message); await demoReply(txt); }
     } else {
@@ -1686,6 +1773,69 @@ async function streamReply(txt){
   }finally{
     A.streaming=false; updSendBtn(); scrollB();
   }
+}
+
+// ═══════════════════════════════════════════════════════
+// TEAM API STREAMING（团队模式 · 服务器端代理 · 128k 上下文）
+// 使用服务器端 YUNWU_API_KEY，无需用户提供密钥
+// ═══════════════════════════════════════════════════════
+async function teamStreamReply(txt){
+  A.streaming=true;
+  A.msgs.push({role:'user',content:txt});
+  updSendBtn();
+  const el=addStreamBubble();
+
+  // Resolve proxy URL (relative or absolute)
+  let proxyUrl=TEAM_API.proxyUrl;
+  if(proxyUrl.startsWith('/')){
+    proxyUrl=location.origin+proxyUrl;
+  }
+
+  const reqBody={
+    provider: TEAM_API.provider,
+    model: TEAM_API.model,
+    messages: trimMessagesForContext([{role:'system',content:sysPrompt()}], A.msgs, false),
+    stream: true,
+    temperature: TEAM_API.temperature,
+    max_tokens: TEAM_API.maxTokens,
+  };
+
+  const res=await fetch(proxyUrl,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(reqBody),
+  });
+
+  if(!res.ok){
+    let em='[团队API] 返回错误 '+res.status;
+    try{const e=await res.json();em=e.message||em;}catch(_){}
+    throw new Error(em);
+  }
+
+  let full='';
+  const rdr=res.body.getReader();
+  const dec=new TextDecoder();
+  let buf='';
+  while(true){
+    const{done,value}=await rdr.read();
+    if(done) break;
+    buf+=dec.decode(value,{stream:true});
+    const lines=buf.split('\n'); buf=lines.pop();
+    for(const line of lines){
+      if(!line.startsWith('data: ')) continue;
+      const d=line.slice(6);
+      if(d==='[DONE]') continue;
+      try{
+        const p=JSON.parse(d);
+        const delta=p.choices?.[0]?.delta?.content||'';
+        if(delta){full+=delta;el.innerHTML=md(full)+'<span class="cur">▋</span>';scrollB();}
+      }catch(_){}
+    }
+  }
+  el.innerHTML=md(full);
+  A.msgs.push({role:'assistant',content:full});
+  addCopyBtns(el);
+  A.streaming=false; updSendBtn(); scrollB();
 }
 
 // ═══════════════════════════════════════════════════════
