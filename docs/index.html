@@ -354,7 +354,7 @@ footer{padding:12px 18px 16px;padding-bottom:max(16px,env(safe-area-inset-bottom
     </div>
     <div class="fg">
       <label>选择你的身份</label>
-      <select id="tuid" onchange="updateTeamIdPreview()">
+      <select id="tuid" onchange="onTeamSelectChange()">
         <option value="">— 选择你的开发者编号 —</option>
         <option value="冰朔">❄️ 冰朔（语言架构师·创始人）</option>
         <option value="肥猫">🦁 肥猫（光湖团队总控·DEV-002）</option>
@@ -366,7 +366,13 @@ footer{padding:12px 18px 16px;padding-bottom:max(16px,env(safe-area-inset-bottom
         <option value="花尔">花尔（DEV-009）</option>
         <option value="匆匆那年">匆匆那年（DEV-011）</option>
         <option value="Awen">Awen（DEV-012）</option>
+        <option value="__custom__">✏️ 自定义开发者编号…</option>
       </select>
+    </div>
+    <div id="team-custom-input" class="fg" style="display:none">
+      <label>输入你的开发者编号</label>
+      <input type="text" id="tcustom-id" placeholder="例如：DEV-013" oninput="updateTeamIdPreview()" style="text-transform:uppercase">
+      <small>输入你的开发者编号（格式：DEV-XXX），系统将自动录入</small>
     </div>
     <div id="team-id-preview"></div>
     <button class="sc-btn" onclick="doTeamLogin()">进入铸渊对话 →</button>
@@ -750,6 +756,9 @@ const ROLE_MAP = {
   '匆匆那年':{role:'dev',          title:'码字工作台',         emoji:'💻', badgeCls:'rb-dev',     devId:'DEV-011'},
   'Awen':   {role:'dev',           title:'通知中心开发',       emoji:'💻', badgeCls:'rb-dev',     devId:'DEV-012'},
 };
+
+// Custom dev ID format validation (DEV-001, DEV-013, etc.)
+const DEV_ID_RE = /^DEV-\d{3,}$/;
 
 // Known API endpoints for fallback auto-detect (when user doesn't provide endpoint)
 const KNOWN_ENDPOINTS = [
@@ -1370,14 +1379,53 @@ function doDemo(){
   showApp();
 }
 
+function onTeamSelectChange(){
+  var sel = document.getElementById('tuid').value;
+  var customBox = document.getElementById('team-custom-input');
+  if(sel==='__custom__'){
+    customBox.style.display='';
+    document.getElementById('tcustom-id').value='';
+    document.getElementById('tcustom-id').focus();
+  } else {
+    customBox.style.display='none';
+  }
+  updateTeamIdPreview();
+}
+
 function updateTeamIdPreview(){
-  const un = document.getElementById('tuid').value;
-  const el = document.getElementById('team-id-preview');
-  if(!un||!el) return;
-  const meta = ROLE_MAP[un];
+  var sel = document.getElementById('tuid').value;
+  var el = document.getElementById('team-id-preview');
+  if(!el) return;
+
+  // Custom dev ID input mode
+  if(sel==='__custom__'){
+    var raw = (document.getElementById('tcustom-id').value||'').trim().toUpperCase();
+    if(!raw){
+      el.innerHTML = '<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 14px;margin:8px 0;font-size:13px;color:var(--dim)">'
+        + '✏️ 请输入你的开发者编号（格式：DEV-XXX）'
+        + '</div>';
+      return;
+    }
+    // Validate format
+    if(DEV_ID_RE.test(raw)){
+      el.innerHTML = '<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 14px;margin:8px 0;font-size:13px">'
+        + '💻 <strong>'+esc(raw)+'</strong> · 自定义开发者'
+        + '<br><span style="color:var(--ok);font-size:12px">✅ 使用服务器端 API 代理 · 128k 上下文 · 首次登录将自动注册</span>'
+        + '</div>';
+    } else {
+      el.innerHTML = '<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 14px;margin:8px 0;font-size:13px">'
+        + '<span style="color:var(--err)">⚠️ 编号格式不正确，请使用 DEV-XXX 格式（如 DEV-013）</span>'
+        + '</div>';
+    }
+    return;
+  }
+
+  // Normal dropdown selection mode
+  if(!sel){ el.innerHTML=''; return; }
+  var meta = ROLE_MAP[sel];
   if(meta){
     el.innerHTML = '<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 14px;margin:8px 0;font-size:13px">'
-      + meta.emoji+' <strong>'+esc(un)+'</strong> · '+meta.title
+      + meta.emoji+' <strong>'+esc(sel)+'</strong> · '+meta.title
       + (meta.devId ? ' · <code>'+meta.devId+'</code>' : '')
       + '<br><span style="color:var(--ok);font-size:12px">✅ 使用服务器端 API 代理 · 128k 上下文 · 无需密钥</span>'
       + '</div>';
@@ -1387,7 +1435,23 @@ function updateTeamIdPreview(){
 }
 
 function doTeamLogin(){
-  const un = document.getElementById('tuid').value;
+  var sel = document.getElementById('tuid').value;
+  var un = sel;
+
+  // Handle custom dev ID
+  if(sel==='__custom__'){
+    var raw = (document.getElementById('tcustom-id').value||'').trim().toUpperCase();
+    if(!raw){
+      alert('请输入你的开发者编号（格式：DEV-XXX）');
+      return;
+    }
+    if(!DEV_ID_RE.test(raw)){
+      alert('开发者编号格式不正确，请使用 DEV-XXX 格式（如 DEV-013）');
+      return;
+    }
+    un = raw;
+  }
+
   if(!un){
     alert('请选择你的开发者身份');
     return;
@@ -2186,6 +2250,10 @@ function setIdentity(userName, ghUser){
   A.userName = userName||'';
   A.ghUser   = ghUser||'';
   A.userMeta = userName ? (ROLE_MAP[userName]||null) : null;
+  // Fallback metadata for custom dev IDs (DEV-XXX not in ROLE_MAP)
+  if(!A.userMeta && userName && DEV_ID_RE.test(userName)){
+    A.userMeta = {role:'dev', title:'开发者', emoji:'💻', badgeCls:'rb-dev', devId:userName};
+  }
   A.role     = A.userMeta?.role || 'guest';
   lss('zy_uname', A.userName);
   lss('zy_ghuser', A.ghUser);
