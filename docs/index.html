@@ -1464,7 +1464,53 @@ function doTeamLogin(){
   A.mdl = TEAM_API.model;
   lss('zy_teammode','1');
   setIdentity(un, '');
+
+  // For custom DEV-XXX IDs, try to sync from Notion (non-blocking)
+  if(sel==='__custom__' && DEV_ID_RE.test(un)){
+    syncDevFromNotion(un);
+  }
+
   showApp();
+}
+
+// Sync developer info from Notion (non-blocking, best-effort)
+function syncDevFromNotion(devId){
+  var apiBase = (location.hostname==='localhost'||location.hostname==='127.0.0.1')
+    ? 'http://localhost:3000' : '';
+  var url = apiBase + '/api/v1/developers/' + encodeURIComponent(devId);
+
+  fetch(url).then(function(r){ return r.json(); }).then(function(data){
+    if(data.found && data.developer){
+      var dev = data.developer;
+      // Update identity with Notion data if available
+      if(dev.name && dev.name !== devId){
+        A.userMeta = {
+          role: 'dev',
+          title: dev.title || dev.role || '开发者',
+          emoji: '💻',
+          badgeCls: 'rb-dev',
+          devId: devId
+        };
+        A.userName = dev.name;
+        lss('zy_uname', A.userName);
+        applyIdentityUI();
+        console.log('[铸渊] Notion 开发者同步成功:', devId, '→', dev.name);
+      }
+    } else {
+      // Developer not found in Notion — try to register (best effort)
+      fetch(apiBase + '/api/v1/developers', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({devId: devId, name: devId})
+      }).then(function(r){ return r.json(); }).then(function(reg){
+        console.log('[铸渊] 开发者自动注册:', reg.created ? '成功' : '已存在', devId);
+      }).catch(function(e){
+        console.log('[铸渊] 开发者注册跳过（后端未就绪）:', e.message);
+      });
+    }
+  }).catch(function(e){
+    console.log('[铸渊] Notion 同步跳过（后端未就绪）:', e.message);
+  });
 }
 
 // ═══════════════════════════════════════════════════════
