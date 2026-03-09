@@ -14,6 +14,8 @@ jobs:
   test-notion-bridge:
     name: 🔗 Notion 数据桥连通性验证
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
