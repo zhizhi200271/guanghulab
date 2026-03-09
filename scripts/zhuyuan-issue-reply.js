@@ -19,7 +19,8 @@ try {
 
 try {
   collaborators = JSON.parse(fs.readFileSync('.github/brain/collaborators.json', 'utf8'));
-} catch {
+} catch (err) {
+  console.log('⚠️ collaborators.json 读取失败，使用空列表：', err.message);
   collaborators = [];
 }
 

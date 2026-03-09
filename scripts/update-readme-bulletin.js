@@ -34,6 +34,7 @@ const COLLABORATORS_PATH = path.join(__dirname, '..', '.github', 'brain', 'colla
 const MAX_BINGSHUO_ENTRIES = 15;
 const MAX_COLLAB_ENTRIES = 20;
 const MAX_GIT_LOG_COMMITS = 30;
+const BINGSHUO_USERNAME = 'qinfendebingshuo';
 
 /* ── 公告区标记 ─────────────────────────── */
 const MARKERS = {
@@ -86,7 +87,7 @@ const SYSTEM_PREFIXES = ['scripts', 'docs', '.github', 'persona-brain-db'];
 function formatTime(ts) {
   if (!ts) return '—';
   const d = new Date(ts);
-  if (isNaN(d.getTime())) return String(ts).substring(0, 10);
+  if (isNaN(d.getTime())) return typeof ts === 'string' ? ts.substring(0, Math.min(10, ts.length)) : '—';
   const fmt = new Intl.DateTimeFormat('zh-CN', {
     timeZone: 'Asia/Shanghai',
     month: '2-digit',
@@ -583,7 +584,7 @@ async function sendAlertEmails(bingshuoIssues, collabIssuesByDev) {
   // 冰朔邮件
   if (bingshuoIssues.length > 0) {
     const bingshuoEmail = process.env.BINGSHUO_EMAIL
-      || await fetchUserEmail('qinfendebingshuo')
+      || await fetchUserEmail(BINGSHUO_USERNAME)
       || null;
 
     if (bingshuoEmail) {
