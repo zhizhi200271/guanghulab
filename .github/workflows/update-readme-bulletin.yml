@@ -1,4 +1,6 @@
-# 光湖系统公告区自动更新工作流
+# 光湖系统公告区自动更新工作流 v2.0
+#
+# 分离为冰朔公告栏 + 合作者公告栏 + 铸渊自动提醒
 #
 # 触发条件:
 #   1. 推送到 main 分支 (模块代码变更)
@@ -7,8 +9,9 @@
 #   4. 手动触发
 #
 # 功能:
-#   读取 memory.json + GitHub Actions API + git 日志,
-#   自动更新 README.md 的系统公告区
+#   - 冰朔公告栏：自检/轮询/数据库状态
+#   - 合作者公告栏：模块上传状态
+#   - 铸渊自动提醒：红色标记 + 邮件通知
 
 name: 📢 更新系统公告区
 
@@ -20,9 +23,10 @@ on:
 
   workflow_run:
     workflows:
-      - "铸渊每日自检"
+      - "铸渊 · 每日自检与自进化"
       - "📦 Module Doc + Notify"
       - "🚀 CD: Deploy to guanghulab.com"
+      - "铸渊 PSP 巡检"
     types: [completed]
 
   schedule:
@@ -55,10 +59,18 @@ jobs:
         with:
           node-version: '20'
 
+      - name: 📦 安装邮件依赖
+        run: npm install nodemailer --no-save 2>/dev/null || true
+
       - name: 📢 更新公告区
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          BINGSHUO_EMAIL: ${{ secrets.BINGSHUO_EMAIL }}
         run: node scripts/update-readme-bulletin.js
 
       - name: 📝 提交更新
