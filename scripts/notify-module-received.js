@@ -104,13 +104,14 @@ function buildNotificationContent(collab, changedModules, allFiles) {
   const extraNote = fileLines.length > 20 ? `\n  - ...（共 ${fileLines.length} 个文件）` : '';
 
   const isPass = TEST_RESULT === 'pass';
-  const statusEmoji = isPass ? '✅' : '❌';
-  const statusText = isPass ? '自检通过' : '自检未通过';
+  const isUnknown = TEST_RESULT === 'unknown';
+  const statusEmoji = isPass ? '✅' : (isUnknown ? 'ℹ️' : '❌');
+  const statusText = isPass ? '自检通过' : (isUnknown ? '自检未执行' : '自检未通过');
 
   let body = `## 📦 光湖自动化系统 · 模块收讫回执\n\n`;
   body += `@${PUSHER_LOGIN} 你好！\n\n`;
 
-  if (isPass) {
+  if (isPass || isUnknown) {
     body += `🎉 **你上传的模块已收到，自检通过！**\n\n`;
   } else {
     body += `⚠️ **你上传的模块已收到，但自检发现以下问题，请修改后重新上传：**\n\n`;
@@ -138,7 +139,7 @@ function buildNotificationContent(collab, changedModules, allFiles) {
     body += isPass ? '所有检查项目通过。\n\n' : '（未获取到详细检查报告）\n\n';
   }
 
-  if (!isPass) {
+  if (!isPass && !isUnknown) {
     body += `### 📌 修改指南\n\n`;
     body += `1. 请根据以上自检报告修改相关文件\n`;
     body += `2. 修改完成后重新推送到仓库\n`;
