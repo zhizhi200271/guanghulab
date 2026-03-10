@@ -15,7 +15,7 @@
 
     <div class="login-box">
       <h2>请输入你的开发编号</h2>
-      <p class="hint">编号由管理员分配，格式：EXP-001</p>
+      <p class="hint">编号由冰朔主控分配，格式：EXP-000 ~ EXP-011</p>
 
       <form id="loginForm" onsubmit="return handleLogin(event)">
         <input
@@ -33,8 +33,8 @@
         <span>或</span>
       </div>
 
-      <button id="guestBtn" class="btn-guest" onclick="handleGuestLogin()">🌊 访客体验模式</button>
-      <p class="guest-hint">无需编号，直接与知秋对话</p>
+      <button id="guestBtn" class="btn-guest" onclick="handleGuestLogin()" disabled>🌊 访客体验模式（暂未开放）</button>
+      <p class="guest-hint">访客模式暂不可用，正式编号用户可正常登录</p>
 
       <div id="errorMsg" class="error-msg" style="display:none;"></div>
     </div>

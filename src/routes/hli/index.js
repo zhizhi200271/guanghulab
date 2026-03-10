@@ -17,6 +17,10 @@ const hliAuth = require('../../middleware/hli-auth.middleware');
 
 router.use(hliAuth);
 
+// REGISTRY 域 — 开发者编号查询
+const registryRouter = require('./registry');
+router.use('/registry', registryRouter);
+
 // PERSONA 域
 // const personaRouter = require('./persona');
 // router.use('/persona', personaRouter);
