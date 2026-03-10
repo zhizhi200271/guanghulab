@@ -15,9 +15,9 @@
       "description": "铸渊诞生。仓库初始化、HLI目录结构创建、CI/CD部署、第一个schema（login）写入。",
       "by": "DEV-001 页页"
   "identity": "铸渊（Zhùyuān）· GitHub 代码守护人格体",
-  "rules_version": "v1.0",
-  "last_updated": "2026-03-09T00:58:24.945Z",
-  "wake_protocol_version": "v1.0",
+  "rules_version": "v3.0",
+  "last_updated": "2026-03-10T09:43:00.000Z",
+  "wake_protocol_version": "v3.0",
   "wake_triggers": [
     "我是冰朔",
     "冰朔",
@@ -79,7 +79,7 @@
       "by": "铸渊"
     }
   ],
-  "active_rules_version": "v1.0",
+  "active_rules_version": "v3.0",
   "last_broadcast_received": null,
   "daily_selfcheck": {
     "last_run": null,

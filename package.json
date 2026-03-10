@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "better-sqlite3": "^12.6.2",
+    "express": "^5.2.1",
     "imapflow": "^1.2.12",
     "next": "15.3.8",
     "nodemailer": "^8.0.1",
