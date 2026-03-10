@@ -63,7 +63,7 @@ body {
 }
 
 /* ========== 频道栏 ========== */
-.channel-bar {
+.channel-tab-bar {
     display: flex;
     gap: 8px;
     padding: 16px 0;
@@ -71,7 +71,7 @@ body {
     overflow-x: auto;
 }
 
-.channel {
+.channel-tab {
     padding: 8px 18px;
     border-radius: 20px;
     border: 1px solid rgba(255,255,255,0.1);
@@ -83,12 +83,12 @@ body {
     white-space: nowrap;
 }
 
-.channel:hover {
+.channel-tab:hover {
     border-color: rgba(255, 183, 77, 0.3);
     color: #b0bec5;
 }
 
-.channel.active {
+.channel-tab.active {
     background: rgba(255,183,77,0.15);
     border-color: #ffb74d;
     color: #ffb74d;
@@ -224,24 +224,24 @@ body {
   header h1 {
     font-size: 18px;
   }
-  .channel-bar {
+  .channel-tab-bar {
     gap: 6px;
     padding: 12px 0;
   }
-  .channel {
+  .channel-tab {
     padding: 6px 14px;
     font-size: 12px;
   }
   .bulletin-card {
     padding: 12px 10px;
   }
-  .channel-bar {
+  .channel-tab-bar {
     flex-wrap: nowrap;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
   }
-  .channel-bar::-webkit-scrollbar {
+  .channel-tab-bar::-webkit-scrollbar {
     display: none;
   }
   .bulletin-card {
@@ -330,11 +330,11 @@ body {
         height: 32px;
     }
     
-    .channel-tabs {
+    .channel-tab-tabs {
         gap: 8px;
     }
     
-    .channel-tab {
+    .channel-tab-tab {
         padding: 6px 12px;
         font-size: 0.9rem;
     }
@@ -369,7 +369,7 @@ body {
         margin-bottom: 4px;
     }
     
-    .channel-tabs {
+    .channel-tab-tabs {
         overflow-x: auto;
         white-space: nowrap;
         flex-wrap: nowrap;
@@ -379,11 +379,11 @@ body {
         scrollbar-width: none; /* Firefox隐藏滚动条 */
     }
     
-    .channel-tabs::-webkit-scrollbar {
+    .channel-tab-tabs::-webkit-scrollbar {
         display: none; /* Chrome/Safari隐藏滚动条 */
     }
     
-    .channel-tab {
+    .channel-tab-tab {
         display: inline-block;
         float: none;
         white-space: nowrap;
@@ -394,4 +394,86 @@ body {
         text-align: center;
         gap: 8px;
     }
+}/* ===== 知秋：loading/error/empty 状态样式 ===== */
+
+/* loading */
+.loading-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 15px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* error */
+.error-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #e74c3c;
+}
+
+.retry-btn {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 10px;
+    transition: background 0.3s;
+}
+
+.retry-btn:hover {
+    background: #2980b9;
+}
+
+/* empty */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+    font-size: 16px;
+}
+
+/* 响应式适配 */
+@media (max-width: 600px) {
+    .loading-state, .error-state, .empty-state {
+        padding: 30px 15px;
+    }
+    
+    .spinner {
+        width: 30px;
+        height: 30px;
+    }
+}/* ===== 频道栏和公告列表的间距 ===== */
+.channel-bar {
+    margin-bottom: 20px;  /* 给频道栏加下边距 */
+}
+
+/* 或者也可以给公告容器加上边距 */
+.bulletin-container {
+    margin-top: 10px;
+}
+/* ===== 频道栏与上方标题栏的间距 ===== */
+.channel-bar {
+    margin-top: 15px;     /* 给频道栏顶部增加间距，让它和上面的内容分开 */
+}
+
+/* 也可以调整标题栏的底部间距 */
+.header-actions {
+    margin-bottom: 5px;   /* 或者给标题栏底部加点间距 */
 }

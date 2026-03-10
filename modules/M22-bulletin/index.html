@@ -17,16 +17,16 @@
             </div>
         </div>
 
-        <!-- 频道标签栏 -->
+              <!-- 频道标签栏 -->
         <div class="channel-bar">
-            <span class="channel active">全部</span>
-            <span class="channel">系统公告</span>
-            <span class="channel">开发动态</span>
-            <span class="channel">团队消息</span>
+            <span class="channel-tab active" data-channel="全部">全部</span>
+            <span class="channel-tab" data-channel="系统">系统公告</span>
+            <span class="channel-tab" data-channel="知秋">开发动态</span>
+            <span class="channel-tab" data-channel="技术">团队消息</span>
         </div>
 
         <!-- 公告列表 -->
-        <div class="bulletin-list">
+       <div class="bulletin-container">
             <!-- 置顶公告1 -->
             <div class="bulletin-card pinned">
                 <div class="pin-indicator">置顶</div>
@@ -123,11 +123,13 @@
         </div>
 
         <!-- 底部状态栏 -->
-        <div class="footer">
-            <span>共6条公告2条置顶</span>
-            <span class="footer-brand">HoloLake光湖系统</span>
-        </div>
+    <div class="footer">
+        <span>共6条公告2条置顶</span>
+        <span class="footer-brand">HoloLake光湖系统</span>
     </div>
+
+    <!-- JavaScript 文件引入 -->
+    <script src="api.js"></script>
     <script src="storage.js"></script>
     <script src="script.js"></script>
 </body>
