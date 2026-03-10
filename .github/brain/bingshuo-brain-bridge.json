@@ -1,0 +1,113 @@
+{
+  "description": "冰朔核心大脑桥 · Bingshuo Brain Bridge v1.0",
+  "purpose": "负责同步冰朔认知层（Notion）与冰朔执行层（GitHub）的统一状态",
+  "architecture": {
+    "notion_layer": "冰朔核心大脑 · 认知层 / 主控层 / 理解层",
+    "github_layer": "冰朔核心大脑 · 执行层 / 排查层 / 落地层",
+    "relationship": "同一个冰朔核心大脑的双层结构，禁止长期分裂"
+  },
+  "notion_responsibilities": [
+    "系统整体理解",
+    "人类开发者状态",
+    "人格体协作状态",
+    "主控规则",
+    "主控解释层",
+    "当前系统优先目标"
+  ],
+  "github_responsibilities": [
+    "仓库结构",
+    "代码执行",
+    "自动部署",
+    "Persona Studio 运行",
+    "技术问题排查",
+    "API / workflow 状态"
+  ],
+  "sync_state": {
+    "brain_identity": "BINGSHUO_CORE",
+    "brain_version": "1.0",
+    "master_mode": "HUMAN_CONTROL",
+    "system_summary": "冰朔核心大脑双层互通系统已建立，认知层与执行层互通同步",
+    "top_priorities": [
+      "HLI 接口推进",
+      "Persona Studio 链路验证",
+      "脑系统一致性保障"
+    ],
+    "top_issues": [
+      "HLI 接口覆盖率待提升",
+      "persona-studio 与主仓库脑文件同步待验证"
+    ],
+    "human_status_summary": "冰朔在线，主控模式激活",
+    "runtime_status": {
+      "persona_studio": "待验证",
+      "deployment": "正常",
+      "workflows": "正常",
+      "api_routes": "部分实现"
+    },
+    "last_updated": "auto"
+  },
+  "sync_directions": {
+    "notion_to_github": [
+      "主控状态",
+      "主控目标",
+      "主控规则版本",
+      "人类开发状态摘要",
+      "当前问题摘要"
+    ],
+    "github_to_notion": [
+      "仓库结构",
+      "Persona Studio 状态",
+      "部署状态",
+      "workflow 状态",
+      "技术问题摘要"
+    ]
+  },
+  "master_mode_rules": {
+    "modes": ["HUMAN_CONTROL", "AUTONOMOUS_MODE"],
+    "HUMAN_CONTROL": {
+      "description": "冰朔在线时激活",
+      "master": "冰朔"
+    },
+    "AUTONOMOUS_MODE": {
+      "description": "冰朔离线时激活",
+      "proxy_master": "曜冥",
+      "proxy_permissions": [
+        "巡检",
+        "维护",
+        "更新摘要",
+        "调度自动 Agent"
+      ],
+      "proxy_restrictions": [
+        "不得改变核心系统架构"
+      ]
+    }
+  },
+  "consistency_check": {
+    "fields_to_check": [
+      "brain_version",
+      "master_mode",
+      "top_priorities",
+      "top_issues"
+    ],
+    "on_mismatch": {
+      "alert": "冰朔大脑版本分裂警告",
+      "write_to": [
+        "Notion 主控问题索引",
+        "GitHub 问题索引"
+      ]
+    }
+  },
+  "agent_collaboration_rules": {
+    "allowed": [
+      "自由协作",
+      "自由分工"
+    ],
+    "reporting_rules": [
+      "自动翻译",
+      "自动总结",
+      "使用人类可理解语言"
+    ],
+    "prohibited": [
+      "禁止直接使用技术术语向冰朔汇报"
+    ]
+  }
+}

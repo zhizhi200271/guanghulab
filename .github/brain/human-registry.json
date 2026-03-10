@@ -1,0 +1,89 @@
+{
+  "description": "冰朔核心大脑 · 人类开发者编号注册表",
+  "note": "系统内部可读写，编号前缀 EXP，格式 EXP-XXX。EXP-000 为冰朔保留编号。",
+  "registry_version": "1.0",
+  "last_updated": "auto",
+  "developers": [
+    {
+      "exp_id": "EXP-000",
+      "name": "冰朔",
+      "github_username": "qinfendebingshuo",
+      "role": "supreme_master",
+      "status": "active",
+      "created_at": "2026-03-10T00:00:00.000Z",
+      "notified": true
+    },
+    {
+      "exp_id": "EXP-001",
+      "name": "页页",
+      "github_username": "",
+      "role": "developer",
+      "status": "active",
+      "created_at": "2026-03-10T00:00:00.000Z",
+      "notified": false
+    },
+    {
+      "exp_id": "EXP-002",
+      "name": "肥猫",
+      "github_username": "",
+      "role": "developer",
+      "status": "active",
+      "created_at": "2026-03-10T00:00:00.000Z",
+      "notified": false
+    },
+    {
+      "exp_id": "EXP-003",
+      "name": "燕樊",
+      "github_username": "",
+      "role": "developer",
+      "status": "active",
+      "created_at": "2026-03-10T00:00:00.000Z",
+      "notified": false
+    },
+    {
+      "exp_id": "EXP-004",
+      "name": "之之",
+      "github_username": "",
+      "role": "developer",
+      "status": "active",
+      "created_at": "2026-03-10T00:00:00.000Z",
+      "notified": false
+    },
+    {
+      "exp_id": "EXP-005",
+      "name": "小草莓",
+      "github_username": "",
+      "role": "developer",
+      "status": "active",
+      "created_at": "2026-03-10T00:00:00.000Z",
+      "notified": false
+    },
+    {
+      "exp_id": "EXP-006",
+      "name": "花尔",
+      "github_username": "",
+      "role": "developer",
+      "status": "active",
+      "created_at": "2026-03-10T00:00:00.000Z",
+      "notified": false
+    },
+    {
+      "exp_id": "EXP-007",
+      "name": "桔子",
+      "github_username": "",
+      "role": "developer",
+      "status": "active",
+      "created_at": "2026-03-10T00:00:00.000Z",
+      "notified": false
+    },
+    {
+      "exp_id": "EXP-008",
+      "name": "匆匆那年",
+      "github_username": "",
+      "role": "developer",
+      "status": "active",
+      "created_at": "2026-03-10T00:00:00.000Z",
+      "notified": false
+    }
+  ]
+}
