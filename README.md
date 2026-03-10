@@ -31,7 +31,7 @@
 
 <br>
 
-### 🚀 [点击进入 Persona Studio →](https://guanghulab.com/persona-studio/)
+### 🚀 [点击进入 Persona Studio →](https://qinfendebingshuo.github.io/guanghulab/persona-studio/)
 
 💬 自然语言对话 &nbsp;·&nbsp; 🧠 智能代码生成 &nbsp;·&nbsp; 📧 邮件推送结果 &nbsp;·&nbsp; 🔄 对话记忆
 
@@ -59,7 +59,7 @@
 | **铸渊 Zhùyuān** | 代码守护者 | 代码审查、CI 巡检、模块协议执行、Issue 回复 |
 | **冰朔 Bīng Shuò** | 系统创建者 | 系统架构设计、核心决策、广播发布 |
 | **霜砚 Shuāng Yàn** | 人格导师 | 人格调校、风格管理、联觉语言系统 |
-| **知秋 Zhī Qiū** | 协助开发者 | 对话协助、代码生成、开发体验（[Persona Studio](https://guanghulab.com/persona-studio/)） |
+| **知秋 Zhī Qiū** | 协助开发者 | 对话协助、代码生成、开发体验（[Persona Studio](https://qinfendebingshuo.github.io/guanghulab/persona-studio/)） |
 
 ---
 
@@ -213,7 +213,7 @@
 ### 体验模块
 | 模块 | 说明 |
 |------|------|
-| `persona-studio/` | 人格体协助开发体验（[进入 →](https://guanghulab.com/persona-studio/)） |
+| `persona-studio/` | 人格体协助开发体验（[进入 →](https://qinfendebingshuo.github.io/guanghulab/persona-studio/)） |
 
 ### 系统支撑
 | 模块 | 说明 |

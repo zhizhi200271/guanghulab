@@ -6,6 +6,7 @@ on:
       - main          # 仅 main 分支触发生产部署
     paths:
       - 'docs/**'
+      - 'persona-studio/frontend/**'
       - '.github/brain/**'
   workflow_dispatch:
 
@@ -30,6 +31,11 @@ jobs:
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
+
+      - name: Sync Persona Studio frontend to docs
+        run: |
+          mkdir -p docs/persona-studio
+          cp -r persona-studio/frontend/* docs/persona-studio/
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
