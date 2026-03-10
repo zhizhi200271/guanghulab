@@ -1,14 +1,14 @@
 {
   "description": "铸渊图书馆目录 · Library Catalog for 铸渊 (Zhùyuān)",
   "version": "2.0",
-  "generated_at": "2026-03-10T13:24:06.857Z",
+  "generated_at": "2026-03-10T14:08:20.956Z",
   "generated_by": "scripts/generate-repo-map.js",
   "repo": "qinfendebingshuo/guanghulab",
   "stats": {
     "zones": 13,
     "total_modules": 10,
-    "total_workflows": 31,
-    "total_scripts": 26,
+    "total_workflows": 32,
+    "total_scripts": 27,
     "total_dev_nodes": 8,
     "hli_interfaces": 21,
     "hli_implemented": 7,
@@ -377,6 +377,14 @@
           ]
         },
         {
+          "file": "zhuyuan-daily-agent.yml",
+          "name": "🤖 铸渊巡检 Agent · 每日自动巡检与修复",
+          "triggers": [
+            "schedule(0 14 * * *)",
+            "manual"
+          ]
+        },
+        {
           "file": "zhuyuan-daily-selfcheck.yml",
           "name": "铸渊 · 每日自检",
           "triggers": [
@@ -400,7 +408,7 @@
           ]
         }
       ],
-      "item_count": 31
+      "item_count": 32
     },
     {
       "zone_id": "SCRIPTS",
@@ -487,6 +495,9 @@
           "file": "update-readme-bulletin.js"
         },
         {
+          "file": "zhuyuan-daily-agent.js"
+        },
+        {
           "file": "zhuyuan-daily-selfcheck.js"
         },
         {
@@ -496,7 +507,7 @@
           "file": "zhuyuan-module-protocol.js"
         }
       ],
-      "item_count": 26
+      "item_count": 27
     },
     {
       "zone_id": "SRC",
@@ -1297,6 +1308,10 @@
     ],
     "zhuyuan-brain-sync": [
       "WORKFLOWS::zhuyuan-brain-sync.yml"
+    ],
+    "zhuyuan-daily-agent": [
+      "WORKFLOWS::zhuyuan-daily-agent.yml",
+      "SCRIPTS::zhuyuan-daily-agent.js"
     ],
     "zhuyuan-daily-selfcheck": [
       "WORKFLOWS::zhuyuan-daily-selfcheck.yml",
