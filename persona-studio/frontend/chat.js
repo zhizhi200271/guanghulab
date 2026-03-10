@@ -9,7 +9,7 @@ const API_BASE = (function () {
   if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
     return 'http://localhost:3002';
   }
-  return '';
+  return 'https://guanghulab.com';
 })();
 
 /* ---- Init ---- */
