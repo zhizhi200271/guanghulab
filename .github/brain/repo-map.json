@@ -1,7 +1,7 @@
 {
   "description": "铸渊图书馆目录 · Library Catalog for 铸渊 (Zhùyuān)",
   "version": "2.0",
-  "generated_at": "2026-03-10T14:08:20.956Z",
+  "generated_at": "2026-03-10T15:36:07.840Z",
   "generated_by": "scripts/generate-repo-map.js",
   "repo": "qinfendebingshuo/guanghulab",
   "stats": {
@@ -611,8 +611,8 @@
         {
           "module_id": "M15",
           "dir": "m15-cloud-drive",
-          "files": 3,
-          "has_readme": false
+          "files": 4,
+          "has_readme": true
         },
         {
           "module_id": "M18",
