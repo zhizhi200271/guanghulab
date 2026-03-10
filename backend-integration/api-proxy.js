@@ -275,7 +275,48 @@ function handleGetModels(req, res) {
   });
 }
 
-// POST /api/chat — 代理转发聊天请求
+// ═══════════════════════════════════════════════════════
+// 模型失败记录（自动 fallback 用）
+// ═══════════════════════════════════════════════════════
+const proxyFailureLog = new Map();
+const PROXY_FAILURE_COOLDOWN_MS = 5 * 60 * 1000;
+
+function recordProxyFailure(provider) {
+  const entry = proxyFailureLog.get(provider) || { count: 0, lastFail: 0 };
+  entry.count++;
+  entry.lastFail = Date.now();
+  proxyFailureLog.set(provider, entry);
+}
+
+function isProviderInCooldown(provider) {
+  const entry = proxyFailureLog.get(provider);
+  if (!entry) return false;
+  if (Date.now() - entry.lastFail > PROXY_FAILURE_COOLDOWN_MS) {
+    proxyFailureLog.delete(provider);
+    return false;
+  }
+  return entry.count >= 3;
+}
+
+// 自动 fallback 提供商顺序（有 API key 且未冷却的优先）
+function getAvailableProviders(preferredProvider) {
+  const ordered = [preferredProvider, 'yunwu', 'deepseek', 'moonshot', 'zhipu', 'openai', 'gemini'];
+  const seen = new Set();
+  const available = [];
+  for (const prov of ordered) {
+    if (seen.has(prov)) continue;
+    seen.add(prov);
+    const cfg = MODEL_CONFIG[prov];
+    if (!cfg) continue;
+    const key = process.env[cfg.keyEnv];
+    if (!key) continue;
+    if (isProviderInCooldown(prov)) continue;
+    available.push({ provider: prov, config: cfg, apiKey: key });
+  }
+  return available;
+}
+
+// POST /api/chat — 代理转发聊天请求（支持自动 fallback）
 async function handleChat(req, res) {
   const clientId = getClientId(req);
 
@@ -316,53 +357,72 @@ async function handleChat(req, res) {
   const temp = typeof temperature === 'number' ? Math.max(0, Math.min(2, temperature)) : 0.8;
   const maxTok = typeof max_tokens === 'number' ? Math.max(1, Math.min(8192, Math.floor(max_tokens))) : 2000;
 
-  // Determine provider
+  // Get available providers with auto-fallback
   const prov = provider || 'deepseek';
-  const config = MODEL_CONFIG[prov];
-  if (!config) {
-    jsonResponse(res, 400, {
-      error: true,
-      code: 'INVALID_PROVIDER',
-      message: `不支持的模型提供商: ${prov}，可选: ${Object.keys(MODEL_CONFIG).join(', ')}`
-    });
-    return;
+  const availableProviders = getAvailableProviders(prov);
+
+  if (availableProviders.length === 0) {
+    // Even cooled-down providers — try the requested one anyway
+    const config = MODEL_CONFIG[prov];
+    if (!config) {
+      jsonResponse(res, 400, {
+        error: true,
+        code: 'INVALID_PROVIDER',
+        message: `不支持的模型提供商: ${prov}，可选: ${Object.keys(MODEL_CONFIG).join(', ')}`
+      });
+      return;
+    }
+    const apiKey = process.env[config.keyEnv];
+    if (!apiKey) {
+      jsonResponse(res, 503, {
+        error: true,
+        code: 'NO_API_KEY',
+        message: `所有模型API密钥均未配置，请联系管理员`
+      });
+      return;
+    }
+    availableProviders.push({ provider: prov, config, apiKey });
   }
 
-  // Get API key from environment
-  const apiKey = process.env[config.keyEnv];
-  if (!apiKey) {
-    jsonResponse(res, 503, {
-      error: true,
-      code: 'NO_API_KEY',
-      message: `${config.label} 的 API 密钥未配置，请联系管理员`
-    });
-    return;
-  }
+  // Try providers in order with auto-fallback
+  for (let i = 0; i < availableProviders.length; i++) {
+    const { provider: curProv, config: curConfig, apiKey: curKey } = availableProviders[i];
+    const mdl = (i === 0 && model) ? model : curConfig.models[0];
 
-  // Build upstream request
-  const mdl = model || config.models[0];
-  const upstreamBody = {
-    model: mdl,
-    messages: messages,
-    stream: stream !== false, // Default to streaming
-    temperature: temp,
-    max_tokens: maxTok
-  };
+    const upstreamBody = {
+      model: mdl,
+      messages: messages,
+      stream: stream !== false,
+      temperature: temp,
+      max_tokens: maxTok
+    };
 
-  // If system prompt provided, prepend as system message
-  if (system && !messages.find(m => m.role === 'system')) {
-    upstreamBody.messages = [{ role: 'system', content: system }, ...messages];
-  }
+    if (system && !messages.find(m => m.role === 'system')) {
+      upstreamBody.messages = [{ role: 'system', content: system }, ...messages];
+    }
 
-  const upstreamUrl = config.base + '/chat/completions';
+    const upstreamUrl = curConfig.base + '/chat/completions';
+    const isLastAttempt = i === availableProviders.length - 1;
 
-  console.log(`[代理] ${prov}/${mdl}`);
+    console.log(`[代理] ${i > 0 ? '降级→' : ''}${curProv}/${mdl}`);
 
-  try {
-    await proxyStream(upstreamUrl, apiKey, upstreamBody, res);
-  } catch (err) {
-    // Error already handled in proxyStream
-    console.error(`[代理] 请求失败: ${err.message}`);
+    try {
+      await proxyStream(upstreamUrl, curKey, upstreamBody, res);
+      return; // Success — stop trying
+    } catch (err) {
+      recordProxyFailure(curProv);
+      console.error(`[代理] ${curProv} 请求失败: ${err.message}`);
+
+      if (isLastAttempt && !res.headersSent) {
+        jsonResponse(res, 502, {
+          error: true,
+          code: 'ALL_PROVIDERS_FAILED',
+          message: '所有模型提供商均请求失败，请稍后重试'
+        });
+      }
+      // If not last attempt and headers not sent, try next provider
+      if (res.headersSent) return;
+    }
   }
 }
 

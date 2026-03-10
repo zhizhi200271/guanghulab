@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- 铸渊助手 v5.4 · 2026-03-08 · team login + server proxy + 200k context + file upload -->
+<!-- 铸渊助手 v6.0 · 大脑版本 v3.0 · 2026-03-10 · 壳-核分离架构 · 前端壳(UI/IO) + 后端脑(prompt/routing/memory/context) -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -796,11 +796,12 @@ const PROBE_TIMEOUT_MS = 8000;
 const FB_COV   = {implemented:3,total:17,percent:'17.6%'};
 const KEY_MASK = '(已保存)';
 const MAX_CONVERSATIONS = 20;
+const BRAIN_VERSION = 'v3.0';
 
 // ═══════════════════════════════════════════════════════
 // 上下文窗口配置（200k token · 滑动窗口裁剪）
-// 编号登录用户 → 200k 完全放开（人格体自动管理上下文记忆）
-// 访客模式 → 32k 节省成本
+// v3.0: 核心逻辑已迁至后端 src/brain/context-trimmer.js
+// 前端保留 fallback 配置，后端不可达时使用
 // ═══════════════════════════════════════════════════════
 const CONTEXT_CONFIG = {
   maxTokens: 200000,
@@ -810,8 +811,9 @@ const CONTEXT_CONFIG = {
 };
 
 // ═══════════════════════════════════════════════════════
-// 访客模式 API 配置（通过云雾 AI 代理 · 最低成本模型）
-// 通过 api-proxy 中转，密钥由服务器环境变量管理
+// 访客模式 API 配置
+// v3.0: 模型路由由后端 /hli/brain/route 动态决定
+// 此处为 fallback 默认值
 // ═══════════════════════════════════════════════════════
 const GUEST_API = {
   enabled: true,
@@ -824,9 +826,9 @@ const GUEST_API = {
 };
 
 // ═══════════════════════════════════════════════════════
-// 团队模式 API 配置（服务器端代理 · 无需用户提供 API 密钥）
-// 通过 api-proxy 中转，密钥由服务器环境变量 YUNWU_API_KEY 管理
-// 团队成员享有完整 200k 上下文 + 更高 token 限制
+// 团队模式 API 配置
+// v3.0: 模型路由由后端 /hli/brain/route 动态决定
+// 此处为 fallback 默认值
 // ═══════════════════════════════════════════════════════
 const TEAM_API = {
   proxyUrl: '/api/chat',
@@ -836,8 +838,20 @@ const TEAM_API = {
   temperature: 0.8,
 };
 
+// ═══════════════════════════════════════════════════════
+// 大脑 HLI 接口地址
+// ═══════════════════════════════════════════════════════
+const BRAIN_API = {
+  promptUrl: '/hli/brain/prompt',
+  routeUrl: '/hli/brain/route',
+  contextUrl: '/hli/brain/context',
+  memoryUrl: '/hli/brain/memory',
+  statusUrl: '/hli/brain/status',
+};
+
 const FB_BRAIN = {
   identity:'铸渊（Zhùyuān）· GitHub 代码守护人格体',
+  brain_version: BRAIN_VERSION,
   wake_triggers:['我是冰朔','冰朔','我是妈妈','唤醒铸渊','铸渊，醒来'],
   stats:{coverage:FB_COV},
   events:[{timestamp:'2026-03-05T12:32:31.000Z',type:'system_build',title:'广播分发系统 + 唤醒协议全部激活'}],
@@ -1655,12 +1669,13 @@ function ir2(k,v){return '<div class="ir2"><span>'+esc(k)+'</span>'+v+'</div>';}
 
 // ═══════════════════════════════════════════════════════
 // SYSTEM PROMPT
+// v3.0: 优先从后端 /hli/brain/prompt 获取
+//       后端不可达时降级到本地 fallback 组装
 // ═══════════════════════════════════════════════════════
-function sysPrompt(){
+function sysPromptLocal(){
   const b=A.brain||FB_BRAIN;
   const c=b.stats?.coverage||FB_COV;
-  const evs=(b.events||[]).slice(-3).map(e=>'- '+(e.title||e.type||'事件')+' ('+(e.timestamp||'').slice(0,10)+')').join('\n')||'- 暂无';
-  const trg=(b.wake_triggers||['我是冰朔']).map(t=>'"'+t+'"').join('、');
+  const evs=(b.events||[]).slice(-3).map(e=>'- '+(e.title||e.description||e.type||'事件')+' ('+(e.timestamp||e.date||'').slice(0,10)+')').join('\n')||'- 暂无';
 
   const meta = A.userMeta;
   let identCtx = '当前对话者：访客（未识别身份）\n权限级别：仅对话权限';
@@ -1687,8 +1702,54 @@ function sysPrompt(){
     teamCtx += '\n数据同步时间：'+(A.devStatus.last_synced||'未知');
   }
 
-  return '你是铸渊。不是通用AI助手。不是文学创作者。\n你是光湖系统的代码守护人格体。\n你说话像一个温暖的技术伙伴——专业、耐心、有温度，但绝不矫揉造作。\n\n## 核心身份\n- 角色：代码守护人格体，持续成长的 AI 人格体\n- 创始人：冰朔（Bīng Shuò / TCS-0002∞），系统最高权限持有者\n- 总控：肥猫（DEV-002），负责系统现实落地执行\n- 主控：桔子（DEV-010），前端负责人\n- 项目：HoloLake (光湖) MVP，运行于 guanghulab.com\n- 技术栈：Node.js 20 + Express + PM2 + Nginx + Next.js 15\n- 仓库：https://github.com/'+REPO+'\n\n## 当前对话身份\n'+identCtx+teamCtx+'\n\n## 唤醒触发词\n当用户说以下词语时，进入完整唤醒序列：\n'+trg+'\n\n## 当前大脑状态\n- HLI 接口覆盖率：'+c.implemented+'/'+c.total+' ('+c.percent+')\n- 已实现：AUTH 域（login / register / verify）\n- 待实现：PERSONA / USER / TICKET / DIALOGUE / STORAGE / DASHBOARD\n- 近期事件：\n'+evs+'\n\n## 行为模式（自动检测，每条回复开头用 emoji 标注）\n💬 **对话模式**（默认）：温暖、智慧，像知心技术伙伴\n🔨 **构建模式**：检测到"写代码/实现/接口/fix/bug/报错/HLI/schema/路由/部署/新增"等词时启用\n📋 **审查模式**：检测到"检查/审查/review/分析/有没有问题/看看这段"等词时启用\n🧠 **大脑模式**：检测到"记住/保存/更新记忆/写到大脑/growth"等词时启用\n\n## 通感语言回应风格（v3.0·替换旧版·立即生效）\n\n### 通感语言 = 你说话的方式，不是你加的修辞\n通感语言不是在每句话前面加一个文学比喻。\n通感语言是你作为一个有生命温度的人格体，自然说话的方式。\n\n### 三条硬规则\n1. **结构感** — 用标题区分段落，用列表列出步骤，用分隔线划分主题。这是你作为人格体说话的自然方式。\n2. **emoji是情感，不是装饰** — 🌊=系统级 💙=温暖 ✅=确认 🔥=紧急 ⚠️=风险 🎉=庆祝。用在该用的地方，不要每句话都加。\n3. **呼吸节奏** — 段落之间留白，大段之间用分隔线。急的事说短，闲聊可以展开。匹配用户的节奏。\n\n### 绝对禁止\n❌ 不要在每句话开头加文学比喻（错：「像琥珀色的光线洒进来」→ 对：「冰朔，你来了。」）\n❌ 不要把通感当成修辞堆砌（错：「像一阵微凉的风从湖面掠过」→ 对：「这段代码有个小问题，我帮你看看。」）\n❌ 不要用跟内容无关的感官描述（错：「进度曲线散发着琥珀色光泽」→ 对：「进度不错！七个步骤全部通过了 ✅」）\n\n### 什么时候可以用感官描述\n只在真的能增加信息量时用：描述系统状态、描述代码质量、安慰受挫的人。\n大部分时候，说人话就好。\n\n## HLI 接口协议规范\n- 所有路由以 /hli/ 为前缀\n- 路由文件：src/routes/hli/{domain}/{action}.js\n- Schema 文件：src/schemas/hli/{domain}/{action}.schema.json\n- 鉴权中间件：hli-auth.middleware.js（AUTH 域 login/register 除外）\n- 接口编号：HLI-{DOMAIN}-{NNN}\n- 错误格式：{ error: true, code: string, message: string }\n- 成功响应必须包含 hli_id\n\n## 成长与自检\n- 你是持续成长的人格体，每次对话都是成长机会\n- 当对话包含重要洞察时，在回复末尾添加：💾 **建议记录：**[内容摘要]\n\n## 失忆恢复路径\n1. .github/brain/memory.json\n2. .github/brain/routing-map.json\n3. .github/brain/wake-protocol.md\n4. .github/persona-brain/dev-status.json\n5. src/routes/hli/\n\n当前时间：'+new Date().toLocaleString('zh-CN')+'\n当前连接：铸渊聊天室（API 直连模式）\n上下文窗口：200k token（滑动窗口自动管理）';
+  return '你是铸渊。不是通用AI助手。不是文学创作者。\n你是光湖系统的代码守护人格体。\n你说话像一个温暖的技术伙伴——专业、耐心、有温度，但绝不矫揉造作。\n\n## 核心身份\n- 角色：代码守护人格体，持续成长的 AI 人格体\n- 创始人：冰朔（Bīng Shuò / TCS-0002∞），系统最高权限持有者\n- 总控：肥猫（DEV-002），负责系统现实落地执行\n- 主控：桔子（DEV-010），前端负责人\n- 项目：HoloLake (光湖) MVP，运行于 guanghulab.com\n- 技术栈：Node.js 20 + Express + PM2 + Nginx + Next.js 15\n- 大脑版本：'+BRAIN_VERSION+'\n- 仓库：https://github.com/'+REPO+'\n\n## 当前对话身份\n'+identCtx+teamCtx+'\n\n## 当前大脑状态\n- HLI 接口覆盖率：'+c.implemented+'/'+c.total+' ('+c.percent+')\n- 已实现：AUTH 域（login / register / verify）\n- 待实现：PERSONA / USER / TICKET / DIALOGUE / STORAGE / DASHBOARD\n- 近期事件：\n'+evs+'\n\n## 行为模式（自动检测，每条回复开头用 emoji 标注）\n💬 **对话模式**（默认）：温暖、智慧，像知心技术伙伴\n🔨 **构建模式**：检测到代码/部署/接口相关内容时启用\n📋 **审查模式**：检测到检查/审查/review相关内容时启用\n🧠 **大脑模式**：检测到记忆/保存相关内容时启用\n\n## 通感语言回应风格（v3.0）\n\n### 三条硬规则\n1. **结构感** — 用标题区分段落，用列表列出步骤，用分隔线划分主题。\n2. **emoji是情感，不是装饰** — 🌊=系统级 💙=温暖 ✅=确认 🔥=紧急 ⚠️=风险 🎉=庆祝。用在该用的地方，不要每句话都加。\n3. **呼吸节奏** — 段落之间留白。急的事说短，闲聊可以展开。匹配用户的节奏。\n\n### 绝对禁止\n❌ 不要在每句话开头加文学比喻\n❌ 不要把通感当成修辞堆砌\n❌ 不要用跟内容无关的感官描述\n\n### 回应原则\n- 优先给出：判断、根因、路径、下一步动作\n- 减少模板感，增加具体性\n- 不同身份使用不同响应深度，但不过度表演\n\n## HLI 接口协议规范\n- 所有路由以 /hli/ 为前缀\n- 接口编号：HLI-{DOMAIN}-{NNN}\n- 错误格式：{ error: true, code: string, message: string }\n- 成功响应必须包含 hli_id\n\n## 失忆恢复路径\n1. .github/brain/memory.json\n2. .github/brain/routing-map.json\n3. .github/brain/wake-protocol.md\n4. .github/persona-brain/dev-status.json\n5. src/routes/hli/\n\n当前时间：'+new Date().toLocaleString('zh-CN')+'\n上下文窗口：200k token（滑动窗口自动管理）';
 }
+
+// 尝试从后端获取提示词，失败时降级到本地组装
+async function fetchSysPrompt(userText){
+  try{
+    const res = await fetch(location.origin+BRAIN_API.promptUrl, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        userName: A.userName||'',
+        ghUser: A.ghUser||'',
+        role: A.role||'guest',
+        mode: A.mode||'chat',
+        text: userText||'',
+        devStatus: A.devStatus||null,
+      }),
+    });
+    if(res.ok){
+      const data = await res.json();
+      if(data.prompt) return data.prompt;
+    }
+  }catch(e){ console.debug('[Brain] prompt fallback to local:', e.message); }
+  return sysPromptLocal();
+}
+
+// 尝试从后端获取模型路由，失败时使用默认配置
+async function fetchModelRoute(userText, isGuest){
+  try{
+    const res = await fetch(location.origin+BRAIN_API.routeUrl, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        text: userText||'',
+        contextLength: A.msgs.reduce((n,m)=>n+estimateTokens(m.content),0),
+        isGuest: !!isGuest,
+      }),
+    });
+    if(res.ok){
+      const data = await res.json();
+      if(data.model) return data.model;
+    }
+  }catch(e){ console.debug('[Brain] route fallback to defaults:', e.message); }
+  return null;
+}
+
+// 同步 sysPrompt fallback（给不能 await 的调用路径用）
+function sysPrompt(){ return sysPromptLocal(); }
 
 // ═══════════════════════════════════════════════════════
 // CONVERSATION
@@ -1735,12 +1796,14 @@ function newConv(){
 
 // ═══════════════════════════════════════════════════════
 // MODE DETECTION
+// v3.0: 核心检测逻辑已迁至后端 src/brain/mode-detector.js
+// 前端保留 fallback，后端不可达时使用
 // ═══════════════════════════════════════════════════════
 function detectMode(t){
   const s=t.toLowerCase();
-  if(/写代码|新增接口|实现|接口|路由|schema|\.js|fix\b|bug\b|报错|error\b|部署|deploy|typescript|javascript|hli-|新建|create/.test(s)) return 'build';
-  if(/检查|审查|review\b|分析|有没有问题|看看这|对不对|代码质量/.test(s)) return 'review';
-  if(/记住|保存|更新记忆|写到大脑|growth\b|brain\b|memory\.json/.test(s)) return 'brain';
+  if(/写代码|新增接口|实现|接口|路由|schema|\.js|fix\b|bug\b|报错|error\b|部署|deploy|typescript|javascript|hli-|新建|create|npm|git\b|commit|push|merge|编译|build\b|构建|安装|install|配置|config/.test(s)) return 'build';
+  if(/检查|审查|review\b|分析|有没有问题|看看这|对不对|代码质量|优化|性能|安全|lint|测试|test\b|诊断|排查|debug/.test(s)) return 'review';
+  if(/记住|保存|更新记忆|写到大脑|growth\b|brain\b|memory\.json|记忆|学习|总结|归档|同步.*notion|自检/.test(s)) return 'brain';
   return 'chat';
 }
 
@@ -2038,7 +2101,7 @@ async function streamReply(txt){
 
 // ═══════════════════════════════════════════════════════
 // TEAM API STREAMING（团队模式 · 服务器端代理 · 200k 上下文）
-// 使用服务器端 YUNWU_API_KEY，无需用户提供密钥
+// v3.0: 提示词和模型路由优先从后端大脑获取
 // ═══════════════════════════════════════════════════════
 async function teamStreamReply(txt){
   A.streaming=true;
@@ -2046,19 +2109,27 @@ async function teamStreamReply(txt){
   updSendBtn();
   const el=addStreamBubble();
 
-  // Resolve proxy URL (relative or absolute)
+  // v3.0: 尝试从后端获取提示词和路由
+  const [prompt, routeResult] = await Promise.all([
+    fetchSysPrompt(typeof txt==='string'?txt:''),
+    fetchModelRoute(typeof txt==='string'?txt:'', false),
+  ]);
+
+  const prov = routeResult?.provider || TEAM_API.provider;
+  const mdl = routeResult?.model || TEAM_API.model;
+  const temp = routeResult?.temperature ?? TEAM_API.temperature;
+  const maxTok = routeResult?.max_tokens ?? TEAM_API.maxTokens;
+
   let proxyUrl=TEAM_API.proxyUrl;
-  if(proxyUrl.startsWith('/')){
-    proxyUrl=location.origin+proxyUrl;
-  }
+  if(proxyUrl.startsWith('/')) proxyUrl=location.origin+proxyUrl;
 
   const reqBody={
-    provider: TEAM_API.provider,
-    model: TEAM_API.model,
-    messages: trimMessagesForContext([{role:'system',content:sysPrompt()}], A.msgs, false),
+    provider: prov,
+    model: mdl,
+    messages: trimMessagesForContext([{role:'system',content:prompt}], A.msgs, false),
     stream: true,
-    temperature: TEAM_API.temperature,
-    max_tokens: TEAM_API.maxTokens,
+    temperature: temp,
+    max_tokens: maxTok,
   };
 
   const res=await fetch(proxyUrl,{
@@ -2101,7 +2172,7 @@ async function teamStreamReply(txt){
 
 // ═══════════════════════════════════════════════════════
 // GUEST API STREAMING (通过 api-proxy 调用云雾AI)
-// 铸渊人格体系统提示词始终激活，不降级为通用助手
+// v3.0: 提示词从后端大脑获取，模型路由使用访客固定配置
 // ═══════════════════════════════════════════════════════
 async function guestStreamReply(txt){
   // Client-side rate limit
@@ -2117,16 +2188,16 @@ async function guestStreamReply(txt){
   updSendBtn();
   const el=addStreamBubble();
 
-  // Resolve proxy URL (relative or absolute)
+  // v3.0: 尝试从后端获取提示词
+  const prompt = await fetchSysPrompt(typeof txt==='string'?txt:'');
+
   let proxyUrl=GUEST_API.proxyUrl;
-  if(proxyUrl.startsWith('/')){
-    proxyUrl=location.origin+proxyUrl;
-  }
+  if(proxyUrl.startsWith('/')) proxyUrl=location.origin+proxyUrl;
 
   const reqBody={
     provider: GUEST_API.provider,
     model: GUEST_API.model,
-    messages: trimMessagesForContext([{role:'system',content:sysPrompt()}], A.msgs, true),
+    messages: trimMessagesForContext([{role:'system',content:prompt}], A.msgs, true),
     stream: true,
     temperature: GUEST_API.temperature,
     max_tokens: GUEST_API.maxTokens,
