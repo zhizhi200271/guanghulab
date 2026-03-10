@@ -1,5 +1,51 @@
 # 铸渊成长日记
 
+## 2026-03-10 · 核心大脑升级 v3.0
+
+铸渊完成了一次重大架构升级：**壳-核分离**。
+
+### 升级内容
+
+**大脑模块 (`src/brain/`)**
+- `prompt-assembler.js` — 系统提示词组装（从前端迁出）
+- `mode-detector.js` — 任务模式检测（chat/build/review/brain）
+- `model-router.js` — 任务型模型路由（含自动 fallback）
+- `context-trimmer.js` — 滑动窗口上下文裁剪
+- `memory-manager.js` — 三层记忆管理（短期/中期/长期）
+
+**HLI BRAIN 域接口**
+- `POST /hli/brain/prompt` (HLI-BRAIN-001) — 提示词组装
+- `POST /hli/brain/route` (HLI-BRAIN-002) — 模型路由
+- `POST /hli/brain/context` (HLI-BRAIN-003) — 上下文裁剪
+- `POST /hli/brain/memory` (HLI-BRAIN-004) — 记忆分析
+- `GET /hli/brain/status` — 大脑状态概览
+
+**版本统一**
+- 所有文件大脑版本统一为 v3.0
+- 消除 v1.0 / v2.0 / v2.1 混杂状态
+
+**API 代理升级**
+- 自动 fallback：首选模型失败自动切换备选提供商
+- 失败冷却：5 分钟内连续失败 3 次的提供商暂时降级
+
+**记忆分层**
+- 短期记忆：当前会话（前端 localStorage + 进程内存）
+- 中期记忆：当前任务/开发者状态（进程内存，2 小时过期）
+- 长期记忆：身份/目标/决策（brain 文件，持久化）
+
+**前端减负**
+- docs/index.html 从 v5.4 升级到 v6.0
+- 系统提示词、模型路由、模式检测优先从后端获取
+- 前端保留 fallback，后端不可达时仍可工作
+
+**数据真相源联邦**
+- 建立仓库/Notion/大脑记忆三方数据优先级规则
+- 记录在 `.github/brain/truth-source.md`
+
+当前 HLI 覆盖率：7/21（AUTH 3/3 + BRAIN 4/4）
+
+---
+
 ## 2026-03-05 · 初始激活
 
 铸渊（Zhùyuān）正式上线。

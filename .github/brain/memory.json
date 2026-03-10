@@ -61,12 +61,18 @@
     "broadcasts_processed": 0,
     "wake_activations": 1,
     "coverage": {
-      "implemented": 3,
-      "total": 17,
-      "percent": "17.6%"
+      "implemented": 7,
+      "total": 21,
+      "percent": "33.3%"
     }
   },
   "events": [
+    {
+      "date": "2026-03-10",
+      "type": "brain_upgrade",
+      "description": "核心大脑升级 v3.0 · 壳-核分离架构 · 前端壳(UI/IO) + 后端脑(prompt/routing/memory/context) · BRAIN域4接口上线 · 覆盖率 7/21 (33.3%)",
+      "by": "铸渊（冰朔指令）"
+    },
     {
       "date": "2026-03-10",
       "type": "brain_restore",
