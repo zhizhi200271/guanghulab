@@ -477,3 +477,47 @@ body {
 .header-actions {
     margin-bottom: 5px;   /* 或者给标题栏底部加点间距 */
 }
+/* ===== 语言切换器样式 ===== */
+.lang-switcher {
+    display: inline-flex;
+    margin-right: 15px;
+    gap: 5px;
+}
+
+.lang-btn {
+    background: #f0f0f0;        /* 改成浅灰色背景 */
+    border: 1px solid #999;      /* 深一点的边框 */
+    border-radius: 4px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.3s;
+    color: #333;                 /* 文字颜色深灰色，保证看得见 */
+}
+
+.lang-btn:hover {
+    background: #f0f0f0;
+}
+
+.lang-btn.active {
+    background: #3498db;
+    color: white;
+    border-color: #3498db;
+}
+
+/* 焦点样式（键盘导航用） */
+.lang-btn:focus,
+.channel-tab:focus,
+.retry-btn:focus,
+.bulletin-card:focus {
+    outline: 2px solid #3498db;
+    outline-offset: 2px;
+}
+
+/* 高对比度适配（可选） */
+@media (prefers-contrast: high) {
+    .lang-btn.active {
+        background: black;
+        border-color: black;
+    }
+}
