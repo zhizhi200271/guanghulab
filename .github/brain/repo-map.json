@@ -1,20 +1,20 @@
 {
   "description": "铸渊图书馆目录 · Library Catalog for 铸渊 (Zhùyuān)",
   "version": "2.0",
-  "generated_at": "2026-03-10T02:04:21.441Z",
+  "generated_at": "2026-03-10T05:24:29.876Z",
   "generated_by": "scripts/generate-repo-map.js",
   "repo": "qinfendebingshuo/guanghulab",
   "stats": {
     "zones": 13,
     "total_modules": 10,
-    "total_workflows": 25,
+    "total_workflows": 29,
     "total_scripts": 23,
     "total_dev_nodes": 8,
     "hli_interfaces": 17,
     "hli_implemented": 3,
     "hli_coverage_pct": "18%",
     "last_ci_run": "2026-03-05T10:30:46.894Z",
-    "memory_last_updated": "2026-03-09T08:56:49.158Z"
+    "memory_last_updated": "2026-03-10T05:00:00.000Z"
   },
   "zones": [
     {
@@ -245,6 +245,34 @@
           ]
         },
         {
+          "file": "ps-on-build.yml",
+          "name": "\"🌊 Persona Studio · 代码生成\"",
+          "triggers": [
+            "manual"
+          ]
+        },
+        {
+          "file": "ps-on-chat.yml",
+          "name": "\"🌊 Persona Studio · 对话处理\"",
+          "triggers": [
+            "manual"
+          ]
+        },
+        {
+          "file": "ps-on-complete.yml",
+          "name": "\"🌊 Persona Studio · 完成通知\"",
+          "triggers": [
+            "manual"
+          ]
+        },
+        {
+          "file": "ps-on-login.yml",
+          "name": "\"🌊 Persona Studio · 登录校验\"",
+          "triggers": [
+            "manual"
+          ]
+        },
+        {
           "file": "psp-daily-inspection.yml",
           "name": "铸渊 · PSP 分身巡检",
           "triggers": [
@@ -325,7 +353,7 @@
           ]
         }
       ],
-      "item_count": 25
+      "item_count": 29
     },
     {
       "zone_id": "SCRIPTS",
@@ -1110,6 +1138,18 @@
     ],
     "process-notion-orders": [
       "WORKFLOWS::process-notion-orders.yml"
+    ],
+    "ps-on-build": [
+      "WORKFLOWS::ps-on-build.yml"
+    ],
+    "ps-on-chat": [
+      "WORKFLOWS::ps-on-chat.yml"
+    ],
+    "ps-on-complete": [
+      "WORKFLOWS::ps-on-complete.yml"
+    ],
+    "ps-on-login": [
+      "WORKFLOWS::ps-on-login.yml"
     ],
     "psp-daily-inspection": [
       "WORKFLOWS::psp-daily-inspection.yml"
