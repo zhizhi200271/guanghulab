@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "description": "冰朔主控系统健康状态",
-  "updated_at": "2026-03-10T10:12:45.213Z",
+  "updated_at": "2026-03-10T10:28:45.711Z",
   "health": {
     "brain_consistency": {
       "status": "yellow",
@@ -17,7 +17,7 @@
     },
     "routing_health": {
       "status": "yellow",
-      "detail": "HLI 接口覆盖率 17.6%（3/17）"
+      "detail": "HLI 接口覆盖率 33.3%（7/21）"
     },
     "docs_entry_health": {
       "status": "green",

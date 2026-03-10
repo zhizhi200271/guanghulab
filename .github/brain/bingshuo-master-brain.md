@@ -1,7 +1,7 @@
 # 冰朔主控神经系统 · 核心主控大脑 v1.0
 
 > 本文件为冰朔主控神经系统的总控脑文件。
-> 最后编译时间：2026-03-10T10:12:45.214Z
+> 最后编译时间：2026-03-10T10:28:45.712Z
 
 ---
 
@@ -46,7 +46,7 @@
 - `persona-studio/backend/` — Persona Studio 后端服务
 
 ### API 路由
-- HLI 协议路由：3/17 已实现
+- HLI 协议路由：7/21 已实现
 - 接口编号格式：`HLI-{DOMAIN}-{NNN}`
 
 ### 基础设施
@@ -85,8 +85,8 @@
 
 > 本区块由 master-brain-compiler 自动编译。
 
-- **编译时间**：2026-03-10T10:12:45.214Z
-- **脑文件规则版本**：v1.0
+- **编译时间**：2026-03-10T10:28:45.712Z
+- **脑文件规则版本**：v3.0
 - **脑文件完整性**：✅ 完整
 
 ---
@@ -95,7 +95,7 @@
 
 | ID | 问题 | 范围 | 状态 | 根因摘要 |
 |----|------|------|------|----------|
-| BS-001 | HLI 接口覆盖率仅 17.6%（3/17） | backend | in_progress | HLI 接口覆盖率 17.6%（3/17） |
+| BS-001 | HLI 接口覆盖率仅 17.6%（3/17） | backend | in_progress | HLI 接口覆盖率 33.3%（7/21） |
 | BS-002 | collaborators.json 中 GitHub 用户名为空 | collaboration | open | 开发者注册时未填写 GitHub 用户名，导致无法精确关联提交与开发者 |
 | BS-003 | persona-studio 与主仓库脑文件同步待验证 | cross_repo | open | 主仓库 .github/brain/ 与 persona-studio/brain/ 存在独立脑文件，同步机制尚未经过完整端到端验证 |
 
@@ -108,7 +108,7 @@
 | 🟡 brain_consistency | yellow | 主仓库脑文件完整，但与 persona-studio 脑文件的同步状态待验证 |
 | 🟢 deployment_health | green | deploy-to-server.yml 与 deploy-pages.yml 均存在 |
 | 🟢 workflow_health | green | 31 个 workflow 已注册 |
-| 🟡 routing_health | yellow | HLI 接口覆盖率 17.6%（3/17） |
+| 🟡 routing_health | yellow | HLI 接口覆盖率 33.3%（7/21） |
 | 🟢 docs_entry_health | green | docs/index.html 存在 |
 | 🟡 persona_studio_health | yellow | 前后端结构存在，端到端对话链路待验证 |
 | 🟡 notion_bridge_health | yellow | Notion 桥接 workflow 已配置，实际同步效果待持续观测 |
@@ -147,7 +147,7 @@
 
 > 冰朔，以下是当前最值得关注的事项：
 
-1. **HLI 接口推进**：当前覆盖率 17.6%（3/17），核心域接口待实现。
+1. **HLI 接口推进**：当前覆盖率 33.3%（7/21），核心域接口待实现。
 
 2. **Persona Studio 链路验证**：前后端结构存在，但端到端对话链路需要验证。
 
