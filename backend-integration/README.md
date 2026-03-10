@@ -33,6 +33,11 @@ curl http://localhost:3721/api/models
 | GET | `/api/health` | 健康检查 |
 | POST | `/api/ps/apikey/detect-models` | 用户 API Key 模型检测（Persona Studio） |
 | POST | `/api/ps/apikey/chat` | 用户 API Key 对话（Persona Studio） |
+| POST | `/api/ps/chat/message` | 知秋对话（→ PS 后端 port 3002） |
+| GET | `/api/ps/chat/history` | 对话历史（→ PS 后端 port 3002） |
+| POST | `/api/ps/auth/login` | 开发编号登录（→ PS 后端 port 3002） |
+| POST | `/api/ps/build/start` | 开发任务触发（→ PS 后端 port 3002） |
+| POST | `/api/ps/notify/send` | 邮件通知（→ PS 后端 port 3002） |
 
 ### 环境变量
 
@@ -45,6 +50,7 @@ curl http://localhost:3721/api/models
 | `OPENAI_API_KEY` | OpenAI 密钥（需海外服务器） |
 | `GEMINI_API_KEY` | Google Gemini 密钥（需海外服务器） |
 | `PROXY_PORT` | 端口（默认 3721） |
+| `PS_PORT` | Persona Studio 后端端口（默认 3002，反向代理目标） |
 | `RATE_LIMIT_RPM` | 频率限制（默认 10 次/分钟） |
 
 ### Nginx 配置
