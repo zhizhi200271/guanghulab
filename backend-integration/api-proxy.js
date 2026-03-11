@@ -710,8 +710,6 @@ async function handleApiKeyChat(req, res) {
 }
 
 // ═══════════════════════════════════════════════════════
-<<<<<<< HEAD
-=======
 // Persona Studio 后端反向代理
 // 将 /api/ps/chat/*, /api/ps/auth/*, /api/ps/build/*, /api/ps/notify/*
 // 转发到 persona-studio 后端服务（默认端口 3002）
@@ -782,7 +780,6 @@ function proxyToPersonaStudio(req, res, fullPath) {
 }
 
 // ═══════════════════════════════════════════════════════
->>>>>>> origin/main
 // HTTP 服务器
 // ═══════════════════════════════════════════════════════
 const server = http.createServer(async (req, res) => {
@@ -810,20 +807,13 @@ const server = http.createServer(async (req, res) => {
       await handleDetectModels(req, res);
     } else if (path === '/api/ps/apikey/chat' && req.method === 'POST') {
       await handleApiKeyChat(req, res);
-<<<<<<< HEAD
-=======
     } else if (shouldProxyToPersonaStudio(path)) {
       await proxyToPersonaStudio(req, res, url.pathname + url.search);
->>>>>>> origin/main
     } else {
       jsonResponse(res, 404, {
         error: true,
         code: 'NOT_FOUND',
-<<<<<<< HEAD
-        message: '接口不存在。可用接口: POST /api/chat, GET /api/models, GET /api/health, POST /api/ps/apikey/detect-models, POST /api/ps/apikey/chat'
-=======
         message: '接口不存在。可用接口: POST /api/chat, GET /api/models, GET /api/health, POST /api/ps/apikey/detect-models, POST /api/ps/apikey/chat, POST /api/ps/chat/message, GET /api/ps/chat/history, POST /api/ps/auth/login'
->>>>>>> origin/main
       });
     }
   } catch (err) {
@@ -863,23 +853,17 @@ server.listen(PORT, () => {
     console.log('   export YUNWU_API_KEY=sk-xxx');
   }
 
-<<<<<<< HEAD
-=======
   console.log(`\n   Persona Studio 后端代理: http://127.0.0.1:${PS_BACKEND_PORT}`);
   console.log('   代理路径: /api/ps/chat/*, /api/ps/auth/*, /api/ps/build/*, /api/ps/notify/*');
 
->>>>>>> origin/main
   console.log('\n   可用接口:');
   console.log('   POST /api/chat                      — 聊天代理（SSE 流式）');
   console.log('   GET  /api/models                    — 列出可用模型');
   console.log('   GET  /api/health                    — 健康检查');
   console.log('   POST /api/ps/apikey/detect-models   — 用户 API Key 模型检测');
   console.log('   POST /api/ps/apikey/chat            — 用户 API Key 对话');
-<<<<<<< HEAD
-=======
   console.log('   POST /api/ps/chat/message            — 知秋对话（→ PS后端）');
   console.log('   GET  /api/ps/chat/history            — 对话历史（→ PS后端）');
   console.log('   POST /api/ps/auth/login              — 登录校验（→ PS后端）');
->>>>>>> origin/main
   console.log('');
 });
