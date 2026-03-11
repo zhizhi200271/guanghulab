@@ -521,3 +521,45 @@ body {
         border-color: black;
     }
 }
+/* ========== 骨架屏样式 ========== */
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+    border-radius: 4px;
+}
+
+@keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.skeleton-text {
+    height: 16px;
+    margin-bottom: 8px;
+    width: 80%;
+}
+
+.skeleton-text.short {
+    width: 40%;
+}
+
+.skeleton-title {
+    height: 24px;
+    margin-bottom: 12px;
+    width: 60%;
+}
+
+.skeleton-card {
+    padding: 16px;
+    border-radius: 8px;
+    background: var(--card-bg, #fff);
+    margin-bottom: 12px;
+}
+
+/* 暗色主题适配 */
+[data-theme="dark"] .skeleton {
+    background: linear-gradient(90deg, #2a2a2a 25%, #333 50%, #2a2a2a 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+}
