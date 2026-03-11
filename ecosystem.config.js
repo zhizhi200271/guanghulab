@@ -25,8 +25,6 @@ module.exports = {
       error_file: 'logs/error.log',
       out_file: 'logs/out.log',
     },
-<<<<<<< HEAD
-=======
     {
       name: 'api-proxy',
       script: 'backend-integration/api-proxy.js',
@@ -55,6 +53,5 @@ module.exports = {
       error_file: 'logs/persona-studio-error.log',
       out_file: 'logs/persona-studio-out.log',
     },
->>>>>>> origin/main
   ],
 };

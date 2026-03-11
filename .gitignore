@@ -3,6 +3,7 @@ node_modules/
 dist/
 build/
 .private/
+.env
 
 # persona-brain-db runtime artifacts
 persona-brain-db/brain.db
