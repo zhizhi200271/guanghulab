@@ -6,6 +6,9 @@
 const fs = require('fs');
 const path = require('path');
 const modelRouter = require('./model-router');
+const knowledgeExtractor = require('./knowledge-extractor');
+const patternAnalyzer = require('./pattern-analyzer');
+const memoryInjector = require('./memory-injector');
 
 const PERSONA_CONFIG_PATH = path.join(__dirname, '..', '..', 'brain', 'persona-config.json');
 
@@ -154,15 +157,41 @@ async function respond({ dev_id, message, history, memory, isGreeting }) {
     return getLocalReply(message, memory, config, isGuest);
   }
 
-  const systemPrompt = buildSystemPrompt(config, memory, devInfo);
+  // 查询知识库和模式库，为回复提供参考
+  let knowledgeContext = '';
+  try {
+    const relevantKnowledge = knowledgeExtractor.queryKnowledge(message, 3);
+    if (relevantKnowledge.length > 0) {
+      knowledgeContext += '\n\n## 系统知识库参考（不要直接暴露给用户，作为回复参考）\n';
+      relevantKnowledge.forEach(function (k) {
+        knowledgeContext += '- [' + k.type + '] ' + k.title + '\n';
+      });
+    }
+
+    const relevantPatterns = patternAnalyzer.queryPatterns(message);
+    if (relevantPatterns.length > 0) {
+      knowledgeContext += '\n## 已知高频模式\n';
+      relevantPatterns.slice(0, 3).forEach(function (p) {
+        knowledgeContext += '- ' + p.name + '（使用 ' + p.frequency + ' 次，成功率 ' + p.success_rate + '%，常用技术栈：' + (p.common_tech_stack || []).join(', ') + '）\n';
+      });
+    }
+  } catch (_e) { /* knowledge/pattern query failed silently */ }
+
+  const systemPrompt = buildSystemPrompt(config, memory, devInfo) + knowledgeContext;
+
+  // 使用记忆注入构建五层 system prompt
+  const injectedPrompt = memoryInjector.buildInjectedSystemPrompt(
+    systemPrompt, dev_id, memory, history
+  );
 
   // 构建消息列表
   const messages = [
-    { role: 'system', content: systemPrompt }
+    { role: 'system', content: injectedPrompt }
   ];
 
-  // 加入最近历史（最多 20 条）
-  const recentHistory = (history || []).slice(-20);
+  // 使用滑动窗口加入最近历史
+  const windowSize = memoryInjector.getSlidingWindowSize();
+  const recentHistory = (history || []).slice(-windowSize);
   recentHistory.forEach(function (msg) {
     messages.push({
       role: msg.role === 'user' ? 'user' : 'assistant',

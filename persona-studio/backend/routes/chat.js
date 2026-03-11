@@ -50,6 +50,9 @@ router.post('/message', async (req, res) => {
 
       // 更新最后话题
       memoryManager.updateLastTopic(dev_id, message);
+
+      // 自动更新用户画像
+      memoryManager.updateProfile(dev_id, message, result.reply);
     }
 
     res.json({
