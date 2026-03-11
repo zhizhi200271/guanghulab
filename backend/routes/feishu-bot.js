@@ -23,8 +23,8 @@ const FEISHU_APP_SECRET = process.env.FEISHU_APP_SECRET;
 const GITHUB_TOKEN      = process.env.GITHUB_TOKEN;
 const VERIFICATION_TOKEN = process.env.FEISHU_VERIFICATION_TOKEN;
 
-const GITHUB_REPO_OWNER = 'qinfendebingshuo';
-const GITHUB_REPO_NAME  = 'guanghulab';
+const GITHUB_REPO_OWNER = process.env.GITHUB_REPO_OWNER || 'qinfendebingshuo';
+const GITHUB_REPO_NAME  = process.env.GITHUB_REPO_NAME  || 'guanghulab';
 
 const VALID_PROTOCOL_VERSIONS = ['4.0', 'v4.0', '4.0.0'];
 

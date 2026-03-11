@@ -129,25 +129,24 @@ function saveSyslogToFile(syslog) {
     fs.mkdirSync(SYSLOG_DIR, { recursive: true });
   }
 
-  const dateStr = new Date().toISOString().split('T')[0];
   const broadcastId = syslog.broadcast_id || syslog.broadcastId || 'UNKNOWN';
   const devId = syslog.dev_id || syslog.developer_id || 'UNKNOWN';
+  const dateStr = syslog.date || syslog.timestamp || new Date().toISOString().split('T')[0];
   const filename = dateStr + '_' + broadcastId + '_' + devId + '.json';
   const filepath = path.join(SYSLOG_DIR, filename);
 
   fs.writeFileSync(filepath, JSON.stringify(syslog, null, 2), 'utf8');
   console.log('  → 已保存: syslog/' + filename);
-  return filepath;
+  return { filepath, dateStr, broadcastId, devId };
 }
 
 // ══════════════════════════════════════════════════════════
 // 步骤 ②：创建 Notion SYSLOG 收件箱条目
 // ══════════════════════════════════════════════════════════
 
-async function createSyslogEntry(syslog, token, dbId) {
+async function createSyslogEntry(syslog, token, dbId, dateStr) {
   const broadcastId = syslog.broadcast_id || syslog.broadcastId || 'UNKNOWN';
   const devId = syslog.dev_id || syslog.developer_id || 'UNKNOWN';
-  const dateStr = new Date().toISOString().split('T')[0];
 
   const properties = {
     '标题':           titleProp('SYSLOG · ' + broadcastId + ' · ' + devId),
@@ -186,10 +185,9 @@ async function createSyslogEntry(syslog, token, dbId) {
 // 步骤 ③：创建霜砚工单
 // ══════════════════════════════════════════════════════════
 
-async function createTicket(syslog, token, dbId) {
+async function createTicket(syslog, token, dbId, dateStr) {
   const broadcastId = syslog.broadcast_id || syslog.broadcastId || 'UNKNOWN';
   const devId = syslog.dev_id || syslog.developer_id || 'UNKNOWN';
-  const dateStr = new Date().toISOString().split('T')[0];
 
   const properties = {
     '标题':       titleProp('SYSLOG 回传｜' + broadcastId + ' · ' + devId),
@@ -270,12 +268,12 @@ async function main() {
 
   // 步骤①：存入仓库
   console.log('💾 步骤①: 存入仓库 syslog/ 目录...');
-  saveSyslogToFile(syslog);
+  const { dateStr } = saveSyslogToFile(syslog);
 
   // 步骤②：创建 Notion SYSLOG 收件箱条目
   if (notionToken && syslogDbId) {
     console.log('📝 步骤②: 创建 Notion SYSLOG 收件箱条目...');
-    await createSyslogEntry(syslog, notionToken, syslogDbId);
+    await createSyslogEntry(syslog, notionToken, syslogDbId, dateStr);
   } else {
     console.log('⚠️  步骤②: 缺少 NOTION_TOKEN 或 NOTION_SYSLOG_DB_ID，跳过 Notion 收件箱');
   }
@@ -283,7 +281,7 @@ async function main() {
   // 步骤③：创建霜砚工单
   if (notionToken && ticketDbId) {
     console.log('📋 步骤③: 创建霜砚工单...');
-    await createTicket(syslog, notionToken, ticketDbId);
+    await createTicket(syslog, notionToken, ticketDbId, dateStr);
   } else {
     console.log('⚠️  步骤③: 缺少 NOTION_TOKEN 或 NOTION_TICKET_DB_ID，跳过工单创建');
   }
