@@ -21,9 +21,18 @@ router.get('/:devId/:project', (req, res) => {
     });
   }
 
-  // 安全校验：防止路径遍历
+  // 安全校验：确保 devId 和 project 匹配预期格式（防止路径遍历）
   const safeDevId = path.basename(devId);
   const safeProject = path.basename(project);
+
+  if (!/^[a-zA-Z0-9_-]+$/.test(safeDevId) || !/^[a-zA-Z0-9_.-]+$/.test(safeProject)) {
+    return res.status(400).json({
+      error: true,
+      code: 'INVALID_PARAMS',
+      message: '参数格式无效'
+    });
+  }
+
   const previewDir = path.join(WORKSPACE_DIR, safeDevId, safeProject, 'preview');
   const projectDir = path.join(WORKSPACE_DIR, safeDevId, safeProject);
 
@@ -52,6 +61,10 @@ router.get('/:devId/:project/:file', (req, res) => {
   const safeDevId = path.basename(devId);
   const safeProject = path.basename(project);
   const safeFile = path.basename(file);
+
+  if (!/^[a-zA-Z0-9_-]+$/.test(safeDevId) || !/^[a-zA-Z0-9_.-]+$/.test(safeProject) || !/^[a-zA-Z0-9_.-]+$/.test(safeFile)) {
+    return res.status(400).send('Invalid parameters');
+  }
 
   const previewDir = path.join(WORKSPACE_DIR, safeDevId, safeProject, 'preview');
   const projectDir = path.join(WORKSPACE_DIR, safeDevId, safeProject);

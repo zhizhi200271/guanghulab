@@ -117,6 +117,7 @@ try {
   };
 } catch (_e) {
   // ws module not installed, WebSocket disabled
+  console.warn('[Persona Studio] ws module not available, WebSocket features disabled');
   app.locals.broadcastToClient = function () {};
 }
 

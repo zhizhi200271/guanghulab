@@ -40,6 +40,9 @@ router.post('/start', async (req, res) => {
     });
   }
 
+  // 联系方式输入清理（去除潜在 HTML/script 注入）
+  const safeContact = contact ? String(contact).replace(/[<>&"']/g, '').substring(0, 100) : null;
+
   // 先立即响应，后台异步处理
   res.json({
     error: false,
@@ -68,7 +71,7 @@ router.post('/start', async (req, res) => {
       memoryManager.addProject(dev_id, {
         name: result.projectName || 'untitled',
         email: email,
-        contact: contact || null,
+        contact: safeContact,
         status: 'completed',
         created_at: new Date().toISOString(),
         files: result.files || []

@@ -129,7 +129,9 @@ function loadProfile(devId) {
 }
 
 /**
- * 粗略估算 token 数量（中文约 1.5 token/字，英文约 0.25 token/word）
+ * 粗略估算 token 数量
+ * 中文约 1.5 token/字（CJK字符经 BPE 分词通常为 1-2 token）
+ * 英文/其他约 0.4 token/字符（英文单词平均 4 字符 ≈ 1 token）
  */
 function estimateTokens(text) {
   if (!text) return 0;

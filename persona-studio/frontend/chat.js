@@ -606,7 +606,9 @@ function closeEmailModal() {
 }
 
 /**
- * 后端二次校验用的邮箱正则
+ * 前端邮箱格式校验（与后端 build.js 使用相同正则，双重校验）
+ * @param {string} email - 邮箱地址
+ * @returns {boolean} 是否合法
  */
 function validateEmail(email) {
   var re = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
