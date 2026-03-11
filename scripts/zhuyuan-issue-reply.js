@@ -40,7 +40,7 @@ if (!devStatus.server_info) {
 if (Array.isArray(devStatus.team_status)) {
   devStatus.team_status.forEach(dev => {
     if (dev.module !== undefined && dev.modules === undefined) {
-      dev.modules = [dev.module];
+      dev.modules = Array.isArray(dev.module) ? dev.module : [dev.module];
     }
     if (dev.current !== undefined && dev.next_step === undefined) {
       dev.next_step = dev.current;
