@@ -45,3 +45,69 @@ jobs:
           FEISHU_APP_SECRET: ${{ secrets.FEISHU_APP_SECRET }}
           FEISHU_DOC_B_ID:   ${{ secrets.FEISHU_DOC_B_ID }}
         run: node scripts/push-broadcast.js
+
+      - name: 📢 通知飞书群有新广播
+        if: success()
+        env:
+          FEISHU_APP_ID:     ${{ secrets.FEISHU_APP_ID }}
+          FEISHU_APP_SECRET: ${{ secrets.FEISHU_APP_SECRET }}
+          ALERT_CHAT_ID:     ${{ secrets.FEISHU_ALERT_CHAT_ID }}
+        run: |
+          if [ -z "$ALERT_CHAT_ID" ]; then
+            echo "⚠️ 未配置 FEISHU_ALERT_CHAT_ID，跳过群通知"
+            exit 0
+          fi
+          node -e "
+            const https = require('https');
+            function post(url, body) {
+              return new Promise((resolve, reject) => {
+                const payload = JSON.stringify(body);
+                const u = new URL(url);
+                const req = https.request({ hostname: u.hostname, port: 443, path: u.pathname, method: 'POST',
+                  headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) }
+                }, res => { let d=''; res.on('data', c => d+=c); res.on('end', () => resolve(d)); });
+                req.on('error', reject); req.write(payload); req.end();
+              });
+            }
+            (async () => {
+              const tokenRes = JSON.parse(await post('https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal',
+                { app_id: process.env.FEISHU_APP_ID, app_secret: process.env.FEISHU_APP_SECRET }));
+              const token = tokenRes.tenant_access_token;
+              const payload = JSON.stringify({ text: '📡 新广播已推送到飞书文档B\n\n时间: ' + new Date().toISOString() + '\n请查看飞书广播收件箱。' });
+              await post('https://open.feishu.cn/open-apis/im/v1/messages?receive_id_type=chat_id',
+                JSON.stringify({ receive_id: process.env.ALERT_CHAT_ID, msg_type: 'text', content: payload }));
+            })().catch(e => console.error(e.message));
+          "
+
+      - name: 🔴 失败告警 → 飞书通知
+        if: failure()
+        env:
+          FEISHU_APP_ID:     ${{ secrets.FEISHU_APP_ID }}
+          FEISHU_APP_SECRET: ${{ secrets.FEISHU_APP_SECRET }}
+          ALERT_CHAT_ID:     ${{ secrets.FEISHU_ALERT_CHAT_ID }}
+        run: |
+          if [ -z "$ALERT_CHAT_ID" ]; then
+            echo "⚠️ 未配置 FEISHU_ALERT_CHAT_ID，跳过告警"
+            exit 0
+          fi
+          node -e "
+            const https = require('https');
+            function post(url, body) {
+              return new Promise((resolve, reject) => {
+                const payload = JSON.stringify(body);
+                const u = new URL(url);
+                const req = https.request({ hostname: u.hostname, port: 443, path: u.pathname, method: 'POST',
+                  headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) }
+                }, res => { let d=''; res.on('data', c => d+=c); res.on('end', () => resolve(d)); });
+                req.on('error', reject); req.write(payload); req.end();
+              });
+            }
+            (async () => {
+              const tokenRes = JSON.parse(await post('https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal',
+                { app_id: process.env.FEISHU_APP_ID, app_secret: process.env.FEISHU_APP_SECRET }));
+              const token = tokenRes.tenant_access_token;
+              const payload = JSON.stringify({ text: '🔴 GitHub Action 失败告警\n\n工作流: push-broadcast\n时间: ' + new Date().toISOString() + '\n请检查 GitHub Actions 日志。' });
+              await post('https://open.feishu.cn/open-apis/im/v1/messages?receive_id_type=chat_id',
+                JSON.stringify({ receive_id: process.env.ALERT_CHAT_ID, msg_type: 'text', content: payload }));
+            })().catch(e => console.error(e.message));
+          "

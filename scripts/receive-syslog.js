@@ -135,9 +135,15 @@ function saveSyslogToFile(syslog) {
   const filename = dateStr + '_' + broadcastId + '_' + devId + '.json';
   const filepath = path.join(SYSLOG_DIR, filename);
 
+  // 幂等性检查：同一 broadcast_id + dev_id + date 不重复创建
+  if (fs.existsSync(filepath)) {
+    console.log('  ⚠️ 幂等跳过: syslog/' + filename + ' 已存在');
+    return { filepath, dateStr, broadcastId, devId, duplicate: true };
+  }
+
   fs.writeFileSync(filepath, JSON.stringify(syslog, null, 2), 'utf8');
   console.log('  → 已保存: syslog/' + filename);
-  return { filepath, dateStr, broadcastId, devId };
+  return { filepath, dateStr, broadcastId, devId, duplicate: false };
 }
 
 // ══════════════════════════════════════════════════════════
@@ -268,7 +274,14 @@ async function main() {
 
   // 步骤①：存入仓库
   console.log('💾 步骤①: 存入仓库 syslog/ 目录...');
-  const { dateStr } = saveSyslogToFile(syslog);
+  const { dateStr, duplicate } = saveSyslogToFile(syslog);
+
+  // 幂等性：重复的 SYSLOG 不再创建 Notion 工单
+  if (duplicate) {
+    console.log('⚠️  相同 SYSLOG 已存在，跳过 Notion 操作（幂等保护）');
+    console.log('✅ SYSLOG 接收处理完成（幂等跳过）');
+    return;
+  }
 
   // 步骤②：创建 Notion SYSLOG 收件箱条目
   if (notionToken && syslogDbId) {

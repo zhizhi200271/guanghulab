@@ -1,16 +1,22 @@
 // backend/routes/feishu-bot.js
 // 铸渊 · 飞书机器人事件回调处理
 //
-// SYSLOG 回传桥：开发者发 SYSLOG → 飞书机器人 → GitHub repository_dispatch
+// Phase 1-3: SYSLOG 回传桥（开发者发 SYSLOG → GitHub → Notion）
+// Phase 4A:  AI 对话引擎（霜砚/人格体上线飞书）
+// Phase 4C:  协作数据采集（对话记录 → collaboration-logs/）
 //
 // 飞书事件订阅：im.message.receive_v1
 // 部署：集成到现有 M-BRIDGE 后端服务
 //
 // 环境变量：
-//   FEISHU_APP_ID          飞书应用 App ID
-//   FEISHU_APP_SECRET      飞书应用 App Secret
-//   GITHUB_TOKEN           GitHub Token（需要 repo scope）
-//   FEISHU_VERIFICATION_TOKEN  飞书事件验证 Token（可选，用于安全校验）
+//   FEISHU_APP_ID              飞书应用 App ID
+//   FEISHU_APP_SECRET          飞书应用 App Secret
+//   GITHUB_TOKEN               GitHub Token（需要 repo scope）
+//   FEISHU_VERIFICATION_TOKEN  飞书事件验证 Token（可选）
+//   MODEL_API_KEY              AI 模型 API Key（Phase 4A）
+//   MODEL_API_BASE             AI 模型 API Base URL（Phase 4A）
+//   MODEL_NAME                 AI 模型名称（Phase 4A）
+//   FEISHU_ALERT_CHAT_ID       失败告警推送的飞书群 chat_id（Phase 4D）
 
 'use strict';
 
@@ -18,15 +24,24 @@ const express = require('express');
 const https   = require('https');
 const router  = express.Router();
 
-const FEISHU_APP_ID     = process.env.FEISHU_APP_ID;
-const FEISHU_APP_SECRET = process.env.FEISHU_APP_SECRET;
-const GITHUB_TOKEN      = process.env.GITHUB_TOKEN;
+const aiChat             = require('../feishu-bot/ai-chat');
+const contextManager     = require('../feishu-bot/context-manager');
+const collaborationLogger = require('../feishu-bot/collaboration-logger');
+
+const FEISHU_APP_ID      = process.env.FEISHU_APP_ID;
+const FEISHU_APP_SECRET  = process.env.FEISHU_APP_SECRET;
+const GITHUB_TOKEN       = process.env.GITHUB_TOKEN;
 const VERIFICATION_TOKEN = process.env.FEISHU_VERIFICATION_TOKEN;
+const ALERT_CHAT_ID      = process.env.FEISHU_ALERT_CHAT_ID;
 
 const GITHUB_REPO_OWNER = process.env.GITHUB_REPO_OWNER || 'qinfendebingshuo';
 const GITHUB_REPO_NAME  = process.env.GITHUB_REPO_NAME  || 'guanghulab';
 
 const VALID_PROTOCOL_VERSIONS = ['4.0', 'v4.0', '4.0.0'];
+
+// 已处理的事件 ID 去重（飞书可能重发事件）
+const processedEvents = new Set();
+const MAX_PROCESSED_EVENTS = 2000;
 
 // ══════════════════════════════════════════════════════════
 // 工具函数
@@ -52,6 +67,9 @@ function httpsRequest(options, body) {
       });
     });
     req.on('error', reject);
+    req.setTimeout(60000, () => {
+      req.destroy(new Error('Request timeout'));
+    });
     if (payload) req.write(payload);
     req.end();
   });
@@ -84,7 +102,24 @@ async function replyFeishuMessage(token, messageId, content) {
   });
 }
 
-async function triggerGitHubDispatch(syslog) {
+async function sendFeishuGroupMessage(token, chatId, text) {
+  return httpsRequest({
+    hostname: 'open.feishu.cn',
+    port: 443,
+    path: '/open-apis/im/v1/messages?receive_id_type=chat_id',
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + token,
+      'Content-Type': 'application/json',
+    },
+  }, {
+    receive_id: chatId,
+    msg_type: 'text',
+    content: JSON.stringify({ text }),
+  });
+}
+
+async function triggerGitHubDispatch(eventType, payload) {
   return httpsRequest({
     hostname: 'api.github.com',
     port: 443,
@@ -97,13 +132,29 @@ async function triggerGitHubDispatch(syslog) {
       'Content-Type': 'application/json',
     },
   }, {
-    event_type: 'receive-syslog',
-    client_payload: {
-      syslog: syslog,
-      dev_id: syslog.dev_id || syslog.developer_id || 'UNKNOWN',
-      broadcast_id: syslog.broadcast_id || syslog.broadcastId || 'UNKNOWN',
-    },
+    event_type: eventType,
+    client_payload: payload,
   });
+}
+
+// ══════════════════════════════════════════════════════════
+// 事件去重
+// ══════════════════════════════════════════════════════════
+
+function isEventProcessed(eventId) {
+  if (!eventId) return false;
+  if (processedEvents.has(eventId)) return true;
+
+  // 清理过多的记录
+  if (processedEvents.size >= MAX_PROCESSED_EVENTS) {
+    const iterator = processedEvents.values();
+    for (let i = 0; i < MAX_PROCESSED_EVENTS / 2; i++) {
+      processedEvents.delete(iterator.next().value);
+    }
+  }
+
+  processedEvents.add(eventId);
+  return false;
 }
 
 // ══════════════════════════════════════════════════════════
@@ -111,8 +162,6 @@ async function triggerGitHubDispatch(syslog) {
 // ══════════════════════════════════════════════════════════
 
 function extractSyslogFromMessage(text) {
-  // 尝试从消息中提取 JSON
-  // 支持：纯 JSON、代码块包裹的 JSON、混合文本中的 JSON
   if (!text || typeof text !== 'string') return null;
 
   // 1. 尝试直接解析整个文本
@@ -161,14 +210,14 @@ function validateSyslog(syslog) {
   if (!syslog.dev_id && !syslog.developer_id) {
     return '缺少 dev_id 或 developer_id 字段';
   }
-  return null; // 验证通过
+  return null;
 }
 
 // ══════════════════════════════════════════════════════════
 // 路由处理
 // ══════════════════════════════════════════════════════════
 
-// 飞书事件回调 URL 验证（首次配置时飞书会发送 challenge）
+// 飞书事件回调 URL 验证 + 消息处理
 router.post('/event', async (req, res) => {
   const body = req.body;
 
@@ -177,7 +226,7 @@ router.post('/event', async (req, res) => {
     return res.json({ challenge: body.challenge });
   }
 
-  // 2. 验证 token（如果配置了 VERIFICATION_TOKEN）
+  // 2. 验证 token
   if (VERIFICATION_TOKEN && body.token && body.token !== VERIFICATION_TOKEN) {
     return res.status(403).json({ error: true, message: '验证 token 不匹配' });
   }
@@ -186,26 +235,30 @@ router.post('/event', async (req, res) => {
   const header = body.header || {};
   const event = body.event || {};
 
+  // 事件去重（飞书可能在超时后重发）
+  if (isEventProcessed(header.event_id)) {
+    return res.json({ code: 0, message: 'duplicate event' });
+  }
+
   // 处理 im.message.receive_v1 事件
   if (header.event_type === 'im.message.receive_v1') {
     // 立即响应飞书（避免超时重发）
     res.json({ code: 0 });
 
     // 异步处理消息
-    processMessage(event).catch(err => {
-      console.error('❌ 消息处理失败:', err.message);
-    });
+    processMessage(event).catch(() => {});
     return;
   }
 
-  // 其他事件类型
   res.json({ code: 0, message: 'event received' });
 });
 
 async function processMessage(event) {
   const message = event.message || {};
+  const sender  = event.sender || {};
   const messageId = message.message_id;
   const msgType = message.message_type;
+  const userId  = sender.sender_id?.open_id || sender.sender_id?.user_id || 'unknown';
 
   // 只处理文本消息
   if (msgType !== 'text') return;
@@ -218,37 +271,74 @@ async function processMessage(event) {
     return;
   }
 
-  // 提取 SYSLOG
-  const syslog = extractSyslogFromMessage(textContent);
-  if (!syslog) return; // 不是 SYSLOG 消息，忽略
-
-  // 验证 SYSLOG
-  const validationError = validateSyslog(syslog);
+  if (!textContent.trim()) return;
 
   // 获取飞书 token 用于回复
   let feishuToken;
   try {
     feishuToken = await getFeishuToken();
   } catch (e) {
-    console.error('❌ 获取飞书 token 失败:', e.message);
     return;
   }
 
+  // ── 路由判断 ────────────────────────────────────────────
+  // 1. 检查是否为 SYSLOG 回传
+  const syslog = extractSyslogFromMessage(textContent);
+  if (syslog) {
+    await handleSyslogMessage(syslog, feishuToken, messageId);
+    return;
+  }
+
+  // 2. 检查是否为特殊指令
+  const trimmed = textContent.trim();
+  if (trimmed === '/clear' || trimmed === '/reset') {
+    contextManager.clearSession(userId);
+    await replyFeishuMessage(feishuToken, messageId, '🔄 对话上下文已清除。');
+    return;
+  }
+  if (trimmed === '/status') {
+    const info = contextManager.getSessionInfo(userId);
+    const stats = collaborationLogger.getStats();
+    await replyFeishuMessage(feishuToken, messageId,
+      '📊 会话状态\n' +
+      '对话轮数: ' + info.totalRounds + '\n' +
+      '当前通道: ' + (info.channel || '未开始') + '\n' +
+      '空闲时间: ' + (info.idleMinutes || 0) + ' 分钟\n' +
+      '协作日志: ' + stats.totalLogFiles + ' 个文件');
+    return;
+  }
+
+  // 3. AI 对话（Phase 4A）
+  await handleAIChatMessage(textContent, userId, feishuToken, messageId);
+}
+
+// ══════════════════════════════════════════════════════════
+// SYSLOG 处理（Phase 1-3）
+// ══════════════════════════════════════════════════════════
+
+async function handleSyslogMessage(syslog, feishuToken, messageId) {
+  const validationError = validateSyslog(syslog);
   if (validationError) {
     await replyFeishuMessage(feishuToken, messageId,
       '❌ SYSLOG 验证失败: ' + validationError + '\n\n请检查 JSON 格式后重新发送。');
     return;
   }
 
-  // 触发 GitHub repository_dispatch
   if (!GITHUB_TOKEN) {
     await replyFeishuMessage(feishuToken, messageId,
       '⚠️ 系统配置缺失 (GITHUB_TOKEN)，请联系管理员。');
     return;
   }
 
+  // Phase 4C: 记录 SYSLOG 协作数据
+  collaborationLogger.logSyslogCollaboration(syslog);
+
   try {
-    const result = await triggerGitHubDispatch(syslog);
+    const result = await triggerGitHubDispatch('receive-syslog', {
+      syslog: syslog,
+      dev_id: syslog.dev_id || syslog.developer_id || 'UNKNOWN',
+      broadcast_id: syslog.broadcast_id || syslog.broadcastId || 'UNKNOWN',
+    });
     if (result.statusCode === 204 || result.statusCode === 200) {
       const devId = syslog.dev_id || syslog.developer_id;
       const broadcastId = syslog.broadcast_id || syslog.broadcastId || '无';
@@ -267,14 +357,89 @@ async function processMessage(event) {
   }
 }
 
-// 健康检查
+// ══════════════════════════════════════════════════════════
+// AI 对话处理（Phase 4A）
+// ══════════════════════════════════════════════════════════
+
+async function handleAIChatMessage(textContent, userId, feishuToken, messageId) {
+  // 获取对话历史
+  const history = contextManager.getHistory(userId);
+
+  // 调用 AI 模型
+  const { reply, channel } = await aiChat.chat(textContent, history, {
+    loginEntryContent: null, // TODO: 从飞书文档A缓存中获取
+  });
+
+  // 更新上下文
+  contextManager.addRound(userId, textContent, reply, channel);
+
+  // Phase 4C: 记录协作数据
+  collaborationLogger.logInteraction({
+    userId,
+    userMessage: textContent,
+    assistantReply: reply,
+    channel,
+    personaId: channel === 'persona' ? 'ICE-GL-ZQ001' : 'ICE-GL-SY001',
+  });
+
+  // 回复用户
+  await replyFeishuMessage(feishuToken, messageId, reply);
+}
+
+// ══════════════════════════════════════════════════════════
+// 失败告警（Phase 4D）
+// ══════════════════════════════════════════════════════════
+
+/**
+ * 发送失败告警到飞书群（供外部 workflow 调用）
+ */
+router.post('/alert', async (req, res) => {
+  const { title, content, level } = req.body;
+  if (!ALERT_CHAT_ID) {
+    return res.status(400).json({ error: true, message: '未配置 FEISHU_ALERT_CHAT_ID' });
+  }
+
+  try {
+    const feishuToken = await getFeishuToken();
+    const emoji = level === 'error' ? '🔴' : level === 'warning' ? '🟡' : 'ℹ️';
+    const text = emoji + ' ' + (title || '系统告警') + '\n\n' + (content || '无详细信息');
+    await sendFeishuGroupMessage(feishuToken, ALERT_CHAT_ID, text);
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: true, message: e.message });
+  }
+});
+
+// ══════════════════════════════════════════════════════════
+// 健康检查 + 统计
+// ══════════════════════════════════════════════════════════
+
 router.get('/health', (req, res) => {
   res.json({
     status: 'ok',
     service: 'feishu-bot-syslog-bridge',
+    version: '2.0.0',
+    features: {
+      syslog_bridge: true,
+      ai_chat: !!process.env.MODEL_API_KEY,
+      collaboration_logging: true,
+      failure_alerting: !!ALERT_CHAT_ID,
+    },
     github_token_configured: !!GITHUB_TOKEN,
     feishu_app_configured: !!(FEISHU_APP_ID && FEISHU_APP_SECRET),
     verification_token_configured: !!VERIFICATION_TOKEN,
+    model_api_configured: !!process.env.MODEL_API_KEY,
+    context_stats: contextManager.getStats(),
+    collaboration_stats: collaborationLogger.getStats(),
+  });
+});
+
+// 导出协作数据（对齐 persona-brain-db 格式）
+router.get('/collaboration-export', (req, res) => {
+  const data = collaborationLogger.exportForBrainDB();
+  res.json({
+    hli_id: 'HLI-FEISHU-COLLAB-EXPORT',
+    ...data,
   });
 });
 
