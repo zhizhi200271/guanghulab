@@ -9,8 +9,45 @@ const fs = require('fs');
 
 const WORKSPACE_DIR = path.join(__dirname, '..', '..', 'workspace');
 
+// 简易速率限制：每个 IP 每分钟最多 60 次请求
+const rateLimitMap = new Map();
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const RATE_LIMIT_MAX = 60;
+
+function rateLimit(req, res, next) {
+  const ip = req.ip || req.connection.remoteAddress || 'unknown';
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+
+  if (!entry || now - entry.start > RATE_LIMIT_WINDOW_MS) {
+    rateLimitMap.set(ip, { start: now, count: 1 });
+    return next();
+  }
+
+  entry.count++;
+  if (entry.count > RATE_LIMIT_MAX) {
+    return res.status(429).json({
+      error: true,
+      code: 'RATE_LIMITED',
+      message: '请求过于频繁，请稍后再试'
+    });
+  }
+
+  return next();
+}
+
+// 定期清理过期条目
+setInterval(function () {
+  const now = Date.now();
+  for (const [ip, entry] of rateLimitMap) {
+    if (now - entry.start > RATE_LIMIT_WINDOW_MS) {
+      rateLimitMap.delete(ip);
+    }
+  }
+}, RATE_LIMIT_WINDOW_MS);
+
 // GET /api/ps/preview/:devId/:project
-router.get('/:devId/:project', (req, res) => {
+router.get('/:devId/:project', rateLimit, (req, res) => {
   const { devId, project } = req.params;
 
   if (!devId || !project) {
@@ -55,7 +92,7 @@ router.get('/:devId/:project', (req, res) => {
 });
 
 // GET /api/ps/preview/:devId/:project/:file (sub-resources like CSS/JS)
-router.get('/:devId/:project/:file', (req, res) => {
+router.get('/:devId/:project/:file', rateLimit, (req, res) => {
   const { devId, project, file } = req.params;
 
   const safeDevId = path.basename(devId);
