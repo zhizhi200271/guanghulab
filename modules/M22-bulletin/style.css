@@ -63,11 +63,7 @@ body {
 }
 
 /* ========== 频道栏 ========== */
-<<<<<<< HEAD
-.channel-bar {
-=======
 .channel-tab-bar {
->>>>>>> origin/main
     display: flex;
     gap: 8px;
     padding: 16px 0;
@@ -75,11 +71,7 @@ body {
     overflow-x: auto;
 }
 
-<<<<<<< HEAD
-.channel {
-=======
 .channel-tab {
->>>>>>> origin/main
     padding: 8px 18px;
     border-radius: 20px;
     border: 1px solid rgba(255,255,255,0.1);
@@ -91,20 +83,12 @@ body {
     white-space: nowrap;
 }
 
-<<<<<<< HEAD
-.channel:hover {
-=======
 .channel-tab:hover {
->>>>>>> origin/main
     border-color: rgba(255, 183, 77, 0.3);
     color: #b0bec5;
 }
 
-<<<<<<< HEAD
-.channel.active {
-=======
 .channel-tab.active {
->>>>>>> origin/main
     background: rgba(255,183,77,0.15);
     border-color: #ffb74d;
     color: #ffb74d;
@@ -240,40 +224,24 @@ body {
   header h1 {
     font-size: 18px;
   }
-<<<<<<< HEAD
-  .channel-bar {
-    gap: 6px;
-    padding: 12px 0;
-  }
-  .channel {
-=======
   .channel-tab-bar {
     gap: 6px;
     padding: 12px 0;
   }
   .channel-tab {
->>>>>>> origin/main
     padding: 6px 14px;
     font-size: 12px;
   }
   .bulletin-card {
     padding: 12px 10px;
   }
-<<<<<<< HEAD
-  .channel-bar {
-=======
   .channel-tab-bar {
->>>>>>> origin/main
     flex-wrap: nowrap;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
   }
-<<<<<<< HEAD
-  .channel-bar::-webkit-scrollbar {
-=======
   .channel-tab-bar::-webkit-scrollbar {
->>>>>>> origin/main
     display: none;
   }
   .bulletin-card {
@@ -362,19 +330,11 @@ body {
         height: 32px;
     }
     
-<<<<<<< HEAD
-    .channel-tabs {
-        gap: 8px;
-    }
-    
-    .channel-tab {
-=======
     .channel-tab-tabs {
         gap: 8px;
     }
     
     .channel-tab-tab {
->>>>>>> origin/main
         padding: 6px 12px;
         font-size: 0.9rem;
     }
@@ -409,11 +369,7 @@ body {
         margin-bottom: 4px;
     }
     
-<<<<<<< HEAD
-    .channel-tabs {
-=======
     .channel-tab-tabs {
->>>>>>> origin/main
         overflow-x: auto;
         white-space: nowrap;
         flex-wrap: nowrap;
@@ -423,19 +379,11 @@ body {
         scrollbar-width: none; /* Firefox隐藏滚动条 */
     }
     
-<<<<<<< HEAD
-    .channel-tabs::-webkit-scrollbar {
-        display: none; /* Chrome/Safari隐藏滚动条 */
-    }
-    
-    .channel-tab {
-=======
     .channel-tab-tabs::-webkit-scrollbar {
         display: none; /* Chrome/Safari隐藏滚动条 */
     }
     
     .channel-tab-tab {
->>>>>>> origin/main
         display: inline-block;
         float: none;
         white-space: nowrap;
@@ -446,8 +394,6 @@ body {
         text-align: center;
         gap: 8px;
     }
-<<<<<<< HEAD
-=======
 }/* ===== 知秋：loading/error/empty 状态样式 ===== */
 
 /* loading */
@@ -574,5 +520,4 @@ body {
         background: black;
         border-color: black;
     }
->>>>>>> origin/main
 }
