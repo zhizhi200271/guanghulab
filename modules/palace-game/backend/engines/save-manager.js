@@ -12,8 +12,12 @@ const crypto = require('crypto');
 
 const SAVES_DIR = path.join(__dirname, '..', '..', 'data', 'saves');
 
-// AES-256-CBC 加密密钥（生产环境应从环境变量读取）
-const ENCRYPTION_KEY = process.env.PALACE_SAVE_KEY || 'palace-game-default-key-32ch!';
+// AES-256-CBC 加密密钥
+const ENCRYPTION_KEY = process.env.PALACE_SAVE_KEY || (
+  process.env.NODE_ENV === 'production'
+    ? (function () { throw new Error('PALACE_SAVE_KEY environment variable is required in production'); })()
+    : 'palace-game-dev-only-key-32ch!!'
+);
 const IV_LENGTH = 16;
 
 /**
@@ -161,14 +165,18 @@ function listSaves() {
  * 删除存档
  */
 function deleteSave(saveId) {
-  const saveDir = path.join(SAVES_DIR, saveId);
+  var saveDir = path.join(SAVES_DIR, saveId);
   if (!fs.existsSync(saveDir)) return false;
-  const files = fs.readdirSync(saveDir);
-  for (const f of files) {
-    fs.unlinkSync(path.join(saveDir, f));
+  try {
+    var files = fs.readdirSync(saveDir);
+    for (var i = 0; i < files.length; i++) {
+      fs.unlinkSync(path.join(saveDir, files[i]));
+    }
+    fs.rmdirSync(saveDir);
+    return true;
+  } catch (err) {
+    return false;
   }
-  fs.rmdirSync(saveDir);
-  return true;
 }
 
 /**
