@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="chat-layout">
+  <div class="chat-layout" id="chatLayout">
     <!-- ── 左侧边栏 ── -->
     <aside class="chat-sidebar" id="chatSidebar">
       <div class="sidebar-header">
@@ -59,8 +59,8 @@
       </div>
     </aside>
 
-    <!-- ── 主聊天区域 ── -->
-    <div class="chat-main">
+    <!-- ── 主聊天区域（分屏左侧） ── -->
+    <div class="chat-main" id="chatMain">
       <header class="chat-header">
         <div class="header-left">
           <button class="sidebar-toggle" onclick="toggleSidebar()" title="展开侧栏" id="sidebarToggleBtn">☰</button>
@@ -106,20 +106,54 @@
         </div>
       </div>
     </div>
+
+    <!-- ── 可拖拽分割线 ── -->
+    <div class="resizer" id="resizer" style="display:none;"></div>
+
+    <!-- ── 右侧预览面板 ── -->
+    <div class="preview-panel" id="previewPanel" style="display:none;">
+      <div class="preview-header">
+        <div class="preview-title">
+          <span class="preview-icon">🌊</span>
+          <span>实时预览 · <span id="previewProjectName">项目</span></span>
+        </div>
+        <div class="preview-status" id="previewStatus">
+          <span class="status-dot status-waiting"></span>
+          <span class="status-text">等待中</span>
+        </div>
+        <div class="preview-actions">
+          <button class="preview-btn" onclick="refreshPreview()" title="刷新预览">↻ 刷新</button>
+          <button class="preview-btn" onclick="openPreviewNewWindow()" title="新窗口打开">↗ 新窗口</button>
+        </div>
+      </div>
+      <iframe id="previewFrame" class="preview-iframe" sandbox="allow-scripts allow-same-origin"></iframe>
+    </div>
   </div>
 
-  <!-- Email Modal -->
+  <!-- Email Modal (增强版：邮箱+联系方式+二次校验) -->
   <div id="emailModal" class="modal" style="display:none;">
     <div class="modal-content">
-      <h3>📧 请填写模块开发完成后发送的邮箱</h3>
-      <input
-        type="email"
-        id="emailInput"
-        placeholder="your@email.com"
-        required
-      />
+      <h3>📧 开发完成后，代码将发送到你的邮箱</h3>
+      <div class="modal-field">
+        <label class="modal-label" for="emailInput">邮箱地址 <span class="required">*</span></label>
+        <input
+          type="email"
+          id="emailInput"
+          placeholder="your@email.com"
+          required
+        />
+        <div class="modal-error" id="emailError" style="display:none;"></div>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label" for="contactInput">联系方式 <span class="optional">（选填）</span></label>
+        <input
+          type="text"
+          id="contactInput"
+          placeholder="微信号 / 手机号（选填）"
+        />
+      </div>
       <div class="modal-actions">
-        <button class="btn-primary" onclick="confirmBuild()">确定</button>
+        <button class="btn-primary" onclick="confirmBuild()">确认</button>
         <button class="btn-secondary" onclick="closeEmailModal()">取消</button>
       </div>
     </div>
