@@ -170,46 +170,83 @@ async function sendMessage() {
   input.focus();
 }
 
-/* ---- API Key 对话（通过后端代理，避免 CORS 问题） ---- */
+/* ---- API Key 对话（浏览器直连用户 API，后端代理作为降级） ---- */
 async function streamApiKeyReply(text) {
   var apiMessages = [ZHIQIU_SYSTEM_PROMPT].concat(conversationHistory.slice(-20).map(function (msg) {
     return { role: msg.role === 'assistant' ? 'assistant' : 'user', content: msg.content };
   }));
 
   var streamEl = appendStreamMessage();
+  var requestBody = JSON.stringify({
+    model: SELECTED_MODEL,
+    messages: apiMessages,
+    max_tokens: 2000,
+    temperature: 0.8
+  });
 
+  var reply = null;
+
+  // 策略 1：浏览器直连用户 API（与模型检测相同路径，最可靠）
   try {
-    var res = await fetch(API_BASE + '/api/ps/apikey/chat', {
+    var directUrl = USER_API_BASE.replace(/\/+$/, '') + '/chat/completions';
+    var directRes = await fetch(directUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        api_base: USER_API_BASE,
-        api_key: USER_API_KEY,
-        model: SELECTED_MODEL,
-        messages: apiMessages
-      })
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + USER_API_KEY
+      },
+      body: requestBody
     });
 
-    if (!res.ok) {
-      var errText = '请求失败 (HTTP ' + res.status + ')';
-      try {
-        var errData = await res.json();
-        errText = errData.message || errText;
-      } catch (_e) { /* ignore parse error */ }
-      streamEl.textContent = '⚠️ ' + errText;
+    if (directRes.ok) {
+      var directData = await directRes.json();
+      if (directData.choices && directData.choices[0] && directData.choices[0].message) {
+        reply = directData.choices[0].message.content;
+      }
+    }
+  } catch (_directErr) {
+    // 浏览器直连失败（CORS 或网络），降级到后端代理
+  }
+
+  // 策略 2：后端代理（处理 CORS 限制的情况）
+  if (!reply) {
+    try {
+      var res = await fetch(API_BASE + '/api/ps/apikey/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          api_base: USER_API_BASE,
+          api_key: USER_API_KEY,
+          model: SELECTED_MODEL,
+          messages: apiMessages
+        })
+      });
+
+      if (res.ok) {
+        var data = await res.json();
+        if (data.reply) {
+          reply = data.reply;
+        }
+      } else {
+        var errText = '请求失败 (HTTP ' + res.status + ')';
+        try {
+          var errData = await res.json();
+          errText = errData.message || errText;
+        } catch (_e) { /* ignore */ }
+        streamEl.textContent = '⚠️ ' + errText;
+        return;
+      }
+    } catch (proxyErr) {
+      streamEl.textContent = '⚠️ ' + (proxyErr.message || '请求失败，请检查网络连接');
       return;
     }
+  }
 
-    var data = await res.json();
-
-    if (data.reply) {
-      streamEl.textContent = data.reply;
-      conversationHistory.push({ role: 'assistant', content: data.reply });
-    } else {
-      streamEl.textContent = '（未收到有效回复）';
-    }
-  } catch (err) {
-    streamEl.textContent = '⚠️ ' + (err.message || '请求失败，请检查网络连接');
+  if (reply) {
+    streamEl.textContent = reply;
+    conversationHistory.push({ role: 'assistant', content: reply });
+  } else {
+    streamEl.textContent = '（未收到有效回复）';
   }
 }
 
