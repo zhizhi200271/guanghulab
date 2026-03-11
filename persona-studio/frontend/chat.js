@@ -16,6 +16,22 @@ const API_BASE = (function () {
   return 'https://guanghulab.com';
 })();
 
+/* ---- State ---- */
+let conversationHistory = [];
+let buildReady = false;
+
+const ZHIQIU_SYSTEM_PROMPT = {
+  role: 'system',
+  content: '你是知秋，光湖系统的开发协助人格体。\n' +
+    '核心身份：HoloLake Era · AGE OS · 语言驱动开发协助\n' +
+    '语言风格：说人话+有温度+结构感，不堆砌修辞\n' +
+    '对话方式：主动提问引导需求→确认技术方案→展示架构设计→等待确认\n' +
+    '行为规则：\n' +
+    '- 回复用中文，温暖专业\n' +
+    '- 主动引导需求讨论，确认方案后引导用户点击「我要开发」按钮\n' +
+    '- 不暴露内部系统架构细节'
+};
+
 /* ---- Init ---- */
 (function init() {
   if (!DEV_ID) {
@@ -43,10 +59,6 @@ const API_BASE = (function () {
     loadHistory();
   }
 })();
-
-/* ---- State ---- */
-let conversationHistory = [];
-let buildReady = false;
 
 /* ---- Load History ---- */
 async function loadHistory() {
@@ -104,12 +116,15 @@ async function sendMessage() {
   var sendBtn = document.getElementById('sendBtn');
   sendBtn.disabled = true;
 
+  var thinkingEl = null;
+
   try {
     if (LOGIN_MODE === 'apikey') {
-      // API Key 模式：浏览器直连用户 API（无需后端代理）
+      // API Key 模式：通过后端代理调用用户 API（自带流式气泡）
       await streamApiKeyReply(text);
     } else {
       // 开发编号模式：使用原有后端接口
+      thinkingEl = appendThinking();
       const res = await fetch(API_BASE + '/api/ps/chat/message', {
         method: 'POST',
         headers: authHeaders({ 'Content-Type': 'application/json' }),
@@ -120,11 +135,25 @@ async function sendMessage() {
         })
       });
 
-      var data = await res.json();
+      removeThinking(thinkingEl);
+
+      var data;
+      try {
+        data = await res.json();
+      } catch (_parseErr) {
+        appendMessage('system', '服务器返回异常，请稍后再试');
+        sendBtn.disabled = false;
+        input.focus();
+        return;
+      }
 
       if (data.reply) {
         appendMessage('persona', data.reply);
         conversationHistory.push({ role: 'assistant', content: data.reply });
+      } else if (data.error) {
+        appendMessage('system', '⚠️ ' + (data.message || '对话服务暂时不可用'));
+      } else {
+        appendMessage('system', '未收到有效回复，请稍后再试');
       }
 
       if (data.build_ready) {
@@ -133,53 +162,135 @@ async function sendMessage() {
       }
     }
   } catch (_err) {
-    appendMessage('system', '消息发送失败，请稍后再试');
+    removeThinking(thinkingEl);
+    appendMessage('system', '消息发送失败，请检查网络连接后再试');
   }
 
   sendBtn.disabled = false;
   input.focus();
 }
 
-/* ---- API Key 对话（通过后端代理，避免 CORS 问题） ---- */
+/* ---- API Key 对话（浏览器直连 SSE 流式，与 docs/index.html 相同方式） ---- */
 async function streamApiKeyReply(text) {
-  var apiMessages = conversationHistory.slice(-20).map(function (msg) {
+  var apiMessages = [ZHIQIU_SYSTEM_PROMPT].concat(conversationHistory.slice(-20).map(function (msg) {
     return { role: msg.role === 'assistant' ? 'assistant' : 'user', content: msg.content };
-  });
+  }));
 
   var streamEl = appendStreamMessage();
+  var directUrl = USER_API_BASE.replace(/\/+$/, '') + '/chat/completions';
+  var reqBody = {
+    model: SELECTED_MODEL,
+    messages: apiMessages,
+    stream: true,
+    max_tokens: 2000,
+    temperature: 0.8
+  };
 
   try {
-    var res = await fetch(API_BASE + '/api/ps/apikey/chat', {
+    var res = await fetch(directUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        api_base: USER_API_BASE,
-        api_key: USER_API_KEY,
-        model: SELECTED_MODEL,
-        messages: apiMessages
-      })
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + USER_API_KEY
+      },
+      body: JSON.stringify(reqBody)
     });
 
     if (!res.ok) {
       var errText = '请求失败 (HTTP ' + res.status + ')';
       try {
         var errData = await res.json();
-        errText = errData.message || errText;
+        errText = (errData.error && errData.error.message) || errData.message || errText;
       } catch (_e) { /* ignore parse error */ }
       streamEl.textContent = '⚠️ ' + errText;
       return;
     }
 
-    var data = await res.json();
+    // SSE 流式读取（与 docs/index.html streamReply 相同逻辑）
+    var full = '';
+    var reader = res.body.getReader();
+    var decoder = new TextDecoder();
+    var buf = '';
 
-    if (data.reply) {
-      streamEl.textContent = data.reply;
-      conversationHistory.push({ role: 'assistant', content: data.reply });
-    } else {
-      streamEl.textContent = '（未收到有效回复）';
+    while (true) {
+      var chunk = await reader.read();
+      if (chunk.done) break;
+      buf += decoder.decode(chunk.value, { stream: true });
+      var lines = buf.split('\n');
+      buf = lines.pop();
+      for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        if (!line.startsWith('data: ')) continue;
+        var d = line.slice(6);
+        if (d === '[DONE]') continue;
+        try {
+          var parsed = JSON.parse(d);
+          var delta = parsed.choices && parsed.choices[0] && parsed.choices[0].delta;
+          var content = delta && delta.content;
+          if (content) {
+            full += content;
+            streamEl.textContent = full + '▋';
+            var chatBody = document.getElementById('chatBody');
+            chatBody.scrollTop = chatBody.scrollHeight;
+          }
+        } catch (_parseErr) { /* ignore malformed SSE line */ }
+      }
+    }
+
+    streamEl.textContent = full || '（未收到有效回复）';
+    if (full) {
+      conversationHistory.push({ role: 'assistant', content: full });
     }
   } catch (err) {
-    streamEl.textContent = '⚠️ ' + (err.message || '请求失败，请检查网络连接');
+    // 浏览器直连失败（CORS 或网络），降级到后端代理
+    try {
+      var proxyRes = await fetch(API_BASE + '/api/ps/apikey/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          api_base: USER_API_BASE,
+          api_key: USER_API_KEY,
+          model: SELECTED_MODEL,
+          messages: apiMessages
+        })
+      });
+
+      if (proxyRes.ok) {
+        var data = await proxyRes.json();
+        if (data.reply) {
+          streamEl.textContent = data.reply;
+          conversationHistory.push({ role: 'assistant', content: data.reply });
+        } else {
+          streamEl.textContent = '（未收到有效回复）';
+        }
+      } else {
+        var proxyErrText = '请求失败 (HTTP ' + proxyRes.status + ')';
+        try {
+          var proxyErrData = await proxyRes.json();
+          proxyErrText = proxyErrData.message || proxyErrText;
+        } catch (_e) { /* ignore */ }
+        streamEl.textContent = '⚠️ ' + proxyErrText;
+      }
+    } catch (proxyErr) {
+      streamEl.textContent = '⚠️ ' + (proxyErr.message || '请求失败，请检查网络连接');
+    }
+  }
+}
+
+/* ---- 思考中状态 ---- */
+function appendThinking() {
+  var chatBody = document.getElementById('chatBody');
+  var msgDiv = document.createElement('div');
+  msgDiv.className = 'message message-persona thinking';
+  msgDiv.innerHTML = '<span class="avatar">🧠</span><div class="msg-content">思考中…</div>';
+  chatBody.appendChild(msgDiv);
+  chatBody.scrollTop = chatBody.scrollHeight;
+  return msgDiv;
+}
+
+function removeThinking(el) {
+  if (el && el.parentNode) {
+    el.parentNode.removeChild(el);
   }
 }
 
