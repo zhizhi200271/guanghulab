@@ -584,20 +584,64 @@ function appendMessage(role, content) {
 
 /* ---- Build Flow ---- */
 function handleBuild() {
-  document.getElementById('emailModal').style.display = 'flex';
-  document.getElementById('emailInput').focus();
+  var modal = document.getElementById('emailModal');
+  var emailInput = document.getElementById('emailInput');
+  var contactInput = document.getElementById('contactInput');
+  var errorDiv = document.getElementById('emailError');
+
+  // 预填已存储的邮箱
+  var savedEmail = sessionStorage.getItem('ps_build_email') || '';
+  var savedContact = sessionStorage.getItem('ps_build_contact') || '';
+  if (savedEmail) emailInput.value = savedEmail;
+  if (savedContact) contactInput.value = savedContact;
+
+  errorDiv.style.display = 'none';
+  modal.style.display = 'flex';
+  emailInput.focus();
 }
 
 function closeEmailModal() {
   document.getElementById('emailModal').style.display = 'none';
+  document.getElementById('emailError').style.display = 'none';
+}
+
+/**
+ * 后端二次校验用的邮箱正则
+ */
+function validateEmail(email) {
+  var re = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+  return re.test(email);
 }
 
 async function confirmBuild() {
-  var email = document.getElementById('emailInput').value.trim();
-  if (!email) return;
+  var emailInput = document.getElementById('emailInput');
+  var contactInput = document.getElementById('contactInput');
+  var errorDiv = document.getElementById('emailError');
+  var email = emailInput.value.trim();
+  var contact = contactInput.value.trim();
+
+  // 前端校验
+  if (!email) {
+    errorDiv.textContent = '请填写邮箱地址';
+    errorDiv.style.display = 'block';
+    return;
+  }
+
+  if (!validateEmail(email)) {
+    errorDiv.textContent = '邮箱格式不正确，请检查';
+    errorDiv.style.display = 'block';
+    return;
+  }
+
+  // 存储邮箱（下次预填）
+  sessionStorage.setItem('ps_build_email', email);
+  if (contact) sessionStorage.setItem('ps_build_contact', contact);
 
   closeEmailModal();
   appendMessage('system', '🚀 开发任务已提交，完成后会发送到 ' + email);
+
+  // 进入分屏模式
+  enterDevMode();
 
   try {
     await fetch(API_BASE + '/api/ps/build/start', {
@@ -606,11 +650,226 @@ async function confirmBuild() {
       body: JSON.stringify({
         dev_id: DEV_ID,
         email: email,
+        contact: contact,
         conversation: conversationHistory
       })
     });
   } catch (_err) {
     appendMessage('system', '任务提交失败，请稍后再试');
+  }
+
+  // 连接 WebSocket 获取进度更新
+  connectPreviewWebSocket();
+}
+
+/* ---- Dev Mode: Split Screen ---- */
+var isDevMode = false;
+var wsConnection = null;
+var currentPreviewUrl = '';
+
+function enterDevMode() {
+  if (isDevMode) return;
+  isDevMode = true;
+
+  var layout = document.getElementById('chatLayout');
+  var resizer = document.getElementById('resizer');
+  var previewPanel = document.getElementById('previewPanel');
+
+  layout.classList.add('dev-mode');
+  resizer.style.display = 'block';
+  previewPanel.style.display = 'flex';
+
+  // 初始各占50%
+  var chatMain = document.getElementById('chatMain');
+  chatMain.style.flex = '1 1 50%';
+  previewPanel.style.flex = '1 1 50%';
+
+  updatePreviewStatus('waiting', '等待中');
+  initResizer();
+}
+
+function exitDevMode() {
+  isDevMode = false;
+
+  var layout = document.getElementById('chatLayout');
+  var resizer = document.getElementById('resizer');
+  var previewPanel = document.getElementById('previewPanel');
+  var chatMain = document.getElementById('chatMain');
+
+  layout.classList.remove('dev-mode');
+  resizer.style.display = 'none';
+  previewPanel.style.display = 'none';
+  chatMain.style.flex = '';
+
+  if (wsConnection) {
+    wsConnection.close();
+    wsConnection = null;
+  }
+}
+
+/* ---- Draggable Resizer ---- */
+function initResizer() {
+  var resizer = document.getElementById('resizer');
+  var chatMain = document.getElementById('chatMain');
+  var previewPanel = document.getElementById('previewPanel');
+  var layout = document.getElementById('chatLayout');
+
+  var startX, startChatWidth, startPreviewWidth;
+
+  function onMouseDown(e) {
+    e.preventDefault();
+    startX = e.clientX;
+    startChatWidth = chatMain.getBoundingClientRect().width;
+    startPreviewWidth = previewPanel.getBoundingClientRect().width;
+    resizer.classList.add('resizing');
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  }
+
+  function onMouseMove(e) {
+    var dx = e.clientX - startX;
+    var layoutWidth = layout.getBoundingClientRect().width;
+    var sidebarWidth = document.getElementById('chatSidebar').getBoundingClientRect().width;
+    var resizerWidth = resizer.getBoundingClientRect().width;
+    var available = layoutWidth - sidebarWidth - resizerWidth;
+
+    var newChatWidth = startChatWidth + dx;
+    var newPreviewWidth = startPreviewWidth - dx;
+
+    // Enforce min-width 360px
+    if (newChatWidth < 360) newChatWidth = 360;
+    if (newPreviewWidth < 360) newPreviewWidth = 360;
+    if (newChatWidth + newPreviewWidth > available) return;
+
+    chatMain.style.flex = '0 0 ' + newChatWidth + 'px';
+    previewPanel.style.flex = '0 0 ' + newPreviewWidth + 'px';
+  }
+
+  function onMouseUp() {
+    resizer.classList.remove('resizing');
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+  }
+
+  resizer.addEventListener('mousedown', onMouseDown);
+
+  // Touch support for mobile
+  resizer.addEventListener('touchstart', function (e) {
+    var touch = e.touches[0];
+    startX = touch.clientX;
+    startChatWidth = chatMain.getBoundingClientRect().width;
+    startPreviewWidth = previewPanel.getBoundingClientRect().width;
+    resizer.classList.add('resizing');
+
+    function onTouchMove(ev) {
+      var t = ev.touches[0];
+      var fakeEvent = { clientX: t.clientX };
+      onMouseMove(fakeEvent);
+    }
+
+    function onTouchEnd() {
+      resizer.classList.remove('resizing');
+      document.removeEventListener('touchmove', onTouchMove);
+      document.removeEventListener('touchend', onTouchEnd);
+    }
+
+    document.addEventListener('touchmove', onTouchMove);
+    document.addEventListener('touchend', onTouchEnd);
+  });
+}
+
+/* ---- Preview Panel ---- */
+function updatePreviewStatus(status, text) {
+  var statusEl = document.getElementById('previewStatus');
+  if (!statusEl) return;
+
+  var dotClass = 'status-dot status-' + status;
+  statusEl.innerHTML = '<span class="' + dotClass + '"></span><span class="status-text">' + escapeHtml(text) + '</span>';
+}
+
+function updatePreviewUrl(url) {
+  currentPreviewUrl = url;
+  var frame = document.getElementById('previewFrame');
+  if (frame) frame.src = url;
+}
+
+function refreshPreview() {
+  var frame = document.getElementById('previewFrame');
+  if (frame && frame.src) {
+    frame.src = frame.src;
+  }
+}
+
+function openPreviewNewWindow() {
+  if (currentPreviewUrl) {
+    window.open(currentPreviewUrl, '_blank');
+  }
+}
+
+function setPreviewProjectName(name) {
+  var el = document.getElementById('previewProjectName');
+  if (el) el.textContent = name || '项目';
+}
+
+/* ---- WebSocket for Preview Updates ---- */
+function connectPreviewWebSocket() {
+  var wsBase = API_BASE.replace(/^http/, 'ws');
+  var wsUrl = wsBase + '/ws/preview?dev_id=' + encodeURIComponent(DEV_ID);
+
+  try {
+    wsConnection = new WebSocket(wsUrl);
+
+    wsConnection.onopen = function () {
+      appendMessage('system', '🔧 正在创建项目骨架...');
+      updatePreviewStatus('building', '构建中');
+    };
+
+    wsConnection.onmessage = function (event) {
+      try {
+        var data = JSON.parse(event.data);
+
+        if (data.type === 'progress') {
+          appendMessage('system', data.message || '构建进度更新');
+          if (data.status) {
+            updatePreviewStatus(data.status, data.status_text || '');
+          }
+        }
+
+        if (data.type === 'preview_ready') {
+          var previewUrl = API_BASE + '/api/ps/preview/' + encodeURIComponent(DEV_ID) + '/' + encodeURIComponent(data.project);
+          updatePreviewUrl(previewUrl);
+          setPreviewProjectName(data.project);
+          updatePreviewStatus('done', '完成');
+          appendMessage('system', '✅ 预览已就绪，右侧可以查看');
+        }
+
+        if (data.type === 'reload') {
+          refreshPreview();
+        }
+
+        if (data.type === 'complete') {
+          updatePreviewStatus('done', '全部完成');
+          appendMessage('system', '🎉 全部完成！邮件正在发送');
+        }
+
+        if (data.type === 'error') {
+          updatePreviewStatus('error', '出错');
+          appendMessage('system', '❌ ' + (data.message || '构建出错'));
+        }
+      } catch (_e) { /* ignore malformed WS message */ }
+    };
+
+    wsConnection.onerror = function () {
+      // WebSocket not available, graceful degradation
+      updatePreviewStatus('waiting', '离线模式');
+    };
+
+    wsConnection.onclose = function () {
+      wsConnection = null;
+    };
+  } catch (_e) {
+    // WebSocket connection failed, graceful degradation
+    updatePreviewStatus('waiting', '离线模式');
   }
 }
 
