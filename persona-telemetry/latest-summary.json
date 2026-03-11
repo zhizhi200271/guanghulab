@@ -1,10 +1,6 @@
 {
   "version": "1.0",
-<<<<<<< HEAD
-  "timestamp": "2026-03-09T23:59:23.782Z",
-=======
   "timestamp": "2026-03-10T23:59:09.654Z",
->>>>>>> origin/main
   "sessions": {
     "total_24h": 0,
     "active_devs": [
@@ -23,11 +19,7 @@
     "style_profile": "通感语言·守护者",
     "style_drift_score": 0,
     "memory_depth": "0 selfchecks",
-<<<<<<< HEAD
-    "last_brain_update": "2026-03-09T23:59:23.782Z"
-=======
     "last_brain_update": "2026-03-10T13:24:33.728Z"
->>>>>>> origin/main
   },
   "dev_progress": {
     "syslog_submitted": 0,
@@ -40,11 +32,7 @@
     "next_scheduled": null
   },
   "repo_health": {
-<<<<<<< HEAD
-    "hli_coverage": "17.6%",
-=======
     "hli_coverage": "3/17",
->>>>>>> origin/main
     "total_team_members": 9,
     "green_status_count": 6
   },
