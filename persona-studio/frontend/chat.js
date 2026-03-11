@@ -20,7 +20,7 @@ const API_BASE = (function () {
 let conversationHistory = [];
 let buildReady = false;
 
-var ZHIQIU_SYSTEM_PROMPT = {
+const ZHIQIU_SYSTEM_PROMPT = {
   role: 'system',
   content: '你是知秋，光湖系统的开发协助人格体。\n' +
     '核心身份：HoloLake Era · AGE OS · 语言驱动开发协助\n' +
