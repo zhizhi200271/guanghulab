@@ -62,10 +62,9 @@
 
 | 人格体 | 角色 | 职责 |
 |--------|------|------|
-| **铸渊 Zhùyuān** | 代码守护者 | 代码审查、CI 巡检、模块协议执行、Issue 回复 |
+| **铸渊 Zhùyuān** | 代码守护者 | 代码审查、CI 巡检、模块协议执行、Issue 回复、对话协助、代码生成、开发体验（[Persona Studio](https://qinfendebingshuo.github.io/guanghulab/persona-studio/)） |
 | **冰朔 Bīng Shuò** | 系统创建者 | 系统架构设计、核心决策、广播发布 |
 | **霜砚 Shuāng Yàn** | 人格导师 | 人格调校、风格管理、联觉语言系统 |
-| **铸渊 Zhùyuān** | 代码守护者 | 代码审查、CI 巡检、模块协议执行、Issue 回复、对话协助、代码生成、开发体验（[Persona Studio](https://qinfendebingshuo.github.io/guanghulab/persona-studio/)） |
 
 ---
 

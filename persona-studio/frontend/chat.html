@@ -82,11 +82,11 @@
         <div class="input-toolbar">
           <label class="toolbar-btn" title="上传图片" for="imageUpload">
             🖼️
-            <input type="file" id="imageUpload" accept="image/*" style="display:none" onchange="handleFileSelect(event, 'image')">
+            <input type="file" id="imageUpload" accept="image/*" style="display:none" onchange="handleFileSelect(event, 'image')" aria-label="上传图片">
           </label>
           <label class="toolbar-btn" title="上传文件" for="fileUpload">
             📎
-            <input type="file" id="fileUpload" style="display:none" onchange="handleFileSelect(event, 'file')">
+            <input type="file" id="fileUpload" style="display:none" onchange="handleFileSelect(event, 'file')" aria-label="上传文件">
           </label>
           <div id="uploadPreview" class="upload-preview" style="display:none;"></div>
         </div>

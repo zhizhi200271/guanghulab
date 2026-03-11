@@ -22,6 +22,7 @@ const API_BASE = (function () {
 let conversationHistory = [];
 let buildReady = false;
 let pendingFile = null; // { name, type, dataUrl }
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const isGuest = (DEV_ID === 'GUEST');
 const isDeveloper = (DEV_ID && DEV_ID !== 'GUEST' && /^EXP-\d{3,}$/.test(DEV_ID));
 
@@ -48,7 +49,7 @@ function setActiveSessionId(id) {
 }
 
 function createNewSession() {
-  var id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  var id = Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
   var session = {
     id: id,
     title: '新对话',
@@ -299,8 +300,7 @@ function handleFileSelect(event, type) {
   var file = event.target.files[0];
   if (!file) return;
 
-  var maxSize = 5 * 1024 * 1024; // 5MB
-  if (file.size > maxSize) {
+  if (file.size > MAX_FILE_SIZE) {
     appendMessage('system', '⚠️ 文件过大，最大支持 5MB');
     event.target.value = '';
     return;
@@ -318,11 +318,7 @@ function handleFileSelect(event, type) {
     showUploadPreview();
   };
 
-  if (type === 'image') {
-    reader.readAsDataURL(file);
-  } else {
-    reader.readAsDataURL(file);
-  }
+  reader.readAsDataURL(file);
 
   event.target.value = '';
 }
