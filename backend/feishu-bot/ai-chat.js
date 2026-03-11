@@ -133,7 +133,7 @@ async function callModel(messages, options = {}) {
   const model   = options.model || process.env.MODEL_NAME || DEFAULT_MODEL;
 
   if (!apiKey) {
-    return '⚠️ AI 模型未配置（缺少 MODEL_API_KEY），请联系管理员。';
+    return '⚠️ AI 服务暂时不可用，请联系管理员。';
   }
 
   const url = new URL(apiBase + '/chat/completions');
@@ -163,10 +163,10 @@ async function callModel(messages, options = {}) {
 
     // 尝试降级模型
     if (result.statusCode === 429 || result.statusCode >= 500) {
-      return '⚠️ AI 模型暂时不可用（HTTP ' + result.statusCode + '），请稍后重试。';
+      return '⚠️ AI 模型暂时不可用，请稍后重试。';
     }
 
-    return '⚠️ AI 模型调用异常: ' + (result.data.error?.message || JSON.stringify(result.data));
+    return '⚠️ AI 模型调用异常，请稍后重试或联系管理员。';
   } catch (e) {
     return '⚠️ AI 模型调用失败: ' + e.message;
   }

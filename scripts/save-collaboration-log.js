@@ -107,7 +107,9 @@ function main() {
     d.total_interactions++;
     if (r.type === 'syslog_collaboration') d.syslog_count++;
     if (r.type === 'collaboration') d.chat_count++;
-    d.last_active_at = r.timestamp;
+    if (!d.last_active_at || r.timestamp > d.last_active_at) {
+      d.last_active_at = r.timestamp;
+    }
     if (r.channel) d.channels_used.add(r.channel);
     if (r.broadcast_id && r.broadcast_id !== 'UNKNOWN') d.broadcasts_referenced.add(r.broadcast_id);
   }
