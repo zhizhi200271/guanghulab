@@ -63,7 +63,11 @@ body {
 }
 
 /* ========== 频道栏 ========== */
+<<<<<<< HEAD
 .channel-bar {
+=======
+.channel-tab-bar {
+>>>>>>> origin/main
     display: flex;
     gap: 8px;
     padding: 16px 0;
@@ -71,7 +75,11 @@ body {
     overflow-x: auto;
 }
 
+<<<<<<< HEAD
 .channel {
+=======
+.channel-tab {
+>>>>>>> origin/main
     padding: 8px 18px;
     border-radius: 20px;
     border: 1px solid rgba(255,255,255,0.1);
@@ -83,12 +91,20 @@ body {
     white-space: nowrap;
 }
 
+<<<<<<< HEAD
 .channel:hover {
+=======
+.channel-tab:hover {
+>>>>>>> origin/main
     border-color: rgba(255, 183, 77, 0.3);
     color: #b0bec5;
 }
 
+<<<<<<< HEAD
 .channel.active {
+=======
+.channel-tab.active {
+>>>>>>> origin/main
     background: rgba(255,183,77,0.15);
     border-color: #ffb74d;
     color: #ffb74d;
@@ -224,24 +240,40 @@ body {
   header h1 {
     font-size: 18px;
   }
+<<<<<<< HEAD
   .channel-bar {
     gap: 6px;
     padding: 12px 0;
   }
   .channel {
+=======
+  .channel-tab-bar {
+    gap: 6px;
+    padding: 12px 0;
+  }
+  .channel-tab {
+>>>>>>> origin/main
     padding: 6px 14px;
     font-size: 12px;
   }
   .bulletin-card {
     padding: 12px 10px;
   }
+<<<<<<< HEAD
   .channel-bar {
+=======
+  .channel-tab-bar {
+>>>>>>> origin/main
     flex-wrap: nowrap;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
   }
+<<<<<<< HEAD
   .channel-bar::-webkit-scrollbar {
+=======
+  .channel-tab-bar::-webkit-scrollbar {
+>>>>>>> origin/main
     display: none;
   }
   .bulletin-card {
@@ -330,11 +362,19 @@ body {
         height: 32px;
     }
     
+<<<<<<< HEAD
     .channel-tabs {
         gap: 8px;
     }
     
     .channel-tab {
+=======
+    .channel-tab-tabs {
+        gap: 8px;
+    }
+    
+    .channel-tab-tab {
+>>>>>>> origin/main
         padding: 6px 12px;
         font-size: 0.9rem;
     }
@@ -369,7 +409,11 @@ body {
         margin-bottom: 4px;
     }
     
+<<<<<<< HEAD
     .channel-tabs {
+=======
+    .channel-tab-tabs {
+>>>>>>> origin/main
         overflow-x: auto;
         white-space: nowrap;
         flex-wrap: nowrap;
@@ -379,11 +423,19 @@ body {
         scrollbar-width: none; /* Firefox隐藏滚动条 */
     }
     
+<<<<<<< HEAD
     .channel-tabs::-webkit-scrollbar {
         display: none; /* Chrome/Safari隐藏滚动条 */
     }
     
     .channel-tab {
+=======
+    .channel-tab-tabs::-webkit-scrollbar {
+        display: none; /* Chrome/Safari隐藏滚动条 */
+    }
+    
+    .channel-tab-tab {
+>>>>>>> origin/main
         display: inline-block;
         float: none;
         white-space: nowrap;
@@ -394,4 +446,133 @@ body {
         text-align: center;
         gap: 8px;
     }
+<<<<<<< HEAD
+=======
+}/* ===== 知秋：loading/error/empty 状态样式 ===== */
+
+/* loading */
+.loading-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 15px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* error */
+.error-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #e74c3c;
+}
+
+.retry-btn {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 10px;
+    transition: background 0.3s;
+}
+
+.retry-btn:hover {
+    background: #2980b9;
+}
+
+/* empty */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+    font-size: 16px;
+}
+
+/* 响应式适配 */
+@media (max-width: 600px) {
+    .loading-state, .error-state, .empty-state {
+        padding: 30px 15px;
+    }
+    
+    .spinner {
+        width: 30px;
+        height: 30px;
+    }
+}/* ===== 频道栏和公告列表的间距 ===== */
+.channel-bar {
+    margin-bottom: 20px;  /* 给频道栏加下边距 */
+}
+
+/* 或者也可以给公告容器加上边距 */
+.bulletin-container {
+    margin-top: 10px;
+}
+/* ===== 频道栏与上方标题栏的间距 ===== */
+.channel-bar {
+    margin-top: 15px;     /* 给频道栏顶部增加间距，让它和上面的内容分开 */
+}
+
+/* 也可以调整标题栏的底部间距 */
+.header-actions {
+    margin-bottom: 5px;   /* 或者给标题栏底部加点间距 */
+}
+/* ===== 语言切换器样式 ===== */
+.lang-switcher {
+    display: inline-flex;
+    margin-right: 15px;
+    gap: 5px;
+}
+
+.lang-btn {
+    background: #f0f0f0;        /* 改成浅灰色背景 */
+    border: 1px solid #999;      /* 深一点的边框 */
+    border-radius: 4px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.3s;
+    color: #333;                 /* 文字颜色深灰色，保证看得见 */
+}
+
+.lang-btn:hover {
+    background: #f0f0f0;
+}
+
+.lang-btn.active {
+    background: #3498db;
+    color: white;
+    border-color: #3498db;
+}
+
+/* 焦点样式（键盘导航用） */
+.lang-btn:focus,
+.channel-tab:focus,
+.retry-btn:focus,
+.bulletin-card:focus {
+    outline: 2px solid #3498db;
+    outline-offset: 2px;
+}
+
+/* 高对比度适配（可选） */
+@media (prefers-contrast: high) {
+    .lang-btn.active {
+        background: black;
+        border-color: black;
+    }
+>>>>>>> origin/main
 }

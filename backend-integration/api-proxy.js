@@ -710,6 +710,79 @@ async function handleApiKeyChat(req, res) {
 }
 
 // ═══════════════════════════════════════════════════════
+<<<<<<< HEAD
+=======
+// Persona Studio 后端反向代理
+// 将 /api/ps/chat/*, /api/ps/auth/*, /api/ps/build/*, /api/ps/notify/*
+// 转发到 persona-studio 后端服务（默认端口 3002）
+// ═══════════════════════════════════════════════════════
+const PS_BACKEND_PORT = parseInt(process.env.PS_PORT || '3002', 10);
+const PS_PROXY_PATHS = ['/api/ps/chat/', '/api/ps/auth/', '/api/ps/build/', '/api/ps/notify/'];
+
+function shouldProxyToPersonaStudio(pathname) {
+  return PS_PROXY_PATHS.some(prefix => pathname.startsWith(prefix));
+}
+
+function proxyToPersonaStudio(req, res, fullPath) {
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname: '127.0.0.1',
+      port: PS_BACKEND_PORT,
+      path: fullPath,
+      method: req.method,
+      headers: Object.assign({}, req.headers, {
+        host: '127.0.0.1:' + PS_BACKEND_PORT
+      }),
+      timeout: 60000
+    };
+
+    const proxyReq = http.request(options, (proxyRes) => {
+      // Forward status and headers, but skip backend's CORS headers
+      // because the api-proxy already set CORS headers via setCorsHeaders()
+      // at the top of the request handler — forwarding both would cause duplicates
+      const headers = {};
+      for (const [key, value] of Object.entries(proxyRes.headers)) {
+        if (!key.startsWith('access-control-')) {
+          headers[key] = value;
+        }
+      }
+      res.writeHead(proxyRes.statusCode, headers);
+      proxyRes.pipe(res);
+      proxyRes.on('end', resolve);
+      proxyRes.on('error', reject);
+    });
+
+    proxyReq.on('error', (err) => {
+      console.error('[代理→PS] persona-studio 后端连接失败:', err.message);
+      if (!res.headersSent) {
+        jsonResponse(res, 502, {
+          error: true,
+          code: 'PS_BACKEND_UNAVAILABLE',
+          message: 'Persona Studio 后端服务不可用，请稍后重试'
+        });
+      }
+      resolve();
+    });
+
+    proxyReq.on('timeout', () => {
+      proxyReq.destroy();
+      if (!res.headersSent) {
+        jsonResponse(res, 504, {
+          error: true,
+          code: 'PS_BACKEND_TIMEOUT',
+          message: 'Persona Studio 后端响应超时'
+        });
+      }
+      resolve();
+    });
+
+    // Pipe the original request body to the proxy request
+    req.pipe(proxyReq);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+>>>>>>> origin/main
 // HTTP 服务器
 // ═══════════════════════════════════════════════════════
 const server = http.createServer(async (req, res) => {
@@ -737,11 +810,20 @@ const server = http.createServer(async (req, res) => {
       await handleDetectModels(req, res);
     } else if (path === '/api/ps/apikey/chat' && req.method === 'POST') {
       await handleApiKeyChat(req, res);
+<<<<<<< HEAD
+=======
+    } else if (shouldProxyToPersonaStudio(path)) {
+      await proxyToPersonaStudio(req, res, url.pathname + url.search);
+>>>>>>> origin/main
     } else {
       jsonResponse(res, 404, {
         error: true,
         code: 'NOT_FOUND',
+<<<<<<< HEAD
         message: '接口不存在。可用接口: POST /api/chat, GET /api/models, GET /api/health, POST /api/ps/apikey/detect-models, POST /api/ps/apikey/chat'
+=======
+        message: '接口不存在。可用接口: POST /api/chat, GET /api/models, GET /api/health, POST /api/ps/apikey/detect-models, POST /api/ps/apikey/chat, POST /api/ps/chat/message, GET /api/ps/chat/history, POST /api/ps/auth/login'
+>>>>>>> origin/main
       });
     }
   } catch (err) {
@@ -781,11 +863,23 @@ server.listen(PORT, () => {
     console.log('   export YUNWU_API_KEY=sk-xxx');
   }
 
+<<<<<<< HEAD
+=======
+  console.log(`\n   Persona Studio 后端代理: http://127.0.0.1:${PS_BACKEND_PORT}`);
+  console.log('   代理路径: /api/ps/chat/*, /api/ps/auth/*, /api/ps/build/*, /api/ps/notify/*');
+
+>>>>>>> origin/main
   console.log('\n   可用接口:');
   console.log('   POST /api/chat                      — 聊天代理（SSE 流式）');
   console.log('   GET  /api/models                    — 列出可用模型');
   console.log('   GET  /api/health                    — 健康检查');
   console.log('   POST /api/ps/apikey/detect-models   — 用户 API Key 模型检测');
   console.log('   POST /api/ps/apikey/chat            — 用户 API Key 对话');
+<<<<<<< HEAD
+=======
+  console.log('   POST /api/ps/chat/message            — 知秋对话（→ PS后端）');
+  console.log('   GET  /api/ps/chat/history            — 对话历史（→ PS后端）');
+  console.log('   POST /api/ps/auth/login              — 登录校验（→ PS后端）');
+>>>>>>> origin/main
   console.log('');
 });

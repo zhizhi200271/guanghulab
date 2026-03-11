@@ -1,6 +1,10 @@
 # HoloLake Era 操作系统部署模块
 
+<<<<<<< HEAD
 > 📋 **自动生成文档** · 铸渊（ZhùYuān）维护 · 最后更新：2026-03-10 12:37 UTC
+=======
+> 📋 **自动生成文档** · 铸渊（ZhùYuān）维护 · 最后更新：2026-03-10 15:36 UTC
+>>>>>>> origin/main
 > 
 > 本文档由 GitHub Actions 自动触发生成，每当合作者上传/更新模块时自动刷新。
 > 按合作者编号（DEV-XXX）整理所有已上传模块。
@@ -139,14 +143,24 @@ m10-cloud/
   help.js
 ```
 
+<<<<<<< HEAD
 ### 📦 m15-cloud-drive
+=======
+### 📦 M15 云盘系统
+>>>>>>> origin/main
 
 | 字段 | 内容 |
 |------|------|
 | **目录** | `m15-cloud-drive/` |
+<<<<<<< HEAD
 | **负责人** | 燕樊 |
 | **状态** | 未知 |
 | **技术栈** | 待定 |
+=======
+| **负责人** | 燕樊（DEV-003） |
+| **状态** | 已毕业 |
+| **技术栈** | HTML + CSS + JavaScript（纯前端） |
+>>>>>>> origin/main
 | **依赖模块** | 无 |
 
 **结构检查：** ⚠️ src/ · ⚠️ package.json · ⚠️ SYSLOG.md
@@ -155,6 +169,10 @@ m10-cloud/
 
 ```
 m15-cloud-drive/
+<<<<<<< HEAD
+=======
+  README.md
+>>>>>>> origin/main
   cloud-drive-style.css
   cloud-drive.html
   cloud-drive.js
@@ -166,23 +184,45 @@ m15-cloud-drive/
 
 **角色：** 机器人工程师
 
+<<<<<<< HEAD
 ### 📦 钉钉机器人
+=======
+### 📦 钉钉开发者工作台 · Phase1 · SYSLOG自动处理系统
+>>>>>>> origin/main
 
 | 字段 | 内容 |
 |------|------|
 | **目录** | `dingtalk-bot/` |
 | **负责人** | 之之 |
+<<<<<<< HEAD
 | **状态** | 环节0已完成 |
 | **技术栈** | Node.js + Express |
 | **依赖模块** | 无 |
 
 **结构检查：** ⚠️ src/ · ⚠️ package.json · ⚠️ SYSLOG.md
+=======
+| **状态** | 未知 |
+| **技术栈** | 待定 |
+| **依赖模块** | 无 |
+
+**结构检查：** ⚠️ src/ · ✅ package.json · ⚠️ SYSLOG.md
+>>>>>>> origin/main
 
 **已上传文件：**
 
 ```
 dingtalk-bot/
   README.md
+<<<<<<< HEAD
+=======
+  broadcast-generator.js
+  config.json
+  dingtalk-api.js
+  package-lock.json
+  package.json
+  server.js
+  syslog-parser.js
+>>>>>>> origin/main
 ```
 
 ---
@@ -332,7 +372,11 @@ m11-module/
 | 已上传模块数 | 12 |
 | 待上传模块数 | 0 |
 | 上传完成率 | 100% |
+<<<<<<< HEAD
 | 文档更新时间 | 2026-03-10 12:37 UTC |
+=======
+| 文档更新时间 | 2026-03-10 15:36 UTC |
+>>>>>>> origin/main
 
 ---
 

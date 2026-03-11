@@ -140,12 +140,17 @@ async function sendMessage() {
   input.focus();
 }
 
+<<<<<<< HEAD
 /* ---- API Key 流式响应（浏览器直连） ---- */
+=======
+/* ---- API Key 对话（通过后端代理，避免 CORS 问题） ---- */
+>>>>>>> origin/main
 async function streamApiKeyReply(text) {
   var apiMessages = conversationHistory.slice(-20).map(function (msg) {
     return { role: msg.role === 'assistant' ? 'assistant' : 'user', content: msg.content };
   });
 
+<<<<<<< HEAD
   var chatUrl = USER_API_BASE + '/chat/completions';
   var reqBody = {
     model: SELECTED_MODEL,
@@ -221,6 +226,42 @@ async function streamApiKeyReply(text) {
     conversationHistory.push({ role: 'assistant', content: full });
   } else {
     streamEl.textContent = '（未收到有效回复）';
+=======
+  var streamEl = appendStreamMessage();
+
+  try {
+    var res = await fetch(API_BASE + '/api/ps/apikey/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        api_base: USER_API_BASE,
+        api_key: USER_API_KEY,
+        model: SELECTED_MODEL,
+        messages: apiMessages
+      })
+    });
+
+    if (!res.ok) {
+      var errText = '请求失败 (HTTP ' + res.status + ')';
+      try {
+        var errData = await res.json();
+        errText = errData.message || errText;
+      } catch (_e) { /* ignore parse error */ }
+      streamEl.textContent = '⚠️ ' + errText;
+      return;
+    }
+
+    var data = await res.json();
+
+    if (data.reply) {
+      streamEl.textContent = data.reply;
+      conversationHistory.push({ role: 'assistant', content: data.reply });
+    } else {
+      streamEl.textContent = '（未收到有效回复）';
+    }
+  } catch (err) {
+    streamEl.textContent = '⚠️ ' + (err.message || '请求失败，请检查网络连接');
+>>>>>>> origin/main
   }
 }
 
