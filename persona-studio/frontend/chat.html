@@ -3,18 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>知秋 · 对话</title>
+  <title>铸渊 · 对话</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container chat-container">
     <header class="chat-header">
       <div class="header-left">
-        <span class="persona-name">🧠 知秋</span>
-        <span class="persona-role">光湖系统·开发协助人格体</span>
+        <span class="persona-name">🌀 铸渊</span>
+        <span class="persona-role">光湖系统·代码守护人格体</span>
       </div>
       <div class="header-right">
         <span id="devIdDisplay" class="dev-id-badge"></span>
+        <span id="modelDisplay" class="model-badge"></span>
         <button class="btn-secondary" onclick="handleLogout()">退出</button>
       </div>
     </header>
@@ -27,7 +28,7 @@
       <div class="input-row">
         <textarea
           id="msgInput"
-          placeholder="跟知秋说点什么…"
+          placeholder="跟铸渊说点什么…"
           rows="1"
           onkeydown="handleKeyDown(event)"
         ></textarea>
