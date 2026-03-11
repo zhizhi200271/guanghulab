@@ -6,11 +6,11 @@
   "last_updated": "2026-03-10T10:58:00Z",
   "master_registry": "persona-studio/brain/human-registry.json",
   "guest_mode": {
-    "enabled": false,
+    "enabled": true,
     "dev_id": "GUEST",
     "name": "访客体验者",
     "max_conversations": 50,
-    "disabled_reason": "访客模式暂不可用，正式编号用户不受影响"
+    "note": "访客模式已开放。如需记忆连贯高级功能，请联系冰朔或光湖团队申请开发者编号（EXP-XXX）"
   },
   "developers": {
     "EXP-000": {

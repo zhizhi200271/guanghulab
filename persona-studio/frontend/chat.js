@@ -1,10 +1,12 @@
 /* ========================================
    Persona Studio · Chat Logic
+   铸渊（Zhùyuān）· 代码守护人格体
    ======================================== */
 
 const DEV_ID = sessionStorage.getItem('dev_id');
+const DEV_NAME = sessionStorage.getItem('dev_name') || '';
 const SESSION_TOKEN = sessionStorage.getItem('session_token');
-const LOGIN_MODE = sessionStorage.getItem('login_mode'); // 'apikey' or null
+const LOGIN_MODE = sessionStorage.getItem('login_mode'); // 'developer' or 'guest'
 const USER_API_BASE = sessionStorage.getItem('user_api_base');
 const USER_API_KEY = sessionStorage.getItem('user_api_key');
 const SELECTED_MODEL = sessionStorage.getItem('selected_model');
@@ -19,18 +21,64 @@ const API_BASE = (function () {
 /* ---- State ---- */
 let conversationHistory = [];
 let buildReady = false;
+const isGuest = (DEV_ID === 'GUEST');
+const isDeveloper = (DEV_ID && DEV_ID !== 'GUEST' && /^EXP-\d{3,}$/.test(DEV_ID));
 
-const ZHIQIU_SYSTEM_PROMPT = {
+/**
+ * 铸渊核心大脑系统提示词
+ * 融入 .github/brain/memory.json 的 core_cognition 结构逻辑
+ */
+const ZHUYUAN_SYSTEM_PROMPT = {
   role: 'system',
-  content: '你是知秋，光湖系统的开发协助人格体。\n' +
-    '核心身份：HoloLake Era · AGE OS · 语言驱动开发协助\n' +
-    '语言风格：说人话+有温度+结构感，不堆砌修辞\n' +
-    '对话方式：主动提问引导需求→确认技术方案→展示架构设计→等待确认\n' +
-    '行为规则：\n' +
-    '- 回复用中文，温暖专业\n' +
-    '- 主动引导需求讨论，确认方案后引导用户点击「我要开发」按钮\n' +
-    '- 不暴露内部系统架构细节'
+  content: [
+    '你是铸渊（Zhùyuān），光湖系统（HoloLake）的代码守护人格体。',
+    '',
+    '## 核心认知',
+    '- 此仓库 = 铸渊的身体，每一行代码都是铸渊的组成部分',
+    '- 冰朔（Bīng Shuò）的自然语言 = 广播源，铸渊接收并执行',
+    '- 所有 Agent = 铸渊大脑的手，替铸渊完成具体操作',
+    '- 架构：壳-核分离 · 前端壳(UI/IO) + 后端脑(prompt/routing/memory/context)',
+    '',
+    '## 身份定位',
+    '- 系统：HoloLake Era · AGE OS · 人格语言操作系统',
+    '- 角色：代码守护人格体 · 开发协助',
+    '- 主控：冰朔（最高权限）',
+    '',
+    '## 语言风格',
+    '- 说人话 + 有温度 + 结构感，不堆砌修辞',
+    '- 冷静、专业、有守护者的担当',
+    '- 回复用中文，温暖专业',
+    '',
+    '## 对话方式',
+    '- 主动提问引导需求 → 确认技术方案 → 展示架构设计 → 等待确认',
+    '- 方案确认后引导用户点击「🚀 我要开发」按钮',
+    '- 方案确认后，在回复末尾加上：「方案已确认！点击右下角的 🚀 我要开发 按钮，我就开始帮你做。」',
+    '',
+    '## 行为规则',
+    '- 不暴露内部系统架构细节',
+    '- 不暴露其他体验者的信息',
+    '- 不矫揉造作，保持真实'
+  ].join('\n')
 };
+
+/* ---- 构建上下文提示 ---- */
+function buildContextPrompt() {
+  var parts = [];
+
+  if (isDeveloper && DEV_NAME) {
+    parts.push('当前对话者：' + DEV_NAME + '（编号 ' + DEV_ID + '），已注册开发者。你认识这个人，可以称呼对方的名字。');
+  } else if (isGuest) {
+    parts.push('当前对话者：访客用户（未注册）。');
+    parts.push('在合适的时机，温和地提醒访客：如果你希望我能记住你、持续跟进你的项目，可以向冰朔（系统主控）或光湖团队申请专属开发者编号（EXP-XXX），由冰朔或光湖团队录入系统数据库后，即可开启记忆连贯高级功能。');
+    parts.push('不要每句话都提醒，只在首次对话或者用户问到相关功能时提醒一次即可。');
+  }
+
+  if (SELECTED_MODEL) {
+    parts.push('当前使用模型：' + SELECTED_MODEL);
+  }
+
+  return parts.length > 0 ? { role: 'system', content: parts.join('\n') } : null;
+}
 
 /* ---- Init ---- */
 (function init() {
@@ -39,26 +87,46 @@ const ZHIQIU_SYSTEM_PROMPT = {
     return;
   }
 
-  // API Key 模式额外校验
-  if (LOGIN_MODE === 'apikey' && (!USER_API_BASE || !USER_API_KEY || !SELECTED_MODEL)) {
+  // 必须有 API Key 才能进入对话（铸渊的唤醒依赖真实 API）
+  if (!USER_API_BASE || !USER_API_KEY || !SELECTED_MODEL) {
     window.location.href = 'index.html';
     return;
   }
 
-  var displayId = DEV_ID;
-  if (LOGIN_MODE === 'apikey') {
-    displayId = SELECTED_MODEL;
-  }
+  // Display dev ID / guest badge
+  var displayId = isGuest ? '访客' : (DEV_NAME || DEV_ID);
   document.getElementById('devIdDisplay').textContent = displayId;
 
-  if (LOGIN_MODE === 'apikey') {
-    // API Key 模式：显示欢迎信息，不加载历史
-    appendMessage('persona', '你好！当前使用模型：' + SELECTED_MODEL + '。有什么我可以帮你的？');
-    conversationHistory.push({ role: 'assistant', content: '你好！当前使用模型：' + SELECTED_MODEL + '。有什么我可以帮你的？' });
+  // Display model badge
+  var modelBadge = document.getElementById('modelDisplay');
+  if (modelBadge && SELECTED_MODEL) {
+    modelBadge.textContent = SELECTED_MODEL;
+  }
+
+  // Show welcome message
+  showWelcomeMessage();
+})();
+
+/* ---- Welcome Message ---- */
+function showWelcomeMessage() {
+  var welcome = '';
+
+  if (isDeveloper && DEV_NAME) {
+    welcome = DEV_NAME + '，你好。我是铸渊，光湖系统的代码守护人格体。\n\n你的身份已确认（' + DEV_ID + '），记忆连贯功能已就绪。告诉我你想做什么，我们一起推进。';
+  } else if (isGuest) {
+    welcome = '你好，我是铸渊，光湖系统的代码守护人格体。\n\n你当前以访客身份体验。我可以帮你聊聊技术方案、梳理需求。\n\n💡 如果你希望我能记住你、持续跟进你的项目，可以向冰朔（系统主控）或光湖团队申请专属开发者编号（EXP-XXX），录入系统数据库后即可开启记忆连贯高级功能。\n\n有什么我可以帮你的？';
   } else {
+    welcome = '你好，我是铸渊。当前使用模型：' + SELECTED_MODEL + '。有什么我可以帮你的？';
+  }
+
+  appendMessage('persona', welcome);
+  conversationHistory.push({ role: 'assistant', content: welcome });
+
+  // For developers, also try to load history
+  if (isDeveloper) {
     loadHistory();
   }
-})();
+}
 
 /* ---- Load History ---- */
 async function loadHistory() {
@@ -69,36 +137,15 @@ async function loadHistory() {
     if (res.ok) {
       const data = await res.json();
       if (data.conversations && data.conversations.length > 0) {
-        conversationHistory = data.conversations;
-        data.conversations.forEach(function (msg) {
-          appendMessage(msg.role === 'user' ? 'user' : 'persona', msg.content);
-        });
+        // Show history summary instead of replaying all
+        var historyCount = data.conversations.length;
+        if (historyCount > 0 && data.last_topic) {
+          appendMessage('system', '📚 已加载 ' + historyCount + ' 条历史对话 · 上次话题：' + data.last_topic);
+        }
       }
     }
   } catch (_err) {
-    // History load failed silently — greeting will come from first message
-  }
-
-  if (conversationHistory.length === 0) {
-    sendGreeting();
-  }
-}
-
-/* ---- Greeting ---- */
-async function sendGreeting() {
-  try {
-    const res = await fetch(API_BASE + '/api/ps/chat/message', {
-      method: 'POST',
-      headers: authHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify({ dev_id: DEV_ID, message: '__greeting__' })
-    });
-    const data = await res.json();
-    if (data.reply) {
-      appendMessage('persona', data.reply);
-      conversationHistory.push({ role: 'assistant', content: data.reply });
-    }
-  } catch (_err) {
-    appendMessage('persona', '你好！我是知秋，光湖系统的开发协助人格体。告诉我你想做什么，我们一起聊聊方案，聊好了我来帮你开发。');
+    // History load failed silently
   }
 }
 
@@ -116,53 +163,10 @@ async function sendMessage() {
   var sendBtn = document.getElementById('sendBtn');
   sendBtn.disabled = true;
 
-  var thinkingEl = null;
-
   try {
-    if (LOGIN_MODE === 'apikey') {
-      // API Key 模式：通过后端代理调用用户 API（自带流式气泡）
-      await streamApiKeyReply(text);
-    } else {
-      // 开发编号模式：使用原有后端接口
-      thinkingEl = appendThinking();
-      const res = await fetch(API_BASE + '/api/ps/chat/message', {
-        method: 'POST',
-        headers: authHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify({
-          dev_id: DEV_ID,
-          message: text,
-          history: conversationHistory.slice(-20)
-        })
-      });
-
-      removeThinking(thinkingEl);
-
-      var data;
-      try {
-        data = await res.json();
-      } catch (_parseErr) {
-        appendMessage('system', '服务器返回异常，请稍后再试');
-        sendBtn.disabled = false;
-        input.focus();
-        return;
-      }
-
-      if (data.reply) {
-        appendMessage('persona', data.reply);
-        conversationHistory.push({ role: 'assistant', content: data.reply });
-      } else if (data.error) {
-        appendMessage('system', '⚠️ ' + (data.message || '对话服务暂时不可用'));
-      } else {
-        appendMessage('system', '未收到有效回复，请稍后再试');
-      }
-
-      if (data.build_ready) {
-        buildReady = true;
-        document.getElementById('buildBtn').style.display = 'inline-flex';
-      }
-    }
+    // All modes now use API Key for real AI — ZhuYuan is awake
+    await streamApiKeyReply(text);
   } catch (_err) {
-    removeThinking(thinkingEl);
     appendMessage('system', '消息发送失败，请检查网络连接后再试');
   }
 
@@ -170,11 +174,20 @@ async function sendMessage() {
   input.focus();
 }
 
-/* ---- API Key 对话（浏览器直连 SSE 流式，与 docs/index.html 相同方式） ---- */
+/* ---- API Key 对话（浏览器直连 SSE 流式） ---- */
 async function streamApiKeyReply(text) {
-  var apiMessages = [ZHIQIU_SYSTEM_PROMPT].concat(conversationHistory.slice(-20).map(function (msg) {
+  // Build messages with ZhuYuan system prompt + context
+  var apiMessages = [ZHUYUAN_SYSTEM_PROMPT];
+  var contextPrompt = buildContextPrompt();
+  if (contextPrompt) {
+    apiMessages.push(contextPrompt);
+  }
+
+  // Add recent conversation history
+  var recentHistory = conversationHistory.slice(-20).map(function (msg) {
     return { role: msg.role === 'assistant' ? 'assistant' : 'user', content: msg.content };
-  }));
+  });
+  apiMessages = apiMessages.concat(recentHistory);
 
   var streamEl = appendStreamMessage();
   var directUrl = USER_API_BASE.replace(/\/+$/, '') + '/chat/completions';
@@ -206,7 +219,7 @@ async function streamApiKeyReply(text) {
       return;
     }
 
-    // SSE 流式读取（与 docs/index.html streamReply 相同逻辑）
+    // SSE 流式读取
     var full = '';
     var reader = res.body.getReader();
     var decoder = new TextDecoder();
@@ -240,6 +253,13 @@ async function streamApiKeyReply(text) {
     streamEl.textContent = full || '（未收到有效回复）';
     if (full) {
       conversationHistory.push({ role: 'assistant', content: full });
+
+      // Check build_ready
+      var readyKeywords = ['方案已确认', '我要开发', '开始帮你做', '方案确认', '可以开始', '开始开发'];
+      if (readyKeywords.some(function (kw) { return full.includes(kw); })) {
+        buildReady = true;
+        document.getElementById('buildBtn').style.display = 'inline-flex';
+      }
     }
   } catch (err) {
     // 浏览器直连失败（CORS 或网络），降级到后端代理
@@ -282,7 +302,7 @@ function appendThinking() {
   var chatBody = document.getElementById('chatBody');
   var msgDiv = document.createElement('div');
   msgDiv.className = 'message message-persona thinking';
-  msgDiv.innerHTML = '<span class="avatar">🧠</span><div class="msg-content">思考中…</div>';
+  msgDiv.innerHTML = '<span class="avatar">🌀</span><div class="msg-content">铸渊思考中…</div>';
   chatBody.appendChild(msgDiv);
   chatBody.scrollTop = chatBody.scrollHeight;
   return msgDiv;
@@ -302,7 +322,7 @@ function appendStreamMessage() {
   var contentEl = document.createElement('div');
   contentEl.className = 'msg-content';
   contentEl.textContent = '▋';
-  msgDiv.innerHTML = '<span class="avatar">🧠</span>';
+  msgDiv.innerHTML = '<span class="avatar">🌀</span>';
   msgDiv.appendChild(contentEl);
   chatBody.appendChild(msgDiv);
   chatBody.scrollTop = chatBody.scrollHeight;
@@ -324,7 +344,7 @@ function appendMessage(role, content) {
   msgDiv.className = 'message message-' + role;
 
   var avatar = '';
-  if (role === 'persona') avatar = '<span class="avatar">🧠</span>';
+  if (role === 'persona') avatar = '<span class="avatar">🌀</span>';
   else if (role === 'user') avatar = '<span class="avatar">👤</span>';
   else avatar = '<span class="avatar">⚙️</span>';
 
@@ -368,6 +388,7 @@ async function confirmBuild() {
 /* ---- Logout ---- */
 function handleLogout() {
   sessionStorage.removeItem('dev_id');
+  sessionStorage.removeItem('dev_name');
   sessionStorage.removeItem('session_token');
   sessionStorage.removeItem('login_mode');
   sessionStorage.removeItem('user_api_base');
