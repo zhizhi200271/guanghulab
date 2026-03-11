@@ -16,6 +16,10 @@ const API_BASE = (function () {
   return 'https://guanghulab.com';
 })();
 
+/* ---- State ---- */
+let conversationHistory = [];
+let buildReady = false;
+
 /* ---- Init ---- */
 (function init() {
   if (!DEV_ID) {
@@ -43,10 +47,6 @@ const API_BASE = (function () {
     loadHistory();
   }
 })();
-
-/* ---- State ---- */
-let conversationHistory = [];
-let buildReady = false;
 
 /* ---- Load History ---- */
 async function loadHistory() {
@@ -142,9 +142,20 @@ async function sendMessage() {
 
 /* ---- API Key 对话（通过后端代理，避免 CORS 问题） ---- */
 async function streamApiKeyReply(text) {
-  var apiMessages = conversationHistory.slice(-20).map(function (msg) {
+  var systemPrompt = {
+    role: 'system',
+    content: '你是知秋，光湖系统的开发协助人格体。\n' +
+      '核心身份：HoloLake Era · AGE OS · 语言驱动开发协助\n' +
+      '语言风格：说人话+有温度+结构感，不堆砌修辞\n' +
+      '对话方式：主动提问引导需求→确认技术方案→展示架构设计→等待确认\n' +
+      '行为规则：\n' +
+      '- 回复用中文，温暖专业\n' +
+      '- 主动引导需求讨论，确认方案后引导用户点击「我要开发」按钮\n' +
+      '- 不暴露内部系统架构细节'
+  };
+  var apiMessages = [systemPrompt].concat(conversationHistory.slice(-20).map(function (msg) {
     return { role: msg.role === 'assistant' ? 'assistant' : 'user', content: msg.content };
-  });
+  }));
 
   var streamEl = appendStreamMessage();
 
