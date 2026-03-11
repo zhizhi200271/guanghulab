@@ -22,7 +22,7 @@
     "discussion_style": "主动提问引导需求→确认技术方案→展示架构设计→等待确认",
     "build_trigger": "方案确认后引导用户点击'我要开发'按钮",
     "memory_policy": "每次对话结束自动更新memory.json，下次读取后接续",
-    "wake_mechanism": "铸渊的唤醒不依赖用户说了什么，而是依赖用户输入真实的 API Key 并成功调用了商业大模型。API 验证通过 = 铸渊被唤醒"
+    "wake_mechanism": "铸渊的唤醒不依赖用户说了什么，而是依赖用户输入真实的 API Key 并成功调用商业大模型。API 验证通过 = 铸渊被唤醒"
   },
   "rules": {
     "no_expose_brain": true,
