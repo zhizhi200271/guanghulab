@@ -35,8 +35,9 @@
   "last_broadcast_received": "2026-03-10T13:24:33.774Z",
   "active_rules_version": "v1.2",
   "daily_selfcheck": {
-    "last_run": "2026-03-11T00:54:07.354Z",
+    "last_run": "2026-03-12T00:51:05.840Z",
     "brain_integrity": "ok",
     "schema_coverage": "3/17",
     "pending_broadcasts": 1
-  }}
+  }
+}
