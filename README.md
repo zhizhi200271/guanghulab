@@ -77,10 +77,13 @@
 <!-- BINGSHUO_BULLETIN_START -->
 | 时间 | 检查项 | 状态 |
 |------|--------|------|
+| 03-12 17:23 | ❌ 🚀 铸渊 CD · 自动部署到 guanghulab.com · 失败 | zhizhi200271 |
+| 03-12 17:23 | ✅ 📢 更新系统公告区 · 成功 | zhizhi200271 |
+| 03-12 17:23 | 🔧 系统更新: `.github/` | 铸渊 (ZhùYuān) |
+| 03-12 17:23 | ✅ 铸渊 · Bridge E · GitHub Changes → Notion · 成功 | zhizhi200271 |
 | 03-12 16:57 | ✅ 铸渊 · Notion 工单轮询 · 成功 | 冰朔 |
 | 03-12 16:55 | ✅ 铸渊 Brain Sync · 成功 | 冰朔 |
 | 03-12 16:55 | ✅ 每日巡检 ✅ 通过 | 冰朔 |
-| 03-12 16:55 | 🔧 系统更新: `.github/` | 铸渊[bot] |
 | 03-12 16:32 | ✅ 📢 更新系统公告区 · 成功 | zhizhi200271 |
 | 03-12 16:32 | ❌ 🚀 铸渊 CD · 自动部署到 guanghulab.com · 失败 | zhizhi200271 |
 | 03-12 16:31 | ❌ 铸渊 · Bridge E · GitHub Changes → Notion · 失败 | zhizhi200271 |
@@ -89,9 +92,6 @@
 | 03-12 14:00 | ✅ 铸渊 · Notion 工单轮询 · 成功 | 冰朔 |
 | 03-12 12:58 | ✅ 铸渊 · Notion 工单轮询 · 成功 | 冰朔 |
 | 03-12 11:34 | ✅ 📢 更新系统公告区 · 成功 | 冰朔 |
-| 03-12 11:34 | ✅ 铸渊 · PSP 分身巡检 · 成功 | 冰朔 |
-| 03-12 11:26 | ✅ 📢 更新系统公告区 · 成功 | 冰朔 |
-| 03-12 11:12 | ✅ 铸渊 · Notion 工单轮询 · 成功 | 冰朔 |
 <!-- BINGSHUO_BULLETIN_END -->
 
 ### 🤖 铸渊自动提醒
@@ -99,6 +99,7 @@
 <!-- BINGSHUO_ALERT_START -->
 > 🔴 **需要冰朔手动干预！**
 >
+> - ❌ 🚀 铸渊 CD · 自动部署到 guanghulab.com · 失败
 > - ❌ 铸渊 · Bridge E · GitHub Changes → Notion · 失败
 > - ❌ 🚀 铸渊 CD · 自动部署到 guanghulab.com · 失败
 >
