@@ -49,6 +49,21 @@
 
 ---
 
+## 🚀 开发者入口
+
+<div align="center">
+
+[![提交系统日志](https://img.shields.io/badge/📡_提交系统日志-点这里-blue?style=for-the-badge)](https://github.com/qinfendebingshuo/guanghulab/discussions/new?category=📡+SYSLOG+提交区)
+[![遇到问题](https://img.shields.io/badge/❓_遇到问题-点这里提问-green?style=for-the-badge)](https://github.com/qinfendebingshuo/guanghulab/discussions/new?category=📡+SYSLOG+提交区)
+
+> 做完了？把日志粘贴进去，填上邮箱，点提交。新广播会发到你邮箱里。
+>
+> 有问题？同一个入口，选「提问」，问题解答也发到你邮箱里。
+
+</div>
+
+---
+
 ## 📖 系统简介
 
 **光湖（HoloLake）** 是一个基于人格语言操作系统的智能协作平台，采用壳-核分离设计：
@@ -77,21 +92,21 @@
 <!-- BINGSHUO_BULLETIN_START -->
 | 时间 | 检查项 | 状态 |
 |------|--------|------|
+| 03-13 12:50 | ✅ 🚀 铸渊 CD · 自动部署到 guanghulab.com · 成功 | 冰朔 |
+| 03-13 12:50 | ✅ 铸渊 · Notion 工单轮询 · 成功 | 冰朔 |
+| 03-13 12:49 | ✅ 📢 更新系统公告区 · 成功 | 冰朔 |
+| 03-13 12:49 | 🔧 系统更新: `.github/` | 铸渊 (ZhùYuān) |
+| 03-13 12:49 | ✅ 铸渊 · Bridge E · GitHub Changes → Notion · 成功 | 冰朔 |
+| 03-13 11:54 | 🔧 系统更新: `scripts/` | 铸渊 (Copilot) |
+| 03-13 11:31 | ✅ 📢 更新系统公告区 · 成功 | 冰朔 |
 | 03-13 11:31 | ✅ 铸渊 · PSP 分身巡检 · 成功 | 冰朔 |
-| 03-13 11:31 | 🔧 系统更新: `.github/` | 铸渊 (ZhùYuān) |
 | 03-13 11:22 | ✅ 📢 更新系统公告区 · 成功 | 冰朔 |
 | 03-13 10:49 | ✅ 铸渊 · Notion 工单轮询 · 成功 | 冰朔 |
-| 03-13 09:58 | ✅ 📢 更新系统公告区 · 成功 | zhizhi200271 |
-| 03-13 09:58 | ✅ 🚀 铸渊 CD · 自动部署到 guanghulab.com · 成功 | zhizhi200271 |
-| 03-13 09:57 | ✅ 📢 更新系统公告区 · 成功 | zhizhi200271 |
-| 03-13 09:56 | ⏹️ 📢 更新系统公告区 · cancelled | zhizhi200271 |
-| 03-13 09:56 | ✅ 铸渊 · Bridge E · GitHub Changes → Notion · 成功 | zhizhi200271 |
 | 03-13 09:56 | 🔧 系统更新: `docs/` | 铸渊 (ZhùYuān) |
-| 03-13 08:57 | ✅ 📢 更新系统公告区 · 成功 | 冰朔 |
-| 03-13 08:56 | ✅ 铸渊 · 每日自检 · 成功 | 冰朔 |
-| 03-13 08:01 | ✅ Generate Session Summary for Notion · 成功 | 冰朔 |
 | 03-13 08:00 | ✅ 铸渊 PSP 巡检通过 · 全部检查项 ✅ | 铸渊PSP巡检 |
-| 03-13 07:59 | ✅ 铸渊 · Notion 工单轮询 · 成功 | 冰朔 |
+| 03-12 16:55 | ✅ 每日巡检 ✅ 通过 | 冰朔 |
+| 03-12 08:00 | ✅ 铸渊 PSP 巡检通过 · 全部检查项 ✅ | 铸渊PSP巡检 |
+| 03-11 16:55 | ✅ 每日巡检 ✅ 通过 | 冰朔 |
 <!-- BINGSHUO_BULLETIN_END -->
 
 ### 🤖 铸渊自动提醒
@@ -113,7 +128,8 @@
 <!-- COLLABORATOR_BULLETIN_START -->
 | 时间 | 合作者 | 模块 | 状态 |
 |------|--------|------|------|
-| 03-13 09:56 | zhizhi200271 | `—/` | ✅ 上传成功 |
+| 03-13 12:49 | 冰朔 | `—/` | ✅ 上传成功 |
+| 03-13 12:49 | Copilot | `—/` | ✅ 上传成功 |
 | 03-13 09:56 | 🤖 之之 | `dingtalk-bot/` | 📦 上传成功 |
 <!-- COLLABORATOR_BULLETIN_END -->
 
