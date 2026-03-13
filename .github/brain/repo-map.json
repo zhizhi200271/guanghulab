@@ -1,20 +1,20 @@
 {
   "description": "铸渊图书馆目录 · Library Catalog for 铸渊 (Zhùyuān)",
   "version": "2.0",
-  "generated_at": "2026-03-13T02:07:22.787Z",
+  "generated_at": "2026-03-13T04:49:33.903Z",
   "generated_by": "scripts/generate-repo-map.js",
   "repo": "qinfendebingshuo/guanghulab",
   "stats": {
     "zones": 13,
     "total_modules": 10,
-    "total_workflows": 35,
-    "total_scripts": 32,
+    "total_workflows": 36,
+    "total_scripts": 33,
     "total_dev_nodes": 8,
     "hli_interfaces": 21,
     "hli_implemented": 7,
     "hli_coverage_pct": "33%",
     "last_ci_run": "2026-03-05T16:07:24.070Z",
-    "memory_last_updated": "2026-03-12T08:55:54.205Z"
+    "memory_last_updated": "2026-03-13T03:31:06.282Z"
   },
   "zones": [
     {
@@ -363,6 +363,13 @@
           ]
         },
         {
+          "file": "syslog-auto-pipeline.yml",
+          "name": "SYSLOG Auto Pipeline",
+          "triggers": [
+            "unknown"
+          ]
+        },
+        {
           "file": "syslog-pipeline.yml",
           "name": "铸渊 · SYSLOG Pipeline (A/D/E)",
           "triggers": [
@@ -435,7 +442,7 @@
           ]
         }
       ],
-      "item_count": 35
+      "item_count": 36
     },
     {
       "zone_id": "SCRIPTS",
@@ -537,6 +544,9 @@
           "file": "update-readme-bulletin.js"
         },
         {
+          "file": "wake-persona.js"
+        },
+        {
           "file": "zhuyuan-daily-agent.js"
         },
         {
@@ -549,7 +559,7 @@
           "file": "zhuyuan-module-protocol.js"
         }
       ],
-      "item_count": 32
+      "item_count": 33
     },
     {
       "zone_id": "SRC",
@@ -1356,6 +1366,9 @@
     "sync-persona-studio": [
       "WORKFLOWS::sync-persona-studio.yml"
     ],
+    "syslog-auto-pipeline": [
+      "WORKFLOWS::syslog-auto-pipeline.yml"
+    ],
     "syslog-pipeline": [
       "WORKFLOWS::syslog-pipeline.yml"
     ],
@@ -1465,6 +1478,9 @@
     ],
     "update-memory": [
       "SCRIPTS::update-memory.js"
+    ],
+    "wake-persona": [
+      "SCRIPTS::wake-persona.js"
     ],
     "zhuyuan-module-protocol": [
       "SCRIPTS::zhuyuan-module-protocol.js"
