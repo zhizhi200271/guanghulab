@@ -177,13 +177,17 @@ jobs:
             '验证详情: ' + moduleVerify.slice(0, 400),
           ].join('\\n');
 
+          // SYSLOG类型工单设为'待处理'（等待Notion侧核心大脑处理）
+          // 提问类型工单设为'已完成'（铸渊已生成解答）
+          const ticketStatus = type === 'syslog' ? '待处理' : '已完成';
+
           const body = JSON.stringify({
             parent: { database_id: dbId },
             properties: {
               '标题': { title: [{ type: 'text', text: { content: title.slice(0, 120) } }] },
               '操作类型': { select: { name: '其他' } },
               '提交者': { rich_text: [{ type: 'text', text: { content: '铸渊Agent·自动管道' } }] },
-              '状态': { select: { name: '待处理' } },
+              '状态': { select: { name: ticketStatus } },
               '优先级': { select: { name: 'P1' } }
             },
             children: [{

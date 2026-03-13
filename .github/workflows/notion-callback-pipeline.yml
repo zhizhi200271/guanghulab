@@ -208,31 +208,38 @@ jobs:
           const status = process.env.NOTION_STATUS || 'unknown';
           const now = new Date().toISOString();
 
-          // 检查是否已存在相同事件
-          const exists = memory.events.some(function(e) {
+          // 检查是否已存在相同事件（按 broadcast_id 精确匹配 + 同类型 + 同日期）
+          const eventKey = 'Notion 回传核验 · ' + broadcastId;
+          const todayStr = now.slice(0, 10);
+          const existingIdx = memory.events.findIndex(function(e) {
             return e.type === 'notion_callback' &&
-                   e.description && e.description.includes(broadcastId) &&
-                   e.date === now.slice(0, 10);
+                   e.broadcast_id === broadcastId &&
+                   e.date === todayStr;
           });
 
-          if (!exists) {
-            memory.events.unshift({
-              date: now.slice(0, 10),
-              type: 'notion_callback',
-              description: 'Notion 回传核验 · ' + broadcastId + ' · 状态: ' + status,
-              by: '铸渊Agent·Notion回传管道'
-            });
+          const newEvent = {
+            date: todayStr,
+            type: 'notion_callback',
+            broadcast_id: broadcastId,
+            description: eventKey + ' · 状态: ' + status,
+            by: '铸渊Agent·Notion回传管道'
+          };
 
-            // 保留最近 20 条事件
-            if (memory.events.length > 20) {
-              memory.events = memory.events.slice(0, 20);
-            }
-
-            fs.writeFileSync(memoryPath, JSON.stringify(memory, null, 2) + '\n');
-            console.log('✅ 大脑记忆已更新');
+          if (existingIdx >= 0) {
+            // 同一 broadcast_id 只保留最新的一条
+            memory.events[existingIdx] = newEvent;
+            console.log('ℹ️ 已更新同日同广播事件');
           } else {
-            console.log('ℹ️ 事件已存在，跳过');
+            memory.events.unshift(newEvent);
           }
+
+          // 保留最近 20 条事件
+          if (memory.events.length > 20) {
+            memory.events = memory.events.slice(0, 20);
+          }
+
+          fs.writeFileSync(memoryPath, JSON.stringify(memory, null, 2) + '\n');
+          console.log('✅ 大脑记忆已更新');
           "
         env:
           BROADCAST_ID: ${{ steps.callback.outputs.broadcast_id }}

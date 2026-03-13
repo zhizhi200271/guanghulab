@@ -63,23 +63,32 @@ function extractModuleIds(content, broadcastId) {
 // ══════════════════════════════════════════════════════════
 
 function extractDevId(content, broadcastId) {
-  // 从广播编号提取开发者后缀（如 BC-M22-009-AW → AW）
-  var suffixMatch = broadcastId.match(/BC-[A-Z0-9]+-\d+-([A-Z]+)/i);
-  var devSuffix = suffixMatch ? suffixMatch[1] : '';
-
-  // 从内容中提取 DEV-XXX
+  // 从内容中直接提取 DEV-XXX（最优先）
   var devMatch = content.match(/\b(DEV-\d{3})\b/i);
   if (devMatch) return devMatch[1].toUpperCase();
 
-  // 从 dev-status.json 通过后缀查找
+  // 从广播编号提取开发者后缀（如 BC-M22-009-AW → AW）
+  var suffixMatch = broadcastId.match(/BC-[A-Z0-9]+-\d+-([A-Z]+)/i);
+  var devSuffix = suffixMatch ? suffixMatch[1].toUpperCase() : '';
+
+  // 从 dev-status.json 通过后缀匹配开发者
   if (devSuffix) {
     try {
       var devStatus = JSON.parse(fs.readFileSync(DEV_STATUS_PATH, 'utf8'));
       var team = devStatus.team || [];
+      // 后缀缩写映射表（从 dev-status.json 中名字的拼音首字母）
+      var suffixMap = {
+        'YY': 'DEV-001', 'FM': 'DEV-002', 'YF': 'DEV-003',
+        'ZZ': 'DEV-004', 'XCM': 'DEV-005', 'HE': 'DEV-009',
+        'JZ': 'DEV-010', 'CCNN': 'DEV-011', 'AW': 'DEV-012',
+        'XX': 'DEV-013', 'SY': 'DEV-014',
+      };
+      if (suffixMap[devSuffix]) return suffixMap[devSuffix];
+
+      // 兜底：尝试从 team 中匹配 waiting 字段里的广播编号
       for (var i = 0; i < team.length; i++) {
-        var name = team[i].name || '';
-        // 简单匹配：用名字首字母缩写匹配后缀
-        if (name && devSuffix.length >= 2) {
+        var waiting = team[i].waiting || '';
+        if (waiting.includes(broadcastId) || waiting.includes(devSuffix)) {
           return team[i].dev_id;
         }
       }
