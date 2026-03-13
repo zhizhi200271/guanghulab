@@ -685,7 +685,7 @@ async function confirmBuild() {
         appendMessage('system', '⏳ 连接后端服务中，正在重试（' + retryCount + '/' + maxRetries + '）...');
         await new Promise(function (r) { setTimeout(r, 1500); });
       } else {
-        appendMessage('system', '⚠️ 任务提交失败：无法连接铸渊后端服务。请检查：\n1. 网络连接是否正常\n2. 后端服务是否已启动（端口 3002）\n3. 如使用 GitHub Pages 访问，请确认 guanghulab.com 服务可用');
+        appendMessage('system', '⚠️ 任务提交失败：无法连接铸渊后端服务。请检查：\n1. 网络连接是否正常\n2. 后端服务是否已启动\n3. 如使用 GitHub Pages 访问，请确认 guanghulab.com 服务可用');
         updatePreviewStatus('error', '连接失败');
       }
     }
