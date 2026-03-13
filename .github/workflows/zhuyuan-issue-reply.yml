@@ -7,11 +7,88 @@ on:
     types: [created]
 
 jobs:
+  # ════════════════════════════════════════════════════════════
+  # SYSLOG 即时确认 · 安全网
+  # 当开发者通过 Issue 提交 SYSLOG 时，立刻回复确认 + 进度清单
+  # 确保即使 syslog-issue-pipeline 未触发，开发者也能看到系统已收到
+  # ════════════════════════════════════════════════════════════
+  syslog-ack:
+    name: 📡 SYSLOG 提交确认
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'issues' &&
+      github.event.action == 'opened' &&
+      (contains(join(github.event.issue.labels.*.name, ','), 'syslog') ||
+       contains(github.event.issue.title, 'SYSLOG') ||
+       contains(github.event.issue.title, '系统日志') ||
+       contains(github.event.issue.body, '### 广播编号'))
+    permissions:
+      issues: write
+    steps:
+      - name: 📡 发送即时确认
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.issue.body || '';
+            const number = context.payload.issue.number;
+            const author = context.payload.issue.user.login;
+
+            // Extract broadcast_id from body
+            const bcMatch = body.match(/###\s*广播编号\s*\n+([^\n#]+)/i);
+            const broadcastId = bcMatch ? bcMatch[1].trim() : '(待解析)';
+
+            // Extract type
+            const typeMatch = body.match(/###\s*类型\s*\n+([^\n#]+)/i);
+            const submitType = typeMatch ? typeMatch[1].trim() : 'SYSLOG';
+
+            const now = new Date().toISOString();
+
+            const comment = [
+              '## 📡 系统已收到 · SYSLOG 闭环处理启动',
+              '',
+              '> **提交者**: @' + author,
+              '> **广播编号**: `' + broadcastId + '`',
+              '> **类型**: ' + submitType,
+              '> **接收时间**: ' + now,
+              '',
+              '### 📋 处理进度',
+              '',
+              '| 阶段 | 状态 | 说明 |',
+              '|------|------|------|',
+              '| ① 接收提交 | ✅ 已完成 | 系统已收到你的 SYSLOG |',
+              '| ② 解析内容 | ⏳ 等待中 | 解析广播编号、邮箱、内容 |',
+              '| ③ 模块验证 | ⏳ 等待中 | 检测模块是否已上传到仓库 |',
+              '| ④ 唤醒核心大脑 | ⏳ 等待中 | 铸渊核心大脑处理 SYSLOG |',
+              '| ⑤ 创建 Notion 工单 | ⏳ 等待中 | 推送霜砚工单到 Notion |',
+              '| ⑥ 生成广播 | ⏳ 等待中 | 生成新广播内容 |',
+              '| ⑦ 邮件通知 | ⏳ 等待中 | 发送结果到你的邮箱 |',
+              '| ⑧ 闭环确认 | ⏳ 等待中 | Issue 回复 + 关闭 |',
+              '',
+              '> 💡 SYSLOG 自动管道已启动，预计 2-5 分钟完成全部处理。',
+              '> 完成后本 Issue 下方会出现最终结果，你的邮箱也会收到通知。',
+              '>',
+              '> 如超过 10 分钟无后续回复，请在下方评论中 @铸渊 查询状态。',
+              '>',
+              '> *—— 铸渊（ICE-GL-ZY001）· 代码守护人格体*'
+            ].join('\n');
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: number,
+              body: comment
+            });
+
+            console.log('📡 SYSLOG 即时确认已发送 Issue #' + number);
+
+  # ════════════════════════════════════════════════════════════
+  # 开发者提问 · 铸渊自动回答
+  # 排除 SYSLOG 提交（由 syslog-issue-pipeline.yml 处理）
+  # 排除 bingshuo-deploy（由 bingshuo-deploy-agent.yml 处理）
+  # ════════════════════════════════════════════════════════════
   auto-reply:
     name: 🤖 铸渊回答问题
     runs-on: ubuntu-latest
-    # 仅在 Issue 新建或评论中包含 @铸渊 / 铸渊 时触发
-    # 排除 SYSLOG 提交（由 syslog-issue-pipeline.yml 处理）和 bingshuo-deploy（由 bingshuo-deploy-agent.yml 处理）
     if: >
       (github.event_name == 'issues' &&
        !contains(join(github.event.issue.labels.*.name, ','), 'syslog') &&
