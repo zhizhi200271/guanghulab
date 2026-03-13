@@ -18,6 +18,7 @@
 
 var https = require('https');
 var fs = require('fs');
+var devSuffixMap = require('./utils/dev-suffix-map');
 
 var GITHUB_TOKEN = process.env.GITHUB_TOKEN || '';
 var BROADCAST_ID = process.env.BROADCAST_ID || '';
@@ -94,16 +95,7 @@ async function pushBroadcast() {
   // 确定开发者 ID（从广播编号提取或使用环境变量）
   var devId = DEVELOPER_ID;
   if (!devId) {
-    // 从 BROADCAST_ID 提取后缀 → 映射到 DEV-XXX
-    var suffixMatch = BROADCAST_ID.match(/BC-[A-Z0-9]+-\d+-([A-Z]+)/i);
-    var suffix = suffixMatch ? suffixMatch[1].toUpperCase() : '';
-    var suffixMap = {
-      'YY': 'DEV-001', 'FM': 'DEV-002', 'YF': 'DEV-003',
-      'ZZ': 'DEV-004', 'XCM': 'DEV-005', 'HE': 'DEV-009',
-      'JZ': 'DEV-010', 'CCNN': 'DEV-011', 'AW': 'DEV-012',
-      'XX': 'DEV-013', 'SY': 'DEV-014',
-    };
-    devId = suffixMap[suffix] || 'UNKNOWN';
+    devId = devSuffixMap.getDevIdFromBroadcast(BROADCAST_ID) || 'UNKNOWN';
   }
 
   // 构建路径和提交信息

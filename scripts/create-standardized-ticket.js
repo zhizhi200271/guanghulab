@@ -18,6 +18,7 @@
 'use strict';
 
 const https = require('https');
+const fs = require('fs');
 
 const NOTION_TOKEN = process.env.NOTION_TOKEN || '';
 const NOTION_TICKET_DB_ID = process.env.NOTION_TICKET_DB_ID || '';
@@ -184,7 +185,6 @@ async function createStandardizedTicket() {
     // 输出工单 ID 到 GITHUB_OUTPUT
     var outputFile = process.env.GITHUB_OUTPUT;
     if (outputFile) {
-      var fs = require('fs');
       fs.appendFileSync(outputFile, 'ticket_page_id=' + result.id + '\n');
       fs.appendFileSync(outputFile, 'ticket_url=' + (result.url || '') + '\n');
     }

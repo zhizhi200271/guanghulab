@@ -24,6 +24,7 @@ const https = require('https');
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const childProcess = require('child_process');
 
 // ══════════════════════════════════════════════════════════
 // 配置
@@ -166,7 +167,6 @@ async function invokePersona(workOrder) {
   process.env.AUTHOR = workOrder.developer;
 
   // 执行 wake-persona.js（fork 子进程）
-  var childProcess = require('child_process');
   var wakeScript = path.join(__dirname, 'wake-persona.js');
 
   return new Promise(function (resolve, reject) {

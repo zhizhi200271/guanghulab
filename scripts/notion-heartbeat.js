@@ -30,8 +30,8 @@ var SMTP_USER = process.env.SMTP_USER || '';
 var SMTP_PASS = process.env.SMTP_PASS || '';
 
 var NOTION_VERSION = '2022-06-28';
-var HEARTBEAT_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
-var MAX_RETRIES = 3;
+var HEARTBEAT_TIMEOUT_MS = (parseInt(process.env.HEARTBEAT_TIMEOUT_MINUTES, 10) || 5) * 60 * 1000;
+var MAX_RETRIES = parseInt(process.env.MAX_RETRY_COUNT, 10) || 3;
 
 var REPO_OWNER = 'qinfendebingshuo';
 var REPO_NAME = 'guanghulab';
