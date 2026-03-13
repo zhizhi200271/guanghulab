@@ -92,21 +92,21 @@
 <!-- BINGSHUO_BULLETIN_START -->
 | 时间 | 检查项 | 状态 |
 |------|--------|------|
+| 03-14 04:31 | ✅ 🚀 铸渊 CD · 自动部署到 guanghulab.com · 成功 | 冰朔 |
+| 03-14 04:30 | ✅ 📢 更新系统公告区 · 成功 | 冰朔 |
+| 03-14 04:30 | 🔧 系统更新: `.github/` | 铸渊 (ZhùYuān) |
 | 03-14 04:30 | ✅ 铸渊 · Bridge E · GitHub Changes → Notion · 成功 | 冰朔 |
 | 03-14 04:18 | ✅ Notion Heartbeat Monitor · 成功 | 冰朔 |
 | 03-14 04:02 | ✅ 铸渊 · Notion 工单轮询 · 成功 | 冰朔 |
 | 03-14 03:50 | ✅ Notion Heartbeat Monitor · 成功 | 冰朔 |
 | 03-14 03:45 | ✅ 📢 更新系统公告区 · 成功 | huaer-hua |
-| 03-14 03:45 | ✅ 🚀 铸渊 CD · 自动部署到 guanghulab.com · 成功 | huaer-hua |
 | 03-14 03:44 | ✅ 📢 更新系统公告区 · 成功 | huaer-hua |
-| 03-14 03:43 | 🔧 系统更新: `.github/` | 铸渊 (ZhùYuān) |
 | 03-14 03:43 | ✅ 铸渊 · Bridge E · GitHub Changes → Notion · 成功 | huaer-hua |
 | 03-14 03:39 | 🔧 系统更新: `scripts/` | 铸渊 (Copilot) |
 | 03-13 16:53 | ✅ 每日巡检 ✅ 通过 | 冰朔 |
 | 03-13 08:00 | ✅ 铸渊 PSP 巡检通过 · 全部检查项 ✅ | 铸渊PSP巡检 |
 | 03-12 16:55 | ✅ 每日巡检 ✅ 通过 | 冰朔 |
 | 03-12 08:00 | ✅ 铸渊 PSP 巡检通过 · 全部检查项 ✅ | 铸渊PSP巡检 |
-| 03-11 16:55 | ✅ 每日巡检 ✅ 通过 | 冰朔 |
 <!-- BINGSHUO_BULLETIN_END -->
 
 ### 🤖 铸渊自动提醒
