@@ -36,11 +36,10 @@ const AUTHOR = process.env.AUTHOR || 'unknown';
 // Claude 模型优先级队列（从高到低）
 const PREFERRED_MODELS = [
   'claude-sonnet-4',
-  'claude-3.5-sonnet',
   'claude-3-5-sonnet-20241022',
+  'claude-3.5-sonnet',
   'claude-3-5-sonnet',
   'anthropic/claude-3.5-sonnet',
-  'anthropic/claude-3-5-sonnet',
   'claude-3-sonnet',
   'claude-3-haiku',
 ];
@@ -132,18 +131,22 @@ function selectBestModel(models) {
   for (const preferred of PREFERRED_MODELS) {
     const match = available.find(function (id) { return id.includes(preferred); });
     if (match) {
-      const originalId = models.find(function (m) { return m.id.toLowerCase() === match; }).id;
-      console.log('[LLM] 📌 选择模型: ' + originalId + ' (匹配规则: ' + preferred + ')');
-      return originalId;
+      const found = models.find(function (m) { return m.id.toLowerCase() === match; });
+      if (found) {
+        console.log('[LLM] 📌 选择模型: ' + found.id + ' (匹配规则: ' + preferred + ')');
+        return found.id;
+      }
     }
   }
 
   // 兜底：任何含 'claude' 的模型
   const anyClaude = available.find(function (id) { return id.includes('claude'); });
   if (anyClaude) {
-    const originalId = models.find(function (m) { return m.id.toLowerCase() === anyClaude; }).id;
-    console.log('[LLM] 📌 兜底选择 Claude 模型: ' + originalId);
-    return originalId;
+    const found = models.find(function (m) { return m.id.toLowerCase() === anyClaude; });
+    if (found) {
+      console.log('[LLM] 📌 兜底选择 Claude 模型: ' + found.id);
+      return found.id;
+    }
   }
 
   // 最终兜底：平台第一个可用模型

@@ -261,7 +261,9 @@ jobs:
             const email = '${{ steps.parse.outputs.email }}';
 
             const typeLabel = type === 'syslog' ? 'SYSLOG 闭环处理' : '问题解答';
-            const maskedEmail = email.replace(/(.{2})(.*)(@.*)/, '$1***$3');
+            const maskedEmail = email.length > 4
+              ? email.replace(/(.{2})(.*)(@.*)/, '$1***$3')
+              : '***';
 
             const body = [
               '✅ **已处理** · ' + typeLabel,
