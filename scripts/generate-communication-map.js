@@ -16,7 +16,6 @@ const BRAIN_DIR = path.join(ROOT, 'brain');
 const OUT_PATH  = path.join(BRAIN_DIR, 'communication-map.json');
 
 const now    = new Date();
-const nowISO = now.toISOString();
 
 // ── 工具函数 ──
 
@@ -158,7 +157,7 @@ function generate() {
 
   const map = {
     version: existing.version || '4.0',
-    generated_at: nowISO,
+    generated_at: now.toISOString(),
     generated_by: 'scripts/generate-communication-map.js',
     description: '数字地球系统通信地图 · 所有通信入口与数据流',
     api_endpoints: existing.api_endpoints || {},

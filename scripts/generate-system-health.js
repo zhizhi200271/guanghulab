@@ -15,9 +15,11 @@ const ROOT      = path.join(__dirname, '..');
 const BRAIN_DIR = path.join(ROOT, 'brain');
 const OUT_PATH  = path.join(BRAIN_DIR, 'system-health.json');
 
+const BEIJING_OFFSET_MS = 8 * 3600 * 1000;
+
 const now    = new Date();
 const nowISO = now.toISOString();
-const nowBJ  = new Date(now.getTime() + 8 * 3600 * 1000).toISOString()
+const nowBJ  = new Date(now.getTime() + BEIJING_OFFSET_MS).toISOString()
                  .replace('T', ' ').slice(0, 19) + '+08:00';
 
 // ── 巡检 brain/ 目录完整性 ──

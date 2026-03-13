@@ -107,7 +107,7 @@ jobs:
 
       # ── Step 6: 向 Notion 回报巡检结果 ──
       - name: 向 Notion 回报巡检结果
-        if: env.NOTION_TOKEN != '' && env.SYSLOG_DB_ID != ''
+        if: ${{ secrets.NOTION_TOKEN != '' && secrets.SYSLOG_DB_ID != '' }}
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           SYSLOG_DB_ID: ${{ secrets.SYSLOG_DB_ID }}
@@ -140,4 +140,5 @@ jobs:
                   \"rich_text\": [{ \"text\": { \"content\": \"$REPORT\" } }]
                 }
               }]
-            }" > /dev/null 2>&1 && echo "✅ Notion 回报完成" || echo "⚠️  Notion 回报失败（非致命）"
+            }" 2>&1 | tail -1
+          echo "✅ Notion 回报请求已发送"

@@ -1,6 +1,6 @@
 {
   "version": "4.0",
-  "generated_at": "2026-03-13T19:36:48.714Z",
+  "generated_at": "2026-03-13T19:38:09.552Z",
   "generated_by": "scripts/generate-communication-map.js",
   "description": "数字地球系统通信地图 · 所有通信入口与数据流",
   "api_endpoints": {
