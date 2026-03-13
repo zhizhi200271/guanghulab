@@ -1,14 +1,14 @@
 {
   "description": "铸渊图书馆目录 · Library Catalog for 铸渊 (Zhùyuān)",
   "version": "2.0",
-  "generated_at": "2026-03-13T19:43:56.217Z",
+  "generated_at": "2026-03-13T20:30:17.621Z",
   "generated_by": "scripts/generate-repo-map.js",
   "repo": "qinfendebingshuo/guanghulab",
   "stats": {
     "zones": 13,
     "total_modules": 10,
-    "total_workflows": 41,
-    "total_scripts": 42,
+    "total_workflows": 42,
+    "total_scripts": 45,
     "total_dev_nodes": 8,
     "hli_interfaces": 21,
     "hli_implemented": 7,
@@ -216,6 +216,14 @@
           "triggers": [
             "push",
             "pull_request"
+          ]
+        },
+        {
+          "file": "daily-maintenance.yml",
+          "name": "\"🔧 铸渊 · Daily Maintenance Agent\"",
+          "triggers": [
+            "schedule(0 2 * * *)",
+            "manual"
           ]
         },
         {
@@ -478,7 +486,7 @@
           ]
         }
       ],
-      "item_count": 41
+      "item_count": 42
     },
     {
       "zone_id": "SCRIPTS",
@@ -523,6 +531,12 @@
           "file": "esp-email-processor.js"
         },
         {
+          "file": "generate-automation-map.js"
+        },
+        {
+          "file": "generate-communication-map.js"
+        },
+        {
           "file": "generate-module-doc.js"
         },
         {
@@ -530,6 +544,9 @@
         },
         {
           "file": "generate-session-summary.js"
+        },
+        {
+          "file": "generate-system-health.js"
         },
         {
           "file": "intent-router.js"
@@ -622,7 +639,7 @@
           "file": "zhuyuan-module-protocol.js"
         }
       ],
-      "item_count": 42
+      "item_count": 45
     },
     {
       "zone_id": "SRC",
@@ -1366,6 +1383,9 @@
     "check-structure": [
       "WORKFLOWS::check-structure.yml"
     ],
+    "daily-maintenance": [
+      "WORKFLOWS::daily-maintenance.yml"
+    ],
     "deploy-pages": [
       "WORKFLOWS::deploy-pages.yml"
     ],
@@ -1519,11 +1539,20 @@
     "esp-email-processor": [
       "SCRIPTS::esp-email-processor.js"
     ],
+    "generate-automation-map": [
+      "SCRIPTS::generate-automation-map.js"
+    ],
+    "generate-communication-map": [
+      "SCRIPTS::generate-communication-map.js"
+    ],
     "generate-repo-map": [
       "SCRIPTS::generate-repo-map.js"
     ],
     "generate-session-summary": [
       "SCRIPTS::generate-session-summary.js"
+    ],
+    "generate-system-health": [
+      "SCRIPTS::generate-system-health.js"
     ],
     "intent-router": [
       "SCRIPTS::intent-router.js"
