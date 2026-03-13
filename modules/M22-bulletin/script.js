@@ -1,160 +1,197 @@
-﻿// ========== 确保 HoloLake 命名空间存在 ==========
-window.HoloLake = window.HoloLake || {};
+﻿// ===== script.js =====
+// 知秋：主逻辑·动态渲染+错误处理+i18n+无障碍+骨架屏
 
-// ========== 页面加载完成后执行 ==========
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 script.js 初始化');
-    
-    // 恢复所有状态
-    restoreState();
-    
-    // 绑定事件
-    bindEvents();
-    
-    // 更新布局信息
-    updateLayoutInfo();
-    
-    // 监听窗口大小变化
-    window.addEventListener('resize', function() {
-        updateLayoutInfo();
-    });
-});
+(function() {
+    // 状态变量
+    let allBulletins = [];          // 所有公告（从API拿）
+    let currentChannel = '全部';     // 当前频道（默认全部）
+    let loading = false;            // 是否正在加载
+    let error = null;               // 错误信息
 
-// ========== 恢复状态 ==========
-function restoreState() {
-    console.log('🔍 restoreState 开始...');
-    
-    try {
-        // 1. 恢复订阅状态
-        const isSubscribed = HoloLake.UserState.isSubscribed();
-        const subscribeBtn = document.querySelector('.subscribe-btn');
-        if (subscribeBtn) {
-            if (isSubscribed) {
-                subscribeBtn.classList.add('active');
-                subscribeBtn.textContent = '已订阅';
-            } else {
-                subscribeBtn.classList.remove('active');
-                subscribeBtn.textContent = '订阅';
-            }
+    // DOM元素
+    const container = document.querySelector('.bulletin-container');
+    const channelTabs = document.querySelectorAll('.channel-tab');
+    const skeletonContainer = document.getElementById('skeleton-container');
+
+    // ========== 骨架屏控制 ==========
+    function showSkeleton() {
+        if (skeletonContainer) {
+            skeletonContainer.style.display = 'block';
         }
-        
-        // 2. 恢复已读公告
-        const readList = HoloLake.UserState.getReadBulletins();
-        const bulletinCards = document.querySelectorAll('.bulletin-card');
-        bulletinCards.forEach((card, index) => {
-            const bulletinId = `bulletin-${index}`;
-            if (readList.includes(bulletinId)) {
-                card.classList.add('read');
-            }
-        });
-        
-        // 3. 恢复选中频道
-        const activeChannel = HoloLake.UserState.getActiveChannel();
-        const channels = document.querySelectorAll('.channel');
-        channels.forEach(channel => {
-            const channelText = channel.textContent.trim();
-            if (channelText === activeChannel || (activeChannel === '全部' && channelText === '全部')) {
-                channel.classList.add('active');
-            } else {
-                channel.classList.remove('active');
-            }
-        });
-        
-        // 4. 更新最后访问时间
-        HoloLake.UserState.updateLastVisit();
-        
-        console.log('✅ 恢复已完成');
-    } catch (e) {
-        console.error('❌ 恢复失败:', e);
     }
-}
 
-// ========== 绑定事件 ==========
-function bindEvents() {
-    console.log('🔗 绑定事件...');
-    
-    // 订阅按钮
-    const subscribeBtn = document.querySelector('.subscribe-btn');
-    if (subscribeBtn) {
-        subscribeBtn.addEventListener('click', function() {
-            const newState = HoloLake.UserState.toggleSubscribe();
-            if (newState) {
-                this.classList.add('active');
-                this.textContent = '已订阅';
-            } else {
-                this.classList.remove('active');
-                this.textContent = '订阅';
-            }
-            console.log('📌 订阅状态:', newState ? '已订阅' : '未订阅');
-        });
-    }
-    
-    // 频道点击
-    const channels = document.querySelectorAll('.channel');
-    channels.forEach(channel => {
-        channel.addEventListener('click', function() {
-            // 更新UI
-            channels.forEach(c => c.classList.remove('active'));
-            this.classList.add('active');
-            
-            // 保存状态
-            const channelName = this.textContent.trim();
-            HoloLake.UserState.setActiveChannel(channelName);
-            
-            // 筛选公告（可选功能，这里先做简单筛选）
-            filterBulletinsByChannel(channelName);
-            
-            console.log('📺 切换到频道:', channelName);
-        });
-    });
-    
-    // 公告点击（标记已读）
-    const bulletinCards = document.querySelectorAll('.bulletin-card');
-    bulletinCards.forEach((card, index) => {
-        card.addEventListener('click', function() {
-            const bulletinId = `bulletin-${index}`;
-            
-            // 标记已读
-            if (!this.classList.contains('read')) {
-                this.classList.add('read');
-                HoloLake.UserState.markAsRead(bulletinId);
-                console.log('📖 已读公告:', bulletinId);
-            }
-        });
-    });
-}
-
-// ========== 按频道筛选 ==========
-function filterBulletinsByChannel(channelName) {
-    const cards = document.querySelectorAll('.bulletin-card');
-    
-    if (channelName === '全部') {
-        cards.forEach(card => {
-            card.style.display = 'flex';
-        });
-        return;
-    }
-    
-    cards.forEach(card => {
-        const tag = card.querySelector('.bulletin-tag');
-        if (tag && tag.textContent.trim() === channelName) {
-            card.style.display = 'flex';
-        } else {
-            card.style.display = 'none';
+    function hideSkeleton() {
+        if (skeletonContainer) {
+            skeletonContainer.style.opacity = '0';
+            skeletonContainer.style.transition = 'opacity 0.3s ease';
+            setTimeout(() => {
+                skeletonContainer.style.display = 'none';
+            }, 300);
         }
-    });
-}
-
-// ========== 更新布局信息 ==========
-function updateLayoutInfo() {
-    const width = window.innerWidth;
-    let mode = '桌面';
-    
-    if (width <= 480) {
-        mode = '手机';
-    } else if (width <= 768) {
-        mode = '平板';
     }
-    
-    console.log(`📱 当前布局: ${mode}模式 (${width}px)`);
-}
+
+    // 初始化
+    async function init() {
+        console.log("【知秋】M22公告栏·环节7启动");
+        
+        // 监听语言切换事件
+        window.addEventListener('languagechange', () => {
+            render();
+        });
+
+        await loadBulletins();
+        render();
+        setupEventListeners();
+        setupLangSwitcher();
+        setupKeyboardNavigation();
+    }
+
+    // 语言切换器
+    function setupLangSwitcher() {
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const lang = btn.dataset.lang;
+                window.i18n.switchLang(lang);
+                document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+        const currentLang = window.i18n.currentLang;
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            if (btn.dataset.lang === currentLang) {
+                btn.classList.add('active');
+            }
+        });
+    }
+
+    // 键盘导航
+    function setupKeyboardNavigation() {
+        const tabs = document.querySelectorAll('.channel-tab');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('keydown', (e) => {
+                const currentIndex = Array.from(tabs).findIndex(t => t === e.target);
+                
+                if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    const nextIndex = (currentIndex + 1) % tabs.length;
+                    tabs[nextIndex].focus();
+                    tabs[nextIndex].click();
+                } else if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    const prevIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+                    tabs[prevIndex].focus();
+                    tabs[prevIndex].click();
+                } else if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.target.click();
+                }
+            });
+        });
+    }
+
+    // 加载公告
+    async function loadBulletins() {
+        showSkeleton();              // 显示骨架屏
+        loading = true;
+        error = null;
+
+        try {
+            const data = await API.fetchBulletins();
+            allBulletins = data;
+            hideSkeleton();           // 数据到手，隐藏骨架屏
+            loading = false;
+            render();                  // 渲染真实内容
+        } catch (err) {
+            console.error("加载失败：", err);
+            hideSkeleton();           // 出错也要隐藏骨架屏
+            loading = false;
+            error = "error";
+            render();                  // 显示错误状态
+        }
+    }
+
+    // 渲染公告列表
+    function render() {
+        if (!container) return;
+
+        // 错误状态
+        if (error) {
+            const isOffline = !navigator.onLine;
+            const offlineHint = isOffline ? window.i18n.t('offline') : '';
+            
+            container.innerHTML = `
+                <div class="error-state" role="alert">
+                    <p>😢 ${offlineHint}${window.i18n.t('error')}</p>
+                    <button class="retry-btn" id="retryBtn">${window.i18n.t('retry')}</button>
+                </div>
+            `;
+            const retryBtn = document.getElementById('retryBtn');
+            if (retryBtn) {
+                retryBtn.addEventListener('click', () => {
+                    loadBulletins();
+                });
+            }
+            return;
+        }
+
+        // 空数据状态
+        if (allBulletins.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state" role="status">
+                    <p>${window.i18n.t('empty')}</p>
+                </div>
+            `;
+            return;
+        }
+
+        // 正常渲染：根据频道筛选
+        const filtered = currentChannel === '全部'
+            ? allBulletins
+            : allBulletins.filter(item => item.channel === currentChannel);
+
+        if (filtered.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state" role="status">
+                    <p>${window.i18n.t('emptyChannel')}</p>
+                </div>
+            `;
+            return;
+        }
+
+        // 渲染公告卡片
+        let html = '';
+        filtered.forEach((item, index) => {
+            if (typeof createCard === 'function') {
+                html += createCard(item);
+            } else {
+                html += `
+                    <div class="bulletin-card" role="listitem" tabindex="0" aria-label="${item.title}">
+                        <h3>${item.title}</h3>
+                        <p>${item.content}</p>
+                        <div class="meta">
+                            <span class="channel">${item.channel}</span>
+                            <span class="date">${item.date}</span>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+        container.innerHTML = html;
+    }
+
+    // 频道切换事件
+    function setupEventListeners() {
+        channelTabs.forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                channelTabs.forEach(t => t.classList.remove('active'));
+                e.target.classList.add('active');
+                currentChannel = e.target.dataset.channel || '全部';
+                render();
+            });
+        });
+    }
+
+    // 启动一切
+    init();
+})();

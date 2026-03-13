@@ -1,20 +1,20 @@
 {
   "description": "铸渊图书馆目录 · Library Catalog for 铸渊 (Zhùyuān)",
   "version": "2.0",
-  "generated_at": "2026-03-09T14:51:39.320Z",
+  "generated_at": "2026-03-13T14:51:59.358Z",
   "generated_by": "scripts/generate-repo-map.js",
   "repo": "qinfendebingshuo/guanghulab",
   "stats": {
     "zones": 13,
     "total_modules": 10,
-    "total_workflows": 25,
-    "total_scripts": 23,
+    "total_workflows": 41,
+    "total_scripts": 40,
     "total_dev_nodes": 8,
-    "hli_interfaces": 17,
-    "hli_implemented": 3,
-    "hli_coverage_pct": "18%",
-    "last_ci_run": "2026-03-05T10:30:46.894Z",
-    "memory_last_updated": "2026-03-09T08:56:49.158Z"
+    "hli_interfaces": 21,
+    "hli_implemented": 7,
+    "hli_coverage_pct": "33%",
+    "last_ci_run": "2026-03-05T16:07:24.070Z",
+    "memory_last_updated": "2026-03-13T08:53:32.764Z"
   },
   "zones": [
     {
@@ -34,10 +34,37 @@
       ],
       "shelves": [
         {
+          "file": "bingshuo-agent-registry.json"
+        },
+        {
+          "file": "bingshuo-brain-bridge.json"
+        },
+        {
+          "file": "bingshuo-growth-log.md"
+        },
+        {
+          "file": "bingshuo-issues-index.json"
+        },
+        {
+          "file": "bingshuo-master-brain.md"
+        },
+        {
+          "file": "bingshuo-read-order.md"
+        },
+        {
+          "file": "bingshuo-routing-index.json"
+        },
+        {
+          "file": "bingshuo-system-health.json"
+        },
+        {
           "file": "collaborators.json"
         },
         {
           "file": "growth-log.md"
+        },
+        {
+          "file": "human-registry.json"
         },
         {
           "file": "memory.json"
@@ -55,10 +82,13 @@
           "file": "routing-map.json"
         },
         {
+          "file": "truth-source.md"
+        },
+        {
           "file": "wake-protocol.md"
         }
       ],
-      "item_count": 8
+      "item_count": 18
     },
     {
       "zone_id": "PERSONA_BRAIN",
@@ -90,6 +120,9 @@
           "file": "knowledge-base.json"
         },
         {
+          "file": "logs"
+        },
+        {
           "file": "memory.json"
         },
         {
@@ -103,9 +136,12 @@
         },
         {
           "file": "system-prompt.md"
+        },
+        {
+          "file": "tcs-ml"
         }
       ],
-      "item_count": 10
+      "item_count": 12
     },
     {
       "zone_id": "WORKFLOWS",
@@ -129,6 +165,15 @@
           "triggers": [
             "issues",
             "issue_comment",
+            "manual"
+          ]
+        },
+        {
+          "file": "bingshuo-neural-system.yml",
+          "name": "冰朔主控神经系统 · 自动维护",
+          "triggers": [
+            "push",
+            "schedule(0 0 * * *)",
             "manual"
           ]
         },
@@ -207,7 +252,7 @@
         },
         {
           "file": "generate-module-doc.yml",
-          "name": "铸渊 · HoloLake Era 模块文档自动生成",
+          "name": "铸渊 · 光湖纪元 模块文档自动生成",
           "triggers": [
             "push",
             "manual"
@@ -222,9 +267,24 @@
           ]
         },
         {
+          "file": "notion-callback-pipeline.yml",
+          "name": "Notion Callback Pipeline",
+          "triggers": [
+            "unknown"
+          ]
+        },
+        {
           "file": "notion-connectivity-test.yml",
           "name": "铸渊 · Notion 连通性测试",
           "triggers": [
+            "manual"
+          ]
+        },
+        {
+          "file": "notion-heartbeat.yml",
+          "name": "Notion Heartbeat Monitor",
+          "triggers": [
+            "schedule(*/5 * * * *)",
             "manual"
           ]
         },
@@ -237,10 +297,52 @@
           ]
         },
         {
+          "file": "persona-invoke.yml",
+          "name": "Persona Invoke Endpoint",
+          "triggers": [
+            "manual"
+          ]
+        },
+        {
+          "file": "pm2-server-diagnose.yml",
+          "name": "\"🔧 铸渊 · PM2 服务诊断与健康检查\"",
+          "triggers": [
+            "manual"
+          ]
+        },
+        {
           "file": "process-notion-orders.yml",
           "name": "Process Notion Work Orders",
           "triggers": [
             "push",
+            "manual"
+          ]
+        },
+        {
+          "file": "ps-on-build.yml",
+          "name": "\"🌊 Persona Studio · 代码生成\"",
+          "triggers": [
+            "manual"
+          ]
+        },
+        {
+          "file": "ps-on-chat.yml",
+          "name": "\"🌊 Persona Studio · 对话处理\"",
+          "triggers": [
+            "manual"
+          ]
+        },
+        {
+          "file": "ps-on-complete.yml",
+          "name": "\"🌊 Persona Studio · 完成通知\"",
+          "triggers": [
+            "manual"
+          ]
+        },
+        {
+          "file": "ps-on-login.yml",
+          "name": "\"🌊 Persona Studio · 登录校验\"",
+          "triggers": [
             "manual"
           ]
         },
@@ -253,11 +355,54 @@
           ]
         },
         {
+          "file": "push-broadcast.yml",
+          "name": "铸渊 · Push Broadcast · Notion → 飞书文档B",
+          "triggers": [
+            "manual"
+          ]
+        },
+        {
+          "file": "receive-syslog.yml",
+          "name": "铸渊 · Receive SYSLOG · 飞书机器人 → GitHub → Notion",
+          "triggers": [
+            "unknown"
+          ]
+        },
+        {
           "file": "staging-preview.yml",
           "name": "\"🔍 铸渊预演部署 (Staging Preview)\"",
           "triggers": [
             "pull_request",
             "manual"
+          ]
+        },
+        {
+          "file": "sync-login-entry.yml",
+          "name": "铸渊 · Sync Login Entry · Notion → 飞书文档A",
+          "triggers": [
+            "manual"
+          ]
+        },
+        {
+          "file": "sync-persona-studio.yml",
+          "name": "🔄 铸渊跨仓库同步 · persona-studio",
+          "triggers": [
+            "push",
+            "manual"
+          ]
+        },
+        {
+          "file": "syslog-auto-pipeline.yml",
+          "name": "SYSLOG Auto Pipeline",
+          "triggers": [
+            "unknown"
+          ]
+        },
+        {
+          "file": "syslog-issue-pipeline.yml",
+          "name": "📡 SYSLOG Issue Pipeline",
+          "triggers": [
+            "issues"
           ]
         },
         {
@@ -302,6 +447,14 @@
           ]
         },
         {
+          "file": "zhuyuan-daily-agent.yml",
+          "name": "🤖 铸渊巡检 Agent · 每日自动巡检与修复",
+          "triggers": [
+            "schedule(0 14 * * *)",
+            "manual"
+          ]
+        },
+        {
           "file": "zhuyuan-daily-selfcheck.yml",
           "name": "铸渊 · 每日自检",
           "triggers": [
@@ -325,7 +478,7 @@
           ]
         }
       ],
-      "item_count": 25
+      "item_count": 41
     },
     {
       "zone_id": "SCRIPTS",
@@ -346,7 +499,19 @@
           "file": "bingshuo-deploy-agent.js"
         },
         {
+          "file": "bingshuo-neural-sync.js"
+        },
+        {
+          "file": "brain-bridge-sync.js"
+        },
+        {
           "file": "contract-check.js"
+        },
+        {
+          "file": "create-standardized-ticket.js"
+        },
+        {
+          "file": "cross-repo-sync.js"
         },
         {
           "file": "daily-check.js"
@@ -367,6 +532,9 @@
           "file": "generate-session-summary.js"
         },
         {
+          "file": "invoke-persona.js"
+        },
+        {
           "file": "notify-module-received.js"
         },
         {
@@ -374,6 +542,9 @@
         },
         {
           "file": "notion-connectivity-test.js"
+        },
+        {
+          "file": "notion-heartbeat.js"
         },
         {
           "file": "notion-signal-bridge.js"
@@ -388,10 +559,31 @@
           "file": "psp-inspection.js"
         },
         {
+          "file": "push-broadcast-to-github.js"
+        },
+        {
+          "file": "push-broadcast.js"
+        },
+        {
+          "file": "receive-syslog.js"
+        },
+        {
           "file": "route-align-check.js"
         },
         {
+          "file": "save-collaboration-log.js"
+        },
+        {
           "file": "selfcheck.js"
+        },
+        {
+          "file": "send-feishu-alert.js"
+        },
+        {
+          "file": "server-diagnose-report.js"
+        },
+        {
+          "file": "sync-login-entry.js"
         },
         {
           "file": "update-brain.js"
@@ -403,6 +595,18 @@
           "file": "update-readme-bulletin.js"
         },
         {
+          "file": "utils"
+        },
+        {
+          "file": "verify-modules.js"
+        },
+        {
+          "file": "wake-persona.js"
+        },
+        {
+          "file": "zhuyuan-daily-agent.js"
+        },
+        {
           "file": "zhuyuan-daily-selfcheck.js"
         },
         {
@@ -412,7 +616,7 @@
           "file": "zhuyuan-module-protocol.js"
         }
       ],
-      "item_count": 23
+      "item_count": 40
     },
     {
       "zone_id": "SRC",
@@ -432,6 +636,9 @@
       ],
       "shelves": [
         {
+          "file": "brain"
+        },
+        {
           "file": "index.js"
         },
         {
@@ -444,7 +651,7 @@
           "file": "schemas"
         }
       ],
-      "item_count": 4
+      "item_count": 5
     },
     {
       "zone_id": "MODULES",
@@ -513,8 +720,8 @@
         {
           "module_id": "M15",
           "dir": "m15-cloud-drive",
-          "files": 3,
-          "has_readme": false
+          "files": 4,
+          "has_readme": true
         },
         {
           "module_id": "M18",
@@ -771,13 +978,16 @@
           "file": "README.md"
         },
         {
+          "file": "ai-system-doc.md"
+        },
+        {
           "file": "index.html"
         },
         {
           "file": "使用指南.md"
         }
       ],
-      "item_count": 5
+      "item_count": 6
     },
     {
       "zone_id": "TESTS",
@@ -805,8 +1015,8 @@
     }
   ],
   "hli_interfaces": {
-    "total": 17,
-    "implemented": 3,
+    "total": 21,
+    "implemented": 7,
     "pending": 14,
     "domains": [
       {
@@ -956,12 +1166,42 @@
             "status": "pending"
           }
         ]
+      },
+      {
+        "name": "BRAIN",
+        "module": "CORE",
+        "prefix": "/hli/brain",
+        "total": 4,
+        "implemented": 4,
+        "interfaces": [
+          {
+            "id": "HLI-BRAIN-001",
+            "path": "/hli/brain/prompt",
+            "status": "implemented"
+          },
+          {
+            "id": "HLI-BRAIN-002",
+            "path": "/hli/brain/route",
+            "status": "implemented"
+          },
+          {
+            "id": "HLI-BRAIN-003",
+            "path": "/hli/brain/context",
+            "status": "implemented"
+          },
+          {
+            "id": "HLI-BRAIN-004",
+            "path": "/hli/brain/memory",
+            "status": "implemented"
+          }
+        ]
       }
     ]
   },
   "routing_index": {
     "brain": [
-      "BRAIN"
+      "BRAIN",
+      "SRC::brain"
     ],
     "memory": [
       "BRAIN",
@@ -984,11 +1224,38 @@
       "BRAIN",
       "SRC"
     ],
+    "bingshuo-agent-registry": [
+      "BRAIN::bingshuo-agent-registry.json"
+    ],
+    "bingshuo-brain-bridge": [
+      "BRAIN::bingshuo-brain-bridge.json"
+    ],
+    "bingshuo-growth-log": [
+      "BRAIN::bingshuo-growth-log.md"
+    ],
+    "bingshuo-issues-index": [
+      "BRAIN::bingshuo-issues-index.json"
+    ],
+    "bingshuo-master-brain": [
+      "BRAIN::bingshuo-master-brain.md"
+    ],
+    "bingshuo-read-order": [
+      "BRAIN::bingshuo-read-order.md"
+    ],
+    "bingshuo-routing-index": [
+      "BRAIN::bingshuo-routing-index.json"
+    ],
+    "bingshuo-system-health": [
+      "BRAIN::bingshuo-system-health.json"
+    ],
     "collaborators": [
       "BRAIN::collaborators.json"
     ],
     "growth-log": [
       "BRAIN::growth-log.md"
+    ],
+    "human-registry": [
+      "BRAIN::human-registry.json"
     ],
     "module-protocol": [
       "BRAIN::module-protocol.md"
@@ -1002,6 +1269,9 @@
     "routing-map": [
       "BRAIN::routing-map.json",
       "PERSONA_BRAIN::routing-map.json"
+    ],
+    "truth-source": [
+      "BRAIN::truth-source.md"
     ],
     "wake-protocol": [
       "BRAIN::wake-protocol.md"
@@ -1032,6 +1302,9 @@
     "knowledge-base": [
       "PERSONA_BRAIN::knowledge-base.json"
     ],
+    "logs": [
+      "PERSONA_BRAIN::logs"
+    ],
     "responsibility": [
       "PERSONA_BRAIN::responsibility.md"
     ],
@@ -1040,6 +1313,9 @@
     ],
     "system-prompt": [
       "PERSONA_BRAIN::system-prompt.md"
+    ],
+    "tcs-ml": [
+      "PERSONA_BRAIN::tcs-ml"
     ],
     "workflow": [
       "WORKFLOWS"
@@ -1065,6 +1341,9 @@
     "bingshuo-deploy-agent": [
       "WORKFLOWS::bingshuo-deploy-agent.yml",
       "SCRIPTS::bingshuo-deploy-agent.js"
+    ],
+    "bingshuo-neural-system": [
+      "WORKFLOWS::bingshuo-neural-system.yml"
     ],
     "brain-sync": [
       "WORKFLOWS::brain-sync.yml"
@@ -1101,21 +1380,67 @@
     "hli-contract-check": [
       "WORKFLOWS::hli-contract-check.yml"
     ],
+    "notion-callback-pipeline": [
+      "WORKFLOWS::notion-callback-pipeline.yml"
+    ],
     "notion-connectivity-test": [
       "WORKFLOWS::notion-connectivity-test.yml",
       "SCRIPTS::notion-connectivity-test.js"
     ],
+    "notion-heartbeat": [
+      "WORKFLOWS::notion-heartbeat.yml",
+      "SCRIPTS::notion-heartbeat.js"
+    ],
     "notion-poll": [
       "WORKFLOWS::notion-poll.yml"
+    ],
+    "persona-invoke": [
+      "WORKFLOWS::persona-invoke.yml"
+    ],
+    "pm2-server-diagnose": [
+      "WORKFLOWS::pm2-server-diagnose.yml"
     ],
     "process-notion-orders": [
       "WORKFLOWS::process-notion-orders.yml"
     ],
+    "ps-on-build": [
+      "WORKFLOWS::ps-on-build.yml"
+    ],
+    "ps-on-chat": [
+      "WORKFLOWS::ps-on-chat.yml"
+    ],
+    "ps-on-complete": [
+      "WORKFLOWS::ps-on-complete.yml"
+    ],
+    "ps-on-login": [
+      "WORKFLOWS::ps-on-login.yml"
+    ],
     "psp-daily-inspection": [
       "WORKFLOWS::psp-daily-inspection.yml"
     ],
+    "push-broadcast": [
+      "WORKFLOWS::push-broadcast.yml",
+      "SCRIPTS::push-broadcast.js"
+    ],
+    "receive-syslog": [
+      "WORKFLOWS::receive-syslog.yml",
+      "SCRIPTS::receive-syslog.js"
+    ],
     "staging-preview": [
       "WORKFLOWS::staging-preview.yml"
+    ],
+    "sync-login-entry": [
+      "WORKFLOWS::sync-login-entry.yml",
+      "SCRIPTS::sync-login-entry.js"
+    ],
+    "sync-persona-studio": [
+      "WORKFLOWS::sync-persona-studio.yml"
+    ],
+    "syslog-auto-pipeline": [
+      "WORKFLOWS::syslog-auto-pipeline.yml"
+    ],
+    "syslog-issue-pipeline": [
+      "WORKFLOWS::syslog-issue-pipeline.yml"
     ],
     "syslog-pipeline": [
       "WORKFLOWS::syslog-pipeline.yml"
@@ -1132,6 +1457,10 @@
     ],
     "zhuyuan-brain-sync": [
       "WORKFLOWS::zhuyuan-brain-sync.yml"
+    ],
+    "zhuyuan-daily-agent": [
+      "WORKFLOWS::zhuyuan-daily-agent.yml",
+      "SCRIPTS::zhuyuan-daily-agent.js"
     ],
     "zhuyuan-daily-selfcheck": [
       "WORKFLOWS::zhuyuan-daily-selfcheck.yml",
@@ -1163,8 +1492,20 @@
     "runner": [
       "SCRIPTS"
     ],
+    "bingshuo-neural-sync": [
+      "SCRIPTS::bingshuo-neural-sync.js"
+    ],
+    "brain-bridge-sync": [
+      "SCRIPTS::brain-bridge-sync.js"
+    ],
     "contract-check": [
       "SCRIPTS::contract-check.js"
+    ],
+    "create-standardized-ticket": [
+      "SCRIPTS::create-standardized-ticket.js"
+    ],
+    "cross-repo-sync": [
+      "SCRIPTS::cross-repo-sync.js"
     ],
     "daily-check": [
       "SCRIPTS::daily-check.js"
@@ -1177,6 +1518,9 @@
     ],
     "generate-session-summary": [
       "SCRIPTS::generate-session-summary.js"
+    ],
+    "invoke-persona": [
+      "SCRIPTS::invoke-persona.js"
     ],
     "notify-module-received": [
       "SCRIPTS::notify-module-received.js"
@@ -1196,17 +1540,38 @@
     "psp-inspection": [
       "SCRIPTS::psp-inspection.js"
     ],
+    "push-broadcast-to-github": [
+      "SCRIPTS::push-broadcast-to-github.js"
+    ],
     "route-align-check": [
       "SCRIPTS::route-align-check.js"
     ],
+    "save-collaboration-log": [
+      "SCRIPTS::save-collaboration-log.js"
+    ],
     "selfcheck": [
       "SCRIPTS::selfcheck.js"
+    ],
+    "send-feishu-alert": [
+      "SCRIPTS::send-feishu-alert.js"
+    ],
+    "server-diagnose-report": [
+      "SCRIPTS::server-diagnose-report.js"
     ],
     "update-brain": [
       "SCRIPTS::update-brain.js"
     ],
     "update-memory": [
       "SCRIPTS::update-memory.js"
+    ],
+    "utils": [
+      "SCRIPTS::utils"
+    ],
+    "verify-modules": [
+      "SCRIPTS::verify-modules.js"
+    ],
+    "wake-persona": [
+      "SCRIPTS::wake-persona.js"
     ],
     "zhuyuan-module-protocol": [
       "SCRIPTS::zhuyuan-module-protocol.js"
@@ -1463,6 +1828,9 @@
     ],
     "hololake-era-os-modules": [
       "DOCS::HoloLake-Era-OS-Modules.md"
+    ],
+    "ai-system-doc": [
+      "DOCS::ai-system-doc.md"
     ],
     "使用指南": [
       "DOCS::使用指南.md"

@@ -1,6 +1,22 @@
 {
-  "system_name": "HoloLake Era · AGE OS MVP",
-  "updated_at": "2026-03-09",
+  "system_name": "光湖纪元·AGE-5 MVP",
+  "updated_at": "2026-03-11",
+  "architecture": {
+    "era": "曜冥纪元",
+    "model": "数字地球",
+    "tcs_core": "TCS = 数字地球自转核",
+    "ice_gl": "ICE-GL = 冰朔通感语言核"
+  },
+  "tcs_ml": {
+    "path": ".github/persona-brain/tcs-ml/",
+    "files": [
+      "dictionary-sync.json",
+      "signal-bus-latest.json",
+      "landing-protocol.md",
+      "architecture-v2.md"
+    ],
+    "description": "母语运行时目录，Notion→GitHub同步的认知投影"
+  },
   "domains": {
     "AUTH": { "module": "M01", "owner": "DEV-002", "route_prefix": "/hli/auth", "interfaces": [
       { "id": "HLI-AUTH-001", "path": "/hli/auth/login", "status": "schema_only" },
@@ -28,6 +44,9 @@
     "STORAGE": { "module": "M10", "owner": "待分配", "route_prefix": "/hli/storage", "interfaces": [
       { "id": "HLI-STORAGE-001", "path": "/hli/storage/upload", "status": "pending" },
       { "id": "HLI-STORAGE-002", "path": "/hli/storage/download", "status": "pending" }
+    ]},
+    "NOTIFICATION": { "module": "M09", "owner": "DEV-012", "route_prefix": "/hli/notification", "interfaces": [
+      { "id": "HLI-NOTIF-001", "path": "/hli/notification/push", "status": "pending" }
     ]},
     "DASHBOARD": { "module": "M12", "owner": "DEV-005", "route_prefix": "/hli/dashboard", "interfaces": [
       { "id": "HLI-DASHBOARD-001", "path": "/hli/dashboard/status", "status": "pending" },

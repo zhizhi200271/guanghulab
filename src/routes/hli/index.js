@@ -8,10 +8,18 @@ const router = express.Router();
 const authRouter = require('./auth');
 router.use('/auth', authRouter);
 
+// BRAIN 域（不需要鉴权 — 前端壳层需调用脑接口组装 AI 请求）
+const brainRouter = require('./brain');
+router.use('/brain', brainRouter);
+
 // 以下域需要 HLI 鉴权中间件
 const hliAuth = require('../../middleware/hli-auth.middleware');
 
 router.use(hliAuth);
+
+// REGISTRY 域 — 开发者编号查询
+const registryRouter = require('./registry');
+router.use('/registry', registryRouter);
 
 // PERSONA 域
 // const personaRouter = require('./persona');

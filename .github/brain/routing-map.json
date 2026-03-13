@@ -1,7 +1,7 @@
 {
-  "version": "v1.0",
-  "last_updated": "2026-03-05",
-  "updated_by": "init",
+  "version": "v3.0",
+  "last_updated": "2026-03-10",
+  "updated_by": "brain-upgrade-v3.0",
   "domains": {
     "AUTH": {
       "module": "M01",
@@ -127,6 +127,37 @@
           "id": "HLI-DASHBOARD-002",
           "path": "/hli/dashboard/realtime",
           "status": "pending"
+        }
+      ]
+    },
+    "BRAIN": {
+      "module": "CORE",
+      "route_prefix": "/hli/brain",
+      "description": "铸渊核心大脑接口 — v3.0 壳-核分离架构",
+      "interfaces": [
+        {
+          "id": "HLI-BRAIN-001",
+          "path": "/hli/brain/prompt",
+          "status": "implemented",
+          "description": "系统提示词组装"
+        },
+        {
+          "id": "HLI-BRAIN-002",
+          "path": "/hli/brain/route",
+          "status": "implemented",
+          "description": "任务型模型路由"
+        },
+        {
+          "id": "HLI-BRAIN-003",
+          "path": "/hli/brain/context",
+          "status": "implemented",
+          "description": "上下文裁剪"
+        },
+        {
+          "id": "HLI-BRAIN-004",
+          "path": "/hli/brain/memory",
+          "status": "implemented",
+          "description": "记忆分析与候选生成"
         }
       ]
     }

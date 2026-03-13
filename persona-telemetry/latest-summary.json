@@ -1,16 +1,9 @@
 {
   "version": "1.0",
-  "timestamp": "2026-03-08T23:59:18.928Z",
+  "timestamp": "2026-03-13T15:30:19.982Z",
   "sessions": {
     "total_24h": 0,
-    "active_devs": [
-      "DEV-001",
-      "DEV-002",
-      "DEV-005",
-      "DEV-010",
-      "DEV-011",
-      "DEV-012"
-    ],
+    "active_devs": [],
     "total_messages": 0,
     "avg_session_length_min": 0
   },
@@ -18,8 +11,8 @@
     "active_persona": "铸渊",
     "style_profile": "通感语言·守护者",
     "style_drift_score": 0,
-    "memory_depth": "6 selfchecks",
-    "last_brain_update": "2026-03-08T00:58:17.396Z"
+    "memory_depth": "0 selfchecks",
+    "last_brain_update": "2026-03-13T06:58:00.000Z"
   },
   "dev_progress": {
     "syslog_submitted": 0,
@@ -32,9 +25,9 @@
     "next_scheduled": null
   },
   "repo_health": {
-    "hli_coverage": "17.6%",
-    "total_team_members": 9,
-    "green_status_count": 6
+    "hli_coverage": "3/17",
+    "total_team_members": 0,
+    "green_status_count": 0
   },
   "alerts": []
 }

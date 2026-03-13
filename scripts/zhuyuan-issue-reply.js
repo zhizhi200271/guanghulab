@@ -24,6 +24,41 @@ try {
   collaborators = [];
 }
 
+// === 数据规范化：兼容 Notion 同步的字段名差异 ===
+if (devStatus.team && !devStatus.team_status) {
+  devStatus.team_status = devStatus.team;
+}
+if (devStatus.last_sync && !devStatus.last_synced) {
+  devStatus.last_synced = devStatus.last_sync;
+}
+if (!devStatus.tech_routing) {
+  devStatus.tech_routing = { level_2_peer_help: {} };
+}
+if (!devStatus.server_info) {
+  devStatus.server_info = {};
+}
+if (Array.isArray(devStatus.team_status)) {
+  devStatus.team_status.forEach(dev => {
+    if (dev.module !== undefined && dev.modules === undefined) {
+      dev.modules = Array.isArray(dev.module) ? dev.module : [dev.module];
+    }
+    if (dev.current !== undefined && dev.next_step === undefined) {
+      dev.next_step = dev.current;
+    }
+    if (dev.waiting !== undefined && dev.waiting_for === undefined) {
+      dev.waiting_for = dev.waiting;
+    }
+    if (!dev.os) {
+      dev.os = '未记录';
+    }
+  });
+}
+
+// 兼容 collaborators.json 的嵌套结构
+if (!Array.isArray(collaborators) && collaborators && collaborators.collaborators) {
+  collaborators = collaborators.collaborators;
+}
+
 const issueNumber = process.env.ISSUE_NUMBER;
 const issueTitle = process.env.ISSUE_TITLE || '';
 const issueBody = process.env.ISSUE_BODY || '';
@@ -68,6 +103,7 @@ function containsSystemCommand(text) {
 }
 
 // === 判断Issue类型 ===
+const isSyslog = issueLabels.includes('syslog') || /SYSLOG|系统日志/.test(issueTitle) || issueBody.includes('### 广播编号');
 const isProgressQuery = issueLabels.includes('progress-query');
 const isDevQuestion = issueLabels.includes('dev-question');
 
@@ -254,6 +290,12 @@ async function handleCollaboratorComment(user) {
 // === Issue 新建处理（原有逻辑保留） ===
 async function handleIssueTrigger() {
   let reply = '';
+
+  // --- SYSLOG 提交：由 syslog-issue-pipeline 处理，此处跳过 ---
+  if (isSyslog) {
+    console.log('📡 SYSLOG Issue detected, skipping (handled by syslog-issue-pipeline)');
+    return;
+  }
 
   // --- 进度查询（指定开发者）---
   if (isProgressQuery && devInfo) {
