@@ -204,3 +204,25 @@ app.get('/api/notion/status', async function(req, res) {
   
   console.log('=== Phase 3 初始化完成 ===\n');
 });
+
+// ========================
+// Phase 6 路由 · 钉钉真实回调
+// ========================
+var dingWebhook = require('./dingtalk-webhook');
+
+// 钉钉消息回调（POST · 钉钉服务器发来的真实消息）
+app.post('/dingtalk/callback', dingWebhook.verifyMiddleware, dingWebhook.handleCallback);
+
+// 回调地址健康检查（GET · 钉钉后台验证用）
+app.get('/dingtalk/callback', dingWebhook.healthCheck);
+
+// 回调状态总览
+app.get('/api/dingtalk/callback-status', function(req, res) {
+  var configured = !!process.env.DINGTALK_APP_SECRET && process.env.DINGTALK_APP_SECRET !== '在这里粘贴你的AppSecret';
+  res.json({
+    callback_active: true,
+    signature_verification: configured ? 'enabled' : 'disabled (dev mode)',
+    endpoint: '/dingtalk/callback',
+    phase: 6
+  });
+});
