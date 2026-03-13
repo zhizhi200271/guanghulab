@@ -1,4 +1,4 @@
-name: SYSLOG Issue Pipeline
+name: 📡 SYSLOG Issue Pipeline
 # 📡 SYSLOG 自助提交系统 · Issue 版全自动闭环
 #
 # 开发者在 GitHub Issue 提交 SYSLOG 或提问（使用 syslog-submit 模板）
@@ -55,6 +55,43 @@ jobs:
 
       - name: Install dependencies
         run: npm ci --ignore-scripts
+
+      - name: 📋 进度通报 · 管道已启动
+        id: progress
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const number = context.payload.issue.number;
+            const now = new Date().toISOString();
+
+            const body = [
+              '## ⚙️ SYSLOG 管道运行中',
+              '',
+              '> 管道启动时间: ' + now,
+              '',
+              '| 阶段 | 状态 | 说明 |',
+              '|------|------|------|',
+              '| ① 接收提交 | ✅ 已完成 | 系统已收到 |',
+              '| ② 解析内容 | 🔄 进行中 | 正在解析广播编号、邮箱、内容 |',
+              '| ③ 模块验证 | ⏳ 等待中 | 检测模块上传状态 |',
+              '| ④ 唤醒核心大脑 | ⏳ 等待中 | 铸渊核心大脑处理 |',
+              '| ⑤ 创建 Notion 工单 | ⏳ 等待中 | 推送霜砚工单 |',
+              '| ⑥ 生成广播 | ⏳ 等待中 | 生成新广播内容 |',
+              '| ⑦ 邮件通知 | ⏳ 等待中 | 发送结果到邮箱 |',
+              '| ⑧ 闭环确认 | ⏳ 等待中 | Issue 回复 + 关闭 |',
+              '',
+              '> *管道正在运行，请勿关闭此 Issue*'
+            ].join('\n');
+
+            const { data: comment } = await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: number,
+              body: body
+            });
+
+            core.setOutput('comment_id', comment.id);
+            console.log('📋 进度通报已发送, comment_id=' + comment.id);
 
       - name: 🔍 Parse submission
         id: parse
@@ -243,6 +280,7 @@ jobs:
             const email = '${{ steps.parse.outputs.email }}';
             const modulesUploaded = '${{ steps.verify.outputs.modules_uploaded }}' === 'true';
             const moduleCount = '${{ steps.verify.outputs.module_count }}' || '0';
+            const progressCommentId = '${{ steps.progress.outputs.comment_id }}';
 
             const typeLabel = type === 'syslog' ? 'SYSLOG 闭环处理' : '问题解答';
             const maskedEmail = email.length > 4
@@ -252,8 +290,37 @@ jobs:
               ? 'ℹ️ 未检测到模块引用'
               : (modulesUploaded ? '✅ 全部已上传' : '⚠️ 部分模块未上传');
 
+            // Update progress comment to show all completed
+            if (progressCommentId && !isNaN(Number(progressCommentId))) {
+              try {
+                const progressBody = [
+                  '## ⚙️ SYSLOG 管道运行完成 ✅',
+                  '',
+                  '| 阶段 | 状态 | 说明 |',
+                  '|------|------|------|',
+                  '| ① 接收提交 | ✅ 已完成 | 系统已收到 |',
+                  '| ② 解析内容 | ✅ 已完成 | 广播编号: `' + broadcastId + '` |',
+                  '| ③ 模块验证 | ✅ 已完成 | ' + moduleStatus + ' |',
+                  '| ④ 唤醒核心大脑 | ✅ 已完成 | 铸渊核心大脑已处理 |',
+                  '| ⑤ 创建 Notion 工单 | ✅ 已完成 | 霜砚工单已推送 |',
+                  '| ⑥ 生成广播 | ✅ 已完成 | 新广播已生成 |',
+                  '| ⑦ 邮件通知 | ✅ 已完成 | 已发送至 `' + maskedEmail + '` |',
+                  '| ⑧ 闭环确认 | ✅ 已完成 | 见下方最终结果 |',
+                ].join('\n');
+
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: Number(progressCommentId),
+                  body: progressBody
+                });
+              } catch (e) {
+                console.log('⚠️ 更新成功进度评论失败: ' + e.message);
+              }
+            }
+
             const body = [
-              '✅ **已处理** · ' + typeLabel,
+              '## ✅ 已处理 · ' + typeLabel,
               '',
               '| 项目 | 内容 |',
               '|------|------|',
@@ -266,7 +333,9 @@ jobs:
               '> 铸渊核心大脑已完成 SYSLOG 验收 + 模块检测 + 广播生成。',
               '> 结果已发送到你的邮箱，Notion 侧工单已创建。',
               '>',
-              '> 如未收到邮件，请检查垃圾箱或重新提交。'
+              '> 如未收到邮件，请检查垃圾箱或重新提交。',
+              '>',
+              '> *—— 铸渊（ICE-GL-ZY001）· 代码守护人格体*'
             ].join('\n');
 
             await github.rest.issues.createComment({
@@ -295,12 +364,40 @@ jobs:
             const number = context.payload.issue?.number;
             if (!number) return;
 
+            const progressCommentId = '${{ steps.progress.outputs.comment_id }}';
+            const actionsUrl = 'https://github.com/' + context.repo.owner + '/' + context.repo.repo + '/actions';
+
+            // Update progress comment to reflect failure
+            if (progressCommentId && !isNaN(Number(progressCommentId))) {
+              try {
+                const progressBody = [
+                  '## ⚙️ SYSLOG 管道运行异常 ❌',
+                  '',
+                  '| 阶段 | 状态 | 说明 |',
+                  '|------|------|------|',
+                  '| ① 接收提交 | ✅ 已完成 | 系统已收到 |',
+                  '| ② ~ ⑧ | ❌ 异常 | 管道处理过程中出错 |',
+                  '',
+                  '> 请检查提交格式或查看 [Actions 日志](' + actionsUrl + ')',
+                ].join('\n');
+
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: Number(progressCommentId),
+                  body: progressBody
+                });
+              } catch (e) {
+                console.log('⚠️ 更新失败进度评论失败: ' + e.message);
+              }
+            }
+
             try {
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: number,
-                body: '❌ **处理失败** · 请检查提交格式是否正确，或联系管理员。\n\n> 错误详情请查看 [Actions 日志](https://github.com/' + context.repo.owner + '/' + context.repo.repo + '/actions)。'
+                body: '❌ **处理失败** · 请检查提交格式是否正确，或联系管理员。\n\n> 错误详情请查看 [Actions 日志](' + actionsUrl + ')。\n>\n> *—— 铸渊（ICE-GL-ZY001）*'
               });
             } catch (err) {
               console.log('⚠️ 失败告警回复失败: ' + err.message);
