@@ -6,10 +6,13 @@ name: SYSLOG Auto Pipeline
 # → 写入 Notion 工单 → 发邮件给开发者 → Discussion 回复
 #
 # 依赖 Secrets：
-#   LLM_API_KEY          第三方 LLM 平台密钥
-#   LLM_BASE_URL         第三方 LLM 平台 API 地址（如 https://api.xxx.com/v1）
+#   LLM_API_KEY          第三方 LLM 平台密钥（必须）
+#   LLM_BASE_URL         第三方 LLM 平台 API 地址（必须，如 https://api.xxx.com/v1）
 #   NOTION_API_TOKEN     Notion API token
 #   NOTION_TICKET_DB_ID  霜砚工单数据库 ID
+#   CORE_BRAIN_PAGE_ID   曜冥核心大脑 v4.0 页面 ID（v4.0 协议动态注入）
+#   PORTRAIT_DB_ID       开发者动态画像库数据库 ID（v4.0 协议动态注入）
+#   FINGERPRINT_DB_ID    模块指纹注册表数据库 ID（v4.0 协议动态注入）
 #   SMTP_USER            QQ 邮箱地址
 #   SMTP_PASS            QQ 邮箱 SMTP 授权码
 
@@ -102,6 +105,10 @@ jobs:
           SUBMIT_TYPE: ${{ steps.parse.outputs.type }}
           SUBMIT_CONTENT: ${{ steps.parse.outputs.content }}
           AUTHOR: ${{ steps.parse.outputs.author }}
+          NOTION_TOKEN: ${{ secrets.NOTION_API_TOKEN }}
+          CORE_BRAIN_PAGE_ID: ${{ secrets.CORE_BRAIN_PAGE_ID }}
+          PORTRAIT_DB_ID: ${{ secrets.PORTRAIT_DB_ID }}
+          FINGERPRINT_DB_ID: ${{ secrets.FINGERPRINT_DB_ID }}
         run: node scripts/wake-persona.js
 
       - name: 📋 Write to Notion ticket

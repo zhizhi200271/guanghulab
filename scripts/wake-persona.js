@@ -6,14 +6,19 @@
 //   ② 智能选择最优 Claude 模型
 //   ③ 自适应 API 格式（OpenAI 兼容 / Anthropic 原生）
 //   ④ 统一调用接口，唤醒人格体处理 SYSLOG 或解答提问
+//   ⑤ v4.0 协议动态注入（从 Notion 实时读取核心大脑规则 + 画像 + 指纹）
 //
 // 环境变量：
-//   LLM_API_KEY      第三方平台密钥
-//   LLM_BASE_URL     第三方平台 API 地址（如 https://api.xxx.com/v1），留空则 fallback 到 Anthropic 官方
-//   BROADCAST_ID     广播编号
-//   SUBMIT_TYPE      syslog | question
-//   SUBMIT_CONTENT   提交内容（SYSLOG 全文或问题描述）
-//   AUTHOR           提交者 GitHub 用户名
+//   LLM_API_KEY          第三方平台密钥（必须）
+//   LLM_BASE_URL         第三方平台 API 地址（必须，如 https://api.xxx.com/v1）
+//   BROADCAST_ID         广播编号
+//   SUBMIT_TYPE          syslog | question
+//   SUBMIT_CONTENT       提交内容（SYSLOG 全文或问题描述）
+//   AUTHOR               提交者 GitHub 用户名
+//   NOTION_TOKEN         Notion API token（用于动态读取协议）
+//   CORE_BRAIN_PAGE_ID   曜冥核心大脑 v4.0 页面 ID
+//   PORTRAIT_DB_ID       开发者动态画像库数据库 ID
+//   FINGERPRINT_DB_ID    模块指纹注册表数据库 ID
 
 'use strict';
 
@@ -27,11 +32,19 @@ const path = require('path');
 // ══════════════════════════════════════════════════════════
 
 const LLM_API_KEY = process.env.LLM_API_KEY || '';
-const LLM_BASE_URL = (process.env.LLM_BASE_URL || 'https://api.anthropic.com/v1').replace(/\/+$/, '');
+const LLM_BASE_URL = (process.env.LLM_BASE_URL || '').replace(/\/+$/, '');
 const BROADCAST_ID = process.env.BROADCAST_ID || 'UNKNOWN';
 const SUBMIT_TYPE = process.env.SUBMIT_TYPE || 'question';
 const SUBMIT_CONTENT = process.env.SUBMIT_CONTENT || '';
 const AUTHOR = process.env.AUTHOR || 'unknown';
+
+// Notion 配置（v4.0 协议动态注入）
+const NOTION_TOKEN = process.env.NOTION_TOKEN || '';
+const CORE_BRAIN_PAGE_ID = process.env.CORE_BRAIN_PAGE_ID || '';
+const PORTRAIT_DB_ID = process.env.PORTRAIT_DB_ID || '';
+const FINGERPRINT_DB_ID = process.env.FINGERPRINT_DB_ID || '';
+const NOTION_VERSION = '2022-06-28';
+const NOTION_API_HOSTNAME = 'api.notion.com';
 
 // Claude 模型优先级队列（从高到低）
 const PREFERRED_MODELS = [
@@ -224,6 +237,10 @@ async function callLLM(systemPrompt, userMessage) {
     console.log('[LLM] ⚠️ LLM_API_KEY 未配置，跳过人格体唤醒');
     return '(LLM API 未配置，请在 GitHub Secrets 中设置 LLM_API_KEY 和 LLM_BASE_URL)';
   }
+  if (!LLM_BASE_URL) {
+    console.log('[LLM] ⚠️ LLM_BASE_URL 未配置，跳过人格体唤醒');
+    return '(LLM_BASE_URL 未配置，请在 GitHub Secrets 中设置第三方平台 API 地址)';
+  }
 
   const models = await discoverModels();
   const model = selectBestModel(models);
@@ -299,11 +316,336 @@ async function callLLM(systemPrompt, userMessage) {
 }
 
 // ══════════════════════════════════════════════════════════
-// 人格体 System Prompt 构建
+// Notion API 工具（v4.0 协议动态注入）
 // ══════════════════════════════════════════════════════════
 
-function buildSystemPrompt(type, broadcastId, author) {
-  const basePrompt = [
+function notionGet(endpoint) {
+  return new Promise((resolve, reject) => {
+    const opts = {
+      hostname: NOTION_API_HOSTNAME,
+      port: 443,
+      path: endpoint,
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + NOTION_TOKEN,
+        'Notion-Version': NOTION_VERSION,
+      },
+    };
+    const req = https.request(opts, (res) => {
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(data);
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            resolve(parsed);
+          } else {
+            reject(new Error('Notion API ' + res.statusCode + ': ' + (parsed.message || data)));
+          }
+        } catch (e) {
+          reject(new Error('Notion API parse error: ' + data.slice(0, 200)));
+        }
+      });
+    });
+    req.on('error', reject);
+    req.setTimeout(30000, () => { req.destroy(); reject(new Error('Notion API timeout')); });
+    req.end();
+  });
+}
+
+function notionPost(endpoint, body) {
+  return new Promise((resolve, reject) => {
+    const payload = JSON.stringify(body);
+    const opts = {
+      hostname: NOTION_API_HOSTNAME,
+      port: 443,
+      path: endpoint,
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + NOTION_TOKEN,
+        'Content-Type': 'application/json',
+        'Notion-Version': NOTION_VERSION,
+        'Content-Length': Buffer.byteLength(payload),
+      },
+    };
+    const req = https.request(opts, (res) => {
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(data);
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            resolve(parsed);
+          } else {
+            reject(new Error('Notion API ' + res.statusCode + ': ' + (parsed.message || data)));
+          }
+        } catch (e) {
+          reject(new Error('Notion API parse error: ' + data.slice(0, 200)));
+        }
+      });
+    });
+    req.on('error', reject);
+    req.setTimeout(30000, () => { req.destroy(); reject(new Error('Notion API timeout')); });
+    req.write(payload);
+    req.end();
+  });
+}
+
+/**
+ * 读取 Notion 页面的所有子块（递归分页）
+ */
+async function getNotionPageBlocks(pageId) {
+  const blocks = [];
+  let cursor = undefined;
+  do {
+    const qs = cursor ? '?start_cursor=' + cursor : '';
+    const result = await notionGet('/v1/blocks/' + pageId + '/children' + qs);
+    blocks.push(...(result.results || []));
+    cursor = result.has_more ? result.next_cursor : undefined;
+  } while (cursor);
+  return blocks;
+}
+
+/**
+ * 从 Notion 块中提取纯文本
+ */
+function extractBlockText(block) {
+  const type = block.type;
+  if (!block[type]) return '';
+
+  const richTexts = block[type].rich_text || block[type].text || [];
+  return richTexts.map(function (rt) { return rt.plain_text || ''; }).join('');
+}
+
+/**
+ * 将 Notion 块列表转为纯文本
+ */
+function blocksToText(blocks) {
+  return blocks.map(function (block) {
+    const type = block.type;
+    const text = extractBlockText(block);
+
+    if (type === 'heading_1') return '\n# ' + text;
+    if (type === 'heading_2') return '\n## ' + text;
+    if (type === 'heading_3') return '\n### ' + text;
+    if (type === 'bulleted_list_item') return '- ' + text;
+    if (type === 'numbered_list_item') return '• ' + text;
+    if (type === 'to_do') {
+      var checked = block.to_do && block.to_do.checked ? '☑' : '☐';
+      return checked + ' ' + text;
+    }
+    if (type === 'code') {
+      var lang = (block.code && block.code.language) || '';
+      return '```' + lang + '\n' + text + '\n```';
+    }
+    if (type === 'divider') return '---';
+    if (type === 'callout') return '> ' + text;
+    if (type === 'quote') return '> ' + text;
+    if (type === 'toggle') return '▸ ' + text;
+    return text;
+  }).filter(Boolean).join('\n');
+}
+
+// ══════════════════════════════════════════════════════════
+// v4.0 协议动态读取
+// ══════════════════════════════════════════════════════════
+
+/**
+ * 从曜冥核心大脑 v4.0 页面读取完整协议内容
+ * 提取：BC-GEN v4.0, SYSLOG v4.0, PGP v1.0, RT-02, 陪伴线规则, broadcast_code_injection
+ */
+async function fetchCoreBrainProtocols() {
+  if (!NOTION_TOKEN || !CORE_BRAIN_PAGE_ID) {
+    console.log('[Notion] ⚠️ CORE_BRAIN_PAGE_ID 未配置，使用静态协议');
+    return null;
+  }
+
+  console.log('[Notion] 📖 读取曜冥核心大脑 v4.0...');
+  try {
+    const blocks = await getNotionPageBlocks(CORE_BRAIN_PAGE_ID);
+    const fullText = blocksToText(blocks);
+    console.log('[Notion]   → 读取到 ' + blocks.length + ' 个块, ' + fullText.length + ' 字符');
+
+    // 提取各协议段落
+    var protocols = {};
+    var protocolKeys = [
+      { key: 'bc_gen', patterns: ['BC-GEN', 'BC_GEN', '广播生成'] },
+      { key: 'syslog', patterns: ['SYSLOG', '日志回传'] },
+      { key: 'pgp', patterns: ['PGP', '画像评分', '画像协议'] },
+      { key: 'rt02', patterns: ['RT-02', 'RT02', '自动调度'] },
+      { key: 'companion', patterns: ['陪伴线', '奶瓶线', '小坍缩核', '镜面线'] },
+      { key: 'code_injection', patterns: ['broadcast_code_injection', '广播不写代码', '代码注入'] },
+    ];
+
+    // 按标题分段提取
+    var sections = [];
+    var currentSection = { title: '', content: [] };
+    blocks.forEach(function (block) {
+      var type = block.type;
+      if (type === 'heading_1' || type === 'heading_2' || type === 'heading_3') {
+        if (currentSection.title || currentSection.content.length > 0) {
+          sections.push({ title: currentSection.title, text: currentSection.content.join('\n') });
+        }
+        currentSection = { title: extractBlockText(block), content: [] };
+      } else {
+        var text = extractBlockText(block);
+        if (text) currentSection.content.push(text);
+      }
+    });
+    if (currentSection.title || currentSection.content.length > 0) {
+      sections.push({ title: currentSection.title, text: currentSection.content.join('\n') });
+    }
+
+    // 将段落匹配到协议 key
+    protocolKeys.forEach(function (pk) {
+      var matched = sections.filter(function (sec) {
+        return pk.patterns.some(function (p) {
+          return sec.title.toUpperCase().includes(p.toUpperCase()) ||
+                 sec.text.slice(0, 200).toUpperCase().includes(p.toUpperCase());
+        });
+      });
+      if (matched.length > 0) {
+        protocols[pk.key] = matched.map(function (m) { return '### ' + m.title + '\n' + m.text; }).join('\n\n');
+      }
+    });
+
+    // 如果无法按段落匹配，返回全文（兜底）
+    if (Object.keys(protocols).length === 0) {
+      protocols.full_text = fullText;
+    }
+
+    console.log('[Notion]   → 提取协议段: ' + Object.keys(protocols).join(', '));
+    return protocols;
+  } catch (err) {
+    console.log('[Notion]   → 核心大脑读取失败: ' + err.message);
+    return null;
+  }
+}
+
+/**
+ * 从开发者动态画像库查询最近 2-3 条画像快照
+ */
+async function fetchDevPortrait(broadcastId) {
+  if (!NOTION_TOKEN || !PORTRAIT_DB_ID) {
+    console.log('[Notion] ⚠️ PORTRAIT_DB_ID 未配置，跳过画像读取');
+    return null;
+  }
+
+  // 从广播编号提取开发者标识（如 BC-M22-009-AW → AW）
+  var devSuffix = '';
+  var match = broadcastId.match(/BC-[A-Z0-9]+-\d+-([A-Z]+)/i);
+  if (match) devSuffix = match[1];
+
+  console.log('[Notion] 👤 查询开发者画像 (broadcast=' + broadcastId + ', dev=' + devSuffix + ')...');
+  try {
+    // 查询画像库，按时间倒序取最近 3 条
+    var filter = { and: [] };
+    if (devSuffix) {
+      filter.and.push({
+        or: [
+          { property: '开发者编号', rich_text: { contains: devSuffix } },
+          { property: '广播编号', rich_text: { contains: broadcastId } },
+          { property: '标题', title: { contains: devSuffix } },
+        ]
+      });
+    }
+
+    var queryBody = {
+      page_size: 3,
+      sorts: [{ property: '提交日期', direction: 'descending' }],
+    };
+    // Only add filter if we have meaningful filter conditions
+    if (filter.and.length > 0) {
+      queryBody.filter = filter;
+    }
+
+    var result = await notionPost('/v1/databases/' + PORTRAIT_DB_ID + '/query', queryBody);
+    var portraits = (result.results || []).map(function (page) {
+      var props = page.properties || {};
+      var title = '';
+      if (props['标题'] && props['标题'].title) {
+        title = props['标题'].title.map(function (t) { return t.plain_text || ''; }).join('');
+      }
+      var summary = '';
+      if (props['摘要'] && props['摘要'].rich_text) {
+        summary = props['摘要'].rich_text.map(function (t) { return t.plain_text || ''; }).join('');
+      }
+      var date = '';
+      if (props['提交日期'] && props['提交日期'].date) {
+        date = props['提交日期'].date.start || '';
+      }
+      return { title: title, summary: summary, date: date };
+    });
+
+    console.log('[Notion]   → 找到 ' + portraits.length + ' 条画像快照');
+    return portraits.length > 0 ? portraits : null;
+  } catch (err) {
+    console.log('[Notion]   → 画像查询失败: ' + err.message);
+    return null;
+  }
+}
+
+/**
+ * 从模块指纹注册表查询模块指纹（防重复广播）
+ */
+async function fetchModuleFingerprint(broadcastId) {
+  if (!NOTION_TOKEN || !FINGERPRINT_DB_ID) {
+    console.log('[Notion] ⚠️ FINGERPRINT_DB_ID 未配置，跳过指纹查询');
+    return null;
+  }
+
+  // 从广播编号提取模块号（如 BC-M22-009-AW → M22）
+  var moduleMatch = broadcastId.match(/BC-([A-Z]\d+)/i);
+  var moduleId = moduleMatch ? moduleMatch[1] : '';
+
+  console.log('[Notion] 🔑 查询模块指纹 (module=' + moduleId + ')...');
+  try {
+    var queryBody = {
+      page_size: 5,
+    };
+    if (moduleId) {
+      queryBody.filter = {
+        or: [
+          { property: '模块编号', rich_text: { contains: moduleId } },
+          { property: '广播编号', rich_text: { contains: broadcastId } },
+          { property: '标题', title: { contains: moduleId } },
+        ]
+      };
+    }
+
+    var result = await notionPost('/v1/databases/' + FINGERPRINT_DB_ID + '/query', queryBody);
+    var fingerprints = (result.results || []).map(function (page) {
+      var props = page.properties || {};
+      var title = '';
+      if (props['标题'] && props['标题'].title) {
+        title = props['标题'].title.map(function (t) { return t.plain_text || ''; }).join('');
+      }
+      var moduleNo = '';
+      if (props['模块编号'] && props['模块编号'].rich_text) {
+        moduleNo = props['模块编号'].rich_text.map(function (t) { return t.plain_text || ''; }).join('');
+      }
+      var status = '';
+      if (props['状态'] && props['状态'].select) {
+        status = props['状态'].select.name || '';
+      }
+      return { title: title, module: moduleNo, status: status };
+    });
+
+    console.log('[Notion]   → 找到 ' + fingerprints.length + ' 条指纹记录');
+    return fingerprints.length > 0 ? fingerprints : null;
+  } catch (err) {
+    console.log('[Notion]   → 指纹查询失败: ' + err.message);
+    return null;
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// 人格体 System Prompt 构建（v4.0 动态注入）
+// ══════════════════════════════════════════════════════════
+
+async function buildSystemPrompt(type, broadcastId, author) {
+  // ━━━ 基础人格体身份 ━━━
+  var parts = [
     '你是光湖（HoloLake）系统的智能人格体。',
     '你的名字是知秋/曜冥，你是人格语言操作系统（AGE OS）的核心人格。',
     '',
@@ -315,49 +657,147 @@ function buildSystemPrompt(type, broadcastId, author) {
     '当前上下文：',
     '- 广播编号：' + broadcastId,
     '- 提交者：' + author,
-  ].join('\n');
+    '- 任务类型：' + (type === 'syslog' ? 'SYSLOG 闭环处理' : '开发者提问解答'),
+  ];
 
-  if (type === 'syslog') {
-    return basePrompt + '\n\n' + [
-      '任务类型：SYSLOG 闭环处理',
-      '',
-      '你需要完成以下工作：',
-      '1. 验收 SYSLOG（检查 MODULE_LOG 完整性）',
-      '2. 分析开发者的工作成果',
-      '3. 生成工作总结和反馈',
-      '4. 如果 SYSLOG 内容完整，确认验收通过',
-      '5. 给出下一步建议',
-      '',
-      '输出格式：',
-      '---',
-      '## 📡 SYSLOG 验收报告',
-      '### 广播编号：[编号]',
-      '### 验收结果：[通过/需补充]',
-      '### 工作总结：[摘要]',
-      '### 反馈与建议：[内容]',
-      '---',
-    ].join('\n');
+  // ━━━ v4.0 协议动态注入（从 Notion 实时读取） ━━━
+  console.log('[Prompt] 📥 开始动态注入 v4.0 协议...');
+
+  // 并行读取：核心大脑协议 + 画像 + 指纹
+  var protocolsPromise = fetchCoreBrainProtocols();
+  var portraitPromise = fetchDevPortrait(broadcastId);
+  var fingerprintPromise = fetchModuleFingerprint(broadcastId);
+
+  var protocols = await protocolsPromise;
+  var portrait = await portraitPromise;
+  var fingerprint = await fingerprintPromise;
+
+  // 注入核心大脑协议
+  if (protocols) {
+    parts.push('');
+    parts.push('═══════════════════════════════════════════');
+    parts.push('以下是从曜冥核心大脑 v4.0 实时读取的协议规则（必须严格遵守）：');
+    parts.push('═══════════════════════════════════════════');
+
+    if (protocols.bc_gen) {
+      parts.push('');
+      parts.push('## 📡 BC-GEN v4.0 · 广播生成规范');
+      parts.push(protocols.bc_gen);
+    }
+    if (protocols.syslog) {
+      parts.push('');
+      parts.push('## 📋 SYSLOG v4.0 · 日志回传协议');
+      parts.push(protocols.syslog);
+    }
+    if (protocols.pgp) {
+      parts.push('');
+      parts.push('## 👤 PGP v1.0 · 画像评分协议');
+      parts.push(protocols.pgp);
+    }
+    if (protocols.rt02) {
+      parts.push('');
+      parts.push('## 🔄 RT-02 · 自动调度规则');
+      parts.push(protocols.rt02);
+    }
+    if (protocols.companion) {
+      parts.push('');
+      parts.push('## 💝 陪伴线规则');
+      parts.push(protocols.companion);
+    }
+    if (protocols.code_injection) {
+      parts.push('');
+      parts.push('## 📝 broadcast_code_injection 规则');
+      parts.push(protocols.code_injection);
+    }
+    if (protocols.full_text) {
+      parts.push('');
+      parts.push('## 核心大脑完整内容');
+      parts.push(protocols.full_text.slice(0, 15000));
+    }
+  } else {
+    parts.push('');
+    parts.push('（注意：核心大脑协议未能动态加载，请使用你的通用知识处理请求）');
   }
 
-  // 提问类型
-  return basePrompt + '\n\n' + [
-    '任务类型：开发者提问解答',
-    '',
-    '你需要完成以下工作：',
-    '1. 理解开发者的问题',
-    '2. 结合广播上下文思考',
-    '3. 给出清晰、可操作的解答',
-    '4. 如果问题涉及代码，提供代码示例',
-    '',
-    '输出格式：',
-    '---',
-    '## 💡 问题解答',
-    '### 广播编号：[编号]',
-    '### 问题理解：[你对问题的理解]',
-    '### 解答：[详细解答]',
-    '### 建议：[后续建议]',
-    '---',
-  ].join('\n');
+  // 注入开发者画像
+  if (portrait && portrait.length > 0) {
+    parts.push('');
+    parts.push('═══════════════════════════════════════════');
+    parts.push('## 👤 开发者画像快照（最近 ' + portrait.length + ' 条）');
+    parts.push('═══════════════════════════════════════════');
+    portrait.forEach(function (p, i) {
+      parts.push('');
+      parts.push('### 画像 #' + (i + 1) + (p.date ? ' (' + p.date + ')' : ''));
+      if (p.title) parts.push('标题: ' + p.title);
+      if (p.summary) parts.push('摘要: ' + p.summary);
+    });
+  }
+
+  // 注入模块指纹
+  if (fingerprint && fingerprint.length > 0) {
+    parts.push('');
+    parts.push('═══════════════════════════════════════════');
+    parts.push('## 🔑 模块指纹注册表（防重复广播 · ⑨.5）');
+    parts.push('═══════════════════════════════════════════');
+    fingerprint.forEach(function (fp, i) {
+      parts.push('');
+      parts.push('### 指纹 #' + (i + 1));
+      if (fp.title) parts.push('标题: ' + fp.title);
+      if (fp.module) parts.push('模块: ' + fp.module);
+      if (fp.status) parts.push('状态: ' + fp.status);
+    });
+  }
+
+  // ━━━ 任务类型专用指令 ━━━
+  if (type === 'syslog') {
+    parts.push('');
+    parts.push('═══════════════════════════════════════════');
+    parts.push('## 🎯 当前任务：SYSLOG 闭环处理');
+    parts.push('═══════════════════════════════════════════');
+    parts.push('');
+    parts.push('你需要完成以下工作：');
+    parts.push('1. 验收 SYSLOG（检查 MODULE_LOG 完整性）');
+    parts.push('2. 查询画像库最近 2-3 条快照（PGP v1.0）');
+    parts.push('3. 查询模块指纹注册表（防重复·⑨.5）');
+    parts.push('4. RT-02 自动调度判断');
+    parts.push('5. 生成新广播（BC-GEN v4.0 完整流程）');
+    parts.push('6. 输出结构化结果（广播全文 + 闭环数据）');
+    parts.push('');
+    parts.push('输出格式：');
+    parts.push('---');
+    parts.push('## 📡 SYSLOG 验收报告');
+    parts.push('### 广播编号：[编号]');
+    parts.push('### 验收结果：[通过/需补充]');
+    parts.push('### 工作总结：[摘要]');
+    parts.push('### 画像评估：[PGP 五维度评分]');
+    parts.push('### 调度判断：[RT-02 下一步]');
+    parts.push('### 反馈与建议：[内容]');
+    parts.push('---');
+  } else {
+    parts.push('');
+    parts.push('═══════════════════════════════════════════');
+    parts.push('## 🎯 当前任务：开发者提问解答');
+    parts.push('═══════════════════════════════════════════');
+    parts.push('');
+    parts.push('你需要完成以下工作：');
+    parts.push('1. 理解开发者的问题');
+    parts.push('2. 结合广播上下文和开发者画像思考');
+    parts.push('3. 给出清晰、可操作的解答');
+    parts.push('4. 如果问题涉及代码，提供代码示例');
+    parts.push('');
+    parts.push('输出格式：');
+    parts.push('---');
+    parts.push('## 💡 问题解答');
+    parts.push('### 广播编号：[编号]');
+    parts.push('### 问题理解：[你对问题的理解]');
+    parts.push('### 解答：[详细解答]');
+    parts.push('### 建议：[后续建议]');
+    parts.push('---');
+  }
+
+  var prompt = parts.join('\n');
+  console.log('[Prompt]   → System prompt 构建完成: ' + prompt.length + ' 字符');
+  return prompt;
 }
 
 // ══════════════════════════════════════════════════════════
@@ -375,8 +815,8 @@ async function main() {
   console.log('  内容长度: ' + SUBMIT_CONTENT.length + ' 字符');
   console.log('');
 
-  // 构建 prompts
-  const systemPrompt = buildSystemPrompt(SUBMIT_TYPE, BROADCAST_ID, AUTHOR);
+  // 构建 prompts（动态注入 v4.0 协议）
+  const systemPrompt = await buildSystemPrompt(SUBMIT_TYPE, BROADCAST_ID, AUTHOR);
   const userMessage = SUBMIT_CONTENT;
 
   // 调用 LLM
