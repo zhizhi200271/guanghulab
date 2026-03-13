@@ -13,7 +13,7 @@ const SELECTED_MODEL = sessionStorage.getItem('selected_model');
 
 const API_BASE = (function () {
   if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-    return 'http://localhost:3721';
+    return 'http://localhost:3002';
   }
   return 'https://guanghulab.com';
 })();
@@ -648,33 +648,47 @@ async function confirmBuild() {
   // 先连接 WebSocket（确保在 build 开始前建立连接，避免丢失进度消息）
   connectPreviewWebSocket();
 
-  try {
-    var buildRes = await fetch(API_BASE + '/api/ps/build/start', {
-      method: 'POST',
-      headers: authHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify({
-        dev_id: DEV_ID,
-        email: email,
-        contact: contact,
-        conversation: conversationHistory,
-        api_base: USER_API_BASE,
-        api_key: USER_API_KEY,
-        model: SELECTED_MODEL
-      })
-    });
+  // 提交开发任务（含重试机制）
+  var maxRetries = 2;
+  var retryCount = 0;
+  var submitted = false;
 
-    if (!buildRes.ok) {
-      var errMsg = 'HTTP ' + buildRes.status + ' ' + buildRes.statusText;
-      try {
-        var errData = await buildRes.json();
-        if (errData.message) errMsg = errData.message;
-      } catch (_e) { /* use status text fallback */ }
-      appendMessage('system', '⚠️ 铸渊代理启动失败: ' + errMsg);
-      updatePreviewStatus('error', '启动失败');
+  while (retryCount <= maxRetries && !submitted) {
+    try {
+      var buildRes = await fetch(API_BASE + '/api/ps/build/start', {
+        method: 'POST',
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({
+          dev_id: DEV_ID,
+          email: email,
+          contact: contact,
+          conversation: conversationHistory,
+          api_base: USER_API_BASE,
+          api_key: USER_API_KEY,
+          model: SELECTED_MODEL
+        })
+      });
+
+      if (!buildRes.ok) {
+        var errMsg = 'HTTP ' + buildRes.status + ' ' + buildRes.statusText;
+        try {
+          var errData = await buildRes.json();
+          if (errData.message) errMsg = errData.message;
+        } catch (_e) { /* use status text fallback */ }
+        appendMessage('system', '⚠️ 铸渊代理启动失败: ' + errMsg);
+        updatePreviewStatus('error', '启动失败');
+      }
+      submitted = true;
+    } catch (_err) {
+      retryCount++;
+      if (retryCount <= maxRetries) {
+        appendMessage('system', '⏳ 连接后端服务中，正在重试（' + retryCount + '/' + maxRetries + '）...');
+        await new Promise(function (r) { setTimeout(r, 1500); });
+      } else {
+        appendMessage('system', '⚠️ 任务提交失败：无法连接铸渊后端服务。请检查：\n1. 网络连接是否正常\n2. 后端服务是否已启动（端口 3002）\n3. 如使用 GitHub Pages 访问，请确认 guanghulab.com 服务可用');
+        updatePreviewStatus('error', '连接失败');
+      }
     }
-  } catch (_err) {
-    appendMessage('system', '⚠️ 任务提交失败，请检查网络连接后再试');
-    updatePreviewStatus('error', '网络错误');
   }
 }
 

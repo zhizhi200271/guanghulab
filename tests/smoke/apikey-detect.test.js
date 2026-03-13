@@ -6,7 +6,7 @@
  */
 const http = require('http');
 
-const BASE = process.env.TEST_BASE || 'http://localhost:3721';
+const BASE = process.env.TEST_BASE || 'http://localhost:3002';
 
 function post(path, body) {
   return new Promise((resolve, reject) => {
