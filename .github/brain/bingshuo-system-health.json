@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "description": "冰朔主控系统健康状态",
-  "updated_at": "2026-03-13T13:38:05.923Z",
+  "updated_at": "2026-03-13T14:25:49.756Z",
   "health": {
     "brain_consistency": {
       "status": "yellow",
@@ -13,7 +13,7 @@
     },
     "workflow_health": {
       "status": "green",
-      "detail": "40 个 workflow 已注册"
+      "detail": "41 个 workflow 已注册"
     },
     "routing_health": {
       "status": "yellow",
