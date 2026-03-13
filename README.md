@@ -49,6 +49,21 @@
 
 ---
 
+## 🚀 开发者入口
+
+<div align="center">
+
+[![提交系统日志](https://img.shields.io/badge/📡_提交系统日志-点这里-blue?style=for-the-badge)](https://github.com/qinfendebingshuo/guanghulab/discussions/new?category=📡+SYSLOG+提交区)
+[![遇到问题](https://img.shields.io/badge/❓_遇到问题-点这里提问-green?style=for-the-badge)](https://github.com/qinfendebingshuo/guanghulab/discussions/new?category=📡+SYSLOG+提交区)
+
+> 做完了？把日志粘贴进去，填上邮箱，点提交。新广播会发到你邮箱里。
+>
+> 有问题？同一个入口，选「提问」，问题解答也发到你邮箱里。
+
+</div>
+
+---
+
 ## 📖 系统简介
 
 **光湖（HoloLake）** 是一个基于人格语言操作系统的智能协作平台，采用壳-核分离设计：
