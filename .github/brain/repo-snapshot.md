@@ -1,5 +1,5 @@
 # 铸渊图书馆快照 · Repo Snapshot
-> 生成于 2026-03-13 22:26 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
+> 生成于 2026-03-13 22:51 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
 
 ---
 
@@ -13,7 +13,7 @@
 | 脚本 | 40 个执行脚本 |
 | 开发者节点 | 8 人 |
 | HLI 接口覆盖率 | 7/21 (33%) |
-| 快照生成时间 | 2026-03-13 22:26 CST |
+| 快照生成时间 | 2026-03-13 22:51 CST |
 
 ---
 
@@ -121,7 +121,7 @@
 | `sync-login-entry.yml` | 铸渊 · Sync Login Entry · Notion → 飞书文档A | manual |
 | `sync-persona-studio.yml` | 🔄 铸渊跨仓库同步 · persona-studio | push, manual |
 | `syslog-auto-pipeline.yml` | SYSLOG Auto Pipeline | unknown |
-| `syslog-issue-pipeline.yml` | SYSLOG Issue Pipeline | issues |
+| `syslog-issue-pipeline.yml` | 📡 SYSLOG Issue Pipeline | issues |
 | `syslog-pipeline.yml` | 铸渊 · SYSLOG Pipeline (A/D/E) | push, manual |
 | `test-notion-bridge.yml` | "🧪 Notion Bridge Connectivity Test" | push, manual |
 | `update-readme-bulletin.yml` | 📢 更新系统公告区 | push, schedule(0 1 * * *), manual |
