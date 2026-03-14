@@ -422,19 +422,19 @@ router.post('/push-broadcast', async (req, res) => {
   // 1. 验证 token
   const token = req.headers['x-push-token'];
   if (!process.env.PUSH_BROADCAST_TOKEN || token !== process.env.PUSH_BROADCAST_TOKEN) {
-    return res.status(401).json({ error: true, message: 'Invalid push token' });
+    return res.status(401).json({ error: true, code: 'INVALID_TOKEN', message: 'Invalid push token' });
   }
 
   // 2. 解析请求体
   const { chat_id, sender_open_id, broadcast_title, broadcast_content, broadcast_url } = req.body;
 
   if (!broadcast_content && !broadcast_title) {
-    return res.status(400).json({ error: true, message: 'Missing broadcast_title or broadcast_content' });
+    return res.status(400).json({ error: true, code: 'MISSING_CONTENT', message: 'Missing broadcast_title or broadcast_content' });
   }
 
   const receive_id = chat_id || sender_open_id;
   if (!receive_id) {
-    return res.status(400).json({ error: true, message: 'Missing chat_id or sender_open_id' });
+    return res.status(400).json({ error: true, code: 'MISSING_TARGET', message: 'Missing chat_id or sender_open_id' });
   }
 
   try {
@@ -467,11 +467,11 @@ router.post('/push-broadcast', async (req, res) => {
       res.json({ success: true, message_id: msgResult.data.data && msgResult.data.data.message_id });
     } else {
       console.error('❌ 飞书发送失败:', JSON.stringify(msgResult.data));
-      res.status(500).json({ error: true, message: (msgResult.data && msgResult.data.msg) || 'Feishu API error', code: msgResult.data && msgResult.data.code });
+      res.status(500).json({ error: true, code: 'FEISHU_API_ERROR', message: (msgResult.data && msgResult.data.msg) || 'Feishu API error' });
     }
   } catch (err) {
     console.error('❌ push-broadcast error:', err.message);
-    res.status(500).json({ error: true, message: err.message });
+    res.status(500).json({ error: true, code: 'PUSH_ERROR', message: err.message });
   }
 });
 
