@@ -38,6 +38,7 @@ jobs:
   push-to-feishu:
     name: 📢 推送广播到飞书聊天
     runs-on: ubuntu-latest
+    permissions: {}
 
     steps:
       - name: 📢 推送广播消息卡片
