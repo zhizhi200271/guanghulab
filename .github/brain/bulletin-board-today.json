@@ -1,1 +1,23 @@
-{"date":"","records":[]}
+{
+  "date": "2026-03-14",
+  "records": [
+    {
+      "key": "Copilot|—|2026-03-14T08:25:24Z",
+      "ts": "2026-03-14T08:25:24Z",
+      "actor": "Copilot",
+      "module": "—",
+      "result": "success",
+      "icon": "✅",
+      "sortKey": 1773476724000
+    },
+    {
+      "key": "冰朔|—|2026-03-14T08:25:36Z",
+      "ts": "2026-03-14T08:25:36Z",
+      "actor": "冰朔",
+      "module": "—",
+      "result": "success",
+      "icon": "✅",
+      "sortKey": 1773476736000
+    }
+  ]
+}
