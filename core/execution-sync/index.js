@@ -223,11 +223,7 @@ async function syncToNotion(statusData) {
   }
 
   console.log('📡 同步执行状态到 Notion...');
-  await notionSync.pushExecutionLog({
-    task_id: `execution-sync-${new Date().toISOString().slice(0, 10)}`,
-    status: statusData.execution_layer_status,
-    message: `v${statusData.version} | modules: ${statusData.core_modules.length} | workflows: ${statusData.workflows.count} | queue: ${statusData.task_queue.total}`
-  });
+  await notionSync.syncExecutionStatus(statusData);
 }
 
 // CLI 入口

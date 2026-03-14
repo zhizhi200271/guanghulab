@@ -57,7 +57,13 @@ function enqueue(task) {
   // 去重：相同 task_id 只保留最新
   const existing = queue.tasks.findIndex(t => t.task_id === task.task_id);
   if (existing !== -1) {
-    queue.tasks[existing] = { ...task, updated_at: new Date().toISOString() };
+    const original = queue.tasks[existing];
+    queue.tasks[existing] = {
+      ...original,
+      ...task,
+      queued_at: original.queued_at,
+      updated_at: new Date().toISOString()
+    };
     console.log(`🔄 更新已有任务: ${task.task_id}`);
   } else {
     queue.tasks.push({

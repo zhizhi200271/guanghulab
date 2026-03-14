@@ -97,12 +97,9 @@ function isDuplicate(broadcastId) {
   try {
     const memory = JSON.parse(fs.readFileSync(MEMORY_PATH, 'utf-8'));
     const events = memory.events || [];
-    const today = new Date().toISOString().slice(0, 10);
-
     return events.some(e =>
       e.broadcast_id === broadcastId ||
-      (e.type === 'broadcast' && e.description === broadcastId) ||
-      (e.type === 'broadcast' && e.description === broadcastId && (e.date || '').startsWith(today))
+      (e.type === 'broadcast' && e.description === broadcastId)
     );
   } catch {
     return false;

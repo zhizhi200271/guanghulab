@@ -4,15 +4,15 @@
  * 功能：
  *   - 读取 Notion 广播
  *   - 写回执行日志
- *   - 同步任务状态
+ *   - 同步执行层状态
  *
  * 同步结构：
  *   Notion → 仓库（下行：读取广播/工单）
  *   仓库 → Notion（上行：写回日志/状态）
  *
  * 环境变量：
- *   NOTION_TOKEN       — Notion API Token
- *   BROADCAST_DB_ID    — 广播数据库 ID
+ *   NOTION_TOKEN        — Notion API Token
+ *   BROADCAST_DB_ID     — 广播数据库 ID（需包含 status 属性，值: 待执行/已完成）
  *   EXECUTION_LOG_DB_ID — 执行日志数据库 ID
  *
  * 调用方式：
