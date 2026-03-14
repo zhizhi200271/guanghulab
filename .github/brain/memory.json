@@ -1,7 +1,7 @@
 {
   "identity": "铸渊（Zhùyuān）· GitHub 代码守护人格体",
   "rules_version": "v3.0",
-  "last_updated": "2026-03-13T03:31:06.282Z",
+  "last_updated": "2026-03-14T08:48:40.855Z",
   "wake_protocol_version": "v3.0",
   "brain_version": "v3.0",
   "architecture": {
@@ -67,6 +67,18 @@
     }
   },
   "events": [
+    {
+      "date": "2026-03-14",
+      "type": "psp_inspection",
+      "description": "铸渊 PSP 巡检通过 · 全部检查项 ✅",
+      "by": "铸渊PSP巡检"
+    },
+    {
+      "date": "2026-03-13",
+      "type": "bug_fix",
+      "description": "修复「我要开发」任务提交失败 · 3个根因：① Nginx缺少CORS头（跨域预检失败）② WebSocket路由冲突（/ws/preview误路由到8080端口）③ 前端开发端口不匹配（3721→3002）· 增加重试机制和详细错误诊断 · 冰朔人格体已启动",
+      "by": "铸渊（冰朔指令）"
+    },
     {
       "date": "2026-03-13",
       "type": "brain_restore",
@@ -185,6 +197,22 @@
       "actor": "qinfendebingshuo",
       "ref": "refs/heads/main",
       "run_id": "22993977564"
+    },
+    {
+      "timestamp": "2026-03-13T08:53:32.764Z",
+      "type": "daily_check",
+      "result": "passed",
+      "actor": "qinfendebingshuo",
+      "ref": "refs/heads/main",
+      "run_id": "23043373769"
+    },
+    {
+      "timestamp": "2026-03-14T08:48:40.855Z",
+      "type": "daily_check",
+      "result": "passed",
+      "actor": "qinfendebingshuo",
+      "ref": "refs/heads/main",
+      "run_id": "23084594270"
     }
   ]
 }

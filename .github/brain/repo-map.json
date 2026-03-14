@@ -1,20 +1,20 @@
 {
   "description": "铸渊图书馆目录 · Library Catalog for 铸渊 (Zhùyuān)",
   "version": "2.0",
-  "generated_at": "2026-03-13T06:03:44.081Z",
+  "generated_at": "2026-03-14T13:47:45.215Z",
   "generated_by": "scripts/generate-repo-map.js",
   "repo": "qinfendebingshuo/guanghulab",
   "stats": {
     "zones": 13,
     "total_modules": 10,
-    "total_workflows": 37,
-    "total_scripts": 33,
+    "total_workflows": 44,
+    "total_scripts": 45,
     "total_dev_nodes": 8,
     "hli_interfaces": 21,
     "hli_implemented": 7,
     "hli_coverage_pct": "33%",
     "last_ci_run": "2026-03-05T16:07:24.070Z",
-    "memory_last_updated": "2026-03-13T03:31:06.282Z"
+    "memory_last_updated": "2026-03-14T08:48:40.855Z"
   },
   "zones": [
     {
@@ -58,6 +58,9 @@
           "file": "bingshuo-system-health.json"
         },
         {
+          "file": "bulletin-board-today.json"
+        },
+        {
           "file": "collaborators.json"
         },
         {
@@ -88,7 +91,7 @@
           "file": "wake-protocol.md"
         }
       ],
-      "item_count": 18
+      "item_count": 19
     },
     {
       "zone_id": "PERSONA_BRAIN",
@@ -219,6 +222,14 @@
           ]
         },
         {
+          "file": "daily-maintenance.yml",
+          "name": "\"🔧 铸渊 · Daily Maintenance Agent\"",
+          "triggers": [
+            "schedule(0 2 * * *)",
+            "manual"
+          ]
+        },
+        {
           "file": "deploy-pages.yml",
           "name": "🌀 部署铸渊聊天室 (GitHub Pages)",
           "triggers": [
@@ -251,6 +262,21 @@
           ]
         },
         {
+          "file": "execution-sync.yml",
+          "name": "\"📡 铸渊 · 执行层状态同步\"",
+          "triggers": [
+            "schedule(0 3 * * *)",
+            "manual"
+          ]
+        },
+        {
+          "file": "feishu-syslog-bridge.yml",
+          "name": "铸渊 · 飞书SYSLOG桥接",
+          "triggers": [
+            "unknown"
+          ]
+        },
+        {
           "file": "generate-module-doc.yml",
           "name": "铸渊 · 光湖纪元 模块文档自动生成",
           "triggers": [
@@ -267,9 +293,24 @@
           ]
         },
         {
+          "file": "notion-callback-pipeline.yml",
+          "name": "Notion Callback Pipeline",
+          "triggers": [
+            "unknown"
+          ]
+        },
+        {
           "file": "notion-connectivity-test.yml",
           "name": "铸渊 · Notion 连通性测试",
           "triggers": [
+            "manual"
+          ]
+        },
+        {
+          "file": "notion-heartbeat.yml",
+          "name": "Notion Heartbeat Monitor",
+          "triggers": [
+            "schedule(*/5 * * * *)",
             "manual"
           ]
         },
@@ -278,6 +319,20 @@
           "name": "铸渊 · Notion 工单轮询",
           "triggers": [
             "schedule(*/15 * * * *)",
+            "manual"
+          ]
+        },
+        {
+          "file": "persona-invoke.yml",
+          "name": "Persona Invoke Endpoint",
+          "triggers": [
+            "manual"
+          ]
+        },
+        {
+          "file": "pm2-server-diagnose.yml",
+          "name": "\"🔧 铸渊 · PM2 服务诊断与健康检查\"",
+          "triggers": [
             "manual"
           ]
         },
@@ -371,7 +426,7 @@
         },
         {
           "file": "syslog-issue-pipeline.yml",
-          "name": "SYSLOG Issue Pipeline",
+          "name": "📡 SYSLOG Issue Pipeline",
           "triggers": [
             "issues"
           ]
@@ -449,7 +504,7 @@
           ]
         }
       ],
-      "item_count": 37
+      "item_count": 44
     },
     {
       "zone_id": "SCRIPTS",
@@ -479,6 +534,9 @@
           "file": "contract-check.js"
         },
         {
+          "file": "create-standardized-ticket.js"
+        },
+        {
           "file": "cross-repo-sync.js"
         },
         {
@@ -491,6 +549,12 @@
           "file": "esp-email-processor.js"
         },
         {
+          "file": "generate-automation-map.js"
+        },
+        {
+          "file": "generate-communication-map.js"
+        },
+        {
           "file": "generate-module-doc.js"
         },
         {
@@ -498,6 +562,15 @@
         },
         {
           "file": "generate-session-summary.js"
+        },
+        {
+          "file": "generate-system-health.js"
+        },
+        {
+          "file": "intent-router.js"
+        },
+        {
+          "file": "invoke-persona.js"
         },
         {
           "file": "notify-module-received.js"
@@ -509,7 +582,13 @@
           "file": "notion-connectivity-test.js"
         },
         {
+          "file": "notion-heartbeat.js"
+        },
+        {
           "file": "notion-signal-bridge.js"
+        },
+        {
+          "file": "pipeline-reporter.js"
         },
         {
           "file": "process-broadcasts.js"
@@ -519,6 +598,9 @@
         },
         {
           "file": "psp-inspection.js"
+        },
+        {
+          "file": "push-broadcast-to-github.js"
         },
         {
           "file": "push-broadcast.js"
@@ -539,6 +621,9 @@
           "file": "send-feishu-alert.js"
         },
         {
+          "file": "server-diagnose-report.js"
+        },
+        {
           "file": "sync-login-entry.js"
         },
         {
@@ -549,6 +634,12 @@
         },
         {
           "file": "update-readme-bulletin.js"
+        },
+        {
+          "file": "utils"
+        },
+        {
+          "file": "verify-modules.js"
         },
         {
           "file": "wake-persona.js"
@@ -566,7 +657,7 @@
           "file": "zhuyuan-module-protocol.js"
         }
       ],
-      "item_count": 33
+      "item_count": 45
     },
     {
       "zone_id": "SRC",
@@ -931,13 +1022,25 @@
           "file": "ai-system-doc.md"
         },
         {
+          "file": "execution-layer-map.md"
+        },
+        {
+          "file": "execution-status.md"
+        },
+        {
           "file": "index.html"
+        },
+        {
+          "file": "notion-bridge-map.md"
+        },
+        {
+          "file": "repo-structure-map.md"
         },
         {
           "file": "使用指南.md"
         }
       ],
-      "item_count": 6
+      "item_count": 10
     },
     {
       "zone_id": "TESTS",
@@ -1198,6 +1301,9 @@
     "bingshuo-system-health": [
       "BRAIN::bingshuo-system-health.json"
     ],
+    "bulletin-board-today": [
+      "BRAIN::bulletin-board-today.json"
+    ],
     "collaborators": [
       "BRAIN::collaborators.json"
     ],
@@ -1310,6 +1416,9 @@
     "check-structure": [
       "WORKFLOWS::check-structure.yml"
     ],
+    "daily-maintenance": [
+      "WORKFLOWS::daily-maintenance.yml"
+    ],
     "deploy-pages": [
       "WORKFLOWS::deploy-pages.yml"
     ],
@@ -1323,6 +1432,12 @@
     "esp-signal-processor": [
       "WORKFLOWS::esp-signal-processor.yml"
     ],
+    "execution-sync": [
+      "WORKFLOWS::execution-sync.yml"
+    ],
+    "feishu-syslog-bridge": [
+      "WORKFLOWS::feishu-syslog-bridge.yml"
+    ],
     "generate-module-doc": [
       "WORKFLOWS::generate-module-doc.yml",
       "SCRIPTS::generate-module-doc.js"
@@ -1330,12 +1445,25 @@
     "hli-contract-check": [
       "WORKFLOWS::hli-contract-check.yml"
     ],
+    "notion-callback-pipeline": [
+      "WORKFLOWS::notion-callback-pipeline.yml"
+    ],
     "notion-connectivity-test": [
       "WORKFLOWS::notion-connectivity-test.yml",
       "SCRIPTS::notion-connectivity-test.js"
     ],
+    "notion-heartbeat": [
+      "WORKFLOWS::notion-heartbeat.yml",
+      "SCRIPTS::notion-heartbeat.js"
+    ],
     "notion-poll": [
       "WORKFLOWS::notion-poll.yml"
+    ],
+    "persona-invoke": [
+      "WORKFLOWS::persona-invoke.yml"
+    ],
+    "pm2-server-diagnose": [
+      "WORKFLOWS::pm2-server-diagnose.yml"
     ],
     "process-notion-orders": [
       "WORKFLOWS::process-notion-orders.yml"
@@ -1438,6 +1566,9 @@
     "contract-check": [
       "SCRIPTS::contract-check.js"
     ],
+    "create-standardized-ticket": [
+      "SCRIPTS::create-standardized-ticket.js"
+    ],
     "cross-repo-sync": [
       "SCRIPTS::cross-repo-sync.js"
     ],
@@ -1447,11 +1578,26 @@
     "esp-email-processor": [
       "SCRIPTS::esp-email-processor.js"
     ],
+    "generate-automation-map": [
+      "SCRIPTS::generate-automation-map.js"
+    ],
+    "generate-communication-map": [
+      "SCRIPTS::generate-communication-map.js"
+    ],
     "generate-repo-map": [
       "SCRIPTS::generate-repo-map.js"
     ],
     "generate-session-summary": [
       "SCRIPTS::generate-session-summary.js"
+    ],
+    "generate-system-health": [
+      "SCRIPTS::generate-system-health.js"
+    ],
+    "intent-router": [
+      "SCRIPTS::intent-router.js"
+    ],
+    "invoke-persona": [
+      "SCRIPTS::invoke-persona.js"
     ],
     "notify-module-received": [
       "SCRIPTS::notify-module-received.js"
@@ -1462,6 +1608,9 @@
     "notion-signal-bridge": [
       "SCRIPTS::notion-signal-bridge.js"
     ],
+    "pipeline-reporter": [
+      "SCRIPTS::pipeline-reporter.js"
+    ],
     "process-broadcasts": [
       "SCRIPTS::process-broadcasts.js"
     ],
@@ -1470,6 +1619,9 @@
     ],
     "psp-inspection": [
       "SCRIPTS::psp-inspection.js"
+    ],
+    "push-broadcast-to-github": [
+      "SCRIPTS::push-broadcast-to-github.js"
     ],
     "route-align-check": [
       "SCRIPTS::route-align-check.js"
@@ -1483,11 +1635,20 @@
     "send-feishu-alert": [
       "SCRIPTS::send-feishu-alert.js"
     ],
+    "server-diagnose-report": [
+      "SCRIPTS::server-diagnose-report.js"
+    ],
     "update-brain": [
       "SCRIPTS::update-brain.js"
     ],
     "update-memory": [
       "SCRIPTS::update-memory.js"
+    ],
+    "utils": [
+      "SCRIPTS::utils"
+    ],
+    "verify-modules": [
+      "SCRIPTS::verify-modules.js"
     ],
     "wake-persona": [
       "SCRIPTS::wake-persona.js"
@@ -1750,6 +1911,18 @@
     ],
     "ai-system-doc": [
       "DOCS::ai-system-doc.md"
+    ],
+    "execution-layer-map": [
+      "DOCS::execution-layer-map.md"
+    ],
+    "execution-status": [
+      "DOCS::execution-status.md"
+    ],
+    "notion-bridge-map": [
+      "DOCS::notion-bridge-map.md"
+    ],
+    "repo-structure-map": [
+      "DOCS::repo-structure-map.md"
     ],
     "使用指南": [
       "DOCS::使用指南.md"

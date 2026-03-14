@@ -3,31 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>M-CHANNEL · 用户频道引擎</title>
+    <title>光湖频道 · 动态渲染引擎</title>
     <link rel="stylesheet" href="channel-style.css">
+    <link rel="stylesheet" href="channel-transition.css">
+    <link rel="stylesheet" href="channel-dashboard.css"> <!-- 新增：面板样式 -->
 </head>
 <body>
-    <!-- 导航栏 -->
-    <nav class="channel-nav">
-        <a href="#/home" class="nav-link">🏠 首页</a>
-        <a href="#/channel" class="nav-link">📺 我的频道</a>
-        <a href="#/about" class="nav-link">ℹ️ 关于</a>
-    </nav>
+    <div class="channel-container">
+        <nav class="channel-nav">
+            <button class="channel-btn active" data-channel="home">🏠 首页</button>
+            <button class="channel-btn" data-channel="module-a">📦 模块A</button>
+            <button class="channel-btn" data-channel="module-b">📦 模块B</button>
+            <button class="channel-btn" data-channel="module-c">📦 模块C</button>
+            <button class="channel-btn" data-channel="dashboard">📊 数据面板</button> <!-- 新增入口 -->
+            <button class="channel-btn" data-channel="debug">🐞 调试面板</button>
+        </nav>
+        <main id="channel-content" class="channel-content">
+            <!-- 动态内容会加载到这里 -->
+        </main>
+    </div>
 
-    <!-- 路由容器：动态内容放这里 -->
-    <main id="router-view" class="router-view">
-        <p>✨ 加载中...</p>
-    </main>
-
-    <!-- 底部状态栏 -->
-    <footer class="status-bar">
-        <span id="current-route">当前路由：/</span>
-    </footer>
-
-    <!-- 脚本区（注意顺序：注册表 → 加载器 → 路由 → 应用入口） -->
+    <!-- 核心脚本（顺序很重要！） -->
     <script src="module-registry.js"></script>
-    <script src="module-loader.js"></script>
+    <script src="event-bus.js"></script>
+    <script src="module-lifecycle.js"></script>
+    <script src="channel-state.js"></script>
     <script src="channel-router.js"></script>
+    <script src="module-loader.js"></script>
     <script src="app.js"></script>
+    <script src="channel-enhancements.js"></script>
+    <link rel="stylesheet" href="channel-notifications.css">
+    <script src="channel-notifications.js"></script>
+
+    <!-- 新增：数据采集与面板逻辑 -->
+    <script src="channel-analytics.js"></script>
+    <script src="channel-dashboard.js"></script>
 </body>
 </html>
