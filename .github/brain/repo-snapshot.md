@@ -1,5 +1,5 @@
 # 铸渊图书馆快照 · Repo Snapshot
-> 生成于 2026-03-14 15:12 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
+> 生成于 2026-03-14 16:25 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
 
 ---
 
@@ -13,14 +13,14 @@
 | 脚本 | 45 个执行脚本 |
 | 开发者节点 | 8 人 |
 | HLI 接口覆盖率 | 7/21 (33%) |
-| 快照生成时间 | 2026-03-14 15:12 CST |
+| 快照生成时间 | 2026-03-14 16:25 CST |
 
 ---
 
 ## 🗺️ 图书馆全区地图
 
 ### 🧠 铸渊大脑（BRAIN）
-**路径**: `.github/brain` · **数量**: 18 项
+**路径**: `.github/brain` · **数量**: 19 项
 **描述**: 铸渊核心记忆 · 路由映射 · 唤醒协议 · 图书馆目录
 **关键词**: brain · memory · routing · wake · 大脑 · 记忆
 
@@ -260,6 +260,7 @@
 - `.github/brain/bingshuo-read-order.md`
 - `.github/brain/bingshuo-routing-index.json`
 - `.github/brain/bingshuo-system-health.json`
+- `.github/brain/bulletin-board-today.json`
 - `.github/brain/collaborators.json`
 - `.github/brain/growth-log.md`
 - `.github/brain/human-registry.json`
