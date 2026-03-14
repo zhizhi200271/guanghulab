@@ -1,20 +1,20 @@
 {
   "description": "铸渊图书馆目录 · Library Catalog for 铸渊 (Zhùyuān)",
   "version": "2.0",
-  "generated_at": "2026-03-14T08:25:45.513Z",
+  "generated_at": "2026-03-14T13:47:45.215Z",
   "generated_by": "scripts/generate-repo-map.js",
   "repo": "qinfendebingshuo/guanghulab",
   "stats": {
     "zones": 13,
     "total_modules": 10,
-    "total_workflows": 43,
+    "total_workflows": 44,
     "total_scripts": 45,
     "total_dev_nodes": 8,
     "hli_interfaces": 21,
     "hli_implemented": 7,
     "hli_coverage_pct": "33%",
     "last_ci_run": "2026-03-05T16:07:24.070Z",
-    "memory_last_updated": "2026-03-14T03:29:04.256Z"
+    "memory_last_updated": "2026-03-14T08:48:40.855Z"
   },
   "zones": [
     {
@@ -270,6 +270,13 @@
           ]
         },
         {
+          "file": "feishu-syslog-bridge.yml",
+          "name": "铸渊 · 飞书SYSLOG桥接",
+          "triggers": [
+            "unknown"
+          ]
+        },
+        {
           "file": "generate-module-doc.yml",
           "name": "铸渊 · 光湖纪元 模块文档自动生成",
           "triggers": [
@@ -497,7 +504,7 @@
           ]
         }
       ],
-      "item_count": 43
+      "item_count": 44
     },
     {
       "zone_id": "SCRIPTS",
@@ -1427,6 +1434,9 @@
     ],
     "execution-sync": [
       "WORKFLOWS::execution-sync.yml"
+    ],
+    "feishu-syslog-bridge": [
+      "WORKFLOWS::feishu-syslog-bridge.yml"
     ],
     "generate-module-doc": [
       "WORKFLOWS::generate-module-doc.yml",
