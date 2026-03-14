@@ -69,7 +69,7 @@ window.ChannelRouter = {
         // 数据采集钩子：开始加载
         if (typeof ChannelAnalytics !== 'undefined') {
             ChannelAnalytics.markLoadStart();
-            if (channel !== 'home' && channel !== 'debug' && channel !== 'dashboard') {
+            if (channel !== 'home' && channel !== 'debug' && channel !== 'dashboard' && channel !== 'settings') {
                 ChannelAnalytics.recordVisit(channel);
             }
         }
@@ -114,6 +114,27 @@ window.ChannelRouter = {
             return;
         }
         
+        // 设置中心路由（环节9新增）
+        if (channel === 'settings') {
+            fetch('views/channel-settings.html')
+                .then(r => r.text())
+                .then(html => {
+                    this.contentEl.innerHTML = html;
+                    if (typeof SettingsUI !== 'undefined') {
+                        SettingsUI.init();
+                    }
+                    // 记录加载完成
+                    if (typeof ChannelAnalytics !== 'undefined') {
+                        ChannelAnalytics.markLoadEnd('settings');
+                    }
+                })
+                .catch(err => {
+                    this.contentEl.innerHTML = '<h2>设置面板加载失败</h2>';
+                    console.error(err);
+                });
+            return;
+        }
+        
         // 内置频道
         if (channel === 'home') {
             this.renderModuleCards();
@@ -124,7 +145,7 @@ window.ChannelRouter = {
         }
 
         // 对于内置频道也记录加载完成
-        if (typeof ChannelAnalytics !== 'undefined' && channel !== 'dashboard') {
+        if (typeof ChannelAnalytics !== 'undefined' && channel !== 'dashboard' && channel !== 'settings') {
             ChannelAnalytics.markLoadEnd(channel);
         }
     },

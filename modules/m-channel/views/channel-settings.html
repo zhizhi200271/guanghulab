@@ -1,272 +1,144 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <style>
-        .settings-panel {
-            padding: 24px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        .settings-section {
-            margin-bottom: 32px;
-            padding-bottom: 24px;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        .settings-section:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-        .settings-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #1f2937;
-            margin: 0 0 16px 0;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .layout-options {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-        .layout-btn {
-            padding: 8px 16px;
-            background: #f3f4f6;
-            border: 2px solid transparent;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
-        }
-        .layout-btn:hover {
-            background: #e5e7eb;
-        }
-        .layout-btn.active {
-            background: #3b82f6;
-            color: white;
-            border-color: #2563eb;
-        }
-        .theme-options {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-        .theme-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: 3px solid transparent;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .theme-btn:hover {
-            transform: scale(1.1);
-        }
-        .theme-btn.active {
-            border-color: #000;
-            box-shadow: 0 0 0 2px white, 0 0 0 4px currentColor;
-        }
-        .theme-default { background: #3b82f6; }
-        .theme-ocean { background: #0891b2; }
-        .theme-forest { background: #059669; }
-        .theme-sunset { background: #d97706; }
-        .theme-lavender { background: #8b5cf6; }
-        .reset-btn {
-            padding: 10px 20px;
-            background: #ef4444;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .reset-btn:hover {
-            background: #dc2626;
-        }
-        .preview-area {
-            margin-top: 24px;
-            padding: 16px;
-            background: #f9fafb;
-            border-radius: 8px;
-            border: 1px dashed #9ca3af;
-        }
-        .preview-title {
-            font-size: 14px;
-            color: #6b7280;
-            margin-bottom: 8px;
-        }
-        .preview-cards {
-            display: flex;
-            gap: 12px;
-        }
-        .preview-card {
-            flex: 1;
-            padding: 12px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            font-size: 12px;
-        }
-        .preview-card .card-title {
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-        .close-btn {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #9ca3af;
-        }
-        .close-btn:hover {
-            color: #4b5563;
-        }
-    </style>
-</head>
-<body>
-    <div class="settings-panel">
-        <button class="close-btn" onclick="parent.ChannelSettings?.closePanel()">&times;</button>
-        
-        <h2>⚙️ 频道设置</h2>
-        
-        <!-- 布局切换 -->
-        <div class="settings-section">
-            <div class="settings-title">📐 布局模式</div>
-            <div class="layout-options" id="layout-options">
-                <button class="layout-btn" data-layout="grid">网格视图</button>
-                <button class="layout-btn" data-layout="list">列表视图</button>
-                <button class="layout-btn" data-layout="compact">紧凑视图</button>
-            </div>
-        </div>
-        
-        <!-- 主题色切换 -->
-        <div class="settings-section">
-            <div class="settings-title">🎨 主题颜色</div>
-            <div class="theme-options" id="theme-options">
-                <button class="theme-btn theme-default" data-theme="default" title="默认蓝"></button>
-                <button class="theme-btn theme-ocean" data-theme="ocean" title="海洋"></button>
-                <button class="theme-btn theme-forest" data-theme="forest" title="森林"></button>
-                <button class="theme-btn theme-sunset" data-theme="sunset" title="日落"></button>
-                <button class="theme-btn theme-lavender" data-theme="lavender" title="薰衣草"></button>
-            </div>
-        </div>
-        
-        <!-- 预览区域（实时显示效果） -->
-        <div class="preview-area">
-            <div class="preview-title">实时预览</div>
-            <div class="preview-cards">
-                <div class="preview-card">
-                    <div class="card-title">工单管理</div>
-                    <div>待处理: 3</div>
-                </div>
-                <div class="preview-card">
-                    <div class="card-title">数据统计</div>
-                    <div>完成率: 75%</div>
-                </div>
-                <div class="preview-card">
-                    <div class="card-title">组件库</div>
-                    <div>24个组件</div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- 恢复默认 -->
-        <div class="settings-section">
-            <button class="reset-btn" id="reset-defaults">恢复默认设置</button>
-        </div>
+<div class="settings-container" id="settingsPanel">
+  <div class="settings-header">
+    <h2>频道设置中心</h2>
+    <p>管理你的频道偏好 · 主题 · 通知 · 显示</p>
+  </div>
+
+  <!-- 外观设置 -->
+  <div class="settings-group">
+    <h3>🎨 外观设置</h3>
+    <div class="setting-row">
+      <div class="setting-label">
+        <span class="title">主题模式</span>
+        <span class="desc">选择你喜欢的界面风格</span>
+      </div>
     </div>
-    
-    <script>
-        // 这个脚本在 iframe 内运行，通过 postMessage 与父页面通信
-        (function() {
-            // 发送消息到父页面
-            function sendMessage(type, data) {
-                window.parent.postMessage({ type, data }, '*');
-            }
-            
-            // 请求当前设置
-            sendMessage('settings:request', {});
-            
-            // 监听来自父页面的设置更新
-            window.addEventListener('message', function(event) {
-                const data = event.data;
-                if (!data || !data.type) return;
-                
-                if (data.type === 'settings:update') {
-                    applySettings(data.settings);
-                } else if (data.type === 'settings:active') {
-                    // 标记当前激活的选项
-                    markActive(data.settings);
-                }
-            });
-            
-            // 应用设置（更新预览区样式）
-            function applySettings(settings) {
-                // 这里可以通过 CSS 变量影响预览区颜色
-                if (settings.theme && window.ChannelTheme) {
-                    // 实际上我们无法直接调用父页面的 ChannelTheme，但可以通过 postMessage 通知父页面
-                    sendMessage('theme:change', { theme: settings.theme });
-                }
-                
-                // 更新预览区布局样式（通过给预览卡片添加类）
-                const previewCards = document.querySelector('.preview-cards');
-                if (previewCards) {
-                    previewCards.className = 'preview-cards';
-                    if (settings.layout) {
-                        previewCards.classList.add(`preview-${settings.layout}`);
-                    }
-                }
-            }
-            
-            // 标记当前激活的按钮
-            function markActive(settings) {
-                // 布局按钮
-                document.querySelectorAll('.layout-btn').forEach(btn => {
-                    btn.classList.remove('active');
-                    if (btn.dataset.layout === settings.layout) {
-                        btn.classList.add('active');
-                    }
-                });
-                
-                // 主题按钮
-                document.querySelectorAll('.theme-btn').forEach(btn => {
-                    btn.classList.remove('active');
-                    if (btn.dataset.theme === settings.theme) {
-                        btn.classList.add('active');
-                    }
-                });
-            }
-            
-            // 绑定点击事件
-            document.querySelectorAll('.layout-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const layout = this.dataset.layout;
-                    sendMessage('layout:change', { layout });
-                });
-            });
-            
-            document.querySelectorAll('.theme-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const theme = this.dataset.theme;
-                    sendMessage('theme:change', { theme });
-                });
-            });
-            
-            document.getElementById('reset-defaults').addEventListener('click', function() {
-                if (confirm('确定要恢复所有默认设置吗？')) {
-                    sendMessage('settings:reset', {});
-                }
-            });
-        })();
-    </script>
-</body>
-</html>
+    <div class="theme-cards" id="themeCards"></div>
+
+    <div class="setting-row">
+      <div class="setting-label">
+        <span class="title">字体大小</span>
+        <span class="desc">调整界面文字大小</span>
+      </div>
+      <select class="setting-select" id="settingFontSize" onchange="SettingsUI.onChange('fontSize', this.value)">
+        <option value="small">小</option>
+        <option value="medium">中</option>
+        <option value="large">大</option>
+      </select>
+    </div>
+
+    <div class="setting-row">
+      <div class="setting-label">
+        <span class="title">过渡动画</span>
+        <span class="desc">开启页面切换动画效果</span>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="settingAnimation" onchange="SettingsUI.onToggle('animationEnabled', this.checked)">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+    <div class="setting-row">
+      <div class="setting-label">
+        <span class="title">侧边栏默认收起</span>
+        <span class="desc">页面加载时侧边栏是否收起</span>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="settingSidebar" onchange="SettingsUI.onToggle('sidebarCollapsed', this.checked)">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <!-- 🔔 通知设置 -->
+  <div class="settings-group">
+    <h3>🔔 通知设置</h3>
+    <div class="setting-row">
+      <div class="setting-label">
+        <span class="title">模块更新通知</span>
+        <span class="desc">有模块内容更新时提醒</span>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="settingNotifyModule" onchange="SettingsUI.onToggle('notifyModuleUpdate', this.checked)">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div class="setting-row">
+      <div class="setting-label">
+        <span class="title">系统通知</span>
+        <span class="desc">系统公告和维护提醒</span>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="settingNotifySystem" onchange="SettingsUI.onToggle('notifySystem', this.checked)">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div class="setting-row">
+      <div class="setting-label">
+        <span class="title">通知声音</span>
+        <span class="desc">收到通知时播放提示音</span>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="settingNotifySound" onchange="SettingsUI.onToggle('notifySound', this.checked)">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <!-- 数据设置 -->
+  <div class="settings-group">
+    <h3>📊 数据设置</h3>
+    <div class="setting-row">
+      <div class="setting-label">
+        <span class="title">数据采集</span>
+        <span class="desc">允许采集模块访问和性能数据（用于数据面板）</span>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="settingAnalytics" onchange="SettingsUI.onToggle('analyticsEnabled', this.checked)">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div class="setting-row">
+      <div class="setting-label">
+        <span class="title">自动刷新</span>
+        <span class="desc">定时自动刷新频道数据</span>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="settingAutoRefresh" onchange="SettingsUI.onToggle('autoRefresh', this.checked)">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div class="setting-row">
+      <div class="setting-label">
+        <span class="title">刷新间隔</span>
+        <span class="desc">自动刷新的时间间隔</span>
+      </div>
+      <select class="setting-select" id="settingRefreshInterval" onchange="SettingsUI.onChange('refreshInterval', parseInt(this.value))">
+        <option value="15">15秒</option>
+        <option value="30">30秒</option>
+        <option value="60">1分钟</option>
+        <option value="300">5分钟</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- 操作按钮 -->
+  <div class="settings-actions">
+    <button class="btn-settings btn-export" onclick="SettingsUI.exportSettings()">📤 导出设置</button>
+    <button class="btn-settings btn-import" onclick="SettingsUI.showImport()">📥 导入设置</button>
+    <button class="btn-settings btn-reset" onclick="SettingsUI.resetAll()">🔄 恢复默认</button>
+  </div>
+</div>
+
+<!-- 导入弹窗 -->
+<div class="import-modal" id="importModal">
+  <div class="import-dialog">
+    <h3 style="color:var(--accent-color); margin-bottom:8px;">📥 导入设置</h3>
+    <p style="font-size:13px; margin-bottom:12px;">粘贴之前导出的JSON内容：</p>
+    <textarea class="import-textarea" id="importTextarea" placeholder='{"theme":"dark",...}'></textarea>
+    <div style="display:flex; gap:10px; justify-content:flex-end;">
+      <button class="btn-settings" style="background:#555; color:#fff;" onclick="SettingsUI.hideImport()">取消</button>
+      <button class="btn-settings btn-import" onclick="SettingsUI.doImport()">确认导入</button>
+    </div>
+  </div>
+</div>

@@ -6,7 +6,9 @@
     <title>光湖频道 · 动态渲染引擎</title>
     <link rel="stylesheet" href="channel-style.css">
     <link rel="stylesheet" href="channel-transition.css">
-    <link rel="stylesheet" href="channel-dashboard.css"> <!-- 新增：面板样式 -->
+    <link rel="stylesheet" href="channel-dashboard.css">
+<link rel="stylesheet" href="channel-settings.css">
+ <!-- 新增：面板样式 -->
 </head>
 <body>
     <div class="channel-container">
@@ -16,7 +18,8 @@
             <button class="channel-btn" data-channel="module-b">📦 模块B</button>
             <button class="channel-btn" data-channel="module-c">📦 模块C</button>
             <button class="channel-btn" data-channel="dashboard">📊 数据面板</button> <!-- 新增入口 -->
-            <button class="channel-btn" data-channel="debug">🐞 调试面板</button>
+ <button class="channel-btn" data-channel="settings">⚙️ 设置</button>       
+    <button class="channel-btn" data-channel="debug">🐞 调试面板</button>
         </nav>
         <main id="channel-content" class="channel-content">
             <!-- 动态内容会加载到这里 -->
@@ -38,5 +41,7 @@
     <!-- 新增：数据采集与面板逻辑 -->
     <script src="channel-analytics.js"></script>
     <script src="channel-dashboard.js"></script>
+<script src="channel-settings.js"></script>
+<script src="channel-settings-ui.js"></script>
 </body>
 </html>

@@ -1,7 +1,6 @@
-
 /**
  * channel-analytics.js
- * 频道数据采集核心·环节8
+ * 频道数据采集核心·环节8 + 环节9设置联动
  * 记录模块访问次数、停留时间、页面加载速度
  */
 
@@ -58,8 +57,13 @@ const ChannelAnalytics = (function() {
 
     // 公开方法
     return {
-        // 记录模块访问
+        // 记录模块访问（环节9：检查数据采集开关）
         recordVisit: function(moduleId) {
+            // 数据采集开关检查（环节9新增）
+            if (typeof ChannelSettings !== 'undefined' && !ChannelSettings.get('analyticsEnabled')) {
+                console.log('📊 数据采集已关闭（设置中心）');
+                return;
+            }
             if (!moduleId) return;
             const data = loadData();
             const mod = ensureModule(data, moduleId);
@@ -95,6 +99,13 @@ const ChannelAnalytics = (function() {
         // 结束计时（切换模块或离开时调用）
         endSession: function() {
             if (!currentModule || !enterTime) return;
+            // 数据采集开关检查（环节9新增）
+            if (typeof ChannelSettings !== 'undefined' && !ChannelSettings.get('analyticsEnabled')) {
+                // 如果关闭采集，清空当前会话但不记录
+                currentModule = null;
+                enterTime = null;
+                return;
+            }
             const duration = Math.round((performance.now() - enterTime) / 1000); // 秒
             const data = loadData();
             const mod = ensureModule(data, currentModule);
@@ -108,6 +119,10 @@ const ChannelAnalytics = (function() {
         // 记录加载性能
         recordLoadTime: function(moduleId, loadTimeMs) {
             if (!moduleId) return;
+            // 数据采集开关检查（环节9新增）
+            if (typeof ChannelSettings !== 'undefined' && !ChannelSettings.get('analyticsEnabled')) {
+                return;
+            }
             const data = loadData();
             const mod = ensureModule(data, moduleId);
             mod.loadTimes.push(loadTimeMs);

@@ -46,3 +46,8 @@
 .slide-exit-right {
     transform: translateX(100%);
 }
+
+/* 临时测试动画 */
+.fade-out, .fade-in {
+    transition: opacity 1s ease !important;
+}
