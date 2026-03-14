@@ -23,6 +23,11 @@ jobs:
       issues: read
     outputs:
       processed_count: ${{ steps.process.outputs.processed_count }}
+      has_syslog: ${{ steps.parse.outputs.has_syslog }}
+      sender_open_id: ${{ steps.parse.outputs.sender_open_id }}
+      chat_id: ${{ steps.parse.outputs.chat_id }}
+      sender_name: ${{ steps.parse.outputs.sender_name }}
+      syslog_file: ${{ steps.parse.outputs.syslog_file }}
 
     steps:
       - uses: actions/checkout@v4
@@ -39,6 +44,41 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Step 0: 解析 sender 信息（在 process-syslog.js 归档之前）
+      - name: 📋 解析 SYSLOG sender 信息
+        id: parse
+        run: |
+          LATEST=$(ls -t syslog-inbox/*.json 2>/dev/null | grep -v '.gitkeep' | head -1 || true)
+          if [ -z "$LATEST" ]; then
+            echo "📭 syslog-inbox/ 无待处理文件"
+            echo "has_syslog=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "has_syslog=true" >> "$GITHUB_OUTPUT"
+          echo "syslog_file=$LATEST" >> "$GITHUB_OUTPUT"
+
+          SENDER_OPEN_ID=$(jq -r '.sender_open_id // empty' "$LATEST" 2>/dev/null || true)
+          CHAT_ID=$(jq -r '.chat_id // empty' "$LATEST" 2>/dev/null || true)
+          SENDER_NAME=$(jq -r '.sender_name // empty' "$LATEST" 2>/dev/null || true)
+
+          echo "sender_open_id=$SENDER_OPEN_ID" >> "$GITHUB_OUTPUT"
+          echo "chat_id=$CHAT_ID" >> "$GITHUB_OUTPUT"
+          echo "sender_name=$SENDER_NAME" >> "$GITHUB_OUTPUT"
+
+          echo "📋 SYSLOG 文件: $LATEST"
+          echo "  sender_open_id: ${SENDER_OPEN_ID:-无}"
+          echo "  chat_id: ${CHAT_ID:-无}"
+          echo "  sender_name: ${SENDER_NAME:-无}"
+
+      # Step 1: 写入 Notion SYSLOG 收件箱
+      - name: 📝 写入 Notion SYSLOG 收件箱
+        if: steps.parse.outputs.has_syslog == 'true'
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DB_SYSLOG: ${{ secrets.NOTION_DB_SYSLOG }}
+        run: node scripts/write-notion-syslog.js "${{ steps.parse.outputs.syslog_file }}"
+
+      # Step 2: 处理 syslog-inbox 条目（归档到 syslog-processed/）
       - name: 📥 处理 syslog-inbox 条目
         id: process
         run: |
@@ -53,6 +93,115 @@ jobs:
           git add syslog-inbox/ syslog-processed/ .github/brain/memory.json
           git diff --staged --quiet || git commit -m "📥 syslog: 处理 inbox 条目，更新大脑记忆 [skip ci]"
           git push
+
+  # ── Pipeline B：Claude API 唤醒人格体 ────────────────────
+  pipeline-b-persona:
+    name: 🧠 Pipeline B · 人格体唤醒
+    runs-on: ubuntu-latest
+    needs: pipeline-a-syslog
+    if: needs.pipeline-a-syslog.outputs.has_syslog == 'true'
+    permissions:
+      contents: read
+    outputs:
+      broadcast_title: ${{ steps.persona.outputs.broadcast_title }}
+      broadcast_url: ${{ steps.persona.outputs.broadcast_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: main
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: 🧠 唤醒人格体处理 SYSLOG
+        id: persona
+        env:
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          CORE_BRAIN_PAGE_ID: ${{ secrets.CORE_BRAIN_PAGE_ID }}
+          PORTRAIT_DB_ID: ${{ secrets.PORTRAIT_DB_ID }}
+          FINGERPRINT_DB_ID: ${{ secrets.FINGERPRINT_DB_ID }}
+          SUBMIT_TYPE: syslog
+          SUBMIT_CONTENT: ${{ needs.pipeline-a-syslog.outputs.syslog_file }}
+          AUTHOR: ${{ needs.pipeline-a-syslog.outputs.sender_name }}
+        run: |
+          if [ -z "$LLM_API_KEY" ] || [ -z "$LLM_BASE_URL" ]; then
+            echo "⚠️  LLM_API_KEY 或 LLM_BASE_URL 未配置，跳过人格体唤醒"
+            echo "broadcast_title=" >> "$GITHUB_OUTPUT"
+            echo "broadcast_url=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          node scripts/wake-persona.js || true
+
+          # 读取人格体输出的广播信息（如果有）
+          if [ -f /tmp/broadcast-result.json ]; then
+            BROADCAST_TITLE=$(jq -r '.title // empty' /tmp/broadcast-result.json)
+            BROADCAST_URL=$(jq -r '.notion_url // empty' /tmp/broadcast-result.json)
+            echo "broadcast_title=$BROADCAST_TITLE" >> "$GITHUB_OUTPUT"
+            echo "broadcast_url=$BROADCAST_URL" >> "$GITHUB_OUTPUT"
+            echo "✅ 人格体处理完成，广播标题: $BROADCAST_TITLE"
+          else
+            echo "⚠️  /tmp/broadcast-result.json 未生成（人格体可能未产出广播）"
+            echo "broadcast_title=" >> "$GITHUB_OUTPUT"
+            echo "broadcast_url=" >> "$GITHUB_OUTPUT"
+          fi
+
+  # ── Pipeline C：推送广播到飞书 ───────────────────────────
+  pipeline-c-push:
+    name: 📢 Pipeline C · 飞书广播推送
+    runs-on: ubuntu-latest
+    needs: [pipeline-a-syslog, pipeline-b-persona]
+    if: >-
+      needs.pipeline-b-persona.outputs.broadcast_title != '' &&
+      (needs.pipeline-a-syslog.outputs.chat_id != '' || needs.pipeline-a-syslog.outputs.sender_open_id != '')
+    steps:
+      - name: 📢 推送广播到飞书
+        env:
+          PUSH_URL: https://guanghulab.com/webhook/push-broadcast
+          PUSH_TOKEN: ${{ secrets.PUSH_BROADCAST_TOKEN }}
+          CHAT_ID: ${{ needs.pipeline-a-syslog.outputs.chat_id }}
+          SENDER_OPEN_ID: ${{ needs.pipeline-a-syslog.outputs.sender_open_id }}
+          BROADCAST_TITLE: ${{ needs.pipeline-b-persona.outputs.broadcast_title }}
+          BROADCAST_URL: ${{ needs.pipeline-b-persona.outputs.broadcast_url }}
+        run: |
+          if [ -z "$PUSH_TOKEN" ]; then
+            echo "⚠️  PUSH_BROADCAST_TOKEN 未配置，跳过飞书推送"
+            exit 0
+          fi
+          echo "📢 推送广播到飞书..."
+          echo "  标题: $BROADCAST_TITLE"
+          echo "  目标: ${CHAT_ID:-$SENDER_OPEN_ID}"
+
+          HTTP_CODE=$(curl -s -o /tmp/push-response.txt -w "%{http_code}" \
+            -X POST "$PUSH_URL" \
+            -H "Content-Type: application/json" \
+            -H "x-push-token: $PUSH_TOKEN" \
+            -d "$(jq -n \
+              --arg chat_id "$CHAT_ID" \
+              --arg sender_open_id "$SENDER_OPEN_ID" \
+              --arg broadcast_title "$BROADCAST_TITLE" \
+              --arg broadcast_content "人格体已验收，请查看完整广播。" \
+              --arg broadcast_url "$BROADCAST_URL" \
+              '{chat_id: $chat_id, sender_open_id: $sender_open_id, broadcast_title: $broadcast_title, broadcast_content: $broadcast_content, broadcast_url: $broadcast_url}')")
+
+          echo "  HTTP 响应: $HTTP_CODE"
+          cat /tmp/push-response.txt 2>/dev/null || true
+          echo ""
+
+          if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+            echo "✅ 广播已推送到飞书"
+          else
+            echo "❌ 推送失败 (HTTP $HTTP_CODE)，可通过 push-broadcast-feishu workflow 手动补推"
+          fi
 
   # ── Pipeline D：Issues 巡检 ─────────────────────────────
   pipeline-d-issues:
