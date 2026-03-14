@@ -1,20 +1,20 @@
 {
   "description": "铸渊图书馆目录 · Library Catalog for 铸渊 (Zhùyuān)",
   "version": "2.0",
-  "generated_at": "2026-03-14T02:05:17.579Z",
+  "generated_at": "2026-03-14T07:12:45.868Z",
   "generated_by": "scripts/generate-repo-map.js",
   "repo": "qinfendebingshuo/guanghulab",
   "stats": {
     "zones": 13,
     "total_modules": 10,
-    "total_workflows": 42,
+    "total_workflows": 43,
     "total_scripts": 45,
     "total_dev_nodes": 8,
     "hli_interfaces": 21,
     "hli_implemented": 7,
     "hli_coverage_pct": "33%",
     "last_ci_run": "2026-03-05T16:07:24.070Z",
-    "memory_last_updated": "2026-03-13T08:53:32.764Z"
+    "memory_last_updated": "2026-03-14T03:29:04.256Z"
   },
   "zones": [
     {
@@ -259,6 +259,14 @@
           ]
         },
         {
+          "file": "execution-sync.yml",
+          "name": "\"📡 铸渊 · 执行层状态同步\"",
+          "triggers": [
+            "schedule(0 3 * * *)",
+            "manual"
+          ]
+        },
+        {
           "file": "generate-module-doc.yml",
           "name": "铸渊 · 光湖纪元 模块文档自动生成",
           "triggers": [
@@ -486,7 +494,7 @@
           ]
         }
       ],
-      "item_count": 42
+      "item_count": 43
     },
     {
       "zone_id": "SCRIPTS",
@@ -1004,13 +1012,25 @@
           "file": "ai-system-doc.md"
         },
         {
+          "file": "execution-layer-map.md"
+        },
+        {
+          "file": "execution-status.md"
+        },
+        {
           "file": "index.html"
+        },
+        {
+          "file": "notion-bridge-map.md"
+        },
+        {
+          "file": "repo-structure-map.md"
         },
         {
           "file": "使用指南.md"
         }
       ],
-      "item_count": 6
+      "item_count": 10
     },
     {
       "zone_id": "TESTS",
@@ -1398,6 +1418,9 @@
     ],
     "esp-signal-processor": [
       "WORKFLOWS::esp-signal-processor.yml"
+    ],
+    "execution-sync": [
+      "WORKFLOWS::execution-sync.yml"
     ],
     "generate-module-doc": [
       "WORKFLOWS::generate-module-doc.yml",
@@ -1872,6 +1895,18 @@
     ],
     "ai-system-doc": [
       "DOCS::ai-system-doc.md"
+    ],
+    "execution-layer-map": [
+      "DOCS::execution-layer-map.md"
+    ],
+    "execution-status": [
+      "DOCS::execution-status.md"
+    ],
+    "notion-bridge-map": [
+      "DOCS::notion-bridge-map.md"
+    ],
+    "repo-structure-map": [
+      "DOCS::repo-structure-map.md"
     ],
     "使用指南": [
       "DOCS::使用指南.md"
