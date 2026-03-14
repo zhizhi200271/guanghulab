@@ -1,7 +1,7 @@
 # 执行层结构地图 — execution-layer-map.md
 
-> 铸渊执行层状态同步系统产物 · TCS-0002∞  
-> 生成时间：2026-03-14
+> 铸渊执行层自动开发循环升级产物 · TCS-0002∞  
+> 生成时间：2026-03-14 · v5.1
 
 ---
 
@@ -16,11 +16,9 @@
         ↓
 仓库执行层（铸渊）
         ↓
+自动开发循环
+        ↓
 自动化执行系统
-        ↓
-执行层状态同步
-        ↓
-Notion 主脑更新
 ```
 
 ---
@@ -29,9 +27,10 @@ Notion 主脑更新
 
 | 模块 | 路径 | 职责 |
 |------|------|------|
+| 上下文加载 | `core/context-loader/index.js` | 执行前加载系统上下文与身份认知 |
 | 广播监听 | `core/broadcast-listener/index.js` | 监听并解析 Notion 广播为可执行任务 |
-| 任务队列 | `core/task-queue/index.js` | 任务入队、调度、优先级管理 |
-| 系统自检 | `core/system-check/index.js` | 仓库结构完整性检查 |
+| 任务队列 | `core/task-queue/index.js` | 任务入队、调度、优先级管理、类型分类 |
+| 系统自检 | `core/system-check/index.js` | 仓库结构完整性检查 + 自动任务生成 |
 | 执行同步 | `core/execution-sync/index.js` | 生成执行状态报告并同步到 Notion |
 
 ---
@@ -73,22 +72,24 @@ Notion 主脑更新
 
 ---
 
-## 执行闭环
+## 执行闭环（自动开发循环 v5.1）
 
 ```
-Notion 广播（主脑下发）
+context-loader（上下文加载）
         ↓
 broadcast-listener（广播监听）
         ↓
-task-queue（任务排队）
+task-queue（任务排队 · 类型: system/dev/maintenance/auto）
         ↓
 执行器运行
         ↓
 execution-sync（状态采集）
         ↓
+system-check（自检 + 自动任务生成）
+        ↓
 connectors/notion-sync（状态回写）
         ↓
 Notion 主脑更新
         ↓
-生成下一任务
+生成下一任务（自动开发循环）
 ```

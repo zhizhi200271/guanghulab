@@ -3,21 +3,29 @@
  *
  * 任务结构：
  *   task_id    — 唯一任务标识
- *   source     — 来源（broadcast / maintenance / dev）
+ *   source     — 来源（broadcast / maintenance / dev / auto）
+ *   type       — 类型（system-task / dev-task / maintenance-task / auto-task）
  *   priority   — 优先级（high / normal / low）
  *   status     — 状态（pending / running / completed / failed）
  *   executor   — 执行者（zhuyuan）
+ *
+ * 任务类型：
+ *   system-task      — 系统级任务（广播、状态同步）
+ *   dev-task         — 开发任务（代码变更、功能开发）
+ *   maintenance-task — 维护任务（结构修复、文档更新）
+ *   auto-task        — 自动生成任务（自检发现的问题）
  *
  * 任务来源：
  *   - Notion 广播
  *   - 系统维护任务
  *   - 开发任务
+ *   - 自动开发循环生成
  *
  * 执行流程：
- *   任务进入队列 → 执行器运行 → 执行结果写回
+ *   任务进入队列 → 按优先级去重 → 执行器运行 → 执行结果写回
  *
  * 调用方式：
- *   node core/task-queue [status|run|add]
+ *   node core/task-queue [status|run|cleanup]
  */
 
 const fs = require('fs');
@@ -31,12 +39,12 @@ const QUEUE_PATH = path.join(ROOT, 'core/task-queue/queue.json');
  */
 function loadQueue() {
   if (!fs.existsSync(QUEUE_PATH)) {
-    return { version: '5.0', tasks: [], last_updated: null };
+    return { version: '5.1', tasks: [], last_updated: null };
   }
   try {
     return JSON.parse(fs.readFileSync(QUEUE_PATH, 'utf-8'));
   } catch {
-    return { version: '5.0', tasks: [], last_updated: null };
+    return { version: '5.1', tasks: [], last_updated: null };
   }
 }
 
@@ -160,7 +168,13 @@ function status() {
     running: tasks.filter(t => t.status === 'running').length,
     completed: tasks.filter(t => t.status === 'completed').length,
     failed: tasks.filter(t => t.status === 'failed').length,
-    last_updated: queue.last_updated
+    last_updated: queue.last_updated,
+    by_type: {
+      'system-task': tasks.filter(t => t.type === 'system-task').length,
+      'dev-task': tasks.filter(t => t.type === 'dev-task').length,
+      'maintenance-task': tasks.filter(t => t.type === 'maintenance-task').length,
+      'auto-task': tasks.filter(t => t.type === 'auto-task').length
+    }
   };
 
   return stats;
@@ -203,6 +217,12 @@ if (require.main === module) {
       console.log(`  已完成: ${s.completed}`);
       console.log(`  失败: ${s.failed}`);
       console.log(`  更新时间: ${s.last_updated || '无'}`);
+      if (s.total > 0) {
+        console.log('  任务类型分布:');
+        for (const [type, count] of Object.entries(s.by_type)) {
+          if (count > 0) console.log(`    ${type}: ${count}`);
+        }
+      }
       break;
     }
     case 'run': {

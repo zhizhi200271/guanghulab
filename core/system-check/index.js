@@ -29,6 +29,7 @@ const REQUIRED_DIRS = [
   'core/task-queue',
   'core/system-check',
   'core/execution-sync',
+  'core/context-loader',
   'connectors/notion-sync',
   'connectors/model-router',
   '.github/workflows',
@@ -114,6 +115,7 @@ function checkCoreModules() {
     { name: 'task-queue', path: 'core/task-queue/index.js' },
     { name: 'system-check', path: 'core/system-check/index.js' },
     { name: 'execution-sync', path: 'core/execution-sync/index.js' },
+    { name: 'context-loader', path: 'core/context-loader/index.js' },
     { name: 'notion-sync', path: 'connectors/notion-sync/index.js' },
     { name: 'model-router', path: 'connectors/model-router/index.js' }
   ];
@@ -177,7 +179,7 @@ function generateReport(dirResults, fileResults, workflows, modules, jsonResults
   ].length;
 
   const report = {
-    version: '5.0',
+    version: '5.1',
     checked_at: new Date().toISOString(),
     summary: {
       total_checks: totalChecks,
@@ -198,10 +200,89 @@ function generateReport(dirResults, fileResults, workflows, modules, jsonResults
 }
 
 /**
+ * 根据自检结果生成自动任务
+ */
+function generateAutoTasks(report) {
+  const tasks = [];
+  const timestamp = new Date().toISOString();
+
+  // 检查目录缺失 → 生成修复任务
+  const missingDirs = (report.directories || []).filter(d => !d.exists);
+  for (const dir of missingDirs) {
+    tasks.push({
+      task_id: `auto-fix-dir-${dir.path.replace(/\//g, '-')}-${timestamp.slice(0, 10)}`,
+      type: 'auto-task',
+      source: 'system-check',
+      priority: 'high',
+      status: 'pending',
+      executor: 'zhuyuan',
+      description: `修复缺失目录: ${dir.path}`
+    });
+  }
+
+  // 检查文件缺失 → 生成修复任务
+  const missingFiles = (report.files || []).filter(f => !f.exists);
+  for (const file of missingFiles) {
+    tasks.push({
+      task_id: `auto-fix-file-${file.path.replace(/\//g, '-')}-${timestamp.slice(0, 10)}`,
+      type: 'auto-task',
+      source: 'system-check',
+      priority: 'high',
+      status: 'pending',
+      executor: 'zhuyuan',
+      description: `修复缺失文件: ${file.path}`
+    });
+  }
+
+  // 检查模块缺失 → 生成修复任务
+  const missingModules = (report.modules || []).filter(m => !m.exists);
+  for (const mod of missingModules) {
+    tasks.push({
+      task_id: `auto-fix-module-${mod.name}-${timestamp.slice(0, 10)}`,
+      type: 'auto-task',
+      source: 'system-check',
+      priority: 'normal',
+      status: 'pending',
+      executor: 'zhuyuan',
+      description: `修复缺失模块: ${mod.name}`
+    });
+  }
+
+  // JSON 完整性失败 → 生成修复任务
+  const invalidJson = (report.json_integrity || []).filter(j => !j.valid);
+  for (const json of invalidJson) {
+    tasks.push({
+      task_id: `auto-fix-json-${json.path.replace(/\//g, '-')}-${timestamp.slice(0, 10)}`,
+      type: 'auto-task',
+      source: 'system-check',
+      priority: 'high',
+      status: 'pending',
+      executor: 'zhuyuan',
+      description: `修复 JSON 文件: ${json.path} (${json.reason})`
+    });
+  }
+
+  // 健康分数低 → 生成结构优化任务
+  if (report.summary && report.summary.health_score < 100) {
+    tasks.push({
+      task_id: `auto-optimize-structure-${timestamp.slice(0, 10)}`,
+      type: 'maintenance-task',
+      source: 'system-check',
+      priority: 'low',
+      status: 'pending',
+      executor: 'zhuyuan',
+      description: `结构优化: 健康分数 ${report.summary.health_score}%`
+    });
+  }
+
+  return tasks;
+}
+
+/**
  * 主执行函数
  */
 function run() {
-  console.log('🏥 铸渊仓库自检系统 v5.0');
+  console.log('🏥 铸渊仓库自检系统 v5.1');
   console.log('═'.repeat(40));
 
   const dirResults = checkDirectories();
@@ -234,6 +315,17 @@ if (require.main === module) {
     fs.writeFileSync(reportPath, JSON.stringify(report, null, 2), 'utf-8');
     console.log(`\n📝 报告已保存: ${reportPath}`);
   }
+
+  // 可选：生成自动任务
+  if (process.argv.includes('--auto-tasks')) {
+    const autoTasks = generateAutoTasks(report);
+    if (autoTasks.length > 0) {
+      console.log(`\n🔄 生成 ${autoTasks.length} 个自动任务:`);
+      autoTasks.forEach(t => console.log(`  📋 ${t.task_id}: ${t.description}`));
+    } else {
+      console.log('\n✅ 系统健康，无需生成自动任务');
+    }
+  }
 }
 
-module.exports = { run, checkDirectories, checkFiles, checkWorkflows, checkCoreModules, checkJsonIntegrity };
+module.exports = { run, generateAutoTasks, checkDirectories, checkFiles, checkWorkflows, checkCoreModules, checkJsonIntegrity };

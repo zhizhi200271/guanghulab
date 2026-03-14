@@ -22,15 +22,19 @@ jobs:
         with:
           node-version: '20'
 
-      # ── Step 1: 运行系统自检 ──
-      - name: 运行系统自检
-        run: node core/system-check
+      # ── Step 1: 加载执行上下文 ──
+      - name: 加载执行上下文
+        run: node core/context-loader
 
-      # ── Step 2: 生成执行状态报告 ──
+      # ── Step 2: 运行系统自检 ──
+      - name: 运行系统自检
+        run: node core/system-check --auto-tasks
+
+      # ── Step 3: 生成执行状态报告 ──
       - name: 生成执行状态报告
         run: node core/execution-sync report
 
-      # ── Step 3: 同步到 Notion ──
+      # ── Step 4: 同步到 Notion ──
       - name: 同步执行状态到 Notion
         if: ${{ env.NOTION_TOKEN != '' }}
         env:
@@ -38,7 +42,7 @@ jobs:
           EXECUTION_LOG_DB_ID: ${{ secrets.EXECUTION_LOG_DB_ID }}
         run: node core/execution-sync sync
 
-      # ── Step 4: 提交状态报告 ──
+      # ── Step 5: 提交状态报告 ──
       - name: 提交状态报告
         run: |
           git config user.name "铸渊 Execution Sync"

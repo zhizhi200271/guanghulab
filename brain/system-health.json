@@ -1,5 +1,5 @@
 {
-  "version": "5.0",
+  "version": "5.1",
   "last_check": "2026-03-14 03:38:09+08:00",
   "communication": "synced",
   "automation": "stable",
@@ -8,6 +8,8 @@
   "execution_layer_status": "stable",
   "notion_bridge": "active",
   "execution_sync": "enabled",
+  "auto_dev_loop": "enabled",
+  "context_loader": "active",
   "task_queue": "running",
   "brain_integrity": {
     "complete": true,
@@ -19,12 +21,13 @@
     "broadcast_listener": "enabled",
     "task_queue": "enabled",
     "system_check": "enabled",
-    "execution_sync": "enabled"
+    "execution_sync": "enabled",
+    "context_loader": "enabled"
   },
   "connectors": {
     "notion_sync": "enabled",
     "model_router": "enabled"
   },
-  "workflow_count": 42,
+  "workflow_count": 43,
   "checked_by": "scripts/generate-system-health.js"
 }

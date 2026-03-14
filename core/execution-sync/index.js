@@ -26,7 +26,8 @@ function collectCoreModules() {
     { name: 'broadcast-listener', path: 'core/broadcast-listener/index.js' },
     { name: 'task-queue', path: 'core/task-queue/index.js' },
     { name: 'system-check', path: 'core/system-check/index.js' },
-    { name: 'execution-sync', path: 'core/execution-sync/index.js' }
+    { name: 'execution-sync', path: 'core/execution-sync/index.js' },
+    { name: 'context-loader', path: 'core/context-loader/index.js' }
   ];
 
   return modules.map(m => ({
@@ -189,9 +190,11 @@ ${connTable}
 ## 执行闭环
 
 \`\`\`
-Notion 广播 → broadcast-listener → task-queue → 执行
+context-loader → broadcast-listener → task-queue → 执行
         ↓
-execution-sync → notion-sync → Notion 主脑更新
+execution-sync → system-check → 自动任务生成
+        ↓
+notion-sync → Notion 主脑更新
 \`\`\`
 `;
 

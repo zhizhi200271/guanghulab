@@ -1,12 +1,12 @@
 # 铸渊执行层 · 系统导航主文件
-# Master Brain · v5.0
-# 数字地球系统通信协议 v5.0 — AGE-5 升级版
+# Master Brain · v5.1
+# 数字地球系统通信协议 v5.1 — AGE-5 自动开发循环升级
 
 ---
 
 ## 系统版本
 
-**v5.0** — 数字地球系统通信协议 · 仓库执行层系统升级
+**v5.1** — 数字地球系统通信协议 · 自动开发循环升级
 
 ---
 
@@ -60,13 +60,14 @@
 
 ---
 
-## v5.0 升级模块
+## v5.1 执行层模块
 
 | 入口 | 路径 | 说明 |
 |------|------|------|
+| 上下文加载 | `core/context-loader/index.js` | 执行前系统上下文加载 |
 | 广播监听 | `core/broadcast-listener/index.js` | 广播监听与任务解析 |
-| 任务队列 | `core/task-queue/index.js` | 任务调度与执行 |
-| 系统自检 | `core/system-check/index.js` | 仓库自检系统 |
+| 任务队列 | `core/task-queue/index.js` | 任务调度与执行（含类型分类） |
+| 系统自检 | `core/system-check/index.js` | 仓库自检 + 自动任务生成 |
 | 执行同步 | `core/execution-sync/index.js` | 执行层状态同步 |
 | Notion 同步 | `connectors/notion-sync/index.js` | 双向数据同步 |
 | 模型路由 | `connectors/model-router/index.js` | 模型调用路由 |
@@ -88,6 +89,7 @@
 5. **巡检维护** — 每日自动巡检系统健康状态
 6. **信号处理** — 处理 SYSLOG、广播、开发者工单
 7. **状态上报** — 向 Notion（认知层）报告执行结果
+8. **自动开发循环** — 自检发现问题后自动生成修复/优化任务
 
 ---
 
@@ -104,4 +106,4 @@
 
 ---
 
-*本文件由铸渊维护 · 系统版本 5.0 · 数字地球系统通信协议 · AGE-5*
+*本文件由铸渊维护 · 系统版本 5.1 · 数字地球系统通信协议 · AGE-5*
