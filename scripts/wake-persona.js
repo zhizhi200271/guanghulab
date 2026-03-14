@@ -885,6 +885,35 @@ async function main() {
     fs.appendFileSync(outputFile, 'result<<' + delimiter + '\n' + result + '\n' + delimiter + '\n');
   }
 
+  // 输出广播结果到 /tmp/broadcast-result.json（供飞书推送步骤使用）
+  try {
+    const broadcastResult = {
+      title: '',
+      summary: '',
+      notion_url: '',
+      dev_id: AUTHOR,
+      raw_length: result.length,
+      timestamp: new Date().toISOString(),
+    };
+
+    // 尝试从人格体输出中提取广播标题（BC-xxx 格式）
+    const bcMatch = result.match(/BC-[\w]+-\d+-[\w]+/);
+    if (bcMatch) {
+      broadcastResult.title = bcMatch[0];
+    }
+
+    // 尝试提取摘要（取前100字符）
+    const summaryLines = result.split('\n').filter(function (l) { return l.trim().length > 0; });
+    if (summaryLines.length > 0) {
+      broadcastResult.summary = summaryLines[0].slice(0, 100);
+    }
+
+    fs.writeFileSync('/tmp/broadcast-result.json', JSON.stringify(broadcastResult, null, 2));
+    console.log('  📄 broadcast-result.json 已写入 /tmp/');
+  } catch (e) {
+    console.log('  ⚠️  broadcast-result.json 写入失败: ' + e.message);
+  }
+
   // 同时输出到 stdout 供调试
   console.log('');
   console.log('═══════════════════════════════════════════');
