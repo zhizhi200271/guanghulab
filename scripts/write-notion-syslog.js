@@ -125,7 +125,7 @@ async function main() {
   }
 
   const filename    = path.basename(filePath);
-  const syslogText  = entry.syslog || entry.content || '';
+  const syslogText  = entry.syslog_raw || entry.syslog || entry.content || '';
   const source      = entry.source || 'unknown';
   const senderName  = entry.sender_name || '';
   const senderOpenId = entry.sender_open_id || '';

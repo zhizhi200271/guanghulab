@@ -76,7 +76,7 @@ jobs:
               '{chat_id: $chat_id, sender_open_id: $sender_open_id, broadcast_title: $broadcast_title, broadcast_content: $broadcast_content, broadcast_url: $broadcast_url}')")
 
           echo "  HTTP 响应: $HTTP_CODE"
-          cat /tmp/push-response.txt
+          cat /tmp/push-response.txt 2>/dev/null || true
           echo ""
 
           if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then

@@ -131,7 +131,7 @@ jobs:
           PORTRAIT_DB_ID: ${{ secrets.PORTRAIT_DB_ID }}
           FINGERPRINT_DB_ID: ${{ secrets.FINGERPRINT_DB_ID }}
           SUBMIT_TYPE: syslog
-          SUBMIT_CONTENT: ${{ needs.pipeline-a-syslog.outputs.syslog_file }}
+          SYSLOG_FILE: ${{ needs.pipeline-a-syslog.outputs.syslog_file }}
           AUTHOR: ${{ needs.pipeline-a-syslog.outputs.sender_name }}
         run: |
           if [ -z "$LLM_API_KEY" ] || [ -z "$LLM_BASE_URL" ]; then
@@ -140,7 +140,17 @@ jobs:
             echo "broadcast_url=" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          node scripts/wake-persona.js || true
+
+          # 读取 SYSLOG 文件内容传递给 wake-persona.js
+          if [ -f "$SYSLOG_FILE" ]; then
+            export SUBMIT_CONTENT=$(cat "$SYSLOG_FILE")
+          fi
+
+          if node scripts/wake-persona.js; then
+            echo "✅ 人格体唤醒成功"
+          else
+            echo "⚠️  人格体唤醒失败（exit code: $?），继续后续步骤"
+          fi
 
           # 读取人格体输出的广播信息（如果有）
           if [ -f /tmp/broadcast-result.json ]; then
