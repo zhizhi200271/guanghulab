@@ -1,12 +1,12 @@
 # 铸渊执行层 · 系统导航主文件
-# Master Brain · v4.0
-# 数字地球系统通信协议 v4.0
+# Master Brain · v5.0
+# 数字地球系统通信协议 v5.0 — AGE-5 升级版
 
 ---
 
 ## 系统版本
 
-**v4.0** — 数字地球系统通信协议
+**v5.0** — 数字地球系统通信协议 · 仓库执行层系统升级
 
 ---
 
@@ -60,6 +60,20 @@
 
 ---
 
+## v5.0 升级模块
+
+| 入口 | 路径 | 说明 |
+|------|------|------|
+| 广播监听 | `core/broadcast-listener/index.js` | 广播监听与任务解析 |
+| 任务队列 | `core/task-queue/index.js` | 任务调度与执行 |
+| 系统自检 | `core/system-check/index.js` | 仓库自检系统 |
+| Notion 同步 | `connectors/notion-sync/index.js` | 双向数据同步 |
+| 模型路由 | `connectors/model-router/index.js` | 模型调用路由 |
+| 结构地图 | `docs/repo-structure-map.md` | 仓库结构文档 |
+| 桥接地图 | `docs/notion-bridge-map.md` | Notion 桥接文档 |
+
+---
+
 ## 铸渊职责
 
 铸渊 = GitHub 侧守护人格体 = 执行层守护者
@@ -87,4 +101,4 @@
 
 ---
 
-*本文件由铸渊维护 · 系统版本 4.0 · 数字地球系统通信协议*
+*本文件由铸渊维护 · 系统版本 5.0 · 数字地球系统通信协议 · AGE-5*
