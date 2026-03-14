@@ -411,6 +411,71 @@ router.post('/alert', async (req, res) => {
 });
 
 // ══════════════════════════════════════════════════════════
+// 广播推送（Pipeline C 调用）
+// ══════════════════════════════════════════════════════════
+
+/**
+ * 接收 Pipeline C 的广播推送请求，转发到飞书聊天窗口
+ * POST /push-broadcast (通过 server.js 映射到 /webhook/push-broadcast)
+ */
+router.post('/push-broadcast', async (req, res) => {
+  // 1. 验证 token
+  const token = req.headers['x-push-token'];
+  if (!process.env.PUSH_BROADCAST_TOKEN || token !== process.env.PUSH_BROADCAST_TOKEN) {
+    return res.status(401).json({ error: true, code: 'INVALID_TOKEN', message: 'Invalid push token' });
+  }
+
+  // 2. 解析请求体
+  const { chat_id, sender_open_id, broadcast_title, broadcast_content, broadcast_url } = req.body;
+
+  if (!broadcast_content && !broadcast_title) {
+    return res.status(400).json({ error: true, code: 'MISSING_CONTENT', message: 'Missing broadcast_title or broadcast_content' });
+  }
+
+  const receive_id = chat_id || sender_open_id;
+  if (!receive_id) {
+    return res.status(400).json({ error: true, code: 'MISSING_TARGET', message: 'Missing chat_id or sender_open_id' });
+  }
+
+  try {
+    // 3. 获取飞书 token
+    const feishuToken = await getFeishuToken();
+
+    // 4. 构造消息文本
+    const urlLine = broadcast_url ? '\n🔗 ' + broadcast_url : '';
+    const text = '📡 新广播 ' + (broadcast_title || '') + '\n\n' + (broadcast_content || '') + urlLine;
+
+    // 5. 发送飞书消息（优先 chat_id，备选 open_id）
+    const receive_id_type = chat_id ? 'chat_id' : 'open_id';
+    const msgResult = await httpsRequest({
+      hostname: 'open.feishu.cn',
+      port: 443,
+      path: '/open-apis/im/v1/messages?receive_id_type=' + receive_id_type,
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + feishuToken,
+        'Content-Type': 'application/json',
+      },
+    }, {
+      receive_id: receive_id,
+      msg_type: 'text',
+      content: JSON.stringify({ text }),
+    });
+
+    if (msgResult.data && msgResult.data.code === 0) {
+      console.log('✅ 广播推送成功: ' + broadcast_title + ' → ' + receive_id);
+      res.json({ success: true, message_id: msgResult.data.data && msgResult.data.data.message_id });
+    } else {
+      console.error('❌ 飞书发送失败:', JSON.stringify(msgResult.data));
+      res.status(500).json({ error: true, code: 'FEISHU_API_ERROR', message: (msgResult.data && msgResult.data.msg) || 'Feishu API error' });
+    }
+  } catch (err) {
+    console.error('❌ push-broadcast error:', err.message);
+    res.status(500).json({ error: true, code: 'PUSH_ERROR', message: err.message });
+  }
+});
+
+// ══════════════════════════════════════════════════════════
 // 健康检查 + 统计
 // ══════════════════════════════════════════════════════════
 
@@ -424,6 +489,7 @@ router.get('/health', (req, res) => {
       ai_chat: !!process.env.MODEL_API_KEY,
       collaboration_logging: true,
       failure_alerting: !!ALERT_CHAT_ID,
+      push_broadcast: !!process.env.PUSH_BROADCAST_TOKEN,
     },
     github_token_configured: !!GITHUB_TOKEN,
     feishu_app_configured: !!(FEISHU_APP_ID && FEISHU_APP_SECRET),
