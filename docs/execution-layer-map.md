@@ -77,15 +77,15 @@
 ```
 context-loader（上下文加载）
         ↓
+system-check（自检 + 自动任务生成）
+        ↓
+execution-sync（状态采集与报告）
+        ↓
 broadcast-listener（广播监听）
         ↓
 task-queue（任务排队 · 类型: system/dev/maintenance/auto）
         ↓
 执行器运行
-        ↓
-execution-sync（状态采集）
-        ↓
-system-check（自检 + 自动任务生成）
         ↓
 connectors/notion-sync（状态回写）
         ↓

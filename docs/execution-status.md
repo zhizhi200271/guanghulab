@@ -1,7 +1,7 @@
 # 执行层状态报告 — execution-status.md
 
 > 铸渊执行层自动生成 · TCS-0002∞  
-> 更新时间：2026-03-14 14:37:53+08:00
+> 更新时间：2026-03-14 14:58:44+08:00
 
 ---
 
@@ -9,7 +9,7 @@
 
 | 指标 | 状态 |
 |------|------|
-| 系统版本 | v5.0 |
+| 系统版本 | v5.1 |
 | 执行层状态 | ✅ Stable |
 | Notion 桥接 | ✅ Active |
 | 执行同步 | ✅ Enabled |
@@ -25,6 +25,7 @@
 | task-queue | `core/task-queue/index.js` | ✅ Enabled |
 | system-check | `core/system-check/index.js` | ✅ Enabled |
 | execution-sync | `core/execution-sync/index.js` | ✅ Enabled |
+| context-loader | `core/context-loader/index.js` | ✅ Enabled |
 
 ---
 
@@ -52,7 +53,9 @@
 ## 执行闭环
 
 ```
-Notion 广播 → broadcast-listener → task-queue → 执行
+context-loader → system-check → execution-sync → 状态报告
         ↓
-execution-sync → notion-sync → Notion 主脑更新
+broadcast-listener → task-queue → 任务执行
+        ↓
+notion-sync → Notion 主脑更新
 ```

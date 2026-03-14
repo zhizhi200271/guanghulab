@@ -190,9 +190,9 @@ ${connTable}
 ## 执行闭环
 
 \`\`\`
-context-loader → broadcast-listener → task-queue → 执行
+context-loader → system-check → execution-sync → 状态报告
         ↓
-execution-sync → system-check → 自动任务生成
+broadcast-listener → task-queue → 任务执行
         ↓
 notion-sync → Notion 主脑更新
 \`\`\`
