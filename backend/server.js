@@ -32,6 +32,12 @@ app.get('/', (req, res) => {
   });
 });
 
+// Pipeline C 广播推送 webhook → 转发到 feishu-bot 路由
+app.post('/webhook/push-broadcast', (req, res, next) => {
+  req.url = '/push-broadcast';
+  feishuBotRoutes(req, res, next);
+});
+
 const PORT = process.env.PORT || 3000;
 // 飞书 Webhook 处理（旧版兼容入口，新事件请使用 /feishu-bot/event）
 app.post('/webhook/feishu', (req, res) => {
