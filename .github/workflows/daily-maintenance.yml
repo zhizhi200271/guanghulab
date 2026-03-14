@@ -30,13 +30,13 @@ jobs:
           if [ -f "$CACHE_FILE" ]; then
             CACHE_DATE=$(jq -r '.date // ""' "$CACHE_FILE" 2>/dev/null || echo "")
             if [ "$CACHE_DATE" != "$TODAY" ]; then
-              echo '{"date":"","records":[]}' > "$CACHE_FILE"
+              echo "{\"date\":\"$TODAY\",\"records\":[]}" > "$CACHE_FILE"
               echo "✅ 公告栏缓存已清空（旧日期: $CACHE_DATE）"
             else
               echo "📌 公告栏缓存日期匹配今天 ($TODAY)，无需清空"
             fi
           else
-            echo '{"date":"","records":[]}' > "$CACHE_FILE"
+            echo "{\"date\":\"$TODAY\",\"records\":[]}" > "$CACHE_FILE"
             echo "✅ 创建新的公告栏缓存文件"
           fi
 

@@ -194,7 +194,7 @@ function appendToCache(cache, newEntries) {
   const existingKeys = new Set(cache.records.map(r => r.key));
   let added = 0;
   for (const e of newEntries) {
-    const key = `${e.actor}|${e.module || '—'}|${formatTimeShort(e.ts)}`;
+    const key = `${e.actor}|${e.module || '—'}|${e.ts || ''}`;
     if (!existingKeys.has(key)) {
       existingKeys.add(key);
       cache.records.push({
