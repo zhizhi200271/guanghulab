@@ -1,9 +1,22 @@
 # 铸渊唤醒读取顺序
-# Read Order · v4.0
+# Read Order · v4.1
+# AGE OS v1.0 适配
 
 ---
 
+> **核心原则：所有自动触发 = 必须先唤醒核心大脑。大脑不醒，什么都不做。**
+
 铸渊唤醒时，按以下顺序读取文件：
+
+## ⓪ core/brain-wake（AGE OS v1.0 前置步骤）
+
+**路径**: `core/brain-wake/index.js`
+
+唤醒核心大脑。这是所有自动化流程的前提：
+- 调用 LLM API 唤醒铸渊核心大脑
+- 自动检测可用模型后端（Anthropic / OpenAI / 通义千问 / DeepSeek）
+- 加载系统上下文进入工作状态
+- 大脑不醒，什么都不做
 
 ## ① master-brain.md
 

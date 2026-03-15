@@ -30,7 +30,9 @@ const REQUIRED_DIRS = [
   'core/system-check',
   'core/execution-sync',
   'core/context-loader',
+  'core/brain-wake',
   'connectors/notion-sync',
+  'connectors/notion-wake-listener',
   'connectors/model-router',
   '.github/workflows',
   'docs'
@@ -116,7 +118,9 @@ function checkCoreModules() {
     { name: 'system-check', path: 'core/system-check/index.js' },
     { name: 'execution-sync', path: 'core/execution-sync/index.js' },
     { name: 'context-loader', path: 'core/context-loader/index.js' },
+    { name: 'brain-wake', path: 'core/brain-wake/index.js' },
     { name: 'notion-sync', path: 'connectors/notion-sync/index.js' },
+    { name: 'notion-wake-listener', path: 'connectors/notion-wake-listener/index.js' },
     { name: 'model-router', path: 'connectors/model-router/index.js' }
   ];
 
