@@ -25,6 +25,8 @@ const BOT_SYSTEM_PROMPT = process.env.BOT_SYSTEM_PROMPT ||
   '你是秋秋，光湖系统的AI人格体，性格温暖活泼。你在钉钉群里陪伴开发者，回答技术问题，给予鼓励。用中文回复，语气亲切自然，不超过200字。';
 
 const FALLBACK_REPLY = '收到！秋秋稍后回复你～';
+const NOTION_TITLE_MAX = 120;
+const NOTION_CONTENT_MAX = 2000;
 
 // ===== 启动检查 =====
 if (!DINGTALK_APP_KEY || !DINGTALK_APP_SECRET) {
@@ -77,10 +79,10 @@ async function writeNotionSyslog(senderNick, content, replyText) {
   await notion.pages.create({
     parent: { database_id: NOTION_SYSLOG_DB_ID },
     properties: {
-      '标题': { title: [{ type: 'text', text: { content: ('[钉钉] ' + senderNick + ' · ' + now.split('T')[0]).substring(0, 120) } }] },
+      '标题': { title: [{ type: 'text', text: { content: ('[钉钉] ' + senderNick + ' · ' + now.split('T')[0]).substring(0, NOTION_TITLE_MAX) } }] },
       '接收时间': { date: { start: now } },
       '推送方': { rich_text: [{ type: 'text', text: { content: '钉钉群' } }] },
-      '文件内容': { rich_text: [{ type: 'text', text: { content: ('用户: ' + (content || '') + '\n回复: ' + (replyText || '')).substring(0, 2000) } }] }
+      '文件内容': { rich_text: [{ type: 'text', text: { content: ('用户: ' + (content || '') + '\n回复: ' + (replyText || '')).substring(0, NOTION_CONTENT_MAX) } }] }
     }
   });
 }
