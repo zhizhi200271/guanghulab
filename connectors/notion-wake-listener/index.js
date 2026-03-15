@@ -180,11 +180,22 @@ async function updateWakeRequestStatus(pageId, status, result) {
       '状态': { select: { name: status } },
     };
 
-    // 如果有回执信息字段，写入处理结果
+    // 如果有回执信息字段，写入处理结果（Notion rich_text 限制 2000 chars）
     if (result) {
+      const NOTION_RICH_TEXT_LIMIT = 2000;
+      let truncatedResult = result;
+      if (result.length > NOTION_RICH_TEXT_LIMIT) {
+        // 截取到最近的完整句子
+        truncatedResult = result.slice(0, NOTION_RICH_TEXT_LIMIT);
+        const lastPeriod = Math.max(truncatedResult.lastIndexOf('。'), truncatedResult.lastIndexOf('. '), truncatedResult.lastIndexOf('\n'));
+        if (lastPeriod > NOTION_RICH_TEXT_LIMIT * 0.5) {
+          truncatedResult = truncatedResult.slice(0, lastPeriod + 1);
+        }
+        truncatedResult += ' ...(已截断)';
+      }
       properties['回执信息'] = {
         rich_text: [{
-          text: { content: result.slice(0, 2000) },
+          text: { content: truncatedResult },
         }],
       };
     }

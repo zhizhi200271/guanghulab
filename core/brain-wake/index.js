@@ -221,15 +221,19 @@ function loadSystemContext() {
   console.log('[WAKE] 📚 加载系统上下文...');
   const context = {};
 
-  // 加载 master-brain（截取前部分避免过长）
+  // 加载 master-brain（截取到最近的段落分隔符避免截断）
   const masterBrainPath = path.join(ROOT, 'brain/master-brain.md');
   if (fs.existsSync(masterBrainPath)) {
     const fullContent = fs.readFileSync(masterBrainPath, 'utf-8');
-    const MASTER_BRAIN_MAX_LENGTH = 3000;
-    context.masterBrain = fullContent.slice(0, MASTER_BRAIN_MAX_LENGTH);
-    if (fullContent.length > MASTER_BRAIN_MAX_LENGTH) {
-      console.log(`[WAKE]   ✅ master-brain.md 已加载 (截取 ${MASTER_BRAIN_MAX_LENGTH}/${fullContent.length} chars)`);
+    const maxLen = parseInt(process.env.BRAIN_CONTEXT_MAX_LENGTH, 10) || 3000;
+    if (fullContent.length > maxLen) {
+      // 截取到最近的段落分隔符（---或空行）
+      const truncated = fullContent.slice(0, maxLen);
+      const lastBreak = Math.max(truncated.lastIndexOf('\n---'), truncated.lastIndexOf('\n\n'));
+      context.masterBrain = lastBreak > maxLen * 0.5 ? truncated.slice(0, lastBreak) : truncated;
+      console.log(`[WAKE]   ✅ master-brain.md 已加载 (截取 ${context.masterBrain.length}/${fullContent.length} chars)`);
     } else {
+      context.masterBrain = fullContent;
       console.log('[WAKE]   ✅ master-brain.md 已加载');
     }
   }
