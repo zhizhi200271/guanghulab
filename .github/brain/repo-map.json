@@ -1,14 +1,14 @@
 {
   "description": "铸渊图书馆目录 · Library Catalog for 铸渊 (Zhùyuān)",
   "version": "2.0",
-  "generated_at": "2026-03-15T07:33:16.266Z",
+  "generated_at": "2026-03-15T08:27:16.119Z",
   "generated_by": "scripts/generate-repo-map.js",
   "repo": "qinfendebingshuo/guanghulab",
   "stats": {
     "zones": 13,
     "total_modules": 10,
-    "total_workflows": 45,
-    "total_scripts": 46,
+    "total_workflows": 46,
+    "total_scripts": 47,
     "total_dev_nodes": 8,
     "hli_interfaces": 21,
     "hli_implemented": 7,
@@ -323,6 +323,14 @@
           ]
         },
         {
+          "file": "notion-wake-listener.yml",
+          "name": "📡 铸渊 · Notion Agent 唤醒监听",
+          "triggers": [
+            "schedule(*/15 * * * *)",
+            "manual"
+          ]
+        },
+        {
           "file": "persona-invoke.yml",
           "name": "Persona Invoke Endpoint",
           "triggers": [
@@ -511,7 +519,7 @@
           ]
         }
       ],
-      "item_count": 45
+      "item_count": 46
     },
     {
       "zone_id": "SCRIPTS",
@@ -661,13 +669,16 @@
           "file": "zhuyuan-daily-selfcheck.js"
         },
         {
+          "file": "zhuyuan-full-inspection.js"
+        },
+        {
           "file": "zhuyuan-issue-reply.js"
         },
         {
           "file": "zhuyuan-module-protocol.js"
         }
       ],
-      "item_count": 46
+      "item_count": 47
     },
     {
       "zone_id": "SRC",
@@ -1029,6 +1040,9 @@
           "file": "README.md"
         },
         {
+          "file": "age-os-v1-architecture.md"
+        },
+        {
           "file": "ai-system-doc.md"
         },
         {
@@ -1050,7 +1064,7 @@
           "file": "使用指南.md"
         }
       ],
-      "item_count": 10
+      "item_count": 11
     },
     {
       "zone_id": "TESTS",
@@ -1469,6 +1483,9 @@
     "notion-poll": [
       "WORKFLOWS::notion-poll.yml"
     ],
+    "notion-wake-listener": [
+      "WORKFLOWS::notion-wake-listener.yml"
+    ],
     "persona-invoke": [
       "WORKFLOWS::persona-invoke.yml"
     ],
@@ -1668,6 +1685,9 @@
     ],
     "write-notion-syslog": [
       "SCRIPTS::write-notion-syslog.js"
+    ],
+    "zhuyuan-full-inspection": [
+      "SCRIPTS::zhuyuan-full-inspection.js"
     ],
     "zhuyuan-module-protocol": [
       "SCRIPTS::zhuyuan-module-protocol.js"
@@ -1924,6 +1944,9 @@
     ],
     "hololake-era-os-modules": [
       "DOCS::HoloLake-Era-OS-Modules.md"
+    ],
+    "age-os-v1-architecture": [
+      "DOCS::age-os-v1-architecture.md"
     ],
     "ai-system-doc": [
       "DOCS::ai-system-doc.md"
