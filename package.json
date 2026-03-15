@@ -36,6 +36,10 @@
     "core:check": "node core/system-check",
     "core:sync": "node core/execution-sync report",
     "core:context": "node core/context-loader",
+    "core:wake": "node core/brain-wake",
+    "core:wake:dry": "node core/brain-wake --dry-run",
+    "core:inspect": "node scripts/zhuyuan-full-inspection.js",
+    "core:inspect:json": "node scripts/zhuyuan-full-inspection.js --json",
     "connector:notion": "node connectors/notion-sync status",
     "connector:model": "node connectors/model-router"
   },

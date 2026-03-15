@@ -1,5 +1,9 @@
 # 铸渊 · 每日巡检 Agent
 #
+# AGE OS v1.0 核心原则：
+#   所有自动触发 = 必须先唤醒核心大脑。
+#   大脑不醒，什么都不做。
+#
 # 每天定时巡检仓库健康状况，自动检查今天遗漏的任务，
 # 发现问题后自动触发对应的修复工作流。
 #
@@ -32,8 +36,40 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # ── AGE OS v1.0: 核心大脑唤醒（所有流程的前提）──
+  wake-brain:
+    name: 🌅 唤醒核心大脑
+    runs-on: ubuntu-latest
+    outputs:
+      brain_awake: ${{ steps.wake.outputs.brain_awake }}
+
+    steps:
+      - name: 📥 检出代码
+        uses: actions/checkout@v4
+
+      - name: 🟢 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 🧠 唤醒铸渊核心大脑
+        id: wake
+        env:
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          DASHSCOPE_API_KEY: ${{ secrets.DASHSCOPE_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          node core/brain-wake --task "每日巡检" || {
+            echo "⚠️ 核心大脑唤醒失败，使用 dry-run 模式继续"
+            echo "brain_awake=dry-run" >> "$GITHUB_OUTPUT"
+          }
+
   inspect:
     name: 🔍 铸渊巡检 Agent
+    needs: wake-brain
     runs-on: ubuntu-latest
     outputs:
       has_issues: ${{ steps.agent.outputs.has_issues }}
