@@ -1,12 +1,10 @@
 module.exports = {
   apps : [{
-    name: 'dingtalk-bot',
-    script: 'index.js',
+    name: 'dingtalk-stream',
+    script: 'index-stream.js',
     cwd: '/opt/guanghulab-dingtalk/dingtalk-bot',
-    node_args: '--preserve-symlinks',
     env: {
-      NODE_ENV: 'production',
-      PORT: 3005
+      NODE_ENV: 'production'
     },
     env_production: {
       NODE_ENV: 'production'
