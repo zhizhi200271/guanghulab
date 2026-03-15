@@ -105,7 +105,7 @@ jobs:
           RESULT=$(ssh ${USER}@${HOST} "bash /tmp/deploy-check.sh ${DEV_ID} ${MODULE}" 2>&1) || true
           echo "$RESULT"
 
-          if echo "$RESULT" | grep -q "FAIL"; then
+          if echo "$RESULT" | grep -q "❌ FAIL:"; then
             echo "result=failed" >> $GITHUB_OUTPUT
             echo "detail=$RESULT" >> $GITHUB_OUTPUT
           else
@@ -142,27 +142,34 @@ jobs:
           RESULT: ${{ needs.deploy-to-sandbox.outputs.deploy_result }}
           DETAIL: ${{ needs.deploy-to-sandbox.outputs.deploy_detail }}
         run: |
-          TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          export TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 
           # 读取现有状态文件或初始化
-          STATUS_FILE="data/deploy-status.json"
+          export STATUS_FILE="data/deploy-status.json"
           mkdir -p data
           [ -f "$STATUS_FILE" ] || echo '{}' > "$STATUS_FILE"
 
           # 更新状态
-          python3 << EOF
-          import json
-          with open('$STATUS_FILE', 'r') as f:
+          python3 << 'EOF'
+          import json, os
+          status_file = os.environ.get('STATUS_FILE', 'data/deploy-status.json')
+          dev_id = os.environ['DEV_ID']
+          module = os.environ['MODULE']
+          result = os.environ.get('RESULT', '')
+          detail = os.environ.get('DETAIL', '')
+          timestamp = os.environ.get('TIMESTAMP', '')
+          commit = os.environ.get('GITHUB_SHA', '')
+          with open(status_file, 'r') as f:
               data = json.load(f)
-          data['${DEV_ID}/${MODULE}'] = {
-              'dev_id': '${DEV_ID}',
-              'module': '${MODULE}',
-              'result': '${RESULT}',
-              'detail': '${DETAIL}',
-              'timestamp': '${TIMESTAMP}',
-              'commit': '${GITHUB_SHA}'
+          data[f'{dev_id}/{module}'] = {
+              'dev_id': dev_id,
+              'module': module,
+              'result': result,
+              'detail': detail,
+              'timestamp': timestamp,
+              'commit': commit
           }
-          with open('$STATUS_FILE', 'w') as f:
+          with open(status_file, 'w') as f:
               json.dump(data, f, indent=2, ensure_ascii=False)
           EOF
 
@@ -182,32 +189,38 @@ jobs:
           MODULE: ${{ needs.parse-and-validate.outputs.module }}
           RESULT: ${{ needs.deploy-to-sandbox.outputs.deploy_result }}
         run: |
-          if [ "$RESULT" = "passed" ]; then
-            SUBJECT="✅ 部署成功：${DEV_ID}/${MODULE}"
-            BODY="你的模块 ${MODULE} 已成功部署到 guanghulab.com\n\n访问地址：https://guanghulab.com/${MODULE}/\n\n铸渊 · 光湖代码守护人格体"
-          else
-            SUBJECT="❌ 部署失败：${DEV_ID}/${MODULE}"
-            BODY="你的模块 ${MODULE} 部署失败\n\n请检查你的模块是否符合『服务器部署适配协议 v1.0』\n\n错误详情请看仓库公告栏或 GitHub Actions 日志\n\n铸渊 · 光湖代码守护人格体"
-          fi
-
-          python3 << PYEOF
-          import smtplib
+          python3 << 'PYEOF'
+          import smtplib, os
           from email.mime.text import MIMEText
           from email.header import Header
 
-          msg = MIMEText("""$BODY""", 'plain', 'utf-8')
-          msg['Subject'] = Header("$SUBJECT", 'utf-8')
-          msg['From'] = "$SMTP_USER"
-          msg['To'] = "$TO_EMAIL"
+          smtp_user = os.environ['SMTP_USER']
+          smtp_pass = os.environ['SMTP_PASS']
+          to_email = os.environ['TO_EMAIL']
+          dev_id = os.environ['DEV_ID']
+          module = os.environ['MODULE']
+          result = os.environ.get('RESULT', '')
+
+          if result == 'passed':
+              subject = f'✅ 部署成功：{dev_id}/{module}'
+              body = f'你的模块 {module} 已成功部署到 guanghulab.com\n\n访问地址：https://guanghulab.com/{module}/\n\n铸渊 · 光湖代码守护人格体'
+          else:
+              subject = f'❌ 部署失败：{dev_id}/{module}'
+              body = f'你的模块 {module} 部署失败\n\n请检查你的模块是否符合「服务器部署适配协议 v1.0」\n\n错误详情请看仓库公告栏或 GitHub Actions 日志\n\n铸渊 · 光湖代码守护人格体'
+
+          msg = MIMEText(body, 'plain', 'utf-8')
+          msg['Subject'] = Header(subject, 'utf-8')
+          msg['From'] = smtp_user
+          msg['To'] = to_email
 
           try:
               server = smtplib.SMTP_SSL('smtp.qq.com', 465)
-              server.login("$SMTP_USER", "$SMTP_PASS")
-              server.sendmail("$SMTP_USER", "$TO_EMAIL", msg.as_string())
+              server.login(smtp_user, smtp_pass)
+              server.sendmail(smtp_user, to_email, msg.as_string())
               server.quit()
-              print("✅ 邮件已发送到 $TO_EMAIL")
+              print(f'✅ 邮件已发送到 {to_email}')
           except Exception as e:
-              print(f"⚠️ 邮件发送失败: {e}")
+              print(f'⚠️ 邮件发送失败: {e}')
           PYEOF
 
       - name: "📝 同步到 Notion 部署注册表"

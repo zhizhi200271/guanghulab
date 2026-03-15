@@ -18,13 +18,9 @@ jobs:
         run: |
           echo "🧠 铸渊核心大脑唤醒中..."
           echo "🔑 扫描 Secrets 权限..."
-          for KEY in NOTION_TOKEN FINGERPRINT_DB_ID SMTP_USER; do
-            if [ -z "$(eval echo \$$KEY)" ]; then
-              echo "⚠️ 缺失: $KEY"
-            else
-              echo "✅ 可用: $KEY"
-            fi
-          done
+          if [ -z "$NOTION_TOKEN" ]; then echo "⚠️ 缺失: NOTION_TOKEN"; else echo "✅ 可用: NOTION_TOKEN"; fi
+          if [ -z "$FINGERPRINT_DB_ID" ]; then echo "⚠️ 缺失: FINGERPRINT_DB_ID"; else echo "✅ 可用: FINGERPRINT_DB_ID"; fi
+          if [ -z "$SMTP_USER" ]; then echo "⚠️ 缺失: SMTP_USER"; else echo "✅ 可用: SMTP_USER"; fi
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           FINGERPRINT_DB_ID: ${{ secrets.FINGERPRINT_DB_ID }}
