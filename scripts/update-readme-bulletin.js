@@ -768,7 +768,7 @@ function buildReadmeSkeleton() {
 ### 🤖 铸渊自动提醒
 
 <!-- BINGSHUO_ALERT_START -->
-> 🟢 **系统已自愈** · README 首页已自动恢复
+> 🟢 **今日无需冰朔手动干预** · 系统一切正常
 <!-- BINGSHUO_ALERT_END -->
 
 ---
@@ -884,7 +884,7 @@ async function main() {
             console.log(`✅ 从 git 历史 (${sha}) 恢复了 README.md 首页结构`);
             break;
           }
-        } catch { /* skip */ }
+        } catch { /* commit inaccessible or corrupt, skip */ }
       }
       if (!restored) {
         console.log('⚠️ 无法从 git 历史恢复，使用内置骨架模板重建首页');
