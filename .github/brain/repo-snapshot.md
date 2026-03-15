@@ -1,5 +1,5 @@
 # 铸渊图书馆快照 · Repo Snapshot
-> 生成于 2026-03-15 16:27 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
+> 生成于 2026-03-15 17:38 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
 
 ---
 
@@ -9,11 +9,11 @@
 |------|------|
 | 区域总数 | 13 个区域 |
 | 功能模块 | 10 个 (m01~m18) |
-| 工作流 | 46 个 GitHub Actions |
+| 工作流 | 47 个 GitHub Actions |
 | 脚本 | 47 个执行脚本 |
 | 开发者节点 | 8 人 |
 | HLI 接口覆盖率 | 7/21 (33%) |
-| 快照生成时间 | 2026-03-15 16:27 CST |
+| 快照生成时间 | 2026-03-15 17:38 CST |
 
 ---
 
@@ -30,7 +30,7 @@
 **关键词**: persona · identity · dev-status · 人格 · 开发者状态
 
 ### ⚡ 自动化工作流（WORKFLOWS）
-**路径**: `.github/workflows` · **数量**: 46 项
+**路径**: `.github/workflows` · **数量**: 47 项
 **描述**: 所有 GitHub Actions 工作流定义
 **关键词**: workflow · actions · ci · automation · 工作流 · 自动化
 
@@ -111,6 +111,7 @@
 | `notion-heartbeat.yml` | Notion Heartbeat Monitor | schedule(*/5 * * * *), manual |
 | `notion-poll.yml` | 铸渊 · Notion 工单轮询 | schedule(*/15 * * * *), manual |
 | `notion-wake-listener.yml` | 📡 铸渊 · Notion Agent 唤醒监听 | schedule(*/15 * * * *), manual |
+| `openclaw-wake-loop.yml` | 🔄 OpenClaw · 唤醒闭环 | schedule(0 14 * * *), manual |
 | `persona-invoke.yml` | Persona Invoke Endpoint | manual |
 | `pm2-server-diagnose.yml` | "🔧 铸渊 · PM2 服务诊断与健康检查" | manual |
 | `process-notion-orders.yml` | Process Notion Work Orders | push, manual |
@@ -281,9 +282,9 @@
 
 ## 🕐 最近动态（memory.json 最新3条）
 
+- `2026-03-15T08:50:17.308Z` · daily_check — passed
 - `2026-03-14T21:00:19.971Z` · syslog_unknown — (无标题)
 - `2026-03-14T18:57:45.006Z` · syslog_unknown — (无标题)
-- `2026-03-14T18:53:33.045Z` · syslog_unknown — (无标题)
 
 ---
 

@@ -1,20 +1,20 @@
 {
   "description": "铸渊图书馆目录 · Library Catalog for 铸渊 (Zhùyuān)",
   "version": "2.0",
-  "generated_at": "2026-03-15T08:27:16.119Z",
+  "generated_at": "2026-03-15T09:38:52.645Z",
   "generated_by": "scripts/generate-repo-map.js",
   "repo": "qinfendebingshuo/guanghulab",
   "stats": {
     "zones": 13,
     "total_modules": 10,
-    "total_workflows": 46,
+    "total_workflows": 47,
     "total_scripts": 47,
     "total_dev_nodes": 8,
     "hli_interfaces": 21,
     "hli_implemented": 7,
     "hli_coverage_pct": "33%",
     "last_ci_run": "2026-03-05T16:07:24.070Z",
-    "memory_last_updated": "2026-03-15T03:52:14.694Z"
+    "memory_last_updated": "2026-03-15T08:50:17.308Z"
   },
   "zones": [
     {
@@ -331,6 +331,14 @@
           ]
         },
         {
+          "file": "openclaw-wake-loop.yml",
+          "name": "🔄 OpenClaw · 唤醒闭环",
+          "triggers": [
+            "schedule(0 14 * * *)",
+            "manual"
+          ]
+        },
+        {
           "file": "persona-invoke.yml",
           "name": "Persona Invoke Endpoint",
           "triggers": [
@@ -519,7 +527,7 @@
           ]
         }
       ],
-      "item_count": 46
+      "item_count": 47
     },
     {
       "zone_id": "SCRIPTS",
@@ -1485,6 +1493,9 @@
     ],
     "notion-wake-listener": [
       "WORKFLOWS::notion-wake-listener.yml"
+    ],
+    "openclaw-wake-loop": [
+      "WORKFLOWS::openclaw-wake-loop.yml"
     ],
     "persona-invoke": [
       "WORKFLOWS::persona-invoke.yml"
