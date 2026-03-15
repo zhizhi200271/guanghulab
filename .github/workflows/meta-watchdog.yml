@@ -33,7 +33,7 @@ jobs:
 
           echo "daily-maintenance 最后运行：$LAST_RUN"
 
-          # 计算距上次运行超过 26 小时则告警
+          # 计算距上次运行的时间差，超过 26 小时则告警（24h 调度周期 + 2h 缓冲）
           node -e "
             const last = new Date('$LAST_RUN');
             const now = new Date();
@@ -67,3 +67,4 @@ jobs:
                 \"处理状态\": {\"status\": {\"name\": \"待处理\"}}
               }
             }"
+
