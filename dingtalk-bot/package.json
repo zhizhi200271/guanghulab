@@ -1,16 +1,19 @@
 {
   "name": "dingtalk-bot",
-  "version": "1.0.0",
-  "description": "- 负责人：之之 - 状态：环节0已完成 - 技术栈：Node.js + Express - 依赖模块：无",
-  "main": "broadcast-generator.js",
+  "version": "2.0.0",
+  "description": "钉钉AI人格体「秋秋」· Stream模式 · HoloLake",
+  "main": "index-stream.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node index-stream.js",
+    "start:webhook": "node server.js",
+    "check": "node --check index-stream.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@notionhq/client": "^5.13.0",
     "axios": "^1.13.6",
     "body-parser": "^2.2.2",
     "cors": "^2.8.6",
