@@ -1,13 +1,13 @@
 {
   "description": "铸渊图书馆目录 · Library Catalog for 铸渊 (Zhùyuān)",
   "version": "2.0",
-  "generated_at": "2026-03-15T15:33:26.784Z",
+  "generated_at": "2026-03-15T15:33:51.915Z",
   "generated_by": "scripts/generate-repo-map.js",
   "repo": "qinfendebingshuo/guanghulab",
   "stats": {
     "zones": 13,
     "total_modules": 10,
-    "total_workflows": 50,
+    "total_workflows": 51,
     "total_scripts": 53,
     "total_dev_nodes": 8,
     "hli_interfaces": 21,
@@ -293,6 +293,14 @@
           ]
         },
         {
+          "file": "meta-watchdog.yml",
+          "name": "\"🐕 元看门狗 · 巡检健康监控\"",
+          "triggers": [
+            "schedule(0 */6 * * *)",
+            "manual"
+          ]
+        },
+        {
           "file": "notion-callback-pipeline.yml",
           "name": "Notion Callback Pipeline",
           "triggers": [
@@ -550,7 +558,7 @@
           ]
         }
       ],
-      "item_count": 50
+      "item_count": 51
     },
     {
       "zone_id": "SCRIPTS",
@@ -1517,6 +1525,9 @@
     ],
     "hli-contract-check": [
       "WORKFLOWS::hli-contract-check.yml"
+    ],
+    "meta-watchdog": [
+      "WORKFLOWS::meta-watchdog.yml"
     ],
     "notion-callback-pipeline": [
       "WORKFLOWS::notion-callback-pipeline.yml"

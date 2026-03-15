@@ -9,7 +9,7 @@
 |------|------|
 | 区域总数 | 13 个区域 |
 | 功能模块 | 10 个 (m01~m18) |
-| 工作流 | 50 个 GitHub Actions |
+| 工作流 | 51 个 GitHub Actions |
 | 脚本 | 53 个执行脚本 |
 | 开发者节点 | 8 人 |
 | HLI 接口覆盖率 | 7/21 (33%) |
@@ -30,7 +30,7 @@
 **关键词**: persona · identity · dev-status · 人格 · 开发者状态
 
 ### ⚡ 自动化工作流（WORKFLOWS）
-**路径**: `.github/workflows` · **数量**: 50 项
+**路径**: `.github/workflows` · **数量**: 51 项
 **描述**: 所有 GitHub Actions 工作流定义
 **关键词**: workflow · actions · ci · automation · 工作流 · 自动化
 
@@ -106,6 +106,7 @@
 | `feishu-syslog-bridge.yml` | 铸渊 · 飞书SYSLOG桥接 | unknown |
 | `generate-module-doc.yml` | 铸渊 · 光湖纪元 模块文档自动生成 | push, manual |
 | `hli-contract-check.yml` | HLI Contract Check | push, pull_request |
+| `meta-watchdog.yml` | "🐕 元看门狗 · 巡检健康监控" | schedule(0 */6 * * *), manual |
 | `notion-callback-pipeline.yml` | Notion Callback Pipeline | unknown |
 | `notion-connectivity-test.yml` | 铸渊 · Notion 连通性测试 | manual |
 | `notion-heartbeat.yml` | Notion Heartbeat Monitor | schedule(*/5 * * * *), manual |
