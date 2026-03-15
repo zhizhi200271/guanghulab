@@ -1,5 +1,5 @@
 # 铸渊图书馆快照 · Repo Snapshot
-> 生成于 2026-03-14 10:05 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
+> 生成于 2026-03-15 10:30 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
 
 ---
 
@@ -9,18 +9,18 @@
 |------|------|
 | 区域总数 | 13 个区域 |
 | 功能模块 | 10 个 (m01~m18) |
-| 工作流 | 42 个 GitHub Actions |
-| 脚本 | 45 个执行脚本 |
+| 工作流 | 45 个 GitHub Actions |
+| 脚本 | 46 个执行脚本 |
 | 开发者节点 | 8 人 |
 | HLI 接口覆盖率 | 7/21 (33%) |
-| 快照生成时间 | 2026-03-14 10:05 CST |
+| 快照生成时间 | 2026-03-15 10:30 CST |
 
 ---
 
 ## 🗺️ 图书馆全区地图
 
 ### 🧠 铸渊大脑（BRAIN）
-**路径**: `.github/brain` · **数量**: 18 项
+**路径**: `.github/brain` · **数量**: 19 项
 **描述**: 铸渊核心记忆 · 路由映射 · 唤醒协议 · 图书馆目录
 **关键词**: brain · memory · routing · wake · 大脑 · 记忆
 
@@ -30,12 +30,12 @@
 **关键词**: persona · identity · dev-status · 人格 · 开发者状态
 
 ### ⚡ 自动化工作流（WORKFLOWS）
-**路径**: `.github/workflows` · **数量**: 42 项
+**路径**: `.github/workflows` · **数量**: 45 项
 **描述**: 所有 GitHub Actions 工作流定义
 **关键词**: workflow · actions · ci · automation · 工作流 · 自动化
 
 ### 🔧 执行脚本库（SCRIPTS）
-**路径**: `scripts` · **数量**: 45 项
+**路径**: `scripts` · **数量**: 46 项
 **描述**: 铸渊所有执行手脚 · 自动化脚本
 **关键词**: script · node · js · 脚本 · 执行 · runner
 
@@ -75,7 +75,7 @@
 **关键词**: syslog · inbox · log · 系统日志
 
 ### 📄 文档与前端（DOCS）
-**路径**: `docs` · **数量**: 6 项
+**路径**: `docs` · **数量**: 10 项
 **描述**: 铸渊助手聊天界面 · GitHub Pages 部署
 **关键词**: docs · html · chat · pages · 文档 · 聊天室
 
@@ -102,6 +102,8 @@
 | `deploy-to-server.yml` | "🚀 铸渊 CD · 自动部署到 guanghulab.com" | push, manual |
 | `distribute-broadcasts.yml` | 铸渊 · 广播分发 | push, manual |
 | `esp-signal-processor.yml` | 铸渊 · ESP 邮件信号处理器（已暂停） | schedule(*/30 * * * *), manual |
+| `execution-sync.yml` | "📡 铸渊 · 执行层状态同步" | schedule(0 3 * * *), manual |
+| `feishu-syslog-bridge.yml` | 铸渊 · 飞书SYSLOG桥接 | unknown |
 | `generate-module-doc.yml` | 铸渊 · 光湖纪元 模块文档自动生成 | push, manual |
 | `hli-contract-check.yml` | HLI Contract Check | push, pull_request |
 | `notion-callback-pipeline.yml` | Notion Callback Pipeline | unknown |
@@ -116,6 +118,7 @@
 | `ps-on-complete.yml` | "🌊 Persona Studio · 完成通知" | manual |
 | `ps-on-login.yml` | "🌊 Persona Studio · 登录校验" | manual |
 | `psp-daily-inspection.yml` | 铸渊 · PSP 分身巡检 | schedule(0 1 * * *), manual |
+| `push-broadcast-feishu.yml` | 铸渊 · 广播推送飞书（聊天消息） | manual |
 | `push-broadcast.yml` | 铸渊 · Push Broadcast · Notion → 飞书文档B | manual |
 | `receive-syslog.yml` | 铸渊 · Receive SYSLOG · 飞书机器人 → GitHub → Notion | unknown |
 | `staging-preview.yml` | "🔍 铸渊预演部署 (Staging Preview)" | pull_request, manual |
@@ -178,6 +181,7 @@
 - `scripts/utils`
 - `scripts/verify-modules.js`
 - `scripts/wake-persona.js`
+- `scripts/write-notion-syslog.js`
 - `scripts/zhuyuan-daily-agent.js`
 - `scripts/zhuyuan-daily-selfcheck.js`
 - `scripts/zhuyuan-issue-reply.js`
@@ -259,6 +263,7 @@
 - `.github/brain/bingshuo-read-order.md`
 - `.github/brain/bingshuo-routing-index.json`
 - `.github/brain/bingshuo-system-health.json`
+- `.github/brain/bulletin-board-today.json`
 - `.github/brain/collaborators.json`
 - `.github/brain/growth-log.md`
 - `.github/brain/human-registry.json`
@@ -274,9 +279,9 @@
 
 ## 🕐 最近动态（memory.json 最新3条）
 
-- `2026-03-13T08:53:32.764Z` · daily_check — passed
-- `2026-03-12T08:55:54.205Z` · daily_check — passed
-- `2026-03-11T08:55:43.347Z` · daily_check — passed
+- `2026-03-14T21:00:19.971Z` · syslog_unknown — (无标题)
+- `2026-03-14T18:57:45.006Z` · syslog_unknown — (无标题)
+- `2026-03-14T18:53:33.045Z` · syslog_unknown — (无标题)
 
 ---
 
