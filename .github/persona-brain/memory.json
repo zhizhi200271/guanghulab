@@ -52,6 +52,14 @@
   "total_ci_runs": 8,
   "last_broadcast_received": "2026-03-10T13:24:33.774Z",
   "active_rules_version": "v1.2",
+  "skyeye": {
+    "last_run": null,
+    "report_id": null,
+    "overall_health": null,
+    "issues_found": 0,
+    "auto_fixed": 0,
+    "needs_human": 0
+  },
   "daily_selfcheck": {
     "last_run": "2026-03-16T04:01:00.000Z",
     "brain_integrity": "ok",
