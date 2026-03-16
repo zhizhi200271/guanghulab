@@ -1,0 +1,40 @@
+name: 铸渊 · Notion 页面阅读器
+
+# 从 Notion 页面链接读取内容，输出 Markdown 格式文本
+#
+# 依赖 Secrets：
+#   NOTION_API_TOKEN   Notion API token
+#
+# dispatch payload / inputs：
+#   notion_page_url    Notion 页面链接或页面 ID
+
+on:
+  repository_dispatch:
+    types: [read-notion-page]
+  workflow_dispatch:
+    inputs:
+      notion_page_url:
+        description: 'Notion 页面链接或页面 ID'
+        required: true
+
+jobs:
+  read-page:
+    name: 📖 读取 Notion 页面
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 📖 读取 Notion 页面内容
+        env:
+          NOTION_TOKEN:    ${{ secrets.NOTION_API_TOKEN }}
+          NOTION_PAGE_URL: ${{ github.event.client_payload.notion_page_url || github.event.inputs.notion_page_url }}
+        run: node scripts/notion-page-reader.js
