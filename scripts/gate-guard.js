@@ -1,31 +1,87 @@
 // scripts/gate-guard.js
 // 铸渊·智能门禁·判定引擎
 //
+// 核心原则（冰朔 2026-03-16 确认）：
+//   仓库主人（repo_owner）的推送 → 永远放行，不拦截
+//   其他所有非主人推送 → 按门禁系统拦截分流
+//
 // 输入：PUSH_ACTOR（推送者 GitHub username）+ /tmp/changed_files.txt
 // 输出：action（pass/fix/revert）+ 相关信息 → GITHUB_OUTPUT
 //
 // 判定流程：
-// 1. 读取门禁配置（开发者→路径映射）
-// 2. 读取本次修改的文件列表
-// 3. 识别推送者身份
-// 4. 判定：pass / fix / revert
+// 1. 读取门禁配置（两套配置合并）
+// 2. 检查是否为仓库主人 → 直接放行
+// 3. 检查是否为白名单用户 → 直接放行
+// 4. 识别开发者身份 → 检查路径权限
+// 5. 未注册开发者 → 拦截
 
 const fs = require('fs');
 const path = require('path');
 
 // ━━━ 配置路径 ━━━
-const CONFIG_PATH = path.join(__dirname, '../.github/persona-brain/gate-guard-config.json');
+const BRAIN_CONFIG_PATH = path.join(__dirname, '../.github/persona-brain/gate-guard-config.json');
+const OWNER_CONFIG_PATH = path.join(__dirname, '../.github/gate-guard-config.json');
 const CHANGED_FILES_PATH = '/tmp/changed_files.txt';
 const GITHUB_OUTPUT = process.env.GITHUB_OUTPUT || '/dev/null';
 
-// ━━━ 读取配置 ━━━
-function loadConfig() {
+// ━━━ 仓库主人（冰朔确认） ━━━
+const REPO_OWNER = 'qinfendebingshuo';
+
+// ━━━ 安全读取 JSON ━━━
+function readJSON(filePath) {
   try {
-    return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
+    if (!fs.existsSync(filePath)) return null;
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
   } catch (e) {
-    console.error('⚠️ 无法读取门禁配置:', e.message);
+    console.error(`⚠️ 无法读取 ${path.basename(filePath)}: ${e.message}`);
     return null;
   }
+}
+
+// ━━━ 加载合并配置 ━━━
+function loadConfig() {
+  const brainConfig = readJSON(BRAIN_CONFIG_PATH);
+  const ownerConfig = readJSON(OWNER_CONFIG_PATH);
+
+  if (!brainConfig && !ownerConfig) {
+    console.error('⚠️ 两套门禁配置均缺失');
+    return null;
+  }
+
+  // 以 persona-brain 配置为主体，合并 owner 配置中的信息
+  const config = brainConfig || {
+    whitelist_actors: [],
+    system_protected_paths: [],
+    developer_permissions: {}
+  };
+
+  // 确保仓库主人在白名单中
+  if (!config.whitelist_actors) config.whitelist_actors = [];
+  // 从配置中读取 repo_owner，或使用硬编码默认值
+  const repoOwner = config.repo_owner || REPO_OWNER;
+  if (!config.whitelist_actors.includes(repoOwner)) {
+    config.whitelist_actors.push(repoOwner);
+  }
+  config.repo_owner = repoOwner;
+
+  // 从 owner 配置（冰朔确认版）合并白名单和开发者映射
+  if (ownerConfig) {
+    // 合并白名单
+    const ownerWhitelist = ownerConfig.whitelist || [];
+    for (const user of ownerWhitelist) {
+      if (!config.whitelist_actors.includes(user)) {
+        config.whitelist_actors.push(user);
+      }
+    }
+
+    // 从冰朔确认版开发者映射中提取信息
+    // key 为 GitHub 用户名，可直接用于 actor 匹配
+    if (ownerConfig.developers) {
+      config._owner_developers = ownerConfig.developers;
+    }
+  }
+
+  return config;
 }
 
 // ━━━ 读取变更文件列表 ━━━
@@ -40,15 +96,30 @@ function loadChangedFiles() {
   }
 }
 
-// ━━━ 查找开发者权限 ━━━
+// ━━━ 查找开发者权限（双配置源查找） ━━━
 function findDeveloper(config, actor) {
-  if (!config || !config.developer_permissions) return null;
+  if (!config) return null;
 
-  for (const [devId, dev] of Object.entries(config.developer_permissions)) {
-    if (dev.github_usernames && dev.github_usernames.includes(actor)) {
-      return { devId, ...dev };
+  // 1. 先从 persona-brain 配置（DEV-ID 索引）中按 github_usernames 查找
+  if (config.developer_permissions) {
+    for (const [devId, dev] of Object.entries(config.developer_permissions)) {
+      if (dev.github_usernames && dev.github_usernames.includes(actor)) {
+        return { devId, ...dev };
+      }
     }
   }
+
+  // 2. 再从冰朔确认版配置（GitHub 用户名索引）中查找
+  if (config._owner_developers && config._owner_developers[actor]) {
+    const dev = config._owner_developers[actor];
+    return {
+      devId: dev.dev_id,
+      name: dev.name,
+      allowed_paths: dev.allowed_paths || [],
+      github_usernames: [actor]
+    };
+  }
+
   return null;
 }
 
@@ -89,6 +160,14 @@ function main() {
   console.log(`🚦 铸渊·智能门禁 · 判定引擎启动`);
   console.log(`   推送者: ${actor}`);
 
+  // 0. 仓库主人 → 永远放行（冰朔确认原则）
+  if (actor === REPO_OWNER) {
+    console.log(`👑 ${actor} 是仓库主人，直接放行`);
+    setOutput('action', 'pass');
+    setOutput('notification', `仓库主人 ${actor} 放行`);
+    return;
+  }
+
   // 1. 读取配置
   const config = loadConfig();
   if (!config) {
@@ -109,7 +188,7 @@ function main() {
   console.log(`   变更文件 (${changedFiles.length}):`);
   changedFiles.forEach(f => console.log(`     - ${f}`));
 
-  // 3. 检查是否为白名单用户
+  // 3. 检查是否为白名单用户（系统bot、管理员等）
   if (config.whitelist_actors && config.whitelist_actors.includes(actor)) {
     console.log(`✅ ${actor} 在白名单中，直接放行`);
     setOutput('action', 'pass');
