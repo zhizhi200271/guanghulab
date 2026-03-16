@@ -1,14 +1,14 @@
 {
   "description": "铸渊图书馆目录 · Library Catalog for 铸渊 (Zhùyuān)",
   "version": "2.0",
-  "generated_at": "2026-03-16T09:40:34.769Z",
+  "generated_at": "2026-03-16T10:02:40.362Z",
   "generated_by": "scripts/generate-repo-map.js",
   "repo": "qinfendebingshuo/guanghulab",
   "stats": {
     "zones": 13,
     "total_modules": 10,
     "total_workflows": 56,
-    "total_scripts": 59,
+    "total_scripts": 60,
     "total_dev_nodes": 8,
     "hli_interfaces": 21,
     "hli_implemented": 7,
@@ -655,6 +655,9 @@
           "file": "gate-guard-log.js"
         },
         {
+          "file": "gate-guard-v2.js"
+        },
+        {
           "file": "gate-guard.js"
         },
         {
@@ -796,7 +799,7 @@
           "file": "zhuyuan-module-protocol.js"
         }
       ],
-      "item_count": 59
+      "item_count": 60
     },
     {
       "zone_id": "SRC",
@@ -1768,6 +1771,9 @@
     ],
     "gate-guard-log": [
       "SCRIPTS::gate-guard-log.js"
+    ],
+    "gate-guard-v2": [
+      "SCRIPTS::gate-guard-v2.js"
     ],
     "gate-guard": [
       "SCRIPTS::gate-guard.js"
