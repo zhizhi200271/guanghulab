@@ -8,7 +8,7 @@
     "qinfendebingshuo"
   ],
   "whitelist_commit_prefixes": [
-    "🔍", "📊", "📡", "🧠", "📢", "🚨", "📰", "🔧"
+    "🔍", "📊", "📡", "🧠", "📢", "🚨", "📰", "🔧", "🦅"
   ],
   "system_protected_paths": [
     ".github/",
