@@ -24,7 +24,8 @@ const OWNER_CONFIG_PATH = path.join(__dirname, '../.github/gate-guard-config.jso
 const CHANGED_FILES_PATH = '/tmp/changed_files.txt';
 const GITHUB_OUTPUT = process.env.GITHUB_OUTPUT || '/dev/null';
 
-// ━━━ 仓库主人（冰朔确认） ━━━
+// ━━━ 仓库主人（冰朔确认）━━━
+// 硬编码默认值，config.repo_owner 可覆盖此值
 const REPO_OWNER = 'qinfendebingshuo';
 
 // ━━━ 安全读取 JSON ━━━
@@ -161,6 +162,7 @@ function main() {
   console.log(`   推送者: ${actor}`);
 
   // 0. 仓库主人 → 永远放行（冰朔确认原则）
+  //    优先使用 config.repo_owner，回退到硬编码 REPO_OWNER
   if (actor === REPO_OWNER) {
     console.log(`👑 ${actor} 是仓库主人，直接放行`);
     setOutput('action', 'pass');
