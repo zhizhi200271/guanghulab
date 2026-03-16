@@ -1,5 +1,5 @@
 # 铸渊图书馆快照 · Repo Snapshot
-> 生成于 2026-03-16 18:37 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
+> 生成于 2026-03-16 23:12 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
 
 ---
 
@@ -9,11 +9,11 @@
 |------|------|
 | 区域总数 | 13 个区域 |
 | 功能模块 | 10 个 (m01~m18) |
-| 工作流 | 56 个 GitHub Actions |
-| 脚本 | 60 个执行脚本 |
+| 工作流 | 57 个 GitHub Actions |
+| 脚本 | 61 个执行脚本 |
 | 开发者节点 | 8 人 |
 | HLI 接口覆盖率 | 7/21 (33%) |
-| 快照生成时间 | 2026-03-16 18:37 CST |
+| 快照生成时间 | 2026-03-16 23:12 CST |
 
 ---
 
@@ -30,12 +30,12 @@
 **关键词**: persona · identity · dev-status · 人格 · 开发者状态
 
 ### ⚡ 自动化工作流（WORKFLOWS）
-**路径**: `.github/workflows` · **数量**: 56 项
+**路径**: `.github/workflows` · **数量**: 57 项
 **描述**: 所有 GitHub Actions 工作流定义
 **关键词**: workflow · actions · ci · automation · 工作流 · 自动化
 
 ### 🔧 执行脚本库（SCRIPTS）
-**路径**: `scripts` · **数量**: 60 项
+**路径**: `scripts` · **数量**: 61 项
 **描述**: 铸渊所有执行手脚 · 自动化脚本
 **关键词**: script · node · js · 脚本 · 执行 · runner
 
@@ -112,6 +112,7 @@
 | `notion-callback-pipeline.yml` | Notion Callback Pipeline | unknown |
 | `notion-connectivity-test.yml` | 铸渊 · Notion 连通性测试 | manual |
 | `notion-heartbeat.yml` | Notion Heartbeat Monitor | schedule(*/5 * * * *), manual |
+| `notion-page-reader.yml` | 铸渊 · Notion 页面阅读器 | manual |
 | `notion-poll.yml` | 铸渊 · Notion 工单轮询 | schedule(*/15 * * * *), manual |
 | `notion-wake-listener.yml` | 📡 铸渊 · Notion Agent 唤醒监听 | schedule(*/15 * * * *), manual |
 | `openclaw-wake-loop.yml` | 🔄 OpenClaw · 唤醒闭环 | schedule(0 14 * * *), manual |
@@ -178,6 +179,7 @@
 - `scripts/notion-bridge.js`
 - `scripts/notion-connectivity-test.js`
 - `scripts/notion-heartbeat.js`
+- `scripts/notion-page-reader.js`
 - `scripts/notion-signal-bridge.js`
 - `scripts/pipeline-reporter.js`
 - `scripts/process-broadcasts.js`

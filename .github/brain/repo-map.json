@@ -1,14 +1,14 @@
 {
   "description": "铸渊图书馆目录 · Library Catalog for 铸渊 (Zhùyuān)",
   "version": "2.0",
-  "generated_at": "2026-03-16T10:37:23.702Z",
+  "generated_at": "2026-03-16T15:12:11.784Z",
   "generated_by": "scripts/generate-repo-map.js",
   "repo": "qinfendebingshuo/guanghulab",
   "stats": {
     "zones": 13,
     "total_modules": 10,
-    "total_workflows": 56,
-    "total_scripts": 60,
+    "total_workflows": 57,
+    "total_scripts": 61,
     "total_dev_nodes": 8,
     "hli_interfaces": 21,
     "hli_implemented": 7,
@@ -341,6 +341,13 @@
           ]
         },
         {
+          "file": "notion-page-reader.yml",
+          "name": "铸渊 · Notion 页面阅读器",
+          "triggers": [
+            "manual"
+          ]
+        },
+        {
           "file": "notion-poll.yml",
           "name": "铸渊 · Notion 工单轮询",
           "triggers": [
@@ -601,7 +608,7 @@
           ]
         }
       ],
-      "item_count": 56
+      "item_count": 57
     },
     {
       "zone_id": "SCRIPTS",
@@ -698,6 +705,9 @@
         },
         {
           "file": "notion-heartbeat.js"
+        },
+        {
+          "file": "notion-page-reader.js"
         },
         {
           "file": "notion-signal-bridge.js"
@@ -799,7 +809,7 @@
           "file": "zhuyuan-module-protocol.js"
         }
       ],
-      "item_count": 60
+      "item_count": 61
     },
     {
       "zone_id": "SRC",
@@ -1613,6 +1623,10 @@
     "notion-heartbeat": [
       "WORKFLOWS::notion-heartbeat.yml",
       "SCRIPTS::notion-heartbeat.js"
+    ],
+    "notion-page-reader": [
+      "WORKFLOWS::notion-page-reader.yml",
+      "SCRIPTS::notion-page-reader.js"
     ],
     "notion-poll": [
       "WORKFLOWS::notion-poll.yml"
