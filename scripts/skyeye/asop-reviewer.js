@@ -43,6 +43,11 @@ const IMMUTABLE_CONCEPTS = [
 // ━━━ 30天变更累计上限 ━━━
 const MAX_GL2_PER_WORKFLOW_30D = 3;
 
+// ━━━ 审批阈值 ━━━
+const MIN_EVIDENCE_LENGTH = 10;
+const MAX_AFFECTED_WORKFLOWS_GL2 = 2;
+const MIN_ROLLBACK_PLAN_LENGTH = 5;
+
 // ━━━ 安全读取 JSON ━━━
 function readJSON(filePath) {
   try {
@@ -113,14 +118,14 @@ function evaluateRequest(req) {
   }
 
   // 数据支撑检查
-  if (!req.data_evidence || req.data_evidence.length < 10) {
-    return { result: 'rejected', reason: '缺少数据支撑（evidence 不足 10 字符），请提供具体证据' };
+  if (!req.data_evidence || req.data_evidence.length < MIN_EVIDENCE_LENGTH) {
+    return { result: 'rejected', reason: `缺少数据支撑（evidence 不足 ${MIN_EVIDENCE_LENGTH} 字符），请提供具体证据` };
   }
 
-  // 影响范围检查：超过 2 个 Workflow → 升级
+  // 影响范围检查：超过阈值个 Workflow → 升级
   const affectedWorkflows = (req.impact_assessment && req.impact_assessment.affected_workflows) || [];
-  if (affectedWorkflows.length > 2) {
-    return { result: 'escalate', reason: `影响超过 2 个 Workflow（${affectedWorkflows.length} 个），需冰朔评估` };
+  if (affectedWorkflows.length > MAX_AFFECTED_WORKFLOWS_GL2) {
+    return { result: 'escalate', reason: `影响超过 ${MAX_AFFECTED_WORKFLOWS_GL2} 个 Workflow（${affectedWorkflows.length} 个），需冰朔评估` };
   }
 
   // 30 天变更累计检查
@@ -136,8 +141,8 @@ function evaluateRequest(req) {
   }
 
   // 回滚计划检查
-  if (!req.rollback_plan || req.rollback_plan.length < 5) {
-    return { result: 'rejected', reason: '缺少回滚计划（rollback_plan），请补充回退方案' };
+  if (!req.rollback_plan || req.rollback_plan.length < MIN_ROLLBACK_PLAN_LENGTH) {
+    return { result: 'rejected', reason: `缺少回滚计划（rollback_plan 不足 ${MIN_ROLLBACK_PLAN_LENGTH} 字符），请补充回退方案` };
   }
 
   // 通过所有检查 → 批准
