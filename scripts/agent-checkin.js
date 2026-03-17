@@ -68,7 +68,7 @@ function githubApi(urlPath) {
 // ── 获取 workflow 今日最新 run ────────────────────────────────────────────
 
 async function getLatestRun(workflowFile) {
-  const urlPath = `/repos/${REPO}/actions/workflows/${encodeURIComponent(workflowFile)}/runs?per_page=1&created=>=${today}`;
+  const urlPath = `/repos/${REPO}/actions/workflows/${encodeURIComponent(workflowFile)}/runs?per_page=1&created=${encodeURIComponent('>=' + today)}`;
   const data = await githubApi(urlPath);
   if (!data || !data.workflow_runs || data.workflow_runs.length === 0) {
     return null;

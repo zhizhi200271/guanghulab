@@ -17,6 +17,7 @@ jobs:
         run: node scripts/zhuyuan-inspection.js
       - name: 推送工单到Notion
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NOTION_TOKEN_BINGSUO: ${{ secrets.NOTION_TOKEN_BINGSUO }}
           NOTION_TOKEN_ZHIZHI: ${{ secrets.NOTION_TOKEN_ZHIZHI }}
           WORKORDER_DB_BINGSUO: ${{ secrets.WORKORDER_DB_BINGSUO }}
