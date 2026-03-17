@@ -4,6 +4,10 @@ on:
     - cron: '0 2 * * *'  # UTC 02:00 = 北京 10:00
   workflow_dispatch:
 
+permissions:
+  contents: write
+  actions: read
+
 jobs:
   checkin:
     runs-on: ubuntu-latest
