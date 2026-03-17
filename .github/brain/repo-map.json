@@ -1,20 +1,20 @@
 {
   "description": "铸渊图书馆目录 · Library Catalog for 铸渊 (Zhùyuān)",
   "version": "2.0",
-  "generated_at": "2026-03-17T07:09:54.581Z",
+  "generated_at": "2026-03-17T10:24:21.780Z",
   "generated_by": "scripts/generate-repo-map.js",
   "repo": "qinfendebingshuo/guanghulab",
   "stats": {
     "zones": 13,
     "total_modules": 10,
     "total_workflows": 62,
-    "total_scripts": 67,
+    "total_scripts": 70,
     "total_dev_nodes": 8,
     "hli_interfaces": 21,
     "hli_implemented": 7,
     "hli_coverage_pct": "33%",
     "last_ci_run": "2026-03-05T16:07:24.070Z",
-    "memory_last_updated": "2026-03-16T09:08:54.932Z"
+    "memory_last_updated": "2026-03-17T09:01:58.444Z"
   },
   "zones": [
     {
@@ -706,6 +706,15 @@
           "file": "daily-check.js"
         },
         {
+          "file": "dc-agent-behavior.js"
+        },
+        {
+          "file": "dc-notion-usage.js"
+        },
+        {
+          "file": "dc-workflow-perf.js"
+        },
+        {
           "file": "deploy-check.sh"
         },
         {
@@ -877,7 +886,7 @@
           "file": "zhuyuan-wakeup.js"
         }
       ],
-      "item_count": 67
+      "item_count": 70
     },
     {
       "zone_id": "SRC",
@@ -1875,6 +1884,15 @@
     ],
     "daily-check": [
       "SCRIPTS::daily-check.js"
+    ],
+    "dc-agent-behavior": [
+      "SCRIPTS::dc-agent-behavior.js"
+    ],
+    "dc-notion-usage": [
+      "SCRIPTS::dc-notion-usage.js"
+    ],
+    "dc-workflow-perf": [
+      "SCRIPTS::dc-workflow-perf.js"
     ],
     "deploy-check": [
       "SCRIPTS::deploy-check.sh"

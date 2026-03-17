@@ -1,5 +1,5 @@
 # 铸渊图书馆快照 · Repo Snapshot
-> 生成于 2026-03-17 15:09 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
+> 生成于 2026-03-17 18:24 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
 
 ---
 
@@ -10,10 +10,10 @@
 | 区域总数 | 13 个区域 |
 | 功能模块 | 10 个 (m01~m18) |
 | 工作流 | 62 个 GitHub Actions |
-| 脚本 | 67 个执行脚本 |
+| 脚本 | 70 个执行脚本 |
 | 开发者节点 | 8 人 |
 | HLI 接口覆盖率 | 7/21 (33%) |
-| 快照生成时间 | 2026-03-17 15:09 CST |
+| 快照生成时间 | 2026-03-17 18:24 CST |
 
 ---
 
@@ -35,7 +35,7 @@
 **关键词**: workflow · actions · ci · automation · 工作流 · 自动化
 
 ### 🔧 执行脚本库（SCRIPTS）
-**路径**: `scripts` · **数量**: 67 项
+**路径**: `scripts` · **数量**: 70 项
 **描述**: 铸渊所有执行手脚 · 自动化脚本
 **关键词**: script · node · js · 脚本 · 执行 · runner
 
@@ -167,6 +167,9 @@
 - `scripts/create-standardized-ticket.js`
 - `scripts/cross-repo-sync.js`
 - `scripts/daily-check.js`
+- `scripts/dc-agent-behavior.js`
+- `scripts/dc-notion-usage.js`
+- `scripts/dc-workflow-perf.js`
 - `scripts/deploy-check.sh`
 - `scripts/distribute-broadcasts.js`
 - `scripts/esp-email-processor.js`
@@ -317,9 +320,9 @@
 
 ## 🕐 最近动态（memory.json 最新3条）
 
+- `2026-03-17T09:01:58.444Z` · daily_check — passed
 - `2026-03-16T09:08:54.931Z` · daily_check — passed
 - `2026-03-15T08:50:17.308Z` · daily_check — passed
-- `2026-03-14T21:00:19.971Z` · syslog_unknown — (无标题)
 
 ---
 
