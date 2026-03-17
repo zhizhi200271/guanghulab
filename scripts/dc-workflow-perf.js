@@ -75,7 +75,7 @@ async function fetchTodayRuns() {
   while (page <= maxPages) {
     try {
       const resp = await githubGet(
-        `/repos/${OWNER}/${REPO}/actions/runs?created=>=${today}T00:00:00Z&per_page=100&page=${page}`
+        `/repos/${OWNER}/${REPO}/actions/runs?created=%3E%3D${today}T00:00:00Z&per_page=100&page=${page}`
       );
 
       if (resp.statusCode !== 200) {

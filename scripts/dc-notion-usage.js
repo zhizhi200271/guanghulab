@@ -115,9 +115,7 @@ async function queryNotionDatabases(token) {
   const databases = [];
 
   try {
-    const resp = await notionGet('/v1/search', token);
-    // search 需要 POST，用简单 GET 替代：查询已知数据库
-    // 由于 search 是 POST，此处跳过，使用环境变量中已知的数据库 ID
+    // search 需要 POST，此处使用已知数据库 ID 直接查询
   } catch {
     // Notion API 不可达
   }
@@ -198,7 +196,7 @@ function countTodayApiCalls() {
     if (count > peakCount) {
       peakCount = count;
       const h = parseInt(hour, 10);
-      peakHour = `${String(h).padStart(2, '0')}:00-${String(h + 1).padStart(2, '0')}:00`;
+      peakHour = `${String(h).padStart(2, '0')}:00-${String((h + 1) % 24).padStart(2, '0')}:00`;
     }
   }
 
