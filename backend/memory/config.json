@@ -1,0 +1,7 @@
+{
+  "port": 3020,
+  "maxFileSizeMB": 50,
+  "allowedTypes": ["json", "txt", "md", "csv", "log", "png", "jpg"],
+  "quotaGB": 1,
+  "autoCleanDays": 30
+}
