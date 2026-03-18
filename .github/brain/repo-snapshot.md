@@ -1,5 +1,5 @@
 # 铸渊图书馆快照 · Repo Snapshot
-> 生成于 2026-03-18 10:21 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
+> 生成于 2026-03-19 00:44 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
 
 ---
 
@@ -9,11 +9,11 @@
 |------|------|
 | 区域总数 | 13 个区域 |
 | 功能模块 | 10 个 (m01~m18) |
-| 工作流 | 62 个 GitHub Actions |
-| 脚本 | 70 个执行脚本 |
+| 工作流 | 63 个 GitHub Actions |
+| 脚本 | 72 个执行脚本 |
 | 开发者节点 | 8 人 |
 | HLI 接口覆盖率 | 7/21 (33%) |
-| 快照生成时间 | 2026-03-18 10:21 CST |
+| 快照生成时间 | 2026-03-19 00:44 CST |
 
 ---
 
@@ -25,17 +25,17 @@
 **关键词**: brain · memory · routing · wake · 大脑 · 记忆
 
 ### 🎭 人格大脑（PERSONA_BRAIN）
-**路径**: `.github/persona-brain` · **数量**: 16 项
+**路径**: `.github/persona-brain` · **数量**: 18 项
 **描述**: 铸渊人格记忆 · 开发者状态 · 知识库 · 成长日记
 **关键词**: persona · identity · dev-status · 人格 · 开发者状态
 
 ### ⚡ 自动化工作流（WORKFLOWS）
-**路径**: `.github/workflows` · **数量**: 62 项
+**路径**: `.github/workflows` · **数量**: 63 项
 **描述**: 所有 GitHub Actions 工作流定义
 **关键词**: workflow · actions · ci · automation · 工作流 · 自动化
 
 ### 🔧 执行脚本库（SCRIPTS）
-**路径**: `scripts` · **数量**: 70 项
+**路径**: `scripts` · **数量**: 72 项
 **描述**: 铸渊所有执行手脚 · 自动化脚本
 **关键词**: script · node · js · 脚本 · 执行 · runner
 
@@ -75,7 +75,7 @@
 **关键词**: syslog · inbox · log · 系统日志
 
 ### 📄 文档与前端（DOCS）
-**路径**: `docs` · **数量**: 12 项
+**路径**: `docs` · **数量**: 13 项
 **描述**: 铸渊助手聊天界面 · GitHub Pages 部署
 **关键词**: docs · html · chat · pages · 文档 · 聊天室
 
@@ -145,6 +145,7 @@
 | `update-readme-bulletin.yml` | 📢 更新系统公告区 | push, schedule(0 1 * * *), manual |
 | `update-repo-map.yml` | 铸渊 · 图书馆目录自动更新 | push, schedule(0 0 * * *), manual |
 | `zhuyuan-brain-sync.yml` | 铸渊 · Brain Sync | push |
+| `zhuyuan-commander.yml` | "🎖️ 铸渊·将军唤醒 · Commander Wake-up" | issues, schedule(0 0 * * *), manual |
 | `zhuyuan-daily-agent.yml` | 🤖 铸渊巡检 Agent · 每日自动巡检与修复 | schedule(0 14 * * *), manual |
 | `zhuyuan-daily-inspection.yml` | 铸渊每日巡检 | issues, schedule(0 4 * * *), manual |
 | `zhuyuan-daily-selfcheck.yml` | 铸渊 · 每日自检 | schedule(0 0 * * *), manual |
@@ -163,6 +164,7 @@
 - `scripts/bingshuo-neural-sync.js`
 - `scripts/brain-bridge-sync.js`
 - `scripts/bridge`
+- `scripts/commander-dashboard.js`
 - `scripts/contract-check.js`
 - `scripts/create-standardized-ticket.js`
 - `scripts/cross-repo-sync.js`
@@ -206,6 +208,7 @@
 - `scripts/server-diagnose-report.js`
 - `scripts/server-patrol.sh`
 - `scripts/setup-sandbox.sh`
+- `scripts/sfp-core.js`
 - `scripts/skyeye`
 - `scripts/smoke-test.sh`
 - `scripts/sync-deploy-to-notion.js`
@@ -320,9 +323,9 @@
 
 ## 🕐 最近动态（memory.json 最新3条）
 
+- `2026-03-18T09:00:54.212Z` · daily_check — passed
 - `2026-03-17T09:01:58.444Z` · daily_check — passed
 - `2026-03-16T09:08:54.931Z` · daily_check — passed
-- `2026-03-15T08:50:17.308Z` · daily_check — passed
 
 ---
 

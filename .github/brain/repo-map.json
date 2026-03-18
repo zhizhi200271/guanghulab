@@ -1,20 +1,20 @@
 {
   "description": "铸渊图书馆目录 · Library Catalog for 铸渊 (Zhùyuān)",
   "version": "2.0",
-  "generated_at": "2026-03-18T02:21:47.632Z",
+  "generated_at": "2026-03-18T16:44:50.237Z",
   "generated_by": "scripts/generate-repo-map.js",
   "repo": "qinfendebingshuo/guanghulab",
   "stats": {
     "zones": 13,
     "total_modules": 10,
-    "total_workflows": 62,
-    "total_scripts": 70,
+    "total_workflows": 63,
+    "total_scripts": 72,
     "total_dev_nodes": 8,
     "hli_interfaces": 21,
     "hli_implemented": 7,
     "hli_coverage_pct": "33%",
     "last_ci_run": "2026-03-05T16:07:24.070Z",
-    "memory_last_updated": "2026-03-17T09:01:58.444Z"
+    "memory_last_updated": "2026-03-18T09:00:54.212Z"
   },
   "zones": [
     {
@@ -129,6 +129,9 @@
           "file": "identity.md"
         },
         {
+          "file": "inspection-report.json"
+        },
+        {
           "file": "knowledge-base.json"
         },
         {
@@ -144,6 +147,9 @@
           "file": "routing-map.json"
         },
         {
+          "file": "security-protocol.json"
+        },
+        {
           "file": "style-config.json"
         },
         {
@@ -156,7 +162,7 @@
           "file": "zhuyuan-signature-registry.json"
         }
       ],
-      "item_count": 16
+      "item_count": 18
     },
     {
       "zone_id": "WORKFLOWS",
@@ -601,6 +607,15 @@
           ]
         },
         {
+          "file": "zhuyuan-commander.yml",
+          "name": "\"🎖️ 铸渊·将军唤醒 · Commander Wake-up\"",
+          "triggers": [
+            "issues",
+            "schedule(0 0 * * *)",
+            "manual"
+          ]
+        },
+        {
           "file": "zhuyuan-daily-agent.yml",
           "name": "🤖 铸渊巡检 Agent · 每日自动巡检与修复",
           "triggers": [
@@ -658,7 +673,7 @@
           ]
         }
       ],
-      "item_count": 62
+      "item_count": 63
     },
     {
       "zone_id": "SCRIPTS",
@@ -692,6 +707,9 @@
         },
         {
           "file": "bridge"
+        },
+        {
+          "file": "commander-dashboard.js"
         },
         {
           "file": "contract-check.js"
@@ -823,6 +841,9 @@
           "file": "setup-sandbox.sh"
         },
         {
+          "file": "sfp-core.js"
+        },
+        {
           "file": "skyeye"
         },
         {
@@ -886,7 +907,7 @@
           "file": "zhuyuan-wakeup.js"
         }
       ],
-      "item_count": 70
+      "item_count": 72
     },
     {
       "zone_id": "SRC",
@@ -1254,6 +1275,9 @@
           "file": "ai-system-doc.md"
         },
         {
+          "file": "daily-reports"
+        },
+        {
           "file": "execution-layer-map.md"
         },
         {
@@ -1275,7 +1299,7 @@
           "file": "使用指南.md"
         }
       ],
-      "item_count": 12
+      "item_count": 13
     },
     {
       "zone_id": "TESTS",
@@ -1599,6 +1623,9 @@
     "growth-journal": [
       "PERSONA_BRAIN::growth-journal.md"
     ],
+    "inspection-report": [
+      "PERSONA_BRAIN::inspection-report.json"
+    ],
     "knowledge-base": [
       "PERSONA_BRAIN::knowledge-base.json"
     ],
@@ -1607,6 +1634,9 @@
     ],
     "responsibility": [
       "PERSONA_BRAIN::responsibility.md"
+    ],
+    "security-protocol": [
+      "PERSONA_BRAIN::security-protocol.json"
     ],
     "style-config": [
       "PERSONA_BRAIN::style-config.json"
@@ -1821,6 +1851,9 @@
     "zhuyuan-brain-sync": [
       "WORKFLOWS::zhuyuan-brain-sync.yml"
     ],
+    "zhuyuan-commander": [
+      "WORKFLOWS::zhuyuan-commander.yml"
+    ],
     "zhuyuan-daily-agent": [
       "WORKFLOWS::zhuyuan-daily-agent.yml",
       "SCRIPTS::zhuyuan-daily-agent.js"
@@ -1872,6 +1905,9 @@
     ],
     "bridge": [
       "SCRIPTS::bridge"
+    ],
+    "commander-dashboard": [
+      "SCRIPTS::commander-dashboard.js"
     ],
     "contract-check": [
       "SCRIPTS::contract-check.js"
@@ -1977,6 +2013,9 @@
     ],
     "setup-sandbox": [
       "SCRIPTS::setup-sandbox.sh"
+    ],
+    "sfp-core": [
+      "SCRIPTS::sfp-core.js"
     ],
     "skyeye": [
       "SCRIPTS::skyeye"
@@ -2278,6 +2317,9 @@
     ],
     "ai-system-doc": [
       "DOCS::ai-system-doc.md"
+    ],
+    "daily-reports": [
+      "DOCS::daily-reports"
     ],
     "execution-layer-map": [
       "DOCS::execution-layer-map.md"
