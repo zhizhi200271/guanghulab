@@ -137,10 +137,10 @@ describe('SFP v1.0 · 系统指纹安全协议', () => {
       expect(hash).toMatch(/^[a-f0-9]{12}$/);
     });
 
-    test('generateNonce 返回6位字母数字', () => {
+    test('generateNonce 返回6位hex字符', () => {
       const nonce = sfpCore.generateNonce();
       expect(nonce).toHaveLength(6);
-      expect(nonce).toMatch(/^[a-z0-9]{6}$/);
+      expect(nonce).toMatch(/^[a-f0-9]{6}$/);
     });
 
     test('SFP_REGEX 能正确匹配指纹格式', () => {

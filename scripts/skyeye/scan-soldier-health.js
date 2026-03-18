@@ -18,6 +18,9 @@ const ROOT = path.resolve(__dirname, '../..');
 const DASHBOARD_PATH = path.join(ROOT, 'data/bulletin-board/dashboard.json');
 const SKYEYE_REPORTS_DIR = path.join(ROOT, 'data/skyeye-reports');
 
+const FAILURE_RATE_THRESHOLD = 20;
+const CONSECUTIVE_FAILURE_THRESHOLD_DAYS = 7;
+
 // ━━━ 安全读取 JSON ━━━
 function readJSON(filePath) {
   try {
@@ -96,18 +99,18 @@ function scanSoldierHealth() {
     }
 
     // 故障率 > 20% → P0
-    if (result.failure_rate > 20) {
+    if (result.failure_rate > FAILURE_RATE_THRESHOLD) {
       result.status = '❌';
       result.issues.push({
         type: 'high_failure_rate',
-        message: `小兵故障率 ${result.failure_rate}% > 20%`,
+        message: `小兵故障率 ${result.failure_rate}% > ${FAILURE_RATE_THRESHOLD}%`,
         action: 'P0工单 · 全局小兵修复'
       });
     }
   }
 
   // 检查连续7天同一错误
-  const recentReports = getRecentReports(7);
+  const recentReports = getRecentReports(CONSECUTIVE_FAILURE_THRESHOLD_DAYS);
   if (recentReports.length >= 2) {
     // 收集各报告中的失败 workflow
     const errorMap = {};
@@ -124,7 +127,7 @@ function scanSoldierHealth() {
 
     // 连续7天同一错误
     for (const [name, count] of Object.entries(errorMap)) {
-      if (count >= 7) {
+      if (count >= CONSECUTIVE_FAILURE_THRESHOLD_DAYS) {
         result.recurring_errors.push({
           soldier: name,
           consecutive_failures: count,

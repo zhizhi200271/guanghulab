@@ -20,6 +20,8 @@ const SFP_NONCE_PATH  = path.join(ROOT, 'data/security/sfp-nonce-registry.json')
 const SFP_ALERT_PATH  = path.join(ROOT, 'data/security/sfp-alert-log.json');
 
 const BEIJING_OFFSET_MS = 8 * 3600 * 1000;
+const MAX_NONCE_REGISTRY_SIZE = 1000;
+const MAX_ALERT_LOG_SIZE = 500;
 
 // ━━━ SFP 指纹正则 ━━━
 const SFP_REGEX = /⌜SFP::([^:]+)::([^:]+)::([0-9T+:.-]+)::([a-f0-9]{12})::([a-zA-Z0-9]{6})⌝/;
@@ -62,13 +64,8 @@ function computeContentHash(content) {
 
 // ━━━ 生成6位随机nonce ━━━
 function generateNonce() {
-  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  let nonce = '';
-  const bytes = crypto.randomBytes(6);
-  for (let i = 0; i < 6; i++) {
-    nonce += chars[bytes[i] % chars.length];
-  }
-  return nonce;
+  // Use hex encoding of random bytes for unbiased distribution
+  return crypto.randomBytes(3).toString('hex');
 }
 
 // ━━━ 获取北京时间ISO字符串 ━━━
@@ -107,8 +104,8 @@ function generateSFP(agentId, content) {
       content_hash: contentHash
     });
     // 保留最近 1000 条 nonce 记录
-    if (nonceRegistry.used_nonces.length > 1000) {
-      nonceRegistry.used_nonces = nonceRegistry.used_nonces.slice(-1000);
+    if (nonceRegistry.used_nonces.length > MAX_NONCE_REGISTRY_SIZE) {
+      nonceRegistry.used_nonces = nonceRegistry.used_nonces.slice(-MAX_NONCE_REGISTRY_SIZE);
     }
     writeJSON(SFP_NONCE_PATH, nonceRegistry);
   } catch (e) {
@@ -236,8 +233,8 @@ function logAlert(alertEntry) {
       logged_at: getBeijingTimestamp()
     });
     // 保留最近 500 条
-    if (alertLog.alerts.length > 500) {
-      alertLog.alerts = alertLog.alerts.slice(-500);
+    if (alertLog.alerts.length > MAX_ALERT_LOG_SIZE) {
+      alertLog.alerts = alertLog.alerts.slice(-MAX_ALERT_LOG_SIZE);
     }
     writeJSON(SFP_ALERT_PATH, alertLog);
   } catch (e) {
