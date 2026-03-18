@@ -3,7 +3,6 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
-const mime = require('mime-types');
 
 const app = express();
 const PORT = 3020;
@@ -23,9 +22,9 @@ function loadConfig() {
       maxFileSizeMB: 50,
       allowedTypes: ['json', 'txt', 'md', 'csv', 'log', 'png', 'jpg'],
       quotaGB: 1,
-      autoCleanDays: 30
+      autoCleanDays: 30,
+      checkIntervalHours: 1
     };
-    // 写入默认配置
     fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
   }
 }
@@ -34,13 +33,11 @@ loadConfig();
 const MAX_SIZE = config.maxFileSizeMB * 1024 * 1024;
 const QUOTA_BYTES = config.quotaGB * 1024 * 1024 * 1024;
 const ALLOWED_EXTENSIONS = config.allowedTypes;
-const AUTO_CLEAN_DAYS = config.autoCleanDays;
 
 // ========== 目录初始化 ==========
 const UPLOAD_DIR = path.join(__dirname, 'uploads');
 const CATEGORIES = ['persona-growth', 'user-memory', 'system-log', 'knowledge-base'];
 
-// 创建 uploads 及其子目录
 if (!fs.existsSync(UPLOAD_DIR)) {
   fs.mkdirSync(UPLOAD_DIR);
 }
@@ -53,7 +50,6 @@ CATEGORIES.forEach(cat => {
 
 const INDEX_PATH = path.join(__dirname, 'memory-index.json');
 
-// 初始化索引文件
 let fileIndex = [];
 if (fs.existsSync(INDEX_PATH)) {
   try {
@@ -70,16 +66,6 @@ function saveIndex() {
   fs.writeFileSync(INDEX_PATH, JSON.stringify(fileIndex, null, 2));
 }
 
-function getFileSize(filePath) {
-  try {
-    const stat = fs.statSync(filePath);
-    return stat.size;
-  } catch {
-    return 0;
-  }
-}
-
-// 计算已用空间
 function getUsedSpace() {
   let total = 0;
   fileIndex.forEach(item => {
@@ -88,48 +74,18 @@ function getUsedSpace() {
   return total;
 }
 
-// 检查配额
 function checkQuota(newFileSize) {
   const used = getUsedSpace();
   return (used + newFileSize) <= QUOTA_BYTES;
 }
 
-// 自动清理旧日志（system-log 超过30天）
-function autoClean() {
-  const now = Date.now();
-  const maxAge = AUTO_CLEAN_DAYS * 24 * 60 * 60 * 1000;
-  
-  fileIndex = fileIndex.filter(item => {
-    if (item.category === 'system-log') {
-      const uploadedAt = new Date(item.uploadedAt).getTime();
-      if (now - uploadedAt > maxAge) {
-        // 删除物理文件
-        const filePath = path.join(UPLOAD_DIR, item.category, item.storedName);
-        try {
-          fs.unlinkSync(filePath);
-        } catch (err) {
-          // 文件可能已经不存在
-        }
-        return false; // 从索引移除
-      }
-    }
-    return true;
-  });
-  
-  saveIndex();
-}
-
-// 每天执行一次清理
-setInterval(autoClean, 24 * 60 * 60 * 1000);
-// 启动时也执行一次
-autoClean();
-
 // ========== multer 配置 ==========
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const category = req.body.category;
-    console.log('收到的 category:', category);  // 加这一行看看
-    if (!CATEGORIES.includes(category)) {
+    console.log('storage category:', category);
+    
+    if (!category || !CATEGORIES.includes(category)) {
       return cb(new Error('分类必须是 persona-growth / user-memory / system-log / knowledge-base'));
     }
     const dest = path.join(UPLOAD_DIR, category);
@@ -162,19 +118,26 @@ app.use(express.urlencoded({ extended: true }));
 
 // ========== API 路由 ==========
 
-// 上传文件
 app.post('/api/memory/upload', upload.single('file'), (req, res) => {
+  console.log('req.body:', req.body);
+  
   if (!req.file) {
     return res.status(400).json({ error: '没有上传文件' });
   }
 
   const { category, description = '', tags = '' } = req.body;
-  
-  // 配额检查
-  if (!checkQuota(req.file.size)) {
+
+  // 分类强制校验
+  if (!category || !CATEGORIES.includes(category)) {
     // 删除已上传的文件
     fs.unlinkSync(req.file.path);
-    return res.status(413).json({ error: '存储配额已满，无法上传' });
+    return res.status(400).json({ error: '必须指定有效分类: persona-growth / user-memory / system-log / knowledge-base' });
+  }
+
+  // 配额检查
+  if (!checkQuota(req.file.size)) {
+    fs.unlinkSync(req.file.path);
+    return res.status(507).json({ error: '存储配额已满，无法上传' });
   }
 
   const fileRecord = {
@@ -196,12 +159,10 @@ app.post('/api/memory/upload', upload.single('file'), (req, res) => {
   res.status(201).json(fileRecord);
 });
 
-// 文件列表
 app.get('/api/memory/files', (req, res) => {
   res.json(fileIndex);
 });
 
-// 单文件信息
 app.get('/api/memory/files/:id', (req, res) => {
   const file = fileIndex.find(f => f.id === req.params.id);
   if (!file) {
@@ -210,7 +171,6 @@ app.get('/api/memory/files/:id', (req, res) => {
   res.json(file);
 });
 
-// 下载文件
 app.get('/api/memory/files/:id/download', (req, res) => {
   const file = fileIndex.find(f => f.id === req.params.id);
   if (!file) {
@@ -225,7 +185,6 @@ app.get('/api/memory/files/:id/download', (req, res) => {
   res.download(filePath, file.filename);
 });
 
-// 删除文件
 app.delete('/api/memory/files/:id', (req, res) => {
   const index = fileIndex.findIndex(f => f.id === req.params.id);
   if (index === -1) {
@@ -235,21 +194,17 @@ app.delete('/api/memory/files/:id', (req, res) => {
   const file = fileIndex[index];
   const filePath = path.join(UPLOAD_DIR, file.category, file.storedName);
   
-  // 删除物理文件
   try {
     fs.unlinkSync(filePath);
-  } catch (err) {
-    // 文件可能已不存在，继续删除索引
-  }
+  } catch (err) {}
 
-  // 删除索引
   fileIndex.splice(index, 1);
   saveIndex();
-
   res.json({ message: '删除成功' });
 });
 
-// 分类统计
+// ========== 环节1 接口 ==========
+
 app.get('/api/memory/categories', (req, res) => {
   const stats = {};
   CATEGORIES.forEach(cat => {
@@ -261,7 +216,6 @@ app.get('/api/memory/categories', (req, res) => {
   res.json(stats);
 });
 
-// 按分类查文件
 app.get('/api/memory/categories/:category', (req, res) => {
   const category = req.params.category;
   if (!CATEGORIES.includes(category)) {
@@ -271,7 +225,6 @@ app.get('/api/memory/categories/:category', (req, res) => {
   res.json(files);
 });
 
-// 关键词搜索
 app.get('/api/memory/search', (req, res) => {
   const q = req.query.q;
   if (!q) {
@@ -290,7 +243,6 @@ app.get('/api/memory/search', (req, res) => {
   res.json(results);
 });
 
-// 更新元数据
 app.put('/api/memory/files/:id/meta', (req, res) => {
   const { description, tags } = req.body;
   const file = fileIndex.find(f => f.id === req.params.id);
@@ -308,7 +260,6 @@ app.put('/api/memory/files/:id/meta', (req, res) => {
   res.json(file);
 });
 
-// 配额查询
 app.get('/api/memory/quota', (req, res) => {
   const used = getUsedSpace();
   res.json({
@@ -322,8 +273,41 @@ app.get('/api/memory/quota', (req, res) => {
   });
 });
 
-// 错误处理中间件
+// ========== 自动清理 ==========
+function autoClean() {
+  console.log('执行自动清理检查...');
+  const now = Date.now();
+  const maxAge = config.autoCleanDays * 24 * 60 * 60 * 1000;
+  let cleaned = 0;
+  
+  fileIndex = fileIndex.filter(item => {
+    if (item.category === 'system-log') {
+      const uploadedAt = new Date(item.uploadedAt).getTime();
+      if (now - uploadedAt > maxAge) {
+        const filePath = path.join(UPLOAD_DIR, item.category, item.storedName);
+        try {
+          fs.unlinkSync(filePath);
+          cleaned++;
+        } catch (err) {}
+        return false;
+      }
+    }
+    return true;
+  });
+  
+  if (cleaned > 0) {
+    saveIndex();
+    console.log(`自动清理完成，删除了 ${cleaned} 个旧日志文件`);
+  }
+}
+
+const checkIntervalMs = (config.checkIntervalHours || 1) * 60 * 60 * 1000;
+setInterval(autoClean, checkIntervalMs);
+autoClean();
+
+// 错误处理
 app.use((err, req, res, next) => {
+  console.log('错误:', err.message);
   if (err instanceof multer.MulterError) {
     if (err.code === 'LIMIT_FILE_SIZE') {
       return res.status(413).json({ error: `文件大小超过限制 (最大 ${config.maxFileSizeMB}MB)` });

@@ -3,5 +3,6 @@
   "maxFileSizeMB": 50,
   "allowedTypes": ["json", "txt", "md", "csv", "log", "png", "jpg"],
   "quotaGB": 1,
-  "autoCleanDays": 30
+  "autoCleanDays": 30,
+  "checkIntervalHours": 1
 }

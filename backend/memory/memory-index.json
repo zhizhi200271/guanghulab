@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "id": "39241692-3b3f-4a5a-beb4-275c5db2df58",
+    "filename": "test.txt",
+    "storedName": "a7d9bf59-4b97-40d7-a729-ebfcc25d444e.txt",
+    "category": "persona-growth",
+    "size": 6,
+    "mimeType": "text/plain",
+    "description": "更新后的描述",
+    "tags": [
+      "test",
+      "updated"
+    ],
+    "uploadedAt": "2026-03-18T02:49:43.863Z",
+    "updatedAt": "2026-03-18T02:50:57.742Z"
+  }
+]
