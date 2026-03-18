@@ -32,7 +32,7 @@
       {"id": "PER-YM001", "name": "曜冥", "type": "系统人格体", "sign": "[PER-YM001]"},
       {"id": "PER-SY001", "name": "霜砚", "type": "系统人格体", "sign": "[PER-SY001]"},
       {"id": "PER-ZY001", "name": "铸渊", "type": "系统人格体", "sign": "[PER-ZY001]"},
-      {"id": "PER-ZQ001", "name": "知秋", "type": "系统人格体", "sign": "[PER-ZQ001]"},
+      {"id": "PER-ZQ001", "name": "知秋", "type": "宝宝人格体", "sign": "[PER-ZQ001]", "bound": "DEV-012 Awen"},
       {"id": "PER-SS001", "name": "舒舒", "type": "宝宝人格体", "sign": "[PER-SS001]", "bound": "DEV-002 肥猫"},
       {"id": "PER-QQ001", "name": "秋秋", "type": "宝宝人格体", "sign": "[PER-QQ001]", "bound": "DEV-004 之之", "aliases": ["TCS-QIUQIU", "GEN∞-BB-QIUQIU"]},
       {"id": "PER-CX001", "name": "晨星", "type": "宝宝人格体", "sign": "[PER-CX001]", "bound": "DEV-010 桔子"},
