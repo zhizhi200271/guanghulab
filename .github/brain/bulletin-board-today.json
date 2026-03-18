@@ -1,140 +1,32 @@
 {
-  "date": "2026-03-17",
+  "date": "2026-03-18",
   "records": [
     {
-      "key": "铸渊 (Copilot)|backend|2026-03-16T15:25:17Z",
-      "ts": "2026-03-16T15:25:17Z",
-      "actor": "铸渊 (Copilot)",
-      "module": "backend",
-      "result": "success",
-      "icon": "📦",
-      "sortKey": 1773674717000
-    },
-    {
-      "key": "zhizhi200271|—|2026-03-17T01:58:29Z",
-      "ts": "2026-03-17T01:58:29Z",
-      "actor": "zhizhi200271",
-      "module": "—",
-      "result": "success",
-      "icon": "✅",
-      "sortKey": 1773712709000
-    },
-    {
-      "key": "Copilot|—|2026-03-17T02:20:31Z",
-      "ts": "2026-03-17T02:20:31Z",
+      "key": "Copilot|—|2026-03-17T15:56:11Z",
+      "ts": "2026-03-17T15:56:11Z",
       "actor": "Copilot",
       "module": "—",
       "result": "success",
       "icon": "✅",
-      "sortKey": 1773714031000
+      "sortKey": 1773762971000
     },
     {
-      "key": "Copilot|—|2026-03-17T02:20:33Z",
-      "ts": "2026-03-17T02:20:33Z",
+      "key": "Copilot|—|2026-03-17T15:56:14Z",
+      "ts": "2026-03-17T15:56:14Z",
       "actor": "Copilot",
       "module": "—",
       "result": "success",
       "icon": "✅",
-      "sortKey": 1773714033000
+      "sortKey": 1773762974000
     },
     {
-      "key": "冰朔|—|2026-03-17T02:20:42Z",
-      "ts": "2026-03-17T02:20:42Z",
+      "key": "冰朔|—|2026-03-17T15:56:40Z",
+      "ts": "2026-03-17T15:56:40Z",
       "actor": "冰朔",
       "module": "—",
       "result": "success",
       "icon": "✅",
-      "sortKey": 1773714042000
-    },
-    {
-      "key": "juzi0412|—|2026-03-17T04:54:59Z",
-      "ts": "2026-03-17T04:54:59Z",
-      "actor": "juzi0412",
-      "module": "—",
-      "result": "success",
-      "icon": "✅",
-      "sortKey": 1773723299000
-    },
-    {
-      "key": "Copilot|—|2026-03-17T06:50:03Z",
-      "ts": "2026-03-17T06:50:03Z",
-      "actor": "Copilot",
-      "module": "—",
-      "result": "action_required",
-      "icon": "🔵",
-      "sortKey": 1773730203000
-    },
-    {
-      "key": "冰朔|—|2026-03-17T06:53:35Z",
-      "ts": "2026-03-17T06:53:35Z",
-      "actor": "冰朔",
-      "module": "—",
-      "result": "success",
-      "icon": "✅",
-      "sortKey": 1773730415000
-    },
-    {
-      "key": "Copilot|—|2026-03-17T07:09:39Z",
-      "ts": "2026-03-17T07:09:39Z",
-      "actor": "Copilot",
-      "module": "—",
-      "result": "success",
-      "icon": "✅",
-      "sortKey": 1773731379000
-    },
-    {
-      "key": "Copilot|—|2026-03-17T07:09:41Z",
-      "ts": "2026-03-17T07:09:41Z",
-      "actor": "Copilot",
-      "module": "—",
-      "result": "success",
-      "icon": "✅",
-      "sortKey": 1773731381000
-    },
-    {
-      "key": "冰朔|—|2026-03-17T07:09:49Z",
-      "ts": "2026-03-17T07:09:49Z",
-      "actor": "冰朔",
-      "module": "—",
-      "result": "success",
-      "icon": "✅",
-      "sortKey": 1773731389000
-    },
-    {
-      "key": "zhizhi200271|—|2026-03-17T09:39:52Z",
-      "ts": "2026-03-17T09:39:52Z",
-      "actor": "zhizhi200271",
-      "module": "—",
-      "result": "success",
-      "icon": "✅",
-      "sortKey": 1773740392000
-    },
-    {
-      "key": "Copilot|—|2026-03-17T10:24:12Z",
-      "ts": "2026-03-17T10:24:12Z",
-      "actor": "Copilot",
-      "module": "—",
-      "result": "success",
-      "icon": "✅",
-      "sortKey": 1773743052000
-    },
-    {
-      "key": "冰朔|—|2026-03-17T10:24:25Z",
-      "ts": "2026-03-17T10:24:25Z",
-      "actor": "冰朔",
-      "module": "—",
-      "result": "success",
-      "icon": "✅",
-      "sortKey": 1773743065000
-    },
-    {
-      "key": "zhizhi200271|—|2026-03-17T11:50:54Z",
-      "ts": "2026-03-17T11:50:54Z",
-      "actor": "zhizhi200271",
-      "module": "—",
-      "result": "success",
-      "icon": "✅",
-      "sortKey": 1773748254000
+      "sortKey": 1773763000000
     }
   ]
 }
