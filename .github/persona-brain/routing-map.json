@@ -1,4 +1,10 @@
 {
+  "system_identity": {
+    "system_node": "GLW-SYS-0001",
+    "root_controller": "TCS-0002∞",
+    "deploy_domain": "guanghulab.com",
+    "repo": "qinfendebingshuo/guanghulab"
+  },
   "NOTIFICATION": {
     "module": "M09",
     "route_prefix": "/hli/notification",
