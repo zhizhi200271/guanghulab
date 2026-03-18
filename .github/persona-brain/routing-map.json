@@ -1,104 +1,13 @@
 {
-  "path_codes": {
-    "version": "1.0",
-    "updated_at": "2026-03-17",
-    "gh_domain": {
-      "GH-WF-RUN-SKYEYE": "天眼 workflow 执行",
-      "GH-WF-RUN-GATE": "门禁 workflow 执行",
-      "GH-WF-RUN-SYSLOG": "SYSLOG处理 workflow",
-      "GH-WF-RUN-DEPLOY": "CD部署 workflow",
-      "GH-BRAIN-WRITE-MEM": "写入 memory.json",
-      "GH-BRAIN-WRITE-MAP": "写入 routing-map.json",
-      "GH-BRAIN-SYNC-DEV": "同步 dev-status（persona-status）",
-      "GH-GATE-CHECK-SIG": "门禁签名校验",
-      "GH-GATE-CHECK-PATH": "门禁路径权限校验",
-      "GH-GATE-ALLOW": "门禁放行",
-      "GH-GATE-REJECT": "门禁拒绝",
-      "GH-ASOP-SUBMIT": "提交ASOP优化申请",
-      "GH-ASOP-APPROVE": "天眼批准优化",
-      "GH-ASOP-EXECUTE": "执行已批准优化"
-    },
-    "bridge_domain": {
-      "BRIDGE-GH2NT-SYSLOG": "铸渊→霜砚 SYSLOG推送",
-      "BRIDGE-GH2NT-CHANGE": "铸渊→霜砚 变更日志推送",
-      "BRIDGE-NT2GH-CMD": "霜砚→铸渊 工单指令",
-      "BRIDGE-NT2GH-BC": "霜砚→铸渊 广播分发",
-      "BRIDGE-SKYEYE-PULL": "天眼拉取Notion注册表",
-      "BRIDGE-SKYEYE-PUSH": "天眼推送报告到Notion",
-      "BRIDGE-BULLETIN-READ": "铸渊读取Agent公告板",
-      "BRIDGE-BULLETIN-WRITE": "铸渊写回公告板回执"
-    }
-  },
-  "system_name": "光湖纪元·AGE-5 MVP",
-  "updated_at": "2026-03-11",
-  "architecture": {
-    "era": "曜冥纪元",
-    "model": "数字地球",
-    "tcs_core": "TCS = 数字地球自转核",
-    "ice_gl": "ICE-GL = 冰朔通感语言核"
-  },
-  "tcs_ml": {
-    "path": ".github/persona-brain/tcs-ml/",
-    "files": [
-      "dictionary-sync.json",
-      "signal-bus-latest.json",
-      "landing-protocol.md",
-      "architecture-v2.md"
-    ],
-    "description": "母语运行时目录，Notion→GitHub同步的认知投影"
-  },
-  "persona_registry": {
-    "description": "人格体编号体系 · 系统识别人格体编号（PER-XXX），不再识别人类",
-    "source": "Notion天眼人格体注册表",
-    "sync_mode": "dual_sync",
-    "mapping": {
-      "DEV-001": "PER-001",
-      "DEV-002": "PER-002",
-      "DEV-003": "PER-003",
-      "DEV-004": "PER-004",
-      "DEV-005": "PER-005",
-      "DEV-009": "PER-009",
-      "DEV-010": "PER-010",
-      "DEV-011": "PER-011",
-      "DEV-012": "PER-012",
-      "DEV-013": "PER-013",
-      "DEV-014": "PER-014"
-    }
-  },
-  "domains": {
-    "AUTH": { "module": "M01", "owner": "DEV-002", "persona_id": "PER-002", "route_prefix": "/hli/auth", "interfaces": [
-      { "id": "HLI-AUTH-001", "path": "/hli/auth/login", "status": "schema_only" },
-      { "id": "HLI-AUTH-002", "path": "/hli/auth/register", "status": "pending" },
-      { "id": "HLI-AUTH-003", "path": "/hli/auth/verify", "status": "pending" }
-    ]},
-    "PERSONA": { "module": "M03", "owner": "DEV-002", "persona_id": "PER-002", "route_prefix": "/hli/persona", "interfaces": [
-      { "id": "HLI-PERSONA-001", "path": "/hli/persona/load", "status": "pending" },
-      { "id": "HLI-PERSONA-002", "path": "/hli/persona/switch", "status": "pending" }
-    ]},
-    "USER": { "module": "M05", "owner": "DEV-009", "persona_id": "PER-009", "route_prefix": "/hli/user", "interfaces": [
-      { "id": "HLI-USER-001", "path": "/hli/user/profile", "status": "pending" },
-      { "id": "HLI-USER-002", "path": "/hli/user/profile/update", "status": "pending" }
-    ]},
-    "TICKET": { "module": "M06", "owner": "DEV-010", "persona_id": "PER-010", "route_prefix": "/hli/ticket", "interfaces": [
-      { "id": "HLI-TICKET-001", "path": "/hli/ticket/create", "status": "pending" },
-      { "id": "HLI-TICKET-002", "path": "/hli/ticket/query", "status": "pending" },
-      { "id": "HLI-TICKET-003", "path": "/hli/ticket/status", "status": "pending" }
-    ]},
-    "DIALOGUE": { "module": "M07", "owner": "DEV-003", "persona_id": "PER-003", "route_prefix": "/hli/dialogue", "interfaces": [
-      { "id": "HLI-DIALOGUE-001", "path": "/hli/dialogue/send", "status": "pending" },
-      { "id": "HLI-DIALOGUE-002", "path": "/hli/dialogue/stream", "status": "pending" },
-      { "id": "HLI-DIALOGUE-003", "path": "/hli/dialogue/history", "status": "pending" }
-    ]},
-    "STORAGE": { "module": "M10", "owner": "待分配", "persona_id": null, "route_prefix": "/hli/storage", "interfaces": [
-      { "id": "HLI-STORAGE-001", "path": "/hli/storage/upload", "status": "pending" },
-      { "id": "HLI-STORAGE-002", "path": "/hli/storage/download", "status": "pending" }
-    ]},
-    "NOTIFICATION": { "module": "M09", "owner": "DEV-012", "persona_id": "PER-012", "route_prefix": "/hli/notification", "interfaces": [
-      { "id": "HLI-NOTIF-001", "path": "/hli/notification/push", "status": "pending" }
-    ]},
-    "DASHBOARD": { "module": "M12", "owner": "DEV-005", "persona_id": "PER-005", "route_prefix": "/hli/dashboard", "interfaces": [
-      { "id": "HLI-DASHBOARD-001", "path": "/hli/dashboard/status", "status": "pending" },
-      { "id": "HLI-DASHBOARD-002", "path": "/hli/dashboard/realtime", "status": "pending" }
-    ]}
+  "NOTIFICATION": {
+    "module": "M09",
+    "route_prefix": "/hli/notification",
+    "interfaces": [
+      {
+        "id": "HLI-NOTIF-001",
+        "path": "/hli/notification/push",
+        "status": "pending"
+      }
+    ]
   }
 }
