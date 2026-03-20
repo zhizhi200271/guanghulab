@@ -1,7 +1,7 @@
 {
-  "title": "[铸渊巡检] 2026-03-19 每日巡检报告",
+  "title": "[铸渊巡检] 2026-03-20 每日巡检报告",
   "type": "巡检报告",
-  "date": "2026-03-19",
+  "date": "2026-03-20",
   "checked_in": [
     {
       "agent_id": "AG-ZY-004",
@@ -324,9 +324,7 @@
       "workflow": "check-structure.yml",
       "reason": "自修复失败：workflow_dispatch 触发失败",
       "recent_failures": [
-        "action_required (2026-03-18T18:29:25Z)",
-        "action_required (2026-03-18T18:29:22Z)",
-        "action_required (2026-03-18T18:14:20Z)"
+        "action_required (2026-03-18T18:29:25Z)"
       ]
     },
     {
@@ -335,9 +333,9 @@
       "workflow": "daily-maintenance.yml",
       "reason": "自修复失败：workflow_dispatch 触发失败",
       "recent_failures": [
-        "failure (2026-03-19T04:19:03Z)",
-        "failure (2026-03-18T05:17:00Z)",
-        "failure (2026-03-18T04:20:56Z)"
+        "failure (2026-03-20T04:09:34Z)",
+        "failure (2026-03-19T10:20:45Z)",
+        "failure (2026-03-19T04:19:03Z)"
       ]
     },
     {
@@ -431,9 +429,9 @@
       "workflow": "openclaw-wake-loop.yml",
       "reason": "不支持自修复",
       "recent_failures": [
+        "failure (2026-03-19T14:40:15Z)",
         "failure (2026-03-18T14:55:39Z)",
-        "failure (2026-03-17T14:47:22Z)",
-        "failure (2026-03-16T14:52:48Z)"
+        "failure (2026-03-17T14:47:22Z)"
       ]
     },
     {
@@ -449,9 +447,9 @@
       "workflow": "pm2-server-diagnose.yml",
       "reason": "不支持自修复",
       "recent_failures": [
+        "failure (2026-03-19T10:20:46Z)",
         "failure (2026-03-18T05:17:00Z)",
-        "failure (2026-03-17T11:50:44Z)",
-        "failure (2026-03-17T09:39:41Z)"
+        "failure (2026-03-17T11:50:44Z)"
       ]
     },
     {
@@ -495,9 +493,9 @@
       "workflow": "psp-daily-inspection.yml",
       "reason": "自修复失败：workflow_dispatch 触发失败",
       "recent_failures": [
+        "failure (2026-03-20T03:32:07Z)",
         "failure (2026-03-19T03:42:11Z)",
-        "failure (2026-03-18T03:42:31Z)",
-        "failure (2026-03-17T03:36:10Z)"
+        "failure (2026-03-18T03:42:31Z)"
       ]
     },
     {
@@ -540,9 +538,9 @@
       "workflow": "server-patrol.yml",
       "reason": "自修复失败：workflow_dispatch 触发失败",
       "recent_failures": [
-        "failure (2026-03-19T01:02:36Z)",
-        "failure (2026-03-18T12:38:43Z)",
-        "failure (2026-03-18T04:07:19Z)"
+        "failure (2026-03-20T00:58:58Z)",
+        "failure (2026-03-19T12:32:24Z)",
+        "failure (2026-03-19T01:02:36Z)"
       ]
     },
     {
@@ -569,9 +567,9 @@
       "workflow": "sync-dev-status.yml",
       "reason": "自修复失败：workflow_dispatch 触发失败",
       "recent_failures": [
-        "failure (2026-03-19T03:40:00Z)",
-        "failure (2026-03-18T15:06:57Z)",
-        "failure (2026-03-18T03:39:57Z)"
+        "failure (2026-03-20T03:29:51Z)",
+        "failure (2026-03-19T14:52:14Z)",
+        "failure (2026-03-19T03:40:00Z)"
       ]
     },
     {
@@ -594,9 +592,9 @@
       "workflow": "syslog-auto-pipeline.yml",
       "reason": "不支持自修复",
       "recent_failures": [
+        "failure (2026-03-19T10:20:45Z)",
         "failure (2026-03-18T05:17:01Z)",
-        "failure (2026-03-17T11:50:43Z)",
-        "failure (2026-03-17T09:39:41Z)"
+        "failure (2026-03-17T11:50:43Z)"
       ]
     },
     {
@@ -605,9 +603,9 @@
       "workflow": "syslog-issue-pipeline.yml",
       "reason": "不支持自修复",
       "recent_failures": [
+        "failure (2026-03-19T10:20:46Z)",
         "failure (2026-03-18T18:29:21Z)",
-        "failure (2026-03-18T18:14:17Z)",
-        "failure (2026-03-18T17:04:56Z)"
+        "failure (2026-03-18T18:14:17Z)"
       ]
     },
     {
@@ -641,9 +639,9 @@
       "workflow": "zhuyuan-daily-agent.yml",
       "reason": "自修复失败：workflow_dispatch 触发失败",
       "recent_failures": [
+        "failure (2026-03-19T14:42:03Z)",
         "failure (2026-03-18T14:57:35Z)",
-        "failure (2026-03-17T14:51:01Z)",
-        "failure (2026-03-16T14:54:40Z)"
+        "failure (2026-03-17T14:51:01Z)"
       ]
     },
     {
@@ -659,9 +657,9 @@
       "workflow": "zhuyuan-daily-selfcheck.yml",
       "reason": "自修复失败：workflow_dispatch 触发失败",
       "recent_failures": [
+        "failure (2026-03-20T00:58:09Z)",
         "failure (2026-03-19T01:01:15Z)",
-        "failure (2026-03-18T01:01:41Z)",
-        "failure (2026-03-17T00:58:18Z)"
+        "failure (2026-03-18T01:01:41Z)"
       ]
     },
     {
@@ -702,6 +700,7 @@
       "workflow": "zhuyuan-skyeye.yml",
       "reason": "自修复失败：workflow_dispatch 触发失败",
       "recent_failures": [
+        "failure (2026-03-19T22:16:06Z)",
         "failure (2026-03-18T22:21:34Z)",
         "failure (2026-03-17T22:21:44Z)"
       ]
