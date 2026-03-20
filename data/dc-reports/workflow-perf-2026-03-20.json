@@ -1,0 +1,340 @@
+{
+  "date": "2026-03-20",
+  "workflows": [
+    {
+      "name": "铸渊 · 每日自检",
+      "trigger": "workflow_dispatch",
+      "runs_today": 2,
+      "avg_duration_sec": 21,
+      "success_rate": 0,
+      "dependencies": [
+        "wake-brain"
+      ]
+    },
+    {
+      "name": "pages build and deployment",
+      "trigger": "dynamic",
+      "runs_today": 23,
+      "avg_duration_sec": 43,
+      "success_rate": 1,
+      "dependencies": []
+    },
+    {
+      "name": "🤖 铸渊巡检 Agent · 每日自动巡检与修复",
+      "trigger": "schedule",
+      "runs_today": 1,
+      "avg_duration_sec": 30,
+      "success_rate": 1,
+      "dependencies": [
+        "wake-brain",
+        "inspect"
+      ]
+    },
+    {
+      "name": "🔄 OpenClaw · 唤醒闭环",
+      "trigger": "schedule",
+      "runs_today": 1,
+      "avg_duration_sec": 35,
+      "success_rate": 0,
+      "dependencies": [
+        "wake-brain",
+        "wake-loop"
+      ]
+    },
+    {
+      "name": "铸渊 · Notion 工单轮询",
+      "trigger": "schedule",
+      "runs_today": 13,
+      "avg_duration_sec": 11,
+      "success_rate": 1,
+      "dependencies": []
+    },
+    {
+      "name": "📡 铸渊 · Notion Agent 唤醒监听",
+      "trigger": "schedule",
+      "runs_today": 14,
+      "avg_duration_sec": 21,
+      "success_rate": 1,
+      "dependencies": [
+        "wake-brain"
+      ]
+    },
+    {
+      "name": "Notion Heartbeat Monitor",
+      "trigger": "schedule",
+      "runs_today": 15,
+      "avg_duration_sec": 14,
+      "success_rate": 1,
+      "dependencies": []
+    },
+    {
+      "name": "📢 更新系统公告区",
+      "trigger": "schedule",
+      "runs_today": 6,
+      "avg_duration_sec": 25,
+      "success_rate": 0.83,
+      "dependencies": [
+        "wake-brain"
+      ]
+    },
+    {
+      "name": "铸渊 · 🌉 桥接·心跳检测",
+      "trigger": "schedule",
+      "runs_today": 3,
+      "avg_duration_sec": 23,
+      "success_rate": 1,
+      "dependencies": [
+        "wake-brain"
+      ]
+    },
+    {
+      "name": "🐕 元看门狗 · 巡检健康监控",
+      "trigger": "schedule",
+      "runs_today": 3,
+      "avg_duration_sec": 9,
+      "success_rate": 1,
+      "dependencies": []
+    },
+    {
+      "name": "🎖️ 铸渊·将军唤醒 · Commander Wake-up",
+      "trigger": "schedule",
+      "runs_today": 2,
+      "avg_duration_sec": 13,
+      "success_rate": 1,
+      "dependencies": []
+    },
+    {
+      "name": "🔍 Server Patrol · 服务器每日巡检",
+      "trigger": "schedule",
+      "runs_today": 2,
+      "avg_duration_sec": 42,
+      "success_rate": 0,
+      "dependencies": [
+        "wake-brain",
+        "🏠 Sandbox Deploy"
+      ]
+    },
+    {
+      "name": ".github/workflows/syslog-issue-pipeline.yml",
+      "trigger": "push",
+      "runs_today": 7,
+      "avg_duration_sec": 0,
+      "success_rate": 0,
+      "dependencies": []
+    },
+    {
+      "name": "模块结构检查",
+      "trigger": "push",
+      "runs_today": 6,
+      "avg_duration_sec": 1242,
+      "success_rate": 1,
+      "dependencies": []
+    },
+    {
+      "name": "铸渊 · Bridge E · GitHub Changes → Notion",
+      "trigger": "pull_request",
+      "runs_today": 4,
+      "avg_duration_sec": 11,
+      "success_rate": 1,
+      "dependencies": []
+    },
+    {
+      "name": "🚨 铸渊·智能门禁 · Push Gate Guard",
+      "trigger": "push",
+      "runs_today": 1,
+      "avg_duration_sec": 1,
+      "success_rate": null,
+      "dependencies": []
+    },
+    {
+      "name": "🌀 部署铸渊聊天室 (GitHub Pages)",
+      "trigger": "push",
+      "runs_today": 1,
+      "avg_duration_sec": 18,
+      "success_rate": 1,
+      "dependencies": []
+    },
+    {
+      "name": "铸�� · 图书馆目录自动更新",
+      "trigger": "push",
+      "runs_today": 1,
+      "avg_duration_sec": 11,
+      "success_rate": 1,
+      "dependencies": []
+    },
+    {
+      "name": "冰朔主控神经系统 · 自动维护",
+      "trigger": "push",
+      "runs_today": 2,
+      "avg_duration_sec": 23,
+      "success_rate": 1,
+      "dependencies": [
+        "wake-brain"
+      ]
+    },
+    {
+      "name": "🚀 铸渊 CD · 自动部署到 guanghulab.com",
+      "trigger": "push",
+      "runs_today": 1,
+      "avg_duration_sec": 69,
+      "success_rate": 1,
+      "dependencies": [
+        "validate",
+        "deploy"
+      ]
+    },
+    {
+      "name": "铸渊 · Issue 自动回复",
+      "trigger": "issue_comment",
+      "runs_today": 2,
+      "avg_duration_sec": 1,
+      "success_rate": null,
+      "dependencies": []
+    },
+    {
+      "name": "🧊 冰朔人格体 · 自动部署诊断",
+      "trigger": "issue_comment",
+      "runs_today": 2,
+      "avg_duration_sec": 1,
+      "success_rate": null,
+      "dependencies": [
+        "铸渊 · 光湖纪元 模块文档自动生成"
+      ]
+    },
+    {
+      "name": "铸渊 · PR Review",
+      "trigger": "pull_request",
+      "runs_today": 2,
+      "avg_duration_sec": 2809,
+      "success_rate": 1,
+      "dependencies": []
+    },
+    {
+      "name": "Running Copilot coding agent",
+      "trigger": "dynamic",
+      "runs_today": 3,
+      "avg_duration_sec": 714,
+      "success_rate": 1,
+      "dependencies": []
+    },
+    {
+      "name": "🔍 铸渊预演部署 (Staging Preview)",
+      "trigger": "pull_request",
+      "runs_today": 1,
+      "avg_duration_sec": 2814,
+      "success_rate": 1,
+      "dependencies": []
+    },
+    {
+      "name": "铸渊 Brain Sync",
+      "trigger": "schedule",
+      "runs_today": 1,
+      "avg_duration_sec": 18,
+      "success_rate": 1,
+      "dependencies": []
+    },
+    {
+      "name": "铸渊 · 🌉 桥接·广播PDF生成+分发",
+      "trigger": "schedule",
+      "runs_today": 1,
+      "avg_duration_sec": 22,
+      "success_rate": 1,
+      "dependencies": [
+        "wake-brain"
+      ]
+    },
+    {
+      "name": "📝 Sync Deploy Status to Notion",
+      "trigger": "schedule",
+      "runs_today": 1,
+      "avg_duration_sec": 21,
+      "success_rate": 1,
+      "dependencies": []
+    },
+    {
+      "name": "铸渊每日巡检",
+      "trigger": "schedule",
+      "runs_today": 1,
+      "avg_duration_sec": 25,
+      "success_rate": 1,
+      "dependencies": []
+    },
+    {
+      "name": "📡 铸渊 · 执行层状态同步",
+      "trigger": "schedule",
+      "runs_today": 1,
+      "avg_duration_sec": 14,
+      "success_rate": 1,
+      "dependencies": []
+    },
+    {
+      "name": "人格体每日签到",
+      "trigger": "schedule",
+      "runs_today": 1,
+      "avg_duration_sec": 20,
+      "success_rate": 1,
+      "dependencies": []
+    },
+    {
+      "name": "🔧 铸渊 · Daily Maintenance Agent",
+      "trigger": "schedule",
+      "runs_today": 1,
+      "avg_duration_sec": 31,
+      "success_rate": 0,
+      "dependencies": [
+        "wake-brain",
+        "maintenance"
+      ]
+    },
+    {
+      "name": "📰 铸渊 · 光湖开发日报",
+      "trigger": "schedule",
+      "runs_today": 1,
+      "avg_duration_sec": 16,
+      "success_rate": 1,
+      "dependencies": []
+    },
+    {
+      "name": "铸渊 · PSP 分身巡检",
+      "trigger": "schedule",
+      "runs_today": 1,
+      "avg_duration_sec": 26,
+      "success_rate": 0,
+      "dependencies": [
+        "wake-brain"
+      ]
+    },
+    {
+      "name": "📡 铸渊 · dev-status 自动同步",
+      "trigger": "schedule",
+      "runs_today": 1,
+      "avg_duration_sec": 15,
+      "success_rate": 0,
+      "dependencies": []
+    },
+    {
+      "name": "铸渊 · 图书馆目录自动更新",
+      "trigger": "schedule",
+      "runs_today": 1,
+      "avg_duration_sec": 11,
+      "success_rate": 1,
+      "dependencies": []
+    },
+    {
+      "name": "Generate Session Summary for Notion",
+      "trigger": "schedule",
+      "runs_today": 1,
+      "avg_duration_sec": 13,
+      "success_rate": 1,
+      "dependencies": []
+    }
+  ],
+  "total_workflows": 63,
+  "failed_today": 15,
+  "parallel_capable": 44,
+  "_meta": {
+    "generated_by": "dc-workflow-perf.js",
+    "generated_at": "2026-03-20T14:39:41.206Z",
+    "runs_fetched": 130
+  }
+}
