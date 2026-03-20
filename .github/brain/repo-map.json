@@ -1,7 +1,7 @@
 {
   "description": "铸渊图书馆目录 · Library Catalog for 铸渊 (Zhùyuān)",
   "version": "2.0",
-  "generated_at": "2026-03-20T02:08:45.650Z",
+  "generated_at": "2026-03-20T10:41:50.177Z",
   "generated_by": "scripts/generate-repo-map.js",
   "repo": "qinfendebingshuo/guanghulab",
   "stats": {
@@ -14,7 +14,7 @@
     "hli_implemented": 7,
     "hli_coverage_pct": "33%",
     "last_ci_run": "2026-03-05T16:07:24.070Z",
-    "memory_last_updated": "2026-03-19T08:55:22.198Z"
+    "memory_last_updated": "2026-03-20T08:53:49.483Z"
   },
   "zones": [
     {
@@ -159,10 +159,13 @@
           "file": "tcs-ml"
         },
         {
+          "file": "trinity-id.json"
+        },
+        {
           "file": "zhuyuan-signature-registry.json"
         }
       ],
-      "item_count": 18
+      "item_count": 19
     },
     {
       "zone_id": "WORKFLOWS",
@@ -1646,6 +1649,9 @@
     ],
     "tcs-ml": [
       "PERSONA_BRAIN::tcs-ml"
+    ],
+    "trinity-id": [
+      "PERSONA_BRAIN::trinity-id.json"
     ],
     "zhuyuan-signature-registry": [
       "PERSONA_BRAIN::zhuyuan-signature-registry.json"

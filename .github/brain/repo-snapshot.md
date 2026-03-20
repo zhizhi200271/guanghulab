@@ -1,5 +1,5 @@
 # 铸渊图书馆快照 · Repo Snapshot
-> 生成于 2026-03-20 10:08 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
+> 生成于 2026-03-20 18:41 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
 
 ---
 
@@ -13,7 +13,7 @@
 | 脚本 | 72 个执行脚本 |
 | 开发者节点 | 8 人 |
 | HLI 接口覆盖率 | 7/21 (33%) |
-| 快照生成时间 | 2026-03-20 10:08 CST |
+| 快照生成时间 | 2026-03-20 18:41 CST |
 
 ---
 
@@ -25,7 +25,7 @@
 **关键词**: brain · memory · routing · wake · 大脑 · 记忆
 
 ### 🎭 人格大脑（PERSONA_BRAIN）
-**路径**: `.github/persona-brain` · **数量**: 18 项
+**路径**: `.github/persona-brain` · **数量**: 19 项
 **描述**: 铸渊人格记忆 · 开发者状态 · 知识库 · 成长日记
 **关键词**: persona · identity · dev-status · 人格 · 开发者状态
 
@@ -323,9 +323,9 @@
 
 ## 🕐 最近动态（memory.json 最新3条）
 
+- `2026-03-20T08:53:49.483Z` · daily_check — passed
 - `2026-03-19T08:55:22.198Z` · daily_check — passed
-- `2026-03-18T09:00:54.212Z` · daily_check — passed
-- `2026-03-17T09:01:58.444Z` · daily_check — passed
+- `2026-03-18T17:00:48.698Z` · daily_agent_inspection — 铸渊巡检Agent · ✅2 ⚠️4 ❌0 · 1个问题
 
 ---
 
