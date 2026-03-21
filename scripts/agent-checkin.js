@@ -92,12 +92,19 @@ async function main() {
   }
   const registry = JSON.parse(fs.readFileSync(REGISTRY_PATH, 'utf8'));
 
-  // 2. 构建签到记录
+  // 2. 构建签到记录（仅检查 daily_checkin_required === true 的 Agent）
   const records = [];
   let checkedIn = 0;
   const missingAgents = [];
+  let skipped = 0;
 
   for (const agent of registry.agents) {
+    // 跳过无需每日签到的 Agent（事件触发型、已暂停等）
+    if (agent.daily_checkin_required === false) {
+      skipped++;
+      continue;
+    }
+
     console.log(`  🔍 检查 ${agent.id} (${agent.workflow})...`);
     const run = await getLatestRun(agent.workflow);
 
@@ -134,6 +141,8 @@ async function main() {
 
     records.push(record);
   }
+
+  console.log(`\n📋 跳过 ${skipped} 个无需签到的 Agent`);
 
   // 3. 构建签到板
   const board = {
