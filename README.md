@@ -100,9 +100,11 @@
 <!-- BINGSHUO_BULLETIN_START -->
 | 时间 | 检查项 | 状态 |
 |------|--------|------|
+| 03-21 08:54 | ✅ 铸渊 · 每日自检 · 成功 | 冰朔 |
+| 03-21 08:54 | 🔧 系统更新: `.github/` | zhuyuan-bot |
+| 03-21 08:10 | ✅ 📢 更新系统公告区 · 成功 | 冰朔 |
 | 03-21 08:09 | ✅ 🚀 铸渊 CD · 自动部署到 guanghulab.com · 成功 | 冰朔 |
 | 03-21 08:09 | ✅ 📢 更新系统公告区 · 成功 | 冰朔 |
-| 03-21 08:08 | 🔧 系统更新: `.github/` | github-actions[bot] |
 | 03-21 08:08 | ✅ 铸渊 · Bridge E · GitHub Changes → Notion · 成功 | 冰朔 |
 | 03-21 08:01 | ✅ Generate Session Summary for Notion · 成功 | 冰朔 |
 | 03-21 07:59 | ✅ 📡 铸渊 · Notion Agent 唤醒监听 · 成功 | 冰朔 |
@@ -113,8 +115,6 @@
 | 03-21 07:14 | ✅ 铸渊 · Notion 工单轮询 · 成功 | 冰朔 |
 | 03-21 07:01 | ✅ 📡 铸渊 · Notion Agent 唤醒监听 · 成功 | 冰朔 |
 | 03-21 06:57 | ✅ Notion Heartbeat Monitor · 成功 | 冰朔 |
-| 03-21 06:43 | ✅ 铸渊 · Notion 工单轮询 · 成功 | 冰朔 |
-| 03-21 06:33 | ✅ 📡 铸渊 · Notion Agent 唤醒监听 · 成功 | 冰朔 |
 <!-- BINGSHUO_BULLETIN_END -->
 
 ### 🤖 铸渊自动提醒
