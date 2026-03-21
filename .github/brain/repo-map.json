@@ -1,20 +1,20 @@
 {
   "description": "铸渊图书馆目录 · Library Catalog for 铸渊 (Zhùyuān)",
   "version": "2.0",
-  "generated_at": "2026-03-21T03:44:38.930Z",
+  "generated_at": "2026-03-21T12:55:24.671Z",
   "generated_by": "scripts/generate-repo-map.js",
   "repo": "qinfendebingshuo/guanghulab",
   "stats": {
     "zones": 13,
     "total_modules": 10,
-    "total_workflows": 64,
-    "total_scripts": 72,
+    "total_workflows": 65,
+    "total_scripts": 73,
     "total_dev_nodes": 8,
     "hli_interfaces": 21,
     "hli_implemented": 7,
     "hli_coverage_pct": "33%",
     "last_ci_run": "2026-03-05T16:07:24.070Z",
-    "memory_last_updated": "2026-03-20T08:53:49.483Z"
+    "memory_last_updated": "2026-03-21T08:44:50.327Z"
   },
   "zones": [
     {
@@ -334,6 +334,15 @@
           "name": "\"📡 铸渊 · 执行层状态同步\"",
           "triggers": [
             "schedule(0 3 * * *)",
+            "manual"
+          ]
+        },
+        {
+          "file": "federation-bridge.yml",
+          "name": "🌉 铸渊 · 仓库联邦桥接",
+          "triggers": [
+            "push",
+            "schedule(0 2 * * *)",
             "manual"
           ]
         },
@@ -683,7 +692,7 @@
           ]
         }
       ],
-      "item_count": 64
+      "item_count": 65
     },
     {
       "zone_id": "SCRIPTS",
@@ -717,6 +726,9 @@
         },
         {
           "file": "bridge"
+        },
+        {
+          "file": "bridge-app.js"
         },
         {
           "file": "commander-dashboard.js"
@@ -917,7 +929,7 @@
           "file": "zhuyuan-wakeup.js"
         }
       ],
-      "item_count": 72
+      "item_count": 73
     },
     {
       "zone_id": "SRC",
@@ -1750,6 +1762,9 @@
     "execution-sync": [
       "WORKFLOWS::execution-sync.yml"
     ],
+    "federation-bridge": [
+      "WORKFLOWS::federation-bridge.yml"
+    ],
     "feishu-syslog-bridge": [
       "WORKFLOWS::feishu-syslog-bridge.yml"
     ],
@@ -1926,6 +1941,9 @@
     ],
     "bridge": [
       "SCRIPTS::bridge"
+    ],
+    "bridge-app": [
+      "SCRIPTS::bridge-app.js"
     ],
     "commander-dashboard": [
       "SCRIPTS::commander-dashboard.js"

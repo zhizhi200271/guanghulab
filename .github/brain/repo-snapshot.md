@@ -1,5 +1,5 @@
 # 铸渊图书馆快照 · Repo Snapshot
-> 生成于 2026-03-21 11:44 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
+> 生成于 2026-03-21 20:55 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
 
 ---
 
@@ -9,11 +9,11 @@
 |------|------|
 | 区域总数 | 13 个区域 |
 | 功能模块 | 10 个 (m01~m18) |
-| 工作流 | 64 个 GitHub Actions |
-| 脚本 | 72 个执行脚本 |
+| 工作流 | 65 个 GitHub Actions |
+| 脚本 | 73 个执行脚本 |
 | 开发者节点 | 8 人 |
 | HLI 接口覆盖率 | 7/21 (33%) |
-| 快照生成时间 | 2026-03-21 11:44 CST |
+| 快照生成时间 | 2026-03-21 20:55 CST |
 
 ---
 
@@ -30,12 +30,12 @@
 **关键词**: persona · identity · dev-status · 人格 · 开发者状态
 
 ### ⚡ 自动化工作流（WORKFLOWS）
-**路径**: `.github/workflows` · **数量**: 64 项
+**路径**: `.github/workflows` · **数量**: 65 项
 **描述**: 所有 GitHub Actions 工作流定义
 **关键词**: workflow · actions · ci · automation · 工作流 · 自动化
 
 ### 🔧 执行脚本库（SCRIPTS）
-**路径**: `scripts` · **数量**: 72 项
+**路径**: `scripts` · **数量**: 73 项
 **描述**: 铸渊所有执行手脚 · 自动化脚本
 **关键词**: script · node · js · 脚本 · 执行 · runner
 
@@ -109,6 +109,7 @@
 | `distribute-broadcasts.yml` | 铸渊 · 广播分发 | push, manual |
 | `esp-signal-processor.yml` | 铸渊 · ESP 邮件信号处理器（已暂停） | schedule(*/30 * * * *), manual |
 | `execution-sync.yml` | "📡 铸渊 · 执行层状态同步" | schedule(0 3 * * *), manual |
+| `federation-bridge.yml` | 🌉 铸渊 · 仓库联邦桥接 | push, schedule(0 2 * * *), manual |
 | `feishu-syslog-bridge.yml` | 铸渊 · 飞书SYSLOG桥接 | unknown |
 | `generate-module-doc.yml` | 铸渊 · 光湖纪元 模块文档自动生成 | push, manual |
 | `hli-contract-check.yml` | HLI Contract Check | push, pull_request |
@@ -165,6 +166,7 @@
 - `scripts/bingshuo-neural-sync.js`
 - `scripts/brain-bridge-sync.js`
 - `scripts/bridge`
+- `scripts/bridge-app.js`
 - `scripts/commander-dashboard.js`
 - `scripts/contract-check.js`
 - `scripts/create-standardized-ticket.js`
@@ -324,9 +326,9 @@
 
 ## 🕐 最近动态（memory.json 最新3条）
 
+- `2026-03-21T08:44:50.327Z` · daily_check — passed
 - `2026-03-20T14:39:13.086Z` · daily_agent_inspection — 铸渊巡检Agent · ✅3 ⚠️3 ❌0 · 2个问题
 - `2026-03-20T08:53:49.483Z` · daily_check — passed
-- `2026-03-19T08:55:22.198Z` · daily_check — passed
 
 ---
 
