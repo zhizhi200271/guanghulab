@@ -519,11 +519,25 @@
       "actor": "qinfendebingshuo",
       "ref": "refs/heads/main",
       "run_id": "23376003295"
+    },
+    {
+      "type": "daily_agent_inspection",
+      "timestamp": "2026-03-21T14:20:47.286Z",
+      "description": "铸渊巡检Agent · ✅4 ⚠️2 ❌0 · 1个问题",
+      "result": "warnings",
+      "checks": 6,
+      "passed": 4,
+      "warnings": 2,
+      "failed": 0,
+      "issues_detail": [
+        "CI 有 1 个失败工作流"
+      ],
+      "actions_suggested": []
     }
   ],
   "last_agent_inspection": {
-    "timestamp": "2026-03-20T14:39:13.086Z",
+    "timestamp": "2026-03-21T14:20:47.286Z",
     "result": "warnings",
-    "summary": "铸渊巡检Agent · ✅3 ⚠️3 ❌0 · 2个问题"
+    "summary": "铸渊巡检Agent · ✅4 ⚠️2 ❌0 · 1个问题"
   }
 }
