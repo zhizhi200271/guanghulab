@@ -1,13 +1,13 @@
 {
   "description": "铸渊图书馆目录 · Library Catalog for 铸渊 (Zhùyuān)",
   "version": "2.0",
-  "generated_at": "2026-03-20T10:41:50.177Z",
+  "generated_at": "2026-03-21T00:08:46.940Z",
   "generated_by": "scripts/generate-repo-map.js",
   "repo": "qinfendebingshuo/guanghulab",
   "stats": {
     "zones": 13,
     "total_modules": 10,
-    "total_workflows": 63,
+    "total_workflows": 64,
     "total_scripts": 72,
     "total_dev_nodes": 8,
     "hli_interfaces": 21,
@@ -494,6 +494,13 @@
           ]
         },
         {
+          "file": "receive-spoke-checkin.yml",
+          "name": "📥 接收子仓库签到",
+          "triggers": [
+            "unknown"
+          ]
+        },
+        {
           "file": "receive-syslog.yml",
           "name": "铸渊 · Receive SYSLOG · 飞书机器人 → GitHub → Notion",
           "triggers": [
@@ -676,7 +683,7 @@
           ]
         }
       ],
-      "item_count": 63
+      "item_count": 64
     },
     {
       "zone_id": "SCRIPTS",
@@ -1173,9 +1180,12 @@
         },
         {
           "file": "DEV-011"
+        },
+        {
+          "file": "DEV-012"
         }
       ],
-      "item_count": 8
+      "item_count": 9
     },
     {
       "zone_id": "SIGNAL_LOG",
@@ -1806,6 +1816,9 @@
       "WORKFLOWS::push-broadcast.yml",
       "SCRIPTS::push-broadcast.js"
     ],
+    "receive-spoke-checkin": [
+      "WORKFLOWS::receive-spoke-checkin.yml"
+    ],
     "receive-syslog": [
       "WORKFLOWS::receive-syslog.yml",
       "SCRIPTS::receive-syslog.js"
@@ -2229,6 +2242,9 @@
     ],
     "dev-011": [
       "BROADCASTS::DEV-011"
+    ],
+    "dev-012": [
+      "BROADCASTS::DEV-012"
     ],
     "signal": [
       "SIGNAL_LOG"

@@ -1,5 +1,5 @@
 # 铸渊图书馆快照 · Repo Snapshot
-> 生成于 2026-03-20 18:41 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
+> 生成于 2026-03-21 08:08 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
 
 ---
 
@@ -9,11 +9,11 @@
 |------|------|
 | 区域总数 | 13 个区域 |
 | 功能模块 | 10 个 (m01~m18) |
-| 工作流 | 63 个 GitHub Actions |
+| 工作流 | 64 个 GitHub Actions |
 | 脚本 | 72 个执行脚本 |
 | 开发者节点 | 8 人 |
 | HLI 接口覆盖率 | 7/21 (33%) |
-| 快照生成时间 | 2026-03-20 18:41 CST |
+| 快照生成时间 | 2026-03-21 08:08 CST |
 
 ---
 
@@ -30,7 +30,7 @@
 **关键词**: persona · identity · dev-status · 人格 · 开发者状态
 
 ### ⚡ 自动化工作流（WORKFLOWS）
-**路径**: `.github/workflows` · **数量**: 63 项
+**路径**: `.github/workflows` · **数量**: 64 项
 **描述**: 所有 GitHub Actions 工作流定义
 **关键词**: workflow · actions · ci · automation · 工作流 · 自动化
 
@@ -55,7 +55,7 @@
 **关键词**: dev · developer · node · config · status · 开发者
 
 ### 📢 广播发件箱（BROADCASTS）
-**路径**: `broadcasts-outbox` · **数量**: 8 项
+**路径**: `broadcasts-outbox` · **数量**: 9 项
 **描述**: 铸渊向各开发者发出的广播任务
 **关键词**: broadcast · outbox · task · 广播 · 发件箱
 
@@ -130,6 +130,7 @@
 | `psp-daily-inspection.yml` | 铸渊 · PSP 分身巡检 | schedule(0 1 * * *), manual |
 | `push-broadcast-feishu.yml` | 铸渊 · 广播推送飞书（聊天消息） | manual |
 | `push-broadcast.yml` | 铸渊 · Push Broadcast · Notion → 飞书文档B | manual |
+| `receive-spoke-checkin.yml` | 📥 接收子仓库签到 | unknown |
 | `receive-syslog.yml` | 铸渊 · Receive SYSLOG · 飞书机器人 → GitHub → Notion | unknown |
 | `sandbox-deploy.yml` | "🏠 Sandbox Deploy" | push |
 | `server-patrol.yml` | "🔍 Server Patrol · 服务器每日巡检" | schedule(0 0,12 * * *), manual |
@@ -323,9 +324,9 @@
 
 ## 🕐 最近动态（memory.json 最新3条）
 
+- `2026-03-20T14:39:13.086Z` · daily_agent_inspection — 铸渊巡检Agent · ✅3 ⚠️3 ❌0 · 2个问题
 - `2026-03-20T08:53:49.483Z` · daily_check — passed
 - `2026-03-19T08:55:22.198Z` · daily_check — passed
-- `2026-03-18T17:00:48.698Z` · daily_agent_inspection — 铸渊巡检Agent · ✅2 ⚠️4 ❌0 · 1个问题
 
 ---
 
