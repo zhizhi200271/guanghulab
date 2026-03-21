@@ -1,14 +1,14 @@
 {
   "description": "铸渊图书馆目录 · Library Catalog for 铸渊 (Zhùyuān)",
   "version": "2.0",
-  "generated_at": "2026-03-21T12:55:24.671Z",
+  "generated_at": "2026-03-21T13:14:24.726Z",
   "generated_by": "scripts/generate-repo-map.js",
   "repo": "qinfendebingshuo/guanghulab",
   "stats": {
     "zones": 13,
     "total_modules": 10,
-    "total_workflows": 65,
-    "total_scripts": 73,
+    "total_workflows": 66,
+    "total_scripts": 74,
     "total_dev_nodes": 8,
     "hli_interfaces": 21,
     "hli_implemented": 7,
@@ -601,6 +601,14 @@
           ]
         },
         {
+          "file": "tianyan-daily-patrol.yml",
+          "name": "\"🦅 天眼 · 每日巡检\"",
+          "triggers": [
+            "schedule(30 0 * * *)",
+            "manual"
+          ]
+        },
+        {
           "file": "update-readme-bulletin.yml",
           "name": "📢 更新系统公告区",
           "triggers": [
@@ -692,7 +700,7 @@
           ]
         }
       ],
-      "item_count": 65
+      "item_count": 66
     },
     {
       "zone_id": "SCRIPTS",
@@ -762,6 +770,9 @@
         },
         {
           "file": "esp-email-processor.js"
+        },
+        {
+          "file": "fix-registry-checkin.js"
         },
         {
           "file": "gate-guard-log.js"
@@ -929,7 +940,7 @@
           "file": "zhuyuan-wakeup.js"
         }
       ],
-      "item_count": 73
+      "item_count": 74
     },
     {
       "zone_id": "SRC",
@@ -1877,6 +1888,9 @@
     "test-notion-bridge": [
       "WORKFLOWS::test-notion-bridge.yml"
     ],
+    "tianyan-daily-patrol": [
+      "WORKFLOWS::tianyan-daily-patrol.yml"
+    ],
     "update-readme-bulletin": [
       "WORKFLOWS::update-readme-bulletin.yml",
       "SCRIPTS::update-readme-bulletin.js"
@@ -1974,6 +1988,9 @@
     ],
     "esp-email-processor": [
       "SCRIPTS::esp-email-processor.js"
+    ],
+    "fix-registry-checkin": [
+      "SCRIPTS::fix-registry-checkin.js"
     ],
     "gate-guard-log": [
       "SCRIPTS::gate-guard-log.js"
