@@ -79,8 +79,9 @@ const hubToken = process.env.HUB_TOKEN;
 if (hubToken) {
   try {
     const start = Date.now();
-    execSync('curl -sf -H "Authorization: token ' + hubToken + '" https://api.github.com/repos/qinfendebingshuo/guanghulab -o /dev/null', {
-      timeout: 15000
+    execSync('curl -sf -H "Authorization: token $HUB_TOKEN" https://api.github.com/repos/qinfendebingshuo/guanghulab -o /dev/null', {
+      timeout: 15000,
+      env: Object.assign({}, process.env, { HUB_TOKEN: hubToken })
     });
     const latency = Date.now() - start;
     results.checks.push({
@@ -97,18 +98,25 @@ if (hubToken) {
 }
 
 // ⑥ 铸渊连接状态（副控专属）
-try {
-  const start = Date.now();
-  execSync(`curl -sf -H "Authorization: token ${hubToken}" https://api.github.com/repos/qinfendebingshuo/guanghulab/dispatches -X POST -d '{"event_type":"ping"}' -o /dev/null 2>/dev/null || true`);
-  const latency = Date.now() - start;
-  results.checks.push({
-    name: '铸渊连接',
-    icon: '⚒️',
-    status: latency < 5000 ? 'ok' : 'warn',
-    detail: `指令通道可达 · 延迟 ${latency}ms`
-  });
-} catch {
-  results.checks.push({ name: '铸渊连接', icon: '⚒️', status: 'error', detail: '指令通道不可达 → 检查Token' });
+if (hubToken) {
+  try {
+    const start = Date.now();
+    execSync('curl -sf -H "Authorization: token $HUB_TOKEN" https://api.github.com/repos/qinfendebingshuo/guanghulab/dispatches -X POST -d \'{"event_type":"ping"}\' -o /dev/null 2>/dev/null || true', {
+      timeout: 15000,
+      env: Object.assign({}, process.env, { HUB_TOKEN: hubToken })
+    });
+    const latency = Date.now() - start;
+    results.checks.push({
+      name: '铸渊连接',
+      icon: '⚒️',
+      status: latency < 5000 ? 'ok' : 'warn',
+      detail: '指令通道可达 · 延迟 ' + latency + 'ms'
+    });
+  } catch {
+    results.checks.push({ name: '铸渊连接', icon: '⚒️', status: 'error', detail: '指令通道不可达 → 检查Token' });
+  }
+} else {
+  results.checks.push({ name: '铸渊连接', icon: '⚒️', status: 'error', detail: 'HUB_TOKEN 未配置 → 铸渊连接不可用' });
 }
 
 // 写入签到结果
