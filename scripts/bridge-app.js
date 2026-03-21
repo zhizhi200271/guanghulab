@@ -8,6 +8,8 @@ const path = require('path');
 
 const TOKEN = process.env.MAIN_REPO_TOKEN;
 const ORG = process.env.GITHUB_ORG || 'qinfendebingshuo';
+const COMMITTER = { name: '铸渊 (ZhùYuān)', email: 'zhuyuan@guanghulab.com' };
+const BULLETIN_PATH = 'bulletins/latest.md';
 
 // ========== 开发者仓库路由表 ==========
 const FEDERATION = {
@@ -65,7 +67,7 @@ async function pushFile(repo, filePath, content, message) {
   const body = {
     message,
     content: Buffer.from(content).toString('base64'),
-    committer: { name: '铸渊 (ZhùYuān)', email: 'zhuyuan@guanghulab.com' }
+    committer: COMMITTER
   };
   if (sha) body.sha = sha;
 
@@ -76,12 +78,11 @@ async function pushFile(repo, filePath, content, message) {
 
 // 1. 推送公告到所有仓库
 async function pushBulletin() {
-  const bulletinPath = 'bulletins/latest.md';
-  if (!fs.existsSync(bulletinPath)) {
+  if (!fs.existsSync(BULLETIN_PATH)) {
     console.log('📭 无 bulletins/latest.md');
     return;
   }
-  const content = fs.readFileSync(bulletinPath, 'utf8');
+  const content = fs.readFileSync(BULLETIN_PATH, 'utf8');
   const timestamp = new Date().toISOString().split('T')[0];
 
   for (const [devId, dev] of Object.entries(FEDERATION)) {
@@ -189,12 +190,18 @@ async function distributeBroadcasts() {
 }
 
 // ========== 入口 ==========
-const action = process.argv[2];
-switch (action) {
-  case 'bulletin':    pushBulletin(); break;
-  case 'init':        initRepo(process.argv[3]); break;
-  case 'init-all':    (async () => { for (const id of Object.keys(FEDERATION)) await initRepo(id); })(); break;
-  case 'status':      collectStatus(); break;
-  case 'distribute':  distributeBroadcasts(); break;
-  default:            console.log('用法: node bridge-app.js [bulletin|init DEV-XXX|init-all|status|distribute]');
+async function main() {
+  const action = process.argv[2];
+  switch (action) {
+    case 'bulletin':    await pushBulletin(); break;
+    case 'init':        await initRepo(process.argv[3]); break;
+    case 'init-all':
+      for (const id of Object.keys(FEDERATION)) await initRepo(id);
+      break;
+    case 'status':      await collectStatus(); break;
+    case 'distribute':  await distributeBroadcasts(); break;
+    default:            console.log('用法: node bridge-app.js [bulletin|init DEV-XXX|init-all|status|distribute]');
+  }
 }
+
+main().catch(e => { console.error('❌ 桥接执行失败:', e.message); process.exit(1); });
