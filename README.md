@@ -280,6 +280,10 @@ npm run test:smoke
 - **模块自检**：推送时自动检测模块完整性（README.md + package.json + src/）
 - **部署流水线**：推送到 main → 验证 → 同步 → 重启 → Notion 通知
 - **广播系统**：冰朔广播 → 分发至各开发者 outbox → 邮件/钉钉通知
+- **最新健康报告**：[2026-03-21 全链路健康报告](reports/health-report-2026-03-21.md) · `ZY-SKYEYE-RESTORE-002`
+  - ✅ Server Patrol 修复（git push 替换 PR 创建）
+  - ✅ Agent 签到系统修正（14 需签到 / 48 事件型免签到）
+  - ✅ 66 个 Workflow 全部 YAML 语法验证通过
 
 ---
 

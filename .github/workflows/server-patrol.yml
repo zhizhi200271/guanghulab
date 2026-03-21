@@ -104,20 +104,17 @@ jobs:
           echo "PATROL_DATE=$DATE" >> $GITHUB_ENV
 
       - name: "📊 提交巡检报告"
-        uses: peter-evans/create-pull-request@v7
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "🔍 server-patrol: ${{ env.PATROL_DATE }} · ${{ steps.patrol.outputs.overall }}"
-          title: "🔍 服务器巡检报告 · ${{ env.PATROL_DATE }}"
-          body: |
-            🤖 铸渊服务器巡检报告自动提交
-            - 结果: ${{ steps.patrol.outputs.overall }}
-            - 告警数: ${{ steps.patrol.outputs.alert_count }}
-          branch: auto/server-patrol
-          delete-branch: true
-          add-paths: |
-            data/patrol-logs/
-          labels: auto-sync
+        run: |
+          git config user.name "铸渊 (ZhùYuān)"
+          git config user.email "zhuyuan@guanghulab.com"
+          git add data/patrol-logs/
+          git diff --cached --quiet || git commit -m "🔍 server-patrol: ${{ env.PATROL_DATE }} · ${{ steps.patrol.outputs.overall }}"
+          git pull --rebase origin main || echo "⚠️ rebase 失败，尝试直接推送..."
+          git push || {
+            echo "⚠️ 推送失败，尝试重新拉取后再推送..."
+            git pull --rebase origin main
+            git push
+          }
 
       - name: "📧 异常时通知妈妈"
         if: steps.patrol.outputs.overall == 'has_issues'
