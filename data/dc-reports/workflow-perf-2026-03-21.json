@@ -1,0 +1,116 @@
+{
+  "date": "2026-03-21",
+  "workflows": [
+    {
+      "name": "��渊 · 每日自检",
+      "trigger": "schedule",
+      "runs_today": 1,
+      "avg_duration_sec": 13,
+      "success_rate": null,
+      "dependencies": []
+    },
+    {
+      "name": "pages build and deployment",
+      "trigger": "dynamic",
+      "runs_today": 6,
+      "avg_duration_sec": 29,
+      "success_rate": 1,
+      "dependencies": []
+    },
+    {
+      "name": "📢 更新系统公告区",
+      "trigger": "workflow_run",
+      "runs_today": 2,
+      "avg_duration_sec": 24,
+      "success_rate": 1,
+      "dependencies": [
+        "wake-brain"
+      ]
+    },
+    {
+      "name": "🚨 铸渊·智能门禁 · Push Gate Guard",
+      "trigger": "push",
+      "runs_today": 1,
+      "avg_duration_sec": 1,
+      "success_rate": null,
+      "dependencies": []
+    },
+    {
+      "name": "模块结构检查",
+      "trigger": "push",
+      "runs_today": 1,
+      "avg_duration_sec": 7,
+      "success_rate": 1,
+      "dependencies": []
+    },
+    {
+      "name": "冰朔主控神经系统 · 自动维护",
+      "trigger": "push",
+      "runs_today": 1,
+      "avg_duration_sec": 20,
+      "success_rate": 1,
+      "dependencies": [
+        "wake-brain"
+      ]
+    },
+    {
+      "name": "铸渊 · 广播分发",
+      "trigger": "push",
+      "runs_today": 1,
+      "avg_duration_sec": 11,
+      "success_rate": 1,
+      "dependencies": []
+    },
+    {
+      "name": "铸渊 · 图书馆目录自动更新",
+      "trigger": "push",
+      "runs_today": 1,
+      "avg_duration_sec": 11,
+      "success_rate": 1,
+      "dependencies": []
+    },
+    {
+      "name": "铸渊 · Bridge E · GitHub Changes → Notion",
+      "trigger": "push",
+      "runs_today": 2,
+      "avg_duration_sec": 14,
+      "success_rate": 1,
+      "dependencies": []
+    },
+    {
+      "name": "🚀 铸渊 CD · 自动部署到 guanghulab.com",
+      "trigger": "push",
+      "runs_today": 1,
+      "avg_duration_sec": 73,
+      "success_rate": 1,
+      "dependencies": [
+        "validate",
+        "deploy"
+      ]
+    },
+    {
+      "name": ".github/workflows/syslog-issue-pipeline.yml",
+      "trigger": "push",
+      "runs_today": 2,
+      "avg_duration_sec": 0,
+      "success_rate": 0,
+      "dependencies": []
+    },
+    {
+      "name": "Generate Session Summary for Notion",
+      "trigger": "schedule",
+      "runs_today": 1,
+      "avg_duration_sec": 11,
+      "success_rate": 1,
+      "dependencies": []
+    }
+  ],
+  "total_workflows": 64,
+  "failed_today": 2,
+  "parallel_capable": 45,
+  "_meta": {
+    "generated_by": "dc-workflow-perf.js",
+    "generated_at": "2026-03-21T00:54:37.790Z",
+    "runs_fetched": 20
+  }
+}
