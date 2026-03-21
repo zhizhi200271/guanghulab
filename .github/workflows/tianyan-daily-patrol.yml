@@ -1,0 +1,82 @@
+# .github/workflows/tianyan-daily-patrol.yml
+# 天眼 · 每日自动巡检 + 修复
+#
+# 功能：
+# 1. 扫描注册表完整性（补齐缺失的 daily_checkin_required 字段）
+# 2. 扫描 Workflow 文件健康度
+# 3. 扫描 persona-brain 目录健康度
+# 4. 自动提交修复
+# 5. 失败时创建 Issue 上报
+
+name: "🦅 天眼 · 每日巡检"
+
+on:
+  schedule:
+    - cron: '30 0 * * *'  # 北京时间 08:30，签到之后半小时跑
+  workflow_dispatch:
+
+jobs:
+  patrol:
+    name: "🦅 天眼巡检"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 扫描注册表完整性
+        run: node scripts/fix-registry-checkin.js
+
+      - name: 扫描 Workflow 文件健康度
+        run: |
+          echo "📋 当前 workflow 文件列表："
+          ls -la .github/workflows/*.yml | wc -l
+          echo "---"
+          # 检查关键 workflow 是否存在
+          for f in agent-checkin tianyan-daily-patrol; do
+            if [ -f ".github/workflows/$f.yml" ]; then
+              echo "✅ $f.yml 存在"
+            else
+              echo "❌ $f.yml 缺失"
+            fi
+          done
+
+      - name: 扫描 persona-brain 健康度
+        run: |
+          if [ -d ".github/persona-brain" ]; then
+            echo "✅ .github/persona-brain/ 存在"
+            ls -la .github/persona-brain/
+          else
+            echo "❌ .github/persona-brain/ 不存在"
+          fi
+          if [ -f ".github/persona-brain/agent-registry.json" ]; then
+            TOTAL=$(node -e "const r=JSON.parse(require('fs').readFileSync('.github/persona-brain/agent-registry.json','utf8')); console.log(r.agents.length)")
+            REQUIRED=$(node -e "const r=JSON.parse(require('fs').readFileSync('.github/persona-brain/agent-registry.json','utf8')); console.log(r.agents.filter(a=>a.daily_checkin_required).length)")
+            echo "📊 注册 Agent 总数: $TOTAL"
+            echo "📊 需要签到 Agent: $REQUIRED"
+          fi
+
+      - name: 提交修复（如有）
+        run: |
+          git config user.name "tianyan-bot"
+          git config user.email "tianyan@guanghulab.com"
+          git add -A
+          git diff --cached --quiet || git commit -m "🦅 天眼自动巡检修复 · $(date +%Y-%m-%d)"
+          git diff --cached --quiet || git push
+
+      - name: 异常上报（创建Issue）
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🦅 天眼巡检异常 · ' + new Date().toISOString().split('T')[0],
+              body: '天眼每日巡检发现异常，请冰朔查看 Actions 日志。\n\n运行链接: ' + context.serverUrl + '/' + context.repo.owner + '/' + context.repo.repo + '/actions/runs/' + context.runId,
+              labels: ['tianyan', 'auto-report']
+            });

@@ -12,7 +12,8 @@
       "trigger": "定时/手动",
       "self_repair": true,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-002",
@@ -22,7 +23,8 @@
       "trigger": "Discussion",
       "self_repair": true,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-003",
@@ -32,7 +34,8 @@
       "trigger": "手动/Issue",
       "self_repair": false,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-004",
@@ -42,7 +45,8 @@
       "trigger": "定时/手动/推送",
       "self_repair": false,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": true
     },
     {
       "id": "AG-ZY-005",
@@ -52,7 +56,8 @@
       "trigger": "定时/手动/推送",
       "self_repair": true,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-006",
@@ -62,7 +67,8 @@
       "trigger": "定时/手动",
       "self_repair": true,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-007",
@@ -72,7 +78,8 @@
       "trigger": "推送/PR",
       "self_repair": true,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": true
     },
     {
       "id": "AG-ZY-008",
@@ -82,7 +89,8 @@
       "trigger": "定时/手动",
       "self_repair": true,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": true
     },
     {
       "id": "AG-ZY-009",
@@ -92,7 +100,8 @@
       "trigger": "定时/手动",
       "self_repair": true,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-010",
@@ -102,7 +111,8 @@
       "trigger": "手动/推送",
       "self_repair": true,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-011",
@@ -112,7 +122,8 @@
       "trigger": "手动/推送",
       "self_repair": true,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-012",
@@ -122,7 +133,8 @@
       "trigger": "PR",
       "self_repair": true,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-013",
@@ -132,7 +144,8 @@
       "trigger": "定时/手动",
       "self_repair": true,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": true
     },
     {
       "id": "AG-ZY-014",
@@ -142,7 +155,8 @@
       "trigger": "定时/手动/Discussion",
       "self_repair": true,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": true
     },
     {
       "id": "AG-ZY-015",
@@ -152,7 +166,8 @@
       "trigger": "手动/推送",
       "self_repair": false,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-016",
@@ -162,7 +177,8 @@
       "trigger": "手动/推送",
       "self_repair": false,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": true
     },
     {
       "id": "AG-ZY-017",
@@ -172,7 +188,8 @@
       "trigger": "手动/推送",
       "self_repair": false,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": true
     },
     {
       "id": "AG-ZY-018",
@@ -182,7 +199,8 @@
       "trigger": "定时/手动",
       "self_repair": false,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-019",
@@ -192,7 +210,8 @@
       "trigger": "定时/手动",
       "self_repair": true,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-020",
@@ -202,7 +221,8 @@
       "trigger": "仓库事件",
       "self_repair": true,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-021",
@@ -212,7 +232,8 @@
       "trigger": "手动/推送",
       "self_repair": true,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-022",
@@ -222,7 +243,8 @@
       "trigger": "推送/PR",
       "self_repair": true,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-023",
@@ -232,7 +254,8 @@
       "trigger": "定时/手动",
       "self_repair": false,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": true
     },
     {
       "id": "AG-ZY-024",
@@ -242,7 +265,8 @@
       "trigger": "仓库事件",
       "self_repair": false,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-025",
@@ -252,7 +276,8 @@
       "trigger": "手动",
       "self_repair": false,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-026",
@@ -262,7 +287,8 @@
       "trigger": "定时/手动",
       "self_repair": true,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": true
     },
     {
       "id": "AG-ZY-027",
@@ -272,7 +298,8 @@
       "trigger": "手动/仓库事件",
       "self_repair": false,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-028",
@@ -282,7 +309,8 @@
       "trigger": "定时/手动",
       "self_repair": false,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": true
     },
     {
       "id": "AG-ZY-029",
@@ -292,7 +320,8 @@
       "trigger": "定时/手动",
       "self_repair": false,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": true
     },
     {
       "id": "AG-ZY-030",
@@ -302,7 +331,8 @@
       "trigger": "定时/手动",
       "self_repair": false,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-031",
@@ -312,7 +342,8 @@
       "trigger": "手动",
       "self_repair": false,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-032",
@@ -322,7 +353,8 @@
       "trigger": "手动",
       "self_repair": false,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-033",
@@ -332,7 +364,8 @@
       "trigger": "手动/推送",
       "self_repair": false,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-034",
@@ -342,7 +375,8 @@
       "trigger": "手动",
       "self_repair": false,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-035",
@@ -352,7 +386,8 @@
       "trigger": "手动",
       "self_repair": false,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-036",
@@ -362,7 +397,8 @@
       "trigger": "手动",
       "self_repair": false,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-037",
@@ -372,7 +408,8 @@
       "trigger": "手动",
       "self_repair": false,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-038",
@@ -382,7 +419,8 @@
       "trigger": "定时/手动",
       "self_repair": true,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-039",
@@ -392,7 +430,8 @@
       "trigger": "手动/仓库事件",
       "self_repair": false,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-040",
@@ -402,7 +441,8 @@
       "trigger": "手动/仓库事件",
       "self_repair": false,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-041",
@@ -412,7 +452,8 @@
       "trigger": "仓库事件",
       "self_repair": false,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-042",
@@ -422,7 +463,8 @@
       "trigger": "推送",
       "self_repair": false,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-043",
@@ -432,7 +474,8 @@
       "trigger": "定时/手动",
       "self_repair": true,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-044",
@@ -442,7 +485,8 @@
       "trigger": "手动/PR",
       "self_repair": false,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-045",
@@ -452,7 +496,8 @@
       "trigger": "定时/手动",
       "self_repair": false,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-046",
@@ -462,7 +507,8 @@
       "trigger": "定时/手动",
       "self_repair": true,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-047",
@@ -472,7 +518,8 @@
       "trigger": "手动/仓库事件",
       "self_repair": false,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-048",
@@ -482,7 +529,8 @@
       "trigger": "手动/推送",
       "self_repair": true,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-049",
@@ -492,7 +540,8 @@
       "trigger": "Discussion",
       "self_repair": false,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-050",
@@ -502,7 +551,8 @@
       "trigger": "Issue",
       "self_repair": false,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-051",
@@ -512,7 +562,8 @@
       "trigger": "手动/推送/Issue",
       "self_repair": false,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-052",
@@ -522,7 +573,8 @@
       "trigger": "手动/推送",
       "self_repair": true,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-053",
@@ -532,7 +584,8 @@
       "trigger": "定时/手动/推送",
       "self_repair": true,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": true
     },
     {
       "id": "AG-ZY-054",
@@ -542,7 +595,8 @@
       "trigger": "定时/手动/推送",
       "self_repair": true,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": true
     },
     {
       "id": "AG-ZY-055",
@@ -552,7 +606,8 @@
       "trigger": "推送",
       "self_repair": true,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-056",
@@ -562,7 +617,8 @@
       "trigger": "定时/手动/Issue",
       "self_repair": true,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-057",
@@ -572,7 +628,8 @@
       "trigger": "定时/手动",
       "self_repair": true,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-058",
@@ -582,7 +639,8 @@
       "trigger": "定时/手动/Issue",
       "self_repair": true,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": true
     },
     {
       "id": "AG-ZY-059",
@@ -592,7 +650,8 @@
       "trigger": "推送/Issue",
       "self_repair": false,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-060",
@@ -602,7 +661,8 @@
       "trigger": "Issue",
       "self_repair": true,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-061",
@@ -612,7 +672,8 @@
       "trigger": "PR",
       "self_repair": false,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     },
     {
       "id": "AG-ZY-062",
@@ -622,7 +683,8 @@
       "trigger": "定时/手动/Issue",
       "self_repair": true,
       "report_to": "ICE-GL-ZY001",
-      "status": "registered"
+      "status": "registered",
+      "daily_checkin_required": false
     }
   ],
   "note": "铸渊已扫描所有workflow文件，按此格式逐一注册，编号从AG-ZY-001开始顺序分配"
