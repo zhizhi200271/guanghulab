@@ -10,5 +10,17 @@
     "queue": {
       "created": false
     }
+  },
+  {
+    "timestamp": "2026-03-22T07:01:17.526Z",
+    "notion": {
+      "healthy": true,
+      "status": 200,
+      "latency": 245,
+      "user": "曜冥纪元-HoloLake"
+    },
+    "queue": {
+      "created": false
+    }
   }
 ]
