@@ -42,6 +42,13 @@ const TRAINING_RAW = path.join(GRID_DB, 'training-lake/raw');
 const LOGS = path.join(GRID_DB, 'logs');
 const RULES = path.join(GRID_DB, 'rules');
 
+let broadcastCounter = 0;
+
+function nextBroadcastSeq() {
+  broadcastCounter++;
+  return String(broadcastCounter).padStart(3, '0');
+}
+
 function getDateStr() {
   return new Date().toISOString().slice(0, 10).replace(/-/g, '');
 }
@@ -104,7 +111,7 @@ function processProgressUpdate(msg) {
   }
 
   // Generate outbox broadcast
-  const broadcastId = `GRID-BC-${getDateStr()}-${msg.dev_id}-001`;
+  const broadcastId = `GRID-BC-${getDateStr()}-${msg.dev_id}-${nextBroadcastSeq()}`;
   const broadcast = {
     schema_version: '1.0',
     broadcast_id: broadcastId,
@@ -204,7 +211,7 @@ function processInteractionDump(msg) {
 
 function processHelpRequest(msg) {
   // Mark as P0 and generate immediate response broadcast
-  const broadcastId = `GRID-BC-${getDateStr()}-${msg.dev_id}-P0`;
+  const broadcastId = `GRID-BC-${getDateStr()}-${msg.dev_id}-${nextBroadcastSeq()}`;
   const broadcast = {
     schema_version: '1.0',
     broadcast_id: broadcastId,

@@ -33,11 +33,13 @@ async function main() {
   // Detect changed files (passed from workflow or detect via git diff)
   let changedFiles;
   try {
-    const diff = execSync('git diff --name-only HEAD~1 HEAD -- grid-db/memory/', { encoding: 'utf8' });
+    // Use GITHUB_SHA context if available, otherwise fall back to HEAD~1
+    const beforeSha = process.env.BEFORE_SHA || 'HEAD~1';
+    const diff = execSync(`git diff --name-only ${beforeSha} HEAD -- grid-db/memory/`, { encoding: 'utf8' });
     changedFiles = diff.trim().split('\n')
       .filter(f => f && !f.includes('brain-mirror.json'));
   } catch {
-    console.log('[sync-griddb-to-notion] No changes detected');
+    console.log('[sync-griddb-to-notion] No changes detected (git diff failed, possibly first commit or shallow clone)');
     return;
   }
 
