@@ -1,0 +1,33 @@
+name: 📤 Grid-DB → Notion 增量回传
+
+on:
+  push:
+    paths:
+      - 'grid-db/memory/*/session-context.json'
+      - 'grid-db/memory/*/task-queue.json'
+      - 'grid-db/memory/*/dev-profile.json'
+      - 'grid-db/memory/*/persona-growth.json'
+
+permissions:
+  contents: read
+
+jobs:
+  sync-to-notion:
+    if: github.actor != 'zhuyuan-bot' && !contains(github.event.head_commit.message, '[skip ci]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: 🔍 检测变更文件
+        id: changes
+        run: |
+          CHANGED=$(git diff --name-only HEAD~1 HEAD -- 'grid-db/memory/' | grep -v brain-mirror.json || true)
+          echo "files=$CHANGED" >> $GITHUB_OUTPUT
+
+      - name: 📤 回传增量到 Notion
+        if: steps.changes.outputs.files != ''
+        env:
+          NOTION_API_TOKEN: ${{ secrets.NOTION_API_TOKEN }}
+        run: node scripts/grid-db/sync-griddb-to-notion.js

@@ -1,0 +1,33 @@
+name: 🧠 Notion → Grid-DB 记忆同步
+
+on:
+  schedule:
+    - cron: '0 */4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync-brain-mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 📥 从 Notion 拉取人格体核心大脑数据
+        env:
+          NOTION_API_TOKEN: ${{ secrets.NOTION_API_TOKEN }}
+        run: node scripts/grid-db/sync-notion-brain-mirror.js
+
+      - name: 📏 同步规则缓存
+        env:
+          NOTION_API_TOKEN: ${{ secrets.NOTION_API_TOKEN }}
+        run: node scripts/grid-db/sync-notion-rules.js
+
+      - name: 💾 提交更新
+        run: |
+          git config user.name "zhuyuan-bot"
+          git config user.email "zhuyuan@guanghulab.com"
+          git add grid-db/memory/*/brain-mirror.json grid-db/rules/
+          git diff --cached --quiet || git commit -m "sync: Notion → Grid-DB 记忆镜像 [auto][skip ci]"
+          git push

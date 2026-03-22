@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "description": "广播模板定义（Notion 逻辑缓存）",
+  "last_synced": null,
+  "templates": {
+    "task-directive": {
+      "required_fields": ["next_task", "context_update"],
+      "human_readable_prefix": "你好！",
+      "auto_generate": true
+    },
+    "code-review-result": {
+      "required_fields": ["review_summary", "issues_found", "score"],
+      "human_readable_prefix": "代码校验完成：",
+      "auto_generate": true
+    },
+    "broadcast-relay": {
+      "required_fields": ["original_broadcast_ref", "relay_summary"],
+      "human_readable_prefix": "系统广播转发：",
+      "auto_generate": true
+    },
+    "system-notice": {
+      "required_fields": ["notice_type", "message"],
+      "human_readable_prefix": "系统通知：",
+      "auto_generate": false
+    }
+  }
+}

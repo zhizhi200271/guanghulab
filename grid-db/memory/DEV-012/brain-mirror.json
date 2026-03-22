@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "persona_id": "PER-ZQ001",
+  "persona_name": "知秋",
+  "dev_id": "DEV-012",
+  "dev_name": "Awen",
+  "last_synced_from_notion": null,
+  "status": "awaiting_initial_sync",
+  "core_identity": {},
+  "current_broadcasts": [],
+  "module_assignments": ["M09", "M22", "M23"],
+  "knowledge_base": [],
+  "growth_milestones": []
+}
