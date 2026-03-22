@@ -4,6 +4,8 @@ const { parseIntent, checkPipelineStatus, checkDevStatus, formatTeamOverview, un
 
 // === 知识库匹配阈值：问题词中至少40%出现在Issue文本中才算命中 ===
 const FAQ_MATCH_THRESHOLD = 0.4;
+const MAX_CONTEXT_COMMENTS = 10;
+const MAX_COMMENT_LENGTH = 500;
 
 // === 冰朔（仓库创建者）的 GitHub 用户名 ===
 const BINGSHUO_USERNAME = 'qinfendebingshuo';
@@ -134,12 +136,12 @@ function buildConversationContext(comments) {
     context += `[Issue原文·${issueAuthor || '提问者'}] ${issueTitle}\n${issueBody}\n\n`;
   }
   if (!comments || comments.length === 0) return context;
-  const recent = comments.slice(-10);
+  const recent = comments.slice(-MAX_CONTEXT_COMMENTS);
   recent.forEach(c => {
     const author = c.user ? c.user.login : '未知';
     const isBot = author === 'github-actions[bot]';
     const role = isBot ? '铸渊' : author;
-    const body = c.body && c.body.length > 500 ? c.body.substring(0, 500) + '...' : (c.body || '');
+    const body = c.body && c.body.length > MAX_COMMENT_LENGTH ? c.body.substring(0, MAX_COMMENT_LENGTH) + '...' : (c.body || '');
     context += `[${role}] ${body}\n\n`;
   });
   return context;
@@ -445,8 +447,9 @@ async function handleIssueTrigger() {
 
   // --- 其他类型：铸渊主动尝试回答（不再等霜砚）---
   const user = identifyUser(issueAuthor);
+  const teamStatus = Array.isArray(devStatus.team_status) ? devStatus.team_status : [];
   const issueDevInfo = user.devId
-    ? (Array.isArray(devStatus.team_status) ? devStatus.team_status.find(d => d.dev_id === user.devId) : null)
+    ? teamStatus.find(d => d.dev_id === user.devId)
     : null;
 
   // 先尝试知识库
@@ -481,8 +484,11 @@ async function handleIssueTrigger() {
 
   // AI也答不了 → 邀请用户继续对话
   reply = `## ⚒️ 铸渊收到\n\n`;
-  const author = issueAuthor || '你';
-  reply += `@${author} 我收到了你的问题。请在下方评论中详细描述你的需求，@铸渊 即可继续对话。\n\n`;
+  if (issueAuthor) {
+    reply += `@${issueAuthor} 我收到了你的问题。请在下方评论中详细描述你的需求，@铸渊 即可继续对话。\n\n`;
+  } else {
+    reply += `我收到了你的问题。请在下方评论中详细描述你的需求，@铸渊 即可继续对话。\n\n`;
+  }
   if (issueDevInfo) {
     reply += `📌 你当前在做：${issueDevInfo.modules.join('、')} · ${issueDevInfo.status}\n`;
   }
