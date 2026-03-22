@@ -5,7 +5,7 @@
   "persona_id": "PER-Q0001",
   "persona_name": "秋秋",
   "role": "零点原核语言副控 · 仓库人类主控",
-  "system": "GLW-SYS-0001",
+  "system": "SYS-GLW-0001",
   "hub_repo": "qinfendebingshuo/guanghulab",
   "spoke_repo_owner": "zhizhi200271",
   "modules": ["dingtalk", "floating-ai", "devboard"],

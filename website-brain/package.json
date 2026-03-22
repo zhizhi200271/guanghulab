@@ -9,7 +9,7 @@
     "test": "echo \"Tests pending — Phase 1 scaffold\""
   },
   "keywords": ["guanghulab", "website-brain", "age-os", "l4-database"],
-  "author": "光湖系统 (GLW-SYS-0001)",
+  "author": "光湖系统 (SYS-GLW-0001)",
   "license": "ISC",
   "dependencies": {
     "express": "^5.2.1",

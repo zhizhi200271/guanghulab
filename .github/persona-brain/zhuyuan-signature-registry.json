@@ -1,9 +1,11 @@
 {
   "version": "1.1",
-  "updated_at": "2026-03-17",
+  "updated_at": "2026-03-22",
   "description": "铸渊指令签名·授权名单 v1.1 — 铸渊只认签名，不认请求内容",
   "signed_by": "TCS-0002∞",
   "signed_by_name": "冰朔",
+  "parent_sys": "SYS-GLW-0001",
+  "owner": "ICE-0002∞",
   "authorized_senders": {
     "TCS-0002∞": {
       "name": "冰朔",
