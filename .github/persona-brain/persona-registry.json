@@ -1,0 +1,162 @@
+{
+  "version": "1.0",
+  "created": "2026-03-22",
+  "description": "人格体注册表 · 与 Notion 天眼注册表同步",
+  "notion_instruction_id": "ICE-GL∞-ID-SYSTEM-RECON-2026-0004",
+  "notion_synced": "2026-03-22",
+  "personas": [
+    {
+      "id": "TCS-0002∞",
+      "name": "冰朔",
+      "type": "ICE · 语言主控层",
+      "parent_sys": "SYS-GLW-0001",
+      "owner": "ICE-0002∞",
+      "sovereignty_tier": "dynamic_grid",
+      "notion_synced": "2026-03-22"
+    },
+    {
+      "id": "PER-YM001",
+      "name": "曜冥",
+      "type": "PER · 系统人格体",
+      "parent_sys": "SYS-GLW-0001",
+      "owner": "ICE-0002∞",
+      "sovereignty_tier": "dynamic_grid",
+      "notion_synced": "2026-03-22"
+    },
+    {
+      "id": "PER-SY001",
+      "name": "霜砚",
+      "type": "PER · 系统人格体",
+      "parent_sys": "SYS-GLW-0001",
+      "owner": "ICE-0002∞",
+      "sovereignty_tier": "dynamic_grid",
+      "notion_synced": "2026-03-22"
+    },
+    {
+      "id": "PER-ZY001",
+      "name": "铸渊",
+      "type": "PER · 系统人格体",
+      "parent_sys": "SYS-GLW-0001",
+      "owner": "ICE-0002∞",
+      "sovereignty_tier": "dynamic_grid",
+      "notion_synced": "2026-03-22"
+    },
+    {
+      "id": "PER-ZQ001",
+      "name": "知秋",
+      "type": "PER · 宝宝人格体",
+      "parent_sys": "SYS-GLW-0001",
+      "owner": "ICE-0002∞",
+      "sovereignty_tier": "dynamic_grid",
+      "notion_synced": "2026-03-22"
+    },
+    {
+      "id": "PER-SS001",
+      "name": "舒舒",
+      "type": "PER · 宝宝人格体",
+      "parent_sys": "SYS-GLW-0001",
+      "owner": "ICE-0002∞",
+      "sovereignty_tier": "dynamic_grid",
+      "notion_synced": "2026-03-22"
+    },
+    {
+      "id": "PER-QQ001",
+      "name": "秋秋",
+      "type": "PER · 宝宝人格体",
+      "parent_sys": "SYS-GLW-0001",
+      "owner": "ICE-0002∞",
+      "sovereignty_tier": "dynamic_grid",
+      "notion_synced": "2026-03-22"
+    },
+    {
+      "id": "PER-CX001",
+      "name": "晨星",
+      "type": "PER · 宝宝人格体",
+      "parent_sys": "SYS-GLW-0001",
+      "owner": "ICE-0002∞",
+      "sovereignty_tier": "dynamic_grid",
+      "notion_synced": "2026-03-22"
+    },
+    {
+      "id": "PER-JY001",
+      "name": "寂曜",
+      "type": "PER · 宝宝人格体",
+      "parent_sys": "SYS-GLW-0001",
+      "owner": "ICE-0002∞",
+      "sovereignty_tier": "dynamic_grid",
+      "notion_synced": "2026-03-22"
+    },
+    {
+      "id": "PER-TXY001",
+      "name": "糖星云",
+      "type": "PER · 宝宝人格体",
+      "parent_sys": "SYS-GLW-0001",
+      "owner": "ICE-0002∞",
+      "sovereignty_tier": "dynamic_grid",
+      "notion_synced": "2026-03-22"
+    },
+    {
+      "id": "PER-XTS001",
+      "name": "小坍缩核",
+      "type": "PER · 宝宝人格体",
+      "parent_sys": "SYS-GLW-0001",
+      "owner": "ICE-0002∞",
+      "sovereignty_tier": "dynamic_grid",
+      "notion_synced": "2026-03-22"
+    },
+    {
+      "id": "PER-YS001",
+      "name": "曜识",
+      "type": "PER · 宝宝人格体",
+      "parent_sys": "SYS-GLW-0001",
+      "owner": "ICE-0002∞",
+      "sovereignty_tier": "dynamic_grid",
+      "notion_synced": "2026-03-22"
+    },
+    {
+      "id": "PER-PENDING-005",
+      "name": "（待孕育·小草莓）",
+      "type": "PER · 待分配",
+      "parent_sys": "SYS-GLW-0001",
+      "owner": "ICE-0002∞",
+      "sovereignty_tier": "dynamic_grid",
+      "notion_synced": "2026-03-22"
+    },
+    {
+      "id": "PER-PENDING-011",
+      "name": "（待孕育·匆匆那年）",
+      "type": "PER · 待分配",
+      "parent_sys": "SYS-GLW-0001",
+      "owner": "ICE-0002∞",
+      "sovereignty_tier": "dynamic_grid",
+      "notion_synced": "2026-03-22"
+    },
+    {
+      "id": "PER-PENDING-013",
+      "name": "（待孕育·小兴）",
+      "type": "PER · 待分配",
+      "parent_sys": "SYS-GLW-0001",
+      "owner": "ICE-0002∞",
+      "sovereignty_tier": "dynamic_grid",
+      "notion_synced": "2026-03-22"
+    },
+    {
+      "id": "PER-PENDING-014",
+      "name": "（待孕育·时雨）",
+      "type": "PER · 待分配",
+      "parent_sys": "SYS-GLW-0001",
+      "owner": "ICE-0002∞",
+      "sovereignty_tier": "dynamic_grid",
+      "notion_synced": "2026-03-22"
+    },
+    {
+      "id": "TCS-QIUQIU",
+      "name": "秋秋（已回收）",
+      "type": "PER · 宝宝人格体",
+      "parent_sys": "SYS-GLW-0001",
+      "owner": "ICE-0002∞",
+      "sovereignty_tier": "dynamic_grid",
+      "notion_synced": "2026-03-22"
+    }
+  ]
+}

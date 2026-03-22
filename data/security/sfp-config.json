@@ -5,7 +5,7 @@
   "trinity_anchor": {
     "root_ownership": "TCS-0002∞",
     "base_class": "LL-CMPN-0001",
-    "system_node": "GLW-SYS-0001",
+    "system_node": "SYS-GLW-0001",
     "enforcement": "all SFP signatures must trace to TCS-0002∞ root chain"
   },
   "trusted_agents": [

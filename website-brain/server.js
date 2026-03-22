@@ -21,7 +21,7 @@ app.get('/health', (req, res) => {
     version: '0.1.0',
     phase: 'Phase 1 · 骨架期',
     layer: 'L4 · 网站总大脑',
-    system_node: 'GLW-SYS-0001',
+    system_node: 'SYS-GLW-0001',
     timestamp: new Date().toISOString()
   });
 });
