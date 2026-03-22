@@ -88,7 +88,8 @@ jobs:
        !contains(github.event.issue.title, '系统日志') &&
        !contains(github.event.issue.body, '### 广播编号')) ||
       (github.event_name == 'issue_comment' &&
-       contains(github.event.comment.body, '铸渊'))
+       contains(github.event.comment.body, '铸渊') &&
+       github.event.comment.user.login != 'github-actions[bot]')
     permissions:
       issues: write
       contents: read
@@ -112,4 +113,5 @@ jobs:
           COMMENT_AUTHOR: ${{ github.event.comment.user.login }}
           COMMENT_ID: ${{ github.event.comment.id }}
           EVENT_NAME: ${{ github.event_name }}
+          ISSUE_AUTHOR: ${{ github.event.issue.user.login }}
         run: node scripts/zhuyuan-issue-reply.js
