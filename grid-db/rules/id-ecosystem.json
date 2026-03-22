@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0",
+  "description": "编号生态系统缓存（Notion 逻辑缓存）",
+  "last_synced": null,
+  "sovereignty": {
+    "root": "TCS-0002∞",
+    "system_node": "SYS-GLW-0001",
+    "legal_wall": "国作登字-2026-A-00037559"
+  },
+  "prefixes": {
+    "DEV": "开发者编号",
+    "PER": "人格体编号",
+    "CEP": "系统演化提案",
+    "M": "代码模块",
+    "AG": "Agent 编号",
+    "BC": "广播编号",
+    "GRID-BC": "格点库广播编号",
+    "HLI": "接口编号"
+  },
+  "active_personas": [
+    "PER-XTS001",
+    "PER-SS001",
+    "PER-JY001",
+    "PER-QQ001",
+    "PER-TXY001",
+    "PER-CX001",
+    "PER-ZQ001",
+    "PER-SY001",
+    "PER-ZY001",
+    "PER-YM001"
+  ]
+}

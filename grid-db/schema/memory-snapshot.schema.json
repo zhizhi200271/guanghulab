@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Grid-DB Memory Snapshot",
+  "description": "开发者记忆文件的元数据 schema",
+  "type": "object",
+  "required": ["schema_version", "dev_id", "persona_id"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "dev_id": {
+      "type": "string",
+      "pattern": "^DEV-[0-9]{3}$"
+    },
+    "persona_id": {
+      "type": "string",
+      "pattern": "^PER-[A-Z]{2,4}[0-9]{3}$"
+    },
+    "persona_name": {
+      "type": "string"
+    },
+    "dev_name": {
+      "type": "string"
+    },
+    "last_synced_from_notion": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["awaiting_initial_sync", "active", "syncing", "error"]
+    },
+    "core_identity": {
+      "type": "object"
+    },
+    "current_broadcasts": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "module_assignments": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "knowledge_base": {
+      "type": "array"
+    },
+    "growth_milestones": {
+      "type": "array"
+    }
+  }
+}

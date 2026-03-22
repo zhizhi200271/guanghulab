@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Grid-DB Interaction Record",
+  "description": "交互全文记录格式（JSONL 中每行的 schema）",
+  "type": "object",
+  "required": ["schema_version", "timestamp", "dev_id", "persona_id", "session_id", "role", "content"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "dev_id": {
+      "type": "string",
+      "pattern": "^DEV-[0-9]{3}$"
+    },
+    "persona_id": {
+      "type": "string",
+      "pattern": "^PER-[A-Z]{2,4}[0-9]{3}$"
+    },
+    "session_id": {
+      "type": "string"
+    },
+    "role": {
+      "type": "string",
+      "enum": ["developer", "persona", "system"]
+    },
+    "content": {
+      "type": "string"
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "topic": { "type": "string" },
+        "module_ref": { "type": "string" },
+        "emotion": { "type": "string" },
+        "code_snippet": { "type": "boolean" },
+        "quality_score": { "type": "integer", "minimum": 0, "maximum": 10 }
+      }
+    }
+  }
+}

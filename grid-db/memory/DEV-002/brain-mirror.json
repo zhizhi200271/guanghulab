@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "persona_id": "PER-SS001",
+  "persona_name": "舒舒",
+  "dev_id": "DEV-002",
+  "dev_name": "肥猫",
+  "last_synced_from_notion": null,
+  "status": "awaiting_initial_sync",
+  "core_identity": {},
+  "current_broadcasts": [],
+  "module_assignments": ["M01", "M03", "M04", "M14", "M-BRIDGE", "M-STATUS", "M-GATEWAY", "M-FEISHU"],
+  "knowledge_base": [],
+  "growth_milestones": []
+}

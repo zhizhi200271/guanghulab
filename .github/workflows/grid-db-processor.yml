@@ -1,0 +1,29 @@
+name: ⚙️ Grid-DB 消息处理器
+
+on:
+  push:
+    paths:
+      - 'grid-db/inbox/*.json'
+
+permissions:
+  contents: write
+
+jobs:
+  process-inbox:
+    if: github.actor != 'zhuyuan-bot' && !contains(github.event.head_commit.message, '[skip ci]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: ⚙️ 处理 inbox 消息
+        env:
+          NOTION_API_TOKEN: ${{ secrets.NOTION_API_TOKEN }}
+        run: node scripts/grid-db/process-inbox.js
+
+      - name: 💾 提交处理结果
+        run: |
+          git config user.name "zhuyuan-bot"
+          git config user.email "zhuyuan@guanghulab.com"
+          git add grid-db/
+          git diff --cached --quiet || git commit -m "auto: Grid-DB inbox processed [skip ci]"
+          git push

@@ -1,0 +1,6 @@
+{
+  "schema_version": "1.0",
+  "description": "当前活跃广播列表（Notion 逻辑缓存）",
+  "last_synced": null,
+  "broadcasts": []
+}

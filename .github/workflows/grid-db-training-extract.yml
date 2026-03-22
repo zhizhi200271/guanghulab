@@ -1,0 +1,29 @@
+name: 🧬 训练数据提取
+
+on:
+  schedule:
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 🧬 从交互记录提取训练样本
+        run: node scripts/grid-db/extract-training-samples.js
+
+      - name: 📊 更新 catalog
+        run: node scripts/grid-db/update-training-catalog.js
+
+      - name: 💾 提交
+        run: |
+          git config user.name "zhuyuan-bot"
+          git config user.email "zhuyuan@guanghulab.com"
+          git add grid-db/training-lake/
+          git diff --cached --quiet || git commit -m "training: 周度训练样本提取 [skip ci]"
+          git push

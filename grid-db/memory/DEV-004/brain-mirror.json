@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "persona_id": "PER-QQ001",
+  "persona_name": "秋秋",
+  "dev_id": "DEV-004",
+  "dev_name": "之之",
+  "last_synced_from_notion": null,
+  "status": "awaiting_initial_sync",
+  "core_identity": {},
+  "current_broadcasts": [],
+  "module_assignments": ["M17", "M-DINGTALK", "M-DEVBOARD"],
+  "knowledge_base": [],
+  "growth_milestones": []
+}

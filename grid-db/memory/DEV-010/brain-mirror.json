@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "persona_id": "PER-CX001",
+  "persona_name": "晨星",
+  "dev_id": "DEV-010",
+  "dev_name": "桔子",
+  "last_synced_from_notion": null,
+  "status": "awaiting_initial_sync",
+  "core_identity": {},
+  "current_broadcasts": [],
+  "module_assignments": ["M06", "M08", "M11", "M-CHANNEL", "M-INTEG", "M-BRIDGE-AUTO"],
+  "knowledge_base": [],
+  "growth_milestones": []
+}

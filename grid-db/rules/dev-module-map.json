@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0",
+  "description": "开发者→模块映射表（Notion 天眼注册表同步）",
+  "last_synced": null,
+  "mappings": {
+    "DEV-001": {
+      "dev_name": "页页",
+      "persona_id": "PER-XTS001",
+      "persona_name": "小坍缩核",
+      "github_username": null,
+      "modules": ["M-INTEG", "backend-integration"],
+      "active": true
+    },
+    "DEV-002": {
+      "dev_name": "肥猫",
+      "persona_id": "PER-SS001",
+      "persona_name": "舒舒",
+      "github_username": null,
+      "modules": ["M01", "M03", "M04", "M14", "M-BRIDGE", "M-STATUS", "M-GATEWAY", "M-FEISHU"],
+      "active": true
+    },
+    "DEV-003": {
+      "dev_name": "燕樊",
+      "persona_id": "PER-JY001",
+      "persona_name": "寂曜",
+      "github_username": null,
+      "modules": ["M02", "M07", "M10", "M15", "M18", "M-MEMORY"],
+      "active": true
+    },
+    "DEV-004": {
+      "dev_name": "之之",
+      "persona_id": "PER-QQ001",
+      "persona_name": "秋秋",
+      "github_username": null,
+      "modules": ["M17", "M-DINGTALK", "M-DEVBOARD"],
+      "active": true
+    },
+    "DEV-005": {
+      "dev_name": "小草莓",
+      "persona_id": null,
+      "persona_name": null,
+      "github_username": null,
+      "modules": ["M-STATUS"],
+      "active": false,
+      "note": "待分配人格体"
+    },
+    "DEV-009": {
+      "dev_name": "花尔",
+      "persona_id": "PER-TXY001",
+      "persona_name": "糖星云",
+      "github_username": null,
+      "modules": ["M05", "M20"],
+      "active": true
+    },
+    "DEV-010": {
+      "dev_name": "桔子",
+      "persona_id": "PER-CX001",
+      "persona_name": "晨星",
+      "github_username": null,
+      "modules": ["M06", "M08", "M11", "M-CHANNEL", "M-INTEG", "M-BRIDGE-AUTO"],
+      "active": true
+    },
+    "DEV-011": {
+      "dev_name": "匆匆那年",
+      "persona_id": null,
+      "persona_name": null,
+      "github_username": null,
+      "modules": ["M16"],
+      "active": false,
+      "note": "待分配人格体"
+    },
+    "DEV-012": {
+      "dev_name": "Awen",
+      "persona_id": "PER-ZQ001",
+      "persona_name": "知秋",
+      "github_username": null,
+      "modules": ["M09", "M22", "M23"],
+      "active": true
+    }
+  }
+}
