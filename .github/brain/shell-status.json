@@ -20,5 +20,16 @@
     ],
     "lastEnter": "2026-03-22T04:15:20.442Z",
     "currentState": "running"
+  },
+  "AG-ZY-001": {
+    "runs": [
+      {
+        "start": "2026-03-22T04:24:03.384Z",
+        "end": null,
+        "result": null
+      }
+    ],
+    "lastEnter": "2026-03-22T04:24:03.384Z",
+    "currentState": "running"
   }
 }
