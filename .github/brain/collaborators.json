@@ -57,6 +57,13 @@
       "github_username": "",
       "emoji": "🌙",
       "modules": []
+    },
+    {
+      "dev_id": "DEV-012",
+      "name": "Awen",
+      "github_username": "WENZHUOXI",
+      "emoji": "🛸",
+      "modules": ["m09-notification", "m22-bulletin"]
     }
   ]
 }
