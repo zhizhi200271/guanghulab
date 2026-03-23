@@ -6,6 +6,7 @@ on:
       - 'grid-db/memory/**'
       - 'grid-db/outbox/latest/**'
       - 'grid-db/rules/**'
+      - 'grid-db/drive-index/**'
   schedule:
     - cron: '*/15 * * * *'
   workflow_dispatch:

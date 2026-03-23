@@ -7,6 +7,7 @@
  *   grid-db/memory/DEV-XXX/*.json  →  Drive/mirror/memory/DEV-XXX/
  *   grid-db/outbox/latest/*.json    →  Drive/mirror/outbox/
  *   grid-db/rules/*.json            →  Drive/mirror/rules/
+ *   grid-db/drive-index/*.json      →  Drive/mirror/（每个 DEV 的 index.json）
  *
  * 同步策略：
  *   - 比较文件内容 MD5 hash，仅同步有变更的文件（节省 API 配额）
@@ -36,7 +37,8 @@ const GRID_DB_ROOT = path.join(__dirname, '../../grid-db');
 const SYNC_DIRS = [
   { local: 'memory',        drivePrefix: 'mirror/memory',  recursive: true },
   { local: 'outbox/latest', drivePrefix: 'mirror/outbox',  recursive: false },
-  { local: 'rules',         drivePrefix: 'mirror/rules',   recursive: false }
+  { local: 'rules',         drivePrefix: 'mirror/rules',   recursive: false },
+  { local: 'drive-index',   drivePrefix: 'mirror',         recursive: false }
 ];
 
 /**
@@ -195,6 +197,14 @@ async function main() {
   });
 
   const drive = google.drive({ version: 'v3', auth });
+
+  // 预生成 Drive 索引文件
+  try {
+    const { main: generateIndex } = require('./generate-drive-index');
+    generateIndex();
+  } catch (err) {
+    console.log('[sync-to-drive] Index generation skipped:', err.message);
+  }
 
   console.log('[sync-to-drive] Starting Grid-DB → Drive mirror sync');
 

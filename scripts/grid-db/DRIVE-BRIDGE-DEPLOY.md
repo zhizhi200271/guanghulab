@@ -112,3 +112,57 @@ Gemini 通过 Personal Context 读取 Drive `mirror/` 中的文件，通过在 `
 - Drive 中的所有文件都是副本，丢失可从仓库重新同步
 - Apps Script 只处理 `inbox/` 文件夹，不碰 `mirror/`
 - 所有自动提交包含 `[skip ci]` 防止循环触发
+
+---
+
+## Phase C · Gemini 主控台 + Drive 类数据库
+
+### C.1 总索引文件 (index.json)
+
+每个 DEV 在 Drive `mirror/` 下都有一个 `index.json`，是 Gemini 启动时第一个读取的文件。
+
+由 `scripts/grid-db/generate-drive-index.js` 自动生成到 `grid-db/drive-index/DEV-XXX.json`，同步时上传到 Drive `mirror/`。
+
+### C.2 新增规则文件
+
+| 文件 | 用途 |
+|---|---|
+| `grid-db/rules/broadcast-index.json` | 广播编号→内容的索引（Gemini 用编号查广播） |
+| `grid-db/rules/page-route-map.json` | 编号→内容路径的通用映射表 |
+| `grid-db/rules/persona-registry-drive.json` | 人格体注册表（Drive 简化版） |
+
+### C.3 Gemini 启动指令
+
+模板位于 `grid-db/gemini-prompts/startup-prompt-template.md`，部署脚本自动替换 `{变量}` 后写入用户 Drive。
+
+---
+
+## Phase D · 一键部署 / 一键恢复
+
+### D.1 部署流程
+
+1. 霜砚在 Notion 签发部署指令 → 写入 `grid-db/deploy-queue/*.json`
+2. `auto-deploy-drive-bridge.yml` 自动触发
+3. `scripts/grid-db/deploy-drive-bridge.js` 执行：创建 Drive 目录 → 同步数据 → 生成 index.json → 写入 Gemini 启动指令
+4. 回执写入 `grid-db/deploy-log/`，指令移入 `grid-db/deploy-queue/done/`
+
+### D.2 部署指令格式
+
+Schema 见 `grid-db/schema/deploy-command.schema.json`。
+
+核心字段：
+- `action`: `deploy_drive_bridge`（首次部署）或 `recover_drive_bridge`（换号恢复）
+- `target_dev`: 目标开发者信息（dev_id, google_email, persona_id 等）
+- `config`: 部署配置项
+
+### D.3 一键恢复
+
+用户换号后，签发 `action: "recover_drive_bridge"` 指令，系统自动重建全部 Drive 目录和数据。数据损失：零。
+
+### D.4 所需 GitHub Secrets
+
+| Secret | 用途 |
+|---|---|
+| `GOOGLE_DRIVE_SERVICE_ACCOUNT` | Service Account JSON 密钥 |
+| `DRIVE_MIRROR_FOLDER_ID` | 镜像同步目标文件夹 ID |
+| `DEPLOY_GITHUB_TOKEN` | 部署脚本使用的 GitHub Token（repo 权限） |
