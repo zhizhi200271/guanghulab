@@ -1,7 +1,7 @@
 {
   "scan_id": "SCAN-20260323",
   "mode": "full",
-  "timestamp": "2026-03-23T14:27:06.304Z",
+  "timestamp": "2026-03-23T14:30:07.185Z",
   "guard_scan": {
     "total": 5,
     "valid": 5,
@@ -9,7 +9,7 @@
     "missing_fields": []
   },
   "workflow_scan": {
-    "total": 78,
+    "total": 79,
     "files": [
       "agent-checkin.yml",
       "auto-deploy-drive-bridge.yml",
@@ -65,6 +65,7 @@
       "server-patrol.yml",
       "skyeye-checkin-audit.yml",
       "skyeye-checkin-receiver.yml",
+      "skyeye-weekly-scan.yml",
       "staging-preview.yml",
       "sync-deploy-to-notion.yml",
       "sync-dev-status.yml",
@@ -118,7 +119,7 @@
     "errors": 0,
     "warnings": 0,
     "guards_healthy": "5/5",
-    "workflows_found": 78,
+    "workflows_found": 79,
     "directories_ok": "14/14"
   }
 }

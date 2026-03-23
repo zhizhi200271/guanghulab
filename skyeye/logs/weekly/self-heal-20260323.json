@@ -1,0 +1,32 @@
+{
+  "heal_id": "HEAL-20260323",
+  "timestamp": "2026-03-23T14:30:20.461Z",
+  "guard_repairs": {
+    "repaired": [],
+    "failed": []
+  },
+  "buffer_cleanup": {
+    "files_cleaned": 0,
+    "directories": [
+      {
+        "path": "buffer/processed",
+        "cleaned": 0
+      }
+    ]
+  },
+  "log_cleanup": {
+    "files_cleaned": 0
+  },
+  "guard_restarts": {
+    "restarted": []
+  },
+  "directory_fixes": {
+    "created": []
+  },
+  "summary": {
+    "configs_repaired": 0,
+    "files_cleaned": 0,
+    "guards_restarted": 0,
+    "directories_created": 0
+  }
+}
