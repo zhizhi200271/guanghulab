@@ -195,7 +195,10 @@ function cleanupProcessed(keepDays) {
     .filter(d => fs.statSync(path.join(PROCESSED, d)).isDirectory());
 
   for (const dir of dirs) {
-    // 目录名格式: YYYYMMDD
+    // 目录名格式: YYYYMMDD — 必须是 8 位数字
+    if (!/^\d{8}$/.test(dir)) {
+      continue;
+    }
     const year = parseInt(dir.substring(0, 4));
     const month = parseInt(dir.substring(4, 6)) - 1;
     const day = parseInt(dir.substring(6, 8));
