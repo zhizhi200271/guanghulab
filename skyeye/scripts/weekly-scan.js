@@ -61,7 +61,7 @@ function countGuards() {
     const guard = loadJSON(path.join(guardsDir, file));
     if (guard) {
       if (guard.status === 'active') active++;
-      else if (guard.mode === 'suspended') suspended++;
+      else if (guard.status === 'suspended' || guard.mode === 'suspended') suspended++;
     }
   }
 
