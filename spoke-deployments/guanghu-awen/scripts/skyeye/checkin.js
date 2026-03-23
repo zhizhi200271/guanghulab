@@ -5,6 +5,10 @@ const https = require('https');
 const fs = require('fs');
 
 const TOKEN = process.env.MAIN_REPO_TOKEN;
+if (!TOKEN) {
+  console.error('❌ MAIN_REPO_TOKEN 未配置');
+  process.exit(1);
+}
 const MAIN_REPO = 'qinfendebingshuo/guanghulab';
 
 // 读取扫描报告

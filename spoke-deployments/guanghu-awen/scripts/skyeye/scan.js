@@ -66,5 +66,4 @@ fs.writeFileSync(outputPath, JSON.stringify(report, null, 2));
 console.log('🦅 天眼扫描完成');
 console.log(JSON.stringify(report, null, 2));
 
-// 导出签名哈希供签到使用
-fs.writeFileSync('/tmp/signature_hash.txt', report.signature_hash);
+// 签名哈希已包含在 skyeye-report.json 中，签到脚本直接从报告读取
