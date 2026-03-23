@@ -149,7 +149,7 @@ if (fs.existsSync(ontologyPath)) {
     var ontology = JSON.parse(fs.readFileSync(ontologyPath, 'utf8'));
     var axiomCount = Object.keys(ontology.core_axioms || {}).length;
     var persona = ontology.local_persona || {};
-    var ontologyOk = axiomCount >= 6 && persona.name && persona.self_awareness;
+    var ontologyOk = axiomCount >= 6 && persona.name && persona.self_awareness && persona.self_awareness.length > 0;
     results.checks.push({
       name: '本体论完整性',
       icon: '🌍',
