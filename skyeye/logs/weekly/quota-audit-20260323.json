@@ -1,0 +1,42 @@
+{
+  "audit_id": "AUDIT-20260323",
+  "timestamp": "2026-03-23T14:30:11.691Z",
+  "mode": "full",
+  "services": {
+    "github_actions": {
+      "service": "github_actions",
+      "status": "healthy",
+      "usage_percent": 0,
+      "alerts": [],
+      "recommendations": [
+        "日均可用预算: 250 分钟 (剩余 8 天)"
+      ]
+    },
+    "google_drive": {
+      "service": "google_drive",
+      "status": "healthy",
+      "usage_percent": 0,
+      "alerts": [],
+      "recommendations": []
+    },
+    "notion_api": {
+      "service": "notion_api",
+      "status": "healthy",
+      "usage_percent": 0,
+      "alerts": [],
+      "recommendations": []
+    },
+    "gemini": {
+      "service": "gemini",
+      "status": "healthy",
+      "usage_percent": 0,
+      "alerts": [],
+      "recommendations": []
+    }
+  },
+  "overall_status": "healthy",
+  "total_alerts": 0,
+  "recommendations": [
+    "日均可用预算: 250 分钟 (剩余 8 天)"
+  ]
+}

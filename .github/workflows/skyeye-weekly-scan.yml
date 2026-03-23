@@ -1,0 +1,42 @@
+name: "SkyEye Weekly Full Scan"
+
+on:
+  schedule:
+    - cron: '0 12 * * 6'  # 20:00 CST (UTC+8) every Saturday
+  repository_dispatch:
+    types: [skyeye-full-scan]  # 手动触发
+
+permissions:
+  contents: write
+
+jobs:
+  weekly-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "🧐 Wake up SkyEye Core Brain"
+        run: echo "[SkyEye] Core brain awakened for weekly full scan at $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+
+      - name: "🔍 Phase 1 - Infrastructure Scan"
+        run: node skyeye/scripts/scan-engine.js --mode=full
+
+      - name: "💰 Phase 2 - Quota Audit"
+        run: node skyeye/scripts/quota-tracker.js --audit
+
+      - name: "⚙️ Phase 3 - Optimize Guards"
+        run: node skyeye/scripts/optimizer.js --apply
+
+      - name: "🩹 Phase 4 - Self-Heal"
+        run: node skyeye/scripts/self-healer.js
+
+      - name: "📝 Phase 5 - Generate Report"
+        run: node skyeye/scripts/weekly-scan.js --report
+
+      - name: "Commit scan results"
+        run: |
+          git config user.name "天眼 · SkyEye Core"
+          git config user.email "skyeye@guanghu.system"
+          git add skyeye/ buffer/config/
+          git diff --cached --quiet || git commit -m "[skyeye-weekly] $(date -u +%Y%m%d) full scan complete [skip ci]"
+          git push

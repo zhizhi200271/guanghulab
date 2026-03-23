@@ -1,0 +1,68 @@
+{
+  "report_id": "SKYEYE-SCAN-20260323",
+  "scan_time": "2026-03-23T14:30:25.666Z",
+  "scan_time_beijing": "2026/3/23 22:30:25",
+  "scan_duration_seconds": 0,
+  "infrastructure_status": {
+    "total_services": 5,
+    "healthy": 5,
+    "degraded": 0,
+    "down": 0
+  },
+  "quota_status": {
+    "github_actions": {
+      "used_percent": 0,
+      "remaining_minutes": 2000,
+      "trend": "stable",
+      "recommendation": "maintain_current_frequency"
+    },
+    "google_drive": {
+      "used_percent": 0,
+      "recommendation": "no_action_needed"
+    },
+    "notion_api": {
+      "status": "healthy",
+      "recommendation": "no_action_needed"
+    },
+    "gemini": {
+      "used_percent": 0,
+      "recommendation": "no_action_needed"
+    }
+  },
+  "guard_status": {
+    "total_guards": 5,
+    "active": 5,
+    "suspended": 0,
+    "adjustments_made": []
+  },
+  "self_heal_actions": {
+    "files_cleaned": 0,
+    "configs_repaired": 0,
+    "guards_restarted": 0
+  },
+  "phase_details": {
+    "phase1_scan": {
+      "total_issues": 0,
+      "errors": 0,
+      "warnings": 0,
+      "guards_healthy": "5/5",
+      "workflows_found": 79,
+      "directories_ok": "14/14"
+    },
+    "phase2_audit": "healthy",
+    "phase3_optimize": {
+      "guards_checked": 5,
+      "total_adjustments": 0,
+      "applied": true
+    },
+    "phase4_heal": {
+      "configs_repaired": 0,
+      "files_cleaned": 0,
+      "guards_restarted": 0,
+      "directories_created": 0
+    }
+  },
+  "alerts": [],
+  "human_action_required": [],
+  "next_scan": "2026-03-28T12:00:00.000Z"
+}

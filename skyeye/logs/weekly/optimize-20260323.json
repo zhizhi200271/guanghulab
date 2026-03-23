@@ -1,0 +1,12 @@
+{
+  "optimize_id": "OPT-20260323",
+  "timestamp": "2026-03-23T14:30:16.154Z",
+  "mode": "apply",
+  "guards_checked": 5,
+  "adjustments": [],
+  "summary": {
+    "guards_checked": 5,
+    "total_adjustments": 0,
+    "applied": true
+  }
+}
