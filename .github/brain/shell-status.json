@@ -21,9 +21,14 @@
         "start": "2026-03-22T04:15:20.442Z",
         "end": null,
         "result": null
+      },
+      {
+        "start": "2026-03-23T04:24:56.797Z",
+        "end": null,
+        "result": null
       }
     ],
-    "lastEnter": "2026-03-22T04:15:20.442Z",
+    "lastEnter": "2026-03-23T04:24:56.797Z",
     "currentState": "running"
   },
   "AG-ZY-001": {
