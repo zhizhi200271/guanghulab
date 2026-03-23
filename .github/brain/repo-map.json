@@ -1,7 +1,7 @@
 {
   "description": "铸渊图书馆目录 · Library Catalog for 铸渊 (Zhùyuān)",
   "version": "2.0",
-  "generated_at": "2026-03-23T14:38:39.556Z",
+  "generated_at": "2026-03-23T17:21:20.948Z",
   "generated_by": "scripts/generate-repo-map.js",
   "repo": "qinfendebingshuo/guanghulab",
   "stats": {
@@ -162,6 +162,9 @@
           "file": "memory.json"
         },
         {
+          "file": "ontology.json"
+        },
+        {
           "file": "persona-registry.json"
         },
         {
@@ -189,7 +192,7 @@
           "file": "zhuyuan-signature-registry.json"
         }
       ],
-      "item_count": 20
+      "item_count": 21
     },
     {
       "zone_id": "WORKFLOWS",
@@ -1816,6 +1819,9 @@
     ],
     "logs": [
       "PERSONA_BRAIN::logs"
+    ],
+    "ontology": [
+      "PERSONA_BRAIN::ontology.json"
     ],
     "persona-registry": [
       "PERSONA_BRAIN::persona-registry.json"
