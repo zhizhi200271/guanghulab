@@ -69,9 +69,6 @@ function countGuards() {
 }
 
 function generateReport() {
-  const args = process.argv.slice(2);
-  const isReport = args.includes('--report');
-
   console.log(`[SkyEye Weekly Scan] Generating weekly scan report`);
   console.log(`[SkyEye Weekly Scan] Beijing Time: ${getBeijingTime()}`);
 
