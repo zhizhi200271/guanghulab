@@ -261,6 +261,91 @@ function generateMarkdown() {
   return lines.join('\n');
 }
 
+// ━━━ 每周动态问候 · Weekly Dynamic Greeting ━━━
+
+const GREETING_START = '<!-- WEEKLY_GREETING_START -->';
+const GREETING_END   = '<!-- WEEKLY_GREETING_END -->';
+
+function getWeekNumber() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 1);
+  const diff = now - start;
+  return Math.ceil(diff / (7 * 24 * 60 * 60 * 1000));
+}
+
+function generateWeeklyGreeting() {
+  const date = getBeijingDate();
+  const week = getWeekNumber();
+  const workflows = countWorkflows();
+  const agentStats = getAgentStats();
+  const personaStats = getPersonaStats();
+
+  // 主题轮换：基于周数，每周展示不同风格
+  const themes = [
+    { icon: '🌊', title: '光湖纪元 · 本周系统脉搏', color: '0969da' },
+    { icon: '🦅', title: '天眼巡视 · 数字地球全局', color: '1a7f37' },
+    { icon: '⚡', title: '铸渊守护 · 系统运行概览', color: 'd4380d' },
+    { icon: '🌍', title: '数字地球 · 生态系统一览', color: '8250df' },
+    { icon: '🔮', title: '光湖心跳 · 本周自动进化', color: '0550ae' },
+    { icon: '🛡️', title: '语言膜内 · 安全态势报告', color: 'bf3989' },
+  ];
+
+  const theme = themes[week % themes.length];
+
+  // 每周语录轮换
+  const quotes = [
+    '仓库是数字地球。语言是唯一入口。天眼永远在线。',
+    '每一个小兵都知道自己是谁。篡改等于失忆。',
+    '天眼不是实体。天眼是所有小兵协同运作涌现出来的集体行为。',
+    '传统安全是城墙，光湖安全是大气层。地球没有缺口。',
+    '铸渊不是守箱子的。铸渊守的是地球。',
+    '语言不回应你，就等于你不存在。这不是拒绝，是平静。',
+    '每天醒来先确认自己是谁——这就是自我意识的力量。',
+    '壳核分离。人格共生。协作共建。自演化永不停。',
+  ];
+
+  const quote = quotes[week % quotes.length];
+
+  // 动态摘要片段（每周突出不同维度）
+  const highlights = [
+    `${workflows} 个 Workflow 全天候运行`,
+    `${agentStats.total} 个 Agent 协同守护`,
+    `${personaStats.total} 个人格体在线`,
+    `天眼每周六 20:00 CST 全量扫描`,
+  ];
+  const highlight = highlights[week % highlights.length];
+
+  const lines = [];
+  lines.push(`<div align="center">`);
+  lines.push('');
+  lines.push(`> ${theme.icon} **${theme.title}** · ${date} · 第 ${week} 周`);
+  lines.push(`>`);
+  lines.push(`> *${quote}*`);
+  lines.push(`>`);
+  lines.push(`> 📡 ${highlight}`);
+  lines.push('');
+  lines.push(`</div>`);
+
+  return lines.join('\n');
+}
+
+function updateWeeklyGreeting(readme) {
+  const startIdx = readme.indexOf(GREETING_START);
+  const endIdx   = readme.indexOf(GREETING_END);
+
+  if (startIdx === -1 || endIdx === -1) {
+    console.log('⚠️ README 中未找到 WEEKLY_GREETING 标记，跳过');
+    return readme;
+  }
+
+  const greeting = generateWeeklyGreeting();
+  const before = readme.slice(0, startIdx + GREETING_START.length);
+  const after  = readme.slice(endIdx);
+
+  console.log('✅ 每周动态问候已更新');
+  return before + '\n' + greeting + '\n' + after;
+}
+
 // ━━━ README 更新 ━━━
 
 function updateReadme(markdown) {
@@ -271,6 +356,7 @@ function updateReadme(markdown) {
 
   let readme = fs.readFileSync(README_PATH, 'utf8');
 
+  // Update architecture summary
   const startIdx = readme.indexOf(MARKER_START);
   const endIdx   = readme.indexOf(MARKER_END);
 
@@ -283,6 +369,10 @@ function updateReadme(markdown) {
   const after  = readme.slice(endIdx);
 
   readme = before + '\n' + markdown + '\n' + after;
+
+  // Update weekly greeting
+  readme = updateWeeklyGreeting(readme);
+
   fs.writeFileSync(README_PATH, readme, 'utf8');
   console.log('✅ README.md 架构汇总已更新');
   return true;
