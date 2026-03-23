@@ -66,6 +66,13 @@ function collectFiles(dirPath, recursive) {
 }
 
 /**
+ * 转义 Drive API 查询中的单引号
+ */
+function escapeQuery(str) {
+  return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+}
+
+/**
  * 在 Drive 中查找或创建文件夹（按路径逐级创建）
  */
 async function getOrCreateDriveFolder(drive, parentId, folderPath) {
@@ -73,7 +80,8 @@ async function getOrCreateDriveFolder(drive, parentId, folderPath) {
   let currentParentId = parentId;
 
   for (const part of parts) {
-    const query = `name='${part}' and '${currentParentId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+    const safePart = escapeQuery(part);
+    const query = `name='${safePart}' and '${currentParentId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`;
     const res = await drive.files.list({
       q: query,
       fields: 'files(id, name)',
@@ -103,7 +111,8 @@ async function getOrCreateDriveFolder(drive, parentId, folderPath) {
  * 在 Drive 目标文件夹中查找同名文件
  */
 async function findFileInDrive(drive, folderId, fileName) {
-  const query = `name='${fileName}' and '${folderId}' in parents and trashed=false`;
+  const safeFileName = escapeQuery(fileName);
+  const query = `name='${safeFileName}' and '${folderId}' in parents and trashed=false`;
   const res = await drive.files.list({
     q: query,
     fields: 'files(id, name, md5Checksum)',
