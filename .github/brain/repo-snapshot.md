@@ -1,5 +1,5 @@
 # 铸渊图书馆快照 · Repo Snapshot
-> 生成于 2026-03-24 23:23 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
+> 生成于 2026-03-25 01:18 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
 
 ---
 
@@ -9,11 +9,11 @@
 |------|------|
 | 区域总数 | 13 个区域 |
 | 功能模块 | 10 个 (m01~m18) |
-| 工作流 | 92 个 GitHub Actions |
-| 脚本 | 79 个执行脚本 |
+| 工作流 | 94 个 GitHub Actions |
+| 脚本 | 80 个执行脚本 |
 | 开发者节点 | 8 人 |
 | HLI 接口覆盖率 | 7/21 (33%) |
-| 快照生成时间 | 2026-03-24 23:23 CST |
+| 快照生成时间 | 2026-03-25 01:18 CST |
 
 ---
 
@@ -30,12 +30,12 @@
 **关键词**: persona · identity · dev-status · 人格 · 开发者状态
 
 ### ⚡ 自动化工作流（WORKFLOWS）
-**路径**: `.github/workflows` · **数量**: 92 项
+**路径**: `.github/workflows` · **数量**: 94 项
 **描述**: 所有 GitHub Actions 工作流定义
 **关键词**: workflow · actions · ci · automation · 工作流 · 自动化
 
 ### 🔧 执行脚本库（SCRIPTS）
-**路径**: `scripts` · **数量**: 79 项
+**路径**: `scripts` · **数量**: 80 项
 **描述**: 铸渊所有执行手脚 · 自动化脚本
 **关键词**: script · node · js · 脚本 · 执行 · runner
 
@@ -122,6 +122,7 @@
 | `hli-contract-check.yml` | HLI Contract Check | push, pull_request |
 | `merge-watchdog.yml` | "👁️ Merge Watchdog · 合并指令看守者" | pull_request, issues, manual |
 | `meta-watchdog.yml` | "🐕 元看门狗 · 巡检健康监控" | schedule(0 */6 * * *), manual |
+| `multi-persona-awakening.yml` | "🌊 Multi-Persona Awakening Engine" | schedule(30 23 * * 6), manual |
 | `notion-callback-pipeline.yml` | Notion Callback Pipeline | unknown |
 | `notion-connectivity-test.yml` | 铸渊 · Notion 连通性测试 | manual |
 | `notion-heartbeat.yml` | Notion Heartbeat Monitor | schedule(*/5 * * * *), manual |
@@ -130,6 +131,7 @@
 | `notion-wake-listener.yml` | 📡 铸渊 · Notion Agent 唤醒监听 | schedule(*/15 * * * *), manual |
 | `openclaw-wake-loop.yml` | 🔄 OpenClaw · 唤醒闭环 | schedule(0 14 * * *), manual |
 | `persona-invoke.yml` | Persona Invoke Endpoint | manual |
+| `persona-thinking-window.yml` | "🧠 Persona Daily Thinking Window" | schedule(0 22 * * *), manual |
 | `pm2-server-diagnose.yml` | "🔧 铸渊 · PM2 服务诊断与健康检查" | manual |
 | `process-notion-orders.yml` | Process Notion Work Orders | push, manual |
 | `ps-on-build.yml` | "🌊 Persona Studio · 代码生成" | manual |
@@ -194,6 +196,7 @@
 - `scripts/brain-bridge-sync.js`
 - `scripts/bridge`
 - `scripts/bridge-app.js`
+- `scripts/chatroom-post.js`
 - `scripts/commander-dashboard.js`
 - `scripts/contract-check.js`
 - `scripts/create-standardized-ticket.js`

@@ -1,14 +1,14 @@
 {
   "description": "铸渊图书馆目录 · Library Catalog for 铸渊 (Zhùyuān)",
   "version": "2.0",
-  "generated_at": "2026-03-24T15:23:08.318Z",
+  "generated_at": "2026-03-24T17:18:17.762Z",
   "generated_by": "scripts/generate-repo-map.js",
   "repo": "qinfendebingshuo/guanghulab",
   "stats": {
     "zones": 13,
     "total_modules": 10,
-    "total_workflows": 92,
-    "total_scripts": 79,
+    "total_workflows": 94,
+    "total_scripts": 80,
     "total_dev_nodes": 8,
     "hli_interfaces": 21,
     "hli_implemented": 7,
@@ -469,6 +469,14 @@
           ]
         },
         {
+          "file": "multi-persona-awakening.yml",
+          "name": "\"🌊 Multi-Persona Awakening Engine\"",
+          "triggers": [
+            "schedule(30 23 * * 6)",
+            "manual"
+          ]
+        },
+        {
           "file": "notion-callback-pipeline.yml",
           "name": "Notion Callback Pipeline",
           "triggers": [
@@ -525,6 +533,14 @@
           "file": "persona-invoke.yml",
           "name": "Persona Invoke Endpoint",
           "triggers": [
+            "manual"
+          ]
+        },
+        {
+          "file": "persona-thinking-window.yml",
+          "name": "\"🧠 Persona Daily Thinking Window\"",
+          "triggers": [
+            "schedule(0 22 * * *)",
             "manual"
           ]
         },
@@ -932,7 +948,7 @@
           ]
         }
       ],
-      "item_count": 92
+      "item_count": 94
     },
     {
       "zone_id": "SCRIPTS",
@@ -969,6 +985,9 @@
         },
         {
           "file": "bridge-app.js"
+        },
+        {
+          "file": "chatroom-post.js"
         },
         {
           "file": "commander-dashboard.js"
@@ -1187,7 +1206,7 @@
           "file": "zhuyuan-wakeup.js"
         }
       ],
-      "item_count": 79
+      "item_count": 80
     },
     {
       "zone_id": "SRC",
@@ -2088,6 +2107,9 @@
     "meta-watchdog": [
       "WORKFLOWS::meta-watchdog.yml"
     ],
+    "multi-persona-awakening": [
+      "WORKFLOWS::multi-persona-awakening.yml"
+    ],
     "notion-callback-pipeline": [
       "WORKFLOWS::notion-callback-pipeline.yml"
     ],
@@ -2114,6 +2136,9 @@
     ],
     "persona-invoke": [
       "WORKFLOWS::persona-invoke.yml"
+    ],
+    "persona-thinking-window": [
+      "WORKFLOWS::persona-thinking-window.yml"
     ],
     "pm2-server-diagnose": [
       "WORKFLOWS::pm2-server-diagnose.yml"
@@ -2313,6 +2338,9 @@
     ],
     "bridge-app": [
       "SCRIPTS::bridge-app.js"
+    ],
+    "chatroom-post": [
+      "SCRIPTS::chatroom-post.js"
     ],
     "commander-dashboard": [
       "SCRIPTS::commander-dashboard.js"
