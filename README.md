@@ -75,13 +75,14 @@
 <!-- BINGSHUO_BULLETIN_START -->
 | 时间 | 检查项 | 状态 |
 |------|--------|------|
+| 03-24 12:31 | ✅ 铸渊 · Bridge E · GitHub Changes → Notion · 成功 | 冰朔 |
+| 03-24 12:25 | 🔧 系统更新: `.github/` | 铸渊 (Copilot) |
+| 03-24 12:25 | 🔧 系统更新: `scripts/` | 铸渊 (Copilot) |
+| 03-24 12:17 | ✅ 📢 更新系统公告区 · 成功 | 冰朔 |
 | 03-24 12:16 | ✅ 🚀 铸渊 CD · 自动部署到 guanghulab.com · 成功 | 冰朔 |
 | 03-24 12:15 | ✅ 📢 更新系统公告区 · 成功 | 冰朔 |
-| 03-24 12:15 | 🔧 系统更新: `.github/` | github-actions[bot] |
 | 03-24 12:15 | ✅ 铸渊 · Bridge E · GitHub Changes → Notion · 成功 | 冰朔 |
 | 03-24 12:12 | 🔧 系统更新: `docs/` | zhuyuan-bot |
-| 03-24 12:00 | 🔵 铸渊 · Bridge E · GitHub Changes → Notion · action_required | Copilot |
-| 03-24 10:14 | 🔧 系统更新: `scripts/` | 铸渊 (Copilot) |
 | 03-23 17:08 | ✅ 每日巡检 ✅ 通过 | 冰朔 |
 | 03-22 16:47 | ✅ 每日巡检 ✅ 通过 | 冰朔 |
 | 03-21 16:44 | ✅ 每日巡检 ✅ 通过 | 冰朔 |
@@ -89,7 +90,6 @@
 | 03-19 16:55 | ✅ 每日巡检 ✅ 通过 | 冰朔 |
 | 03-18 17:00 | ✅ 每日巡检 ✅ 通过 | 冰朔 |
 | 03-18 08:00 | 🔵 CI 构建 失败 | GitHub Actions |
-| 03-17 17:01 | ✅ 每日巡检 ✅ 通过 | 冰朔 |
 <!-- BINGSHUO_BULLETIN_END -->
 
 <!-- BINGSHUO_ALERT_START -->
