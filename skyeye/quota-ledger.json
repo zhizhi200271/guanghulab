@@ -14,7 +14,9 @@
         "skyeye_daily": 180,
         "skyeye_weekly": 30,
         "sub_repo_checkins": 200,
-        "emergency": 1230
+        "emergency": 1020,
+        "hibernation_daily": 150,
+        "hibernation_weekly": 60
       },
       "daily_entries": []
     },
@@ -38,6 +40,6 @@
   "health_summary": {
     "overall": "healthy",
     "alerts": [],
-    "last_updated": "2026-03-23T14:30:11.691Z"
+    "last_updated": "2026-03-24T04:20:00.000Z"
   }
 }

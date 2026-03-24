@@ -148,6 +148,34 @@ function generateReport() {
     alerts: [],
     human_action_required: [],
 
+    hibernation_status: {
+      deployed: fs.existsSync(path.join(ROOT, 'skyeye/hibernation')),
+      daily_checkpoints: (() => {
+        const cpDir = path.join(ROOT, 'skyeye/hibernation/checkpoints');
+        try {
+          return fs.existsSync(cpDir)
+            ? fs.readdirSync(cpDir).filter(f => f.startsWith('daily-cp-') && f.endsWith('.json')).length
+            : 0;
+        } catch (e) { return 0; }
+      })(),
+      weekly_snapshots: (() => {
+        const snapDir = path.join(ROOT, 'skyeye/hibernation/weekly-snapshots');
+        try {
+          return fs.existsSync(snapDir)
+            ? fs.readdirSync(snapDir).filter(f => f.startsWith('weekly-snapshot-') && f.endsWith('.json')).length
+            : 0;
+        } catch (e) { return 0; }
+      })(),
+      upgrade_packs: (() => {
+        const upDir = path.join(ROOT, 'skyeye/hibernation/upgrade-packs');
+        try {
+          return fs.existsSync(upDir)
+            ? fs.readdirSync(upDir).filter(f => f.startsWith('upgrade-pack-') && f.endsWith('.json')).length
+            : 0;
+        } catch (e) { return 0; }
+      })()
+    },
+
     next_scan: nextSaturday.toISOString()
   };
 

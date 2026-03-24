@@ -32,7 +32,12 @@ const CORE_DIRS = [
   'connectors',
   'brain',
   'docs',
-  'src'
+  'src',
+  'skyeye/hibernation',
+  'skyeye/hibernation/checkpoints',
+  'skyeye/hibernation/weekly-snapshots',
+  'skyeye/hibernation/upgrade-packs',
+  'skyeye/hibernation/distribution-reports'
 ];
 
 // ━━━ 预期的根目录文件/目录 ━━━
@@ -49,7 +54,10 @@ const EXPECTED_ROOT_ITEMS = [
   'config.js', 'config.json', 'routing-map.json', 'dev-status.json',
   'broadcast-generator.js', 'server.js',
   'dev', 'm10-cloud',
-  'guanghulab-main'
+  'guanghulab-main',
+  'skyeye', 'buffer', 'grid-db',
+  'spoke-deployments', 'federation',
+  'channel-map.json'
 ];
 
 // ━━━ README Markers ━━━
@@ -57,7 +65,8 @@ const README_MARKERS = [
   'BINGSHUO_BULLETIN_START', 'BINGSHUO_BULLETIN_END',
   'BINGSHUO_ALERT_START', 'BINGSHUO_ALERT_END',
   'COLLABORATOR_BULLETIN_START', 'COLLABORATOR_BULLETIN_END',
-  'COLLABORATOR_ALERT_START', 'COLLABORATOR_ALERT_END'
+  'COLLABORATOR_ALERT_START', 'COLLABORATOR_ALERT_END',
+  'SKYEYE-STATUS-BEGIN', 'SKYEYE-STATUS-END'
 ];
 
 // ━━━ 检查核心目录 ━━━

@@ -87,6 +87,11 @@ function scanDirectoryStructure() {
     'skyeye/scripts',
     'skyeye/logs',
     'skyeye/scan-report',
+    'skyeye/hibernation',
+    'skyeye/hibernation/checkpoints',
+    'skyeye/hibernation/weekly-snapshots',
+    'skyeye/hibernation/upgrade-packs',
+    'skyeye/hibernation/distribution-reports',
     '.github/persona-brain',
     '.github/workflows',
     'scripts/skyeye'

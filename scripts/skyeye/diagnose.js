@@ -41,7 +41,10 @@ function classifyIssue(symptom, source) {
     { pattern: /knowledge.?base.*重复/i, fix: 'deduplicate_kb', priority: 'P2' },
     { pattern: /copilot.*instructions.*空|不存在/i, fix: 'note_copilot', priority: 'P2' },
     { pattern: /syntax.*error|语法.*错误/i, fix: 'log_syntax_error', priority: 'P0' },
-    { pattern: /cron.*conflict|冲突/i, fix: 'log_conflict', priority: 'P2' }
+    { pattern: /cron.*conflict|冲突/i, fix: 'log_conflict', priority: 'P2' },
+    { pattern: /hibernation.*checkpoint.*过期|checkpoint.*缺失/i, fix: 'trigger_daily_hibernation', priority: 'P1' },
+    { pattern: /hibernation.*目录.*缺失/i, fix: 'create_directory', priority: 'P1' },
+    { pattern: /upgrade.?pack.*缺失|升级包.*缺失/i, fix: 'trigger_weekly_hibernation', priority: 'P1' }
   ];
 
   const needsHumanPatterns = [
@@ -188,6 +191,26 @@ function extractIssues() {
       const missing = bridgeHealth.secrets.missing || [];
       for (const secret of missing) {
         addIssue('bridge', `Secret 缺失: ${secret}`, '功能不可用');
+      }
+    }
+  }
+
+  // ── Hibernation Health Issues ──
+  const hibDir = path.join(path.resolve(__dirname, '../..'), 'skyeye/hibernation');
+  if (!fs.existsSync(hibDir)) {
+    addIssue('hibernation', 'hibernation 目录缺失', '休眠系统不可用');
+  } else {
+    const cpDir = path.join(hibDir, 'checkpoints');
+    if (fs.existsSync(cpDir)) {
+      const cpFiles = fs.readdirSync(cpDir).filter(f => f.startsWith('daily-cp-') && f.endsWith('.json'));
+      if (cpFiles.length === 0) {
+        addIssue('hibernation', 'hibernation checkpoint 缺失: 无日检查点', '日休眠可能未运行');
+      }
+    }
+    const requiredSubDirs = ['checkpoints', 'weekly-snapshots', 'upgrade-packs', 'distribution-reports'];
+    for (const sub of requiredSubDirs) {
+      if (!fs.existsSync(path.join(hibDir, sub))) {
+        addIssue('hibernation', `hibernation 目录缺失: ${sub}`, '休眠子系统不完整');
       }
     }
   }

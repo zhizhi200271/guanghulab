@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "last_scan": "2026-03-23T14:30:07.186Z",
+  "last_scan": "2026-03-24T04:24:59.723Z",
   "last_scan_by": "skyeye-scan-engine",
   "infrastructure": {
     "github": {
@@ -76,6 +76,35 @@
         "concurrent_jobs": 20,
         "minutes_per_month": 2000,
         "job_timeout_hours": 6
+      }
+    },
+    "hibernation_system": {
+      "service": "SkyEye Hibernation",
+      "plan": "Internal",
+      "description": "双节律休眠系统 · 日休眠(03:50 CST) + 周休眠(周六19:00 CST)",
+      "components": {
+        "sleep_scheduler": "skyeye/hibernation/sleep-scheduler.js",
+        "daily_hibernation": "skyeye/hibernation/daily-hibernation.js",
+        "weekly_hibernation": "skyeye/hibernation/weekly-hibernation.js",
+        "distributor": "skyeye/hibernation/distributor.js",
+        "readme_updater": "skyeye/hibernation/readme-status-updater.js",
+        "overtime_monitor": "skyeye/hibernation/overtime-monitor.js"
+      },
+      "storage": {
+        "checkpoints": "skyeye/hibernation/checkpoints/",
+        "weekly_snapshots": "skyeye/hibernation/weekly-snapshots/",
+        "upgrade_packs": "skyeye/hibernation/upgrade-packs/",
+        "distribution_reports": "skyeye/hibernation/distribution-reports/"
+      },
+      "workflows": {
+        "daily": "skyeye-daily-hibernation.yml",
+        "weekly": "skyeye-weekly-hibernation.yml"
+      },
+      "quotas": {
+        "daily_hibernation_minutes": 5,
+        "weekly_hibernation_minutes": 15,
+        "monthly_budget_minutes": 210,
+        "comment": "日休眠 30天×5min=150 + 周休眠 4×15min=60 ≈ 210 min/month"
       }
     }
   }
