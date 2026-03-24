@@ -130,6 +130,9 @@ async function handleMemo(auth, drive, folderId, issueTitle, issueBody, issueNum
     console.log(`[semantic-landing] Updating existing doc: ${docId}`);
 
     // 获取当前文档内容长度
+    // Google Docs body content elements each have an endIndex; we need the max
+    // to know where existing content ends. Start at 1 because index 0 is reserved
+    // by Docs for the document root and content starts at index 1.
     const docData = await docs.documents.get({ documentId: docId });
     const endIndex = docData.data.body.content
       .reduce((max, el) => Math.max(max, el.endIndex || 0), 1);
@@ -207,7 +210,7 @@ function parseTableData(body) {
   }
 
   // 1. 尝试 JSON 解析
-  const jsonMatch = body.match(/```(?:json)?\s*\n([\s\S]*?)\n```/);
+  const jsonMatch = body.match(/```(?:json)?\s*\n([\s\S]*?)\n?```/);
   if (jsonMatch) {
     try {
       const parsed = JSON.parse(jsonMatch[1].trim());
@@ -248,7 +251,7 @@ function parseTableData(body) {
   }
 
   // 2. 尝试 CSV 解析（代码块内或纯文本）
-  const csvMatch = body.match(/```(?:csv)?\s*\n([\s\S]*?)\n```/);
+  const csvMatch = body.match(/```(?:csv)?\s*\n([\s\S]*?)\n?```/);
   const csvContent = csvMatch ? csvMatch[1].trim() : null;
 
   if (csvContent) {
@@ -261,21 +264,59 @@ function parseTableData(body) {
     return parseMarkdownTable(mdTableMatch[1]);
   }
 
-  // 4. 检查整个 body 是否为 CSV 格式（包含逗号分隔的多行）
+  // 4. Check if body looks like CSV (consistent comma-separated columns across lines)
   const lines = trimmed.split('\n').filter(l => l.trim());
   if (lines.length >= 2 && lines.every(l => l.includes(','))) {
-    return parseCSV(trimmed);
+    const colCounts = lines.map(l => parseCSVLine(l).length);
+    const firstCount = colCounts[0];
+    if (firstCount >= 2 && colCounts.every(c => c === firstCount)) {
+      return parseCSV(trimmed);
+    }
   }
 
   // 5. 降级：整个 body 作为单格数据
   return [[trimmed]];
 }
 
+/**
+ * Parse a single CSV line, handling quoted values containing commas.
+ */
+function parseCSVLine(line) {
+  const cells = [];
+  let current = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQuotes) {
+      if (ch === '"' && line[i + 1] === '"') {
+        current += '"';
+        i++; // skip escaped quote
+      } else if (ch === '"') {
+        inQuotes = false;
+      } else {
+        current += ch;
+      }
+    } else {
+      if (ch === '"') {
+        inQuotes = true;
+      } else if (ch === ',') {
+        cells.push(current.trim());
+        current = '';
+      } else {
+        current += ch;
+      }
+    }
+  }
+  cells.push(current.trim());
+  return cells;
+}
+
 function parseCSV(text) {
   return text
     .split('\n')
     .filter(line => line.trim())
-    .map(line => line.split(',').map(cell => cell.trim()));
+    .map(line => parseCSVLine(line));
 }
 
 function parseMarkdownTable(text) {
@@ -383,13 +424,17 @@ function postIssueComment(token, repo, issueNumber, body) {
     };
 
     const req = https.request(options, (res) => {
-      let body = '';
-      res.on('data', chunk => body += chunk);
+      let responseBody = '';
+      res.on('data', chunk => responseBody += chunk);
       res.on('end', () => {
         if (res.statusCode >= 200 && res.statusCode < 300) {
-          resolve(JSON.parse(body));
+          try {
+            resolve(JSON.parse(responseBody));
+          } catch (e) {
+            resolve({ raw: responseBody });
+          }
         } else {
-          reject(new Error(`GitHub API ${res.statusCode}: ${body}`));
+          reject(new Error(`GitHub API ${res.statusCode}: ${responseBody}`));
         }
       });
     });
