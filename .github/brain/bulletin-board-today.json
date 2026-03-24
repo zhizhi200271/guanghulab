@@ -27,6 +27,15 @@
       "result": "success",
       "icon": "✅",
       "sortKey": 1774286481000
+    },
+    {
+      "key": "冰朔|—|2026-03-24T00:05:55Z",
+      "ts": "2026-03-24T00:05:55Z",
+      "actor": "冰朔",
+      "module": "—",
+      "result": "success",
+      "icon": "✅",
+      "sortKey": 1774310755000
     }
   ]
 }
