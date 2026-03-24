@@ -1,13 +1,13 @@
 {
   "description": "铸渊图书馆目录 · Library Catalog for 铸渊 (Zhùyuān)",
   "version": "2.0",
-  "generated_at": "2026-03-24T08:00:13.170Z",
+  "generated_at": "2026-03-24T08:30:37.889Z",
   "generated_by": "scripts/generate-repo-map.js",
   "repo": "qinfendebingshuo/guanghulab",
   "stats": {
     "zones": 13,
     "total_modules": 10,
-    "total_workflows": 86,
+    "total_workflows": 88,
     "total_scripts": 77,
     "total_dev_nodes": 8,
     "hli_interfaces": 21,
@@ -593,6 +593,14 @@
           ]
         },
         {
+          "file": "readme-ui-refresh.yml",
+          "name": "🎨 README UI 风格刷新",
+          "triggers": [
+            "schedule(0 0 * * 1)",
+            "manual"
+          ]
+        },
+        {
           "file": "receive-spoke-checkin.yml",
           "name": "📥 接收子仓库签到",
           "triggers": [
@@ -802,6 +810,14 @@
           ]
         },
         {
+          "file": "update-readme.yml",
+          "name": "📊 README 仪表盘自动更新",
+          "triggers": [
+            "schedule(0 0 * * *)",
+            "manual"
+          ]
+        },
+        {
           "file": "update-repo-map.yml",
           "name": "铸渊 · 图书馆目录自动更新",
           "triggers": [
@@ -884,7 +900,7 @@
           ]
         }
       ],
-      "item_count": 86
+      "item_count": 88
     },
     {
       "zone_id": "SCRIPTS",
@@ -2086,6 +2102,9 @@
       "WORKFLOWS::push-broadcast.yml",
       "SCRIPTS::push-broadcast.js"
     ],
+    "readme-ui-refresh": [
+      "WORKFLOWS::readme-ui-refresh.yml"
+    ],
     "receive-spoke-checkin": [
       "WORKFLOWS::receive-spoke-checkin.yml"
     ],
@@ -2173,6 +2192,9 @@
     "update-readme-bulletin": [
       "WORKFLOWS::update-readme-bulletin.yml",
       "SCRIPTS::update-readme-bulletin.js"
+    ],
+    "update-readme": [
+      "WORKFLOWS::update-readme.yml"
     ],
     "update-repo-map": [
       "WORKFLOWS::update-repo-map.yml"

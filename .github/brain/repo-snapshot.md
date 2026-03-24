@@ -1,5 +1,5 @@
 # 铸渊图书馆快照 · Repo Snapshot
-> 生成于 2026-03-24 16:00 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
+> 生成于 2026-03-24 16:30 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
 
 ---
 
@@ -9,11 +9,11 @@
 |------|------|
 | 区域总数 | 13 个区域 |
 | 功能模块 | 10 个 (m01~m18) |
-| 工作流 | 86 个 GitHub Actions |
+| 工作流 | 88 个 GitHub Actions |
 | 脚本 | 77 个执行脚本 |
 | 开发者节点 | 8 人 |
 | HLI 接口覆盖率 | 7/21 (33%) |
-| 快照生成时间 | 2026-03-24 16:00 CST |
+| 快照生成时间 | 2026-03-24 16:30 CST |
 
 ---
 
@@ -30,7 +30,7 @@
 **关键词**: persona · identity · dev-status · 人格 · 开发者状态
 
 ### ⚡ 自动化工作流（WORKFLOWS）
-**路径**: `.github/workflows` · **数量**: 86 项
+**路径**: `.github/workflows` · **数量**: 88 项
 **描述**: 所有 GitHub Actions 工作流定义
 **关键词**: workflow · actions · ci · automation · 工作流 · 自动化
 
@@ -139,6 +139,7 @@
 | `pull-sync-awen.yml` | "🌉 Pull Sync from Awen" | schedule(0 1 * * *), manual |
 | `push-broadcast-feishu.yml` | 铸渊 · 广播推送飞书（聊天消息） | manual |
 | `push-broadcast.yml` | 铸渊 · Push Broadcast · Notion → 飞书文档B | manual |
+| `readme-ui-refresh.yml` | 🎨 README UI 风格刷新 | schedule(0 0 * * 1), manual |
 | `receive-spoke-checkin.yml` | 📥 接收子仓库签到 | unknown |
 | `receive-syslog.yml` | 铸渊 · Receive SYSLOG · 飞书机器人 → GitHub → Notion | unknown |
 | `renew-gdrive-tokens.yml` | 🔄 OAuth2 Token 自动续期 | schedule(0 2 * * 1), manual |
@@ -166,6 +167,7 @@
 | `test-notion-bridge.yml` | "🧪 Notion Bridge Connectivity Test" | push, manual |
 | `tianyan-daily-patrol.yml` | "🦅 天眼 · 每日巡检" | schedule(30 0 * * *), manual |
 | `update-readme-bulletin.yml` | 📢 更新系统公告区 | push, schedule(0 1 * * *), manual |
+| `update-readme.yml` | 📊 README 仪表盘自动更新 | schedule(0 0 * * *), manual |
 | `update-repo-map.yml` | 铸渊 · 图书馆目录自动更新 | push, schedule(0 0 * * *), manual |
 | `zhuyuan-brain-sync.yml` | 铸渊 · Brain Sync | push |
 | `zhuyuan-commander.yml` | "🎖️ 铸渊·将军唤醒 · Commander Wake-up" | issues, schedule(0 0 * * *), manual |
