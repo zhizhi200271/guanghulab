@@ -215,13 +215,17 @@ async function main() {
   try {
     plan = JSON.parse(aiResponse);
   } catch (_) {
-    // 尝试从回复中提取 JSON
-    const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+    // 尝试从回复中提取 JSON（非贪婪匹配，找第一个完整 JSON 对象）
+    const jsonMatch = aiResponse.match(/\{[\s\S]*?"actions"[\s\S]*?\}(?=\s*$|\s*\n)/);
     if (jsonMatch) {
       try {
         plan = JSON.parse(jsonMatch[0]);
       } catch (_2) {
-        plan = null;
+        // 降级：找所有 { } 对中最长的合法 JSON
+        const allMatches = aiResponse.match(/\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/g) || [];
+        for (const m of allMatches) {
+          try { plan = JSON.parse(m); if (plan.actions) break; } catch (_3) { plan = null; }
+        }
       }
     }
   }

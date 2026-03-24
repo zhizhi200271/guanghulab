@@ -52,7 +52,7 @@ jobs:
           echo "🦅 天眼强制前置：检查健康状态..."
           # 读取最新天眼报告（从 notion-cache 或 skyeye-core）
           if [ -f ".github/notion-cache/skyeye/latest-report.json" ]; then
-            STATUS=$(cat .github/notion-cache/skyeye/latest-report.json | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('overall_status','unknown'))" 2>/dev/null || echo "unknown")
+            STATUS=$(node -e "try{const d=require('./.github/notion-cache/skyeye/latest-report.json');console.log(d.overall_status||'unknown')}catch(_){console.log('unknown')}" 2>/dev/null || echo "unknown")
             echo "天眼缓存状态：$STATUS"
             if [ "$STATUS" = "critical" ] || [ "$STATUS" = "error" ]; then
               echo "❌ 天眼报告严重问题，暂停执行"

@@ -15,9 +15,13 @@
 
 const https = require('https');
 
+// 模块级检查：jsonwebtoken 是否可用
+let jwtLib = null;
+try { jwtLib = require('jsonwebtoken'); } catch (_) { /* fallback to crypto */ }
+
 /**
- * 用 App Private Key 生成 JWT（不依赖 jsonwebtoken 库的 fallback 实现）
- * 在 CI 环境中可能没有安装 jsonwebtoken，因此提供纯 Node.js 实现
+ * 用 App Private Key 生成 JWT
+ * 优先使用 jsonwebtoken 库，不可用时降级到 Node.js crypto 实现
  */
 function generateJWT() {
   const privateKey = process.env.GHAPP_PRIVATE_KEY;
@@ -27,42 +31,40 @@ function generateJWT() {
     throw new Error('GHAPP_APP_ID 和 GHAPP_PRIVATE_KEY 环境变量必须设置');
   }
 
-  // 尝试使用 jsonwebtoken 库
-  try {
-    const jwt = require('jsonwebtoken');
+  if (jwtLib) {
     const payload = {
       iat: Math.floor(Date.now() / 1000) - 60,
       exp: Math.floor(Date.now() / 1000) + (10 * 60),
       iss: appId
     };
-    return jwt.sign(payload, privateKey, { algorithm: 'RS256' });
-  } catch (e) {
-    // jsonwebtoken 不可用时，使用 Node.js crypto 实现
-    const crypto = require('crypto');
-
-    function base64url(buf) {
-      return buf.toString('base64')
-        .replace(/=/g, '')
-        .replace(/\+/g, '-')
-        .replace(/\//g, '_');
-    }
-
-    const header = base64url(Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' })));
-    const now = Math.floor(Date.now() / 1000);
-    const payload = base64url(Buffer.from(JSON.stringify({
-      iat: now - 60,
-      exp: now + 600,
-      iss: appId
-    })));
-
-    const sigInput = header + '.' + payload;
-    const sign = crypto.createSign('RSA-SHA256');
-    sign.update(sigInput);
-    sign.end();
-    const signature = base64url(sign.sign(privateKey));
-
-    return sigInput + '.' + signature;
+    return jwtLib.sign(payload, privateKey, { algorithm: 'RS256' });
   }
+
+  // jsonwebtoken 不可用时，使用 Node.js crypto 实现
+  const crypto = require('crypto');
+
+  function base64url(buf) {
+    return buf.toString('base64')
+      .replace(/=/g, '')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_');
+  }
+
+  const header = base64url(Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' })));
+  const now = Math.floor(Date.now() / 1000);
+  const payload = base64url(Buffer.from(JSON.stringify({
+    iat: now - 60,
+    exp: now + 600,
+    iss: appId
+  })));
+
+  const sigInput = header + '.' + payload;
+  const sign = crypto.createSign('RSA-SHA256');
+  sign.update(sigInput);
+  sign.end();
+  const signature = base64url(sign.sign(privateKey));
+
+  return sigInput + '.' + signature;
 }
 
 /**
