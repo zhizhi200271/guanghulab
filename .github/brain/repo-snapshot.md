@@ -1,5 +1,5 @@
 # 铸渊图书馆快照 · Repo Snapshot
-> 生成于 2026-03-24 20:40 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
+> 生成于 2026-03-24 22:11 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
 
 ---
 
@@ -9,11 +9,11 @@
 |------|------|
 | 区域总数 | 13 个区域 |
 | 功能模块 | 10 个 (m01~m18) |
-| 工作流 | 90 个 GitHub Actions |
-| 脚本 | 78 个执行脚本 |
+| 工作流 | 92 个 GitHub Actions |
+| 脚本 | 79 个执行脚本 |
 | 开发者节点 | 8 人 |
 | HLI 接口覆盖率 | 7/21 (33%) |
-| 快照生成时间 | 2026-03-24 20:40 CST |
+| 快照生成时间 | 2026-03-24 22:11 CST |
 
 ---
 
@@ -30,12 +30,12 @@
 **关键词**: persona · identity · dev-status · 人格 · 开发者状态
 
 ### ⚡ 自动化工作流（WORKFLOWS）
-**路径**: `.github/workflows` · **数量**: 90 项
+**路径**: `.github/workflows` · **数量**: 92 项
 **描述**: 所有 GitHub Actions 工作流定义
 **关键词**: workflow · actions · ci · automation · 工作流 · 自动化
 
 ### 🔧 执行脚本库（SCRIPTS）
-**路径**: `scripts` · **数量**: 78 项
+**路径**: `scripts` · **数量**: 79 项
 **描述**: 铸渊所有执行手脚 · 自动化脚本
 **关键词**: script · node · js · 脚本 · 执行 · runner
 
@@ -158,6 +158,7 @@
 | `sync-griddb-to-drive.yml` | 🪞 Grid-DB → Google Drive 镜像同步 | push, schedule(*/15 * * * *), manual |
 | `sync-griddb-to-notion.yml` | 📤 Grid-DB → Notion 增量回传 | push |
 | `sync-login-entry.yml` | 铸渊 · Sync Login Entry · Notion → 飞书文档A | manual |
+| `sync-notion-profiles.yml` | "📡 同步 Notion 开发者画像" | schedule(0 */6 * * *), manual |
 | `sync-notion-to-griddb.yml` | 🧠 Notion → Grid-DB 记忆同步 | schedule(0 */4 * * *), manual |
 | `sync-persona-studio.yml` | 🔄 铸渊跨仓库同步 · persona-studio | push, manual |
 | `sync-repo-to-drive.yml` | "🪞 光湖格点库 → Google Drive 同步" | push, schedule(0 */6 * * *), manual |
@@ -176,6 +177,7 @@
 | `zhuyuan-daily-agent.yml` | 🤖 铸渊巡检 Agent · 每日自动巡检与修复 | schedule(0 14 * * *), manual |
 | `zhuyuan-daily-inspection.yml` | 铸渊每日巡检 | issues, schedule(0 4 * * *), manual |
 | `zhuyuan-daily-selfcheck.yml` | 铸渊 · 每日自检 | schedule(0 0 * * *), manual |
+| `zhuyuan-exec-engine.yml` | "🚀 铸渊 · 远程执行引擎" | issues |
 | `zhuyuan-gate-guard.yml` | "🚨 铸渊·智能门禁 · Push Gate Guard" | push, issues |
 | `zhuyuan-issue-reply.yml` | 铸渊 · Issue 自动回复 | issues, issue_comment |
 | `zhuyuan-pr-review.yml` | 铸渊 · PR Review | pull_request |
@@ -245,6 +247,7 @@
 - `scripts/sync-deploy-to-notion.js`
 - `scripts/sync-dev-status.js`
 - `scripts/sync-login-entry.js`
+- `scripts/sync-notion-profiles.js`
 - `scripts/sync-patrol-to-notion.js`
 - `scripts/tcs-semantic-landing.js`
 - `scripts/update-brain.js`
