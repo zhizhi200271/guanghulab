@@ -52,6 +52,29 @@ app.use(function(req, res, next) {
   });
 });
 
+// ===== 简易速率限制 =====
+const rateLimitMap = new Map();
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
+const RATE_LIMIT_MAX = 30; // max requests per window
+
+function rateLimit(req, res, next) {
+  const ip = req.ip || req.connection.remoteAddress || 'unknown';
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+
+  if (!entry || now - entry.start > RATE_LIMIT_WINDOW) {
+    rateLimitMap.set(ip, { start: now, count: 1 });
+    return next();
+  }
+
+  entry.count++;
+  if (entry.count > RATE_LIMIT_MAX) {
+    res.status(429).json({ error: 'Too many requests' });
+    return;
+  }
+  next();
+}
+
 // ===== 健康检查 =====
 app.get('/health', function(req, res) {
   res.json({
@@ -63,7 +86,7 @@ app.get('/health', function(req, res) {
 });
 
 // ===== GitHub App Webhook 入口 =====
-app.post('/webhook/github-app', function(req, res) {
+app.post('/webhook/github-app', rateLimit, function(req, res) {
   const event = req.headers['x-github-event'];
   const sig = req.headers['x-hub-signature-256'];
 
