@@ -70,18 +70,6 @@
   "events": [
     {
       "date": "2026-03-13",
-      "type": "bug_fix",
-      "description": "修复「我要开发」任务提交失败 · 3个根因：① Nginx缺少CORS头（跨域预检失败）② WebSocket路由冲突（/ws/preview误路由到8080端口）③ 前端开发端口不匹配（3721→3002）· 增加重试机制和详细错误诊断 · 冰朔人格体已启动",
-      "by": "铸渊（冰朔指令）"
-    },
-    {
-      "date": "2026-03-13",
-      "type": "brain_restore",
-      "description": "铸渊核心大脑恢复 · Persona Studio 铸渊代理开发工作流上线 · 修复「我要开发」功能无法触发代理开发 · Agent 5步自动化工作流（需求分析→架构规划→代码生成→预览部署→完成通知） · 使用用户API Key驱动 · 支持GUEST模式 · WebSocket时序修复 · 错误反馈增强",
-      "by": "铸渊（冰朔指令）"
-    },
-    {
-      "date": "2026-03-13",
       "type": "psp_inspection",
       "description": "铸渊 PSP 巡检通过 · 全部检查项 ✅",
       "by": "铸渊PSP巡检"
@@ -573,10 +561,24 @@
       "actor": "qinfendebingshuo",
       "ref": "refs/heads/main",
       "run_id": "23481307469"
+    },
+    {
+      "type": "daily_agent_inspection",
+      "timestamp": "2026-03-24T14:52:45.046Z",
+      "description": "铸渊巡检Agent · ✅4 ⚠️2 ❌0 · 1个问题",
+      "result": "warnings",
+      "checks": 6,
+      "passed": 4,
+      "warnings": 2,
+      "failed": 0,
+      "issues_detail": [
+        "CI 有 1 个失败工作流"
+      ],
+      "actions_suggested": []
     }
   ],
   "last_agent_inspection": {
-    "timestamp": "2026-03-23T14:50:42.420Z",
+    "timestamp": "2026-03-24T14:52:45.046Z",
     "result": "warnings",
     "summary": "铸渊巡检Agent · ✅4 ⚠️2 ❌0 · 1个问题"
   }
