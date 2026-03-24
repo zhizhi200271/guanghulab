@@ -369,6 +369,42 @@
       "result": "success",
       "icon": "✅",
       "sortKey": 1774354732000
+    },
+    {
+      "key": "Copilot|—|2026-03-24T12:27:20Z",
+      "ts": "2026-03-24T12:27:20Z",
+      "actor": "Copilot",
+      "module": "—",
+      "result": "action_required",
+      "icon": "🔵",
+      "sortKey": 1774355240000
+    },
+    {
+      "key": "Copilot|—|2026-03-24T12:39:26Z",
+      "ts": "2026-03-24T12:39:26Z",
+      "actor": "Copilot",
+      "module": "—",
+      "result": "action_required",
+      "icon": "🔵",
+      "sortKey": 1774355966000
+    },
+    {
+      "key": "Copilot|—|2026-03-24T12:39:29Z",
+      "ts": "2026-03-24T12:39:29Z",
+      "actor": "Copilot",
+      "module": "—",
+      "result": "action_required",
+      "icon": "🔵",
+      "sortKey": 1774355969000
+    },
+    {
+      "key": "冰朔|—|2026-03-24T12:40:29Z",
+      "ts": "2026-03-24T12:40:29Z",
+      "actor": "冰朔",
+      "module": "—",
+      "result": "success",
+      "icon": "✅",
+      "sortKey": 1774356029000
     }
   ]
 }
