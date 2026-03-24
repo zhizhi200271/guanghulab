@@ -74,7 +74,7 @@ jobs:
           INPUT_PERSONAS: ${{ github.event.inputs.personas }}
         run: |
           DATE=$(date +%Y-%m-%d)
-          SESSION_ID="MULTI-WAKE-$(date +%Y%m%d)-001"
+          SESSION_ID="MULTI-WAKE-$(date +%Y%m%d-%H%M%S)"
           mkdir -p grid-db/multi-wake-sessions
           SESSION_FILE="grid-db/multi-wake-sessions/${SESSION_ID}.json"
 
@@ -241,7 +241,7 @@ jobs:
               if not questions:
                 continue
               for q in questions:
-                h = int(hashlib.md5(q.encode()).hexdigest(), 16) % 10000
+                h = int(hashlib.md5((p['persona_id'] + q + datetime.now().isoformat()).encode()).hexdigest(), 16) % 10000
                 msg = {
                   'id': f"MSG-{datetime.now().strftime('%Y%m%d')}-{h:04d}",
                   'channel': 'general',

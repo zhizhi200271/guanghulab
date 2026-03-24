@@ -35,7 +35,7 @@ fs.mkdirSync(path.dirname(channelFile), { recursive: true });
 const now = new Date();
 const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
 const hash = crypto.createHash('md5').update(content + now.toISOString()).digest('hex');
-const msgId = `MSG-${dateStr}-${parseInt(hash.slice(0, 8), 16) % 10000}`.replace(/-(\d)$/, '-000$1').replace(/-(\d{2})$/, '-00$1').replace(/-(\d{3})$/, '-0$1');
+const msgId = `MSG-${dateStr}-${String(parseInt(hash.slice(0, 8), 16) % 10000).padStart(4, '0')}`;
 
 const message = {
   id: msgId,

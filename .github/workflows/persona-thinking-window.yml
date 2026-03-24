@@ -236,7 +236,7 @@ jobs:
 
           export LOG_FILE
           python3 << 'PYEOF'
-          import json, os
+          import json, os, hashlib
           from datetime import datetime
           log_file = os.environ["LOG_FILE"]
           persona_id = os.environ["PERSONA_ID"]
@@ -257,7 +257,7 @@ jobs:
           with open(general, "a") as f:
             for m in msgs:
               msg = {
-                "id": f"MSG-{datetime.now().strftime('%Y%m%d')}-{int(__import__('hashlib').md5(m.get('message','').encode()).hexdigest(), 16) % 10000:04d}",
+                "id": f"MSG-{datetime.now().strftime('%Y%m%d')}-{int(hashlib.md5((persona_id + m.get('message','') + datetime.now().isoformat()).encode()).hexdigest(), 16) % 10000:04d}",
                 "channel": "general",
                 "from": persona_id,
                 "from_name": persona_name,
