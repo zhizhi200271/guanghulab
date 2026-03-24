@@ -2,10 +2,10 @@
   "checkpoint_id": "DAILY-CP-20260324",
   "date": "2026-03-24",
   "hibernation": {
-    "start_time": "2026-03-24T04:14:52.158Z",
-    "end_time": "2026-03-24T04:19:52.158Z",
-    "duration_minutes": 5,
-    "planned_minutes": 5
+    "start_time": "2026-03-24T20:15:16.036Z",
+    "end_time": "2026-03-24T20:27:16.036Z",
+    "duration_minutes": 12,
+    "planned_minutes": 12
   },
   "health_summary": {
     "guards": {
@@ -30,7 +30,7 @@
         "self_heals_today": 0
       }
     },
-    "workflow_triggers_today": 0,
+    "workflow_triggers_today": 20,
     "errors_today": 0,
     "buffer_backlog": 0,
     "checkin_anomalies": 0
