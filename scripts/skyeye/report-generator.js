@@ -135,6 +135,44 @@ function generateReport() {
       recommendations: soldierHealth.recommendations || []
     } : { dimension: 'D15', status: '❓' },
 
+    hibernation_status: (() => {
+      const hibDir = path.join(ROOT, 'skyeye/hibernation');
+      const cpDir = path.join(hibDir, 'checkpoints');
+      const snapDir = path.join(hibDir, 'weekly-snapshots');
+      const upDir = path.join(hibDir, 'upgrade-packs');
+      const distDir = path.join(hibDir, 'distribution-reports');
+      const deployed = fs.existsSync(hibDir);
+      let dailyCPs = 0, weeklySnaps = 0, upgradePacks = 0, distReports = 0;
+      let lastDaily = null, lastWeekly = null;
+      try {
+        if (fs.existsSync(cpDir)) {
+          const cpFiles = fs.readdirSync(cpDir).filter(f => f.startsWith('daily-cp-') && f.endsWith('.json')).sort();
+          dailyCPs = cpFiles.length;
+          if (cpFiles.length > 0) lastDaily = cpFiles[cpFiles.length - 1];
+        }
+        if (fs.existsSync(snapDir)) {
+          const snapFiles = fs.readdirSync(snapDir).filter(f => f.endsWith('.json')).sort();
+          weeklySnaps = snapFiles.length;
+          if (snapFiles.length > 0) lastWeekly = snapFiles[snapFiles.length - 1];
+        }
+        if (fs.existsSync(upDir)) {
+          upgradePacks = fs.readdirSync(upDir).filter(f => f.endsWith('.json')).length;
+        }
+        if (fs.existsSync(distDir)) {
+          distReports = fs.readdirSync(distDir).filter(f => f.endsWith('.json')).length;
+        }
+      } catch (e) { /* ignore */ }
+      return {
+        deployed,
+        daily_checkpoints: dailyCPs,
+        weekly_snapshots: weeklySnaps,
+        upgrade_packs: upgradePacks,
+        distribution_reports: distReports,
+        last_daily_checkpoint: lastDaily,
+        last_weekly_snapshot: lastWeekly
+      };
+    })(),
+
     diagnosis: {
       total_issues: diagnosis ? diagnosis.total_issues : 0,
       auto_fixed: repairResult ? repairResult.total_repaired : 0,
@@ -197,6 +235,9 @@ function generateReport() {
   if (report.soldier_health && report.soldier_health.recurring_errors &&
       report.soldier_health.recurring_errors.length > 0) {
     report.next_actions.push('P1: 存在持续性故障小兵，建议铸渊介入');
+  }
+  if (!report.hibernation_status.deployed) {
+    report.next_actions.push('P0: 休眠系统未部署，需立即部署 skyeye/hibernation/');
   }
 
   // 保存完整报告

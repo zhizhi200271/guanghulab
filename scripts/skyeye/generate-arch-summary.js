@@ -186,6 +186,34 @@ function getBufferStatus() {
   }
 }
 
+function getHibernationStatus() {
+  const hibDir = path.join(ROOT, 'skyeye/hibernation');
+  const cpDir = path.join(hibDir, 'checkpoints');
+  const snapDir = path.join(hibDir, 'weekly-snapshots');
+  const result = {
+    deployed: fs.existsSync(hibDir),
+    daily_checkpoints: 0,
+    weekly_snapshots: 0,
+    last_daily: null,
+    last_weekly: null
+  };
+  try {
+    if (fs.existsSync(cpDir)) {
+      const cpFiles = fs.readdirSync(cpDir).filter(f => f.startsWith('daily-cp-') && f.endsWith('.json')).sort();
+      result.daily_checkpoints = cpFiles.length;
+      if (cpFiles.length > 0) result.last_daily = cpFiles[cpFiles.length - 1].replace('daily-cp-', '').replace('.json', '');
+    }
+    if (fs.existsSync(snapDir)) {
+      const snapFiles = fs.readdirSync(snapDir).filter(f => f.startsWith('weekly-snapshot-') && f.endsWith('.json')).sort();
+      result.weekly_snapshots = snapFiles.length;
+      if (snapFiles.length > 0) result.last_weekly = snapFiles[snapFiles.length - 1].replace('weekly-snapshot-', '').replace('.json', '');
+    }
+  } catch (e) {
+    // ignore
+  }
+  return result;
+}
+
 // ━━━ Markdown 生成 ━━━
 
 function generateMarkdown() {
@@ -203,6 +231,7 @@ function generateMarkdown() {
   const modules = countModuleDirs();
   const ontology = getOntologyVersion();
   const bufferPending = getBufferStatus();
+  const hibernation = getHibernationStatus();
 
   // Health indicator from latest scan
   let healthIcon = '🟢';
@@ -235,6 +264,7 @@ function generateMarkdown() {
   lines.push(`| 🌍 子仓库联邦 | ${spokes.length} 个模板（签到 ${federation.total} 个） |`);
   lines.push(`| 📜 本体论 | ${ontology} |`);
   lines.push(`| 📮 Buffer 待处理 | ${bufferPending} 条 |`);
+  lines.push(`| 🌙 休眠系统 | ${hibernation.deployed ? '✅ 已部署' : '❌ 未部署'} · 日检查点 ${hibernation.daily_checkpoints} 个 · 周快照 ${hibernation.weekly_snapshots} 个 |`);
   lines.push('');
 
   // Infrastructure services table
@@ -394,7 +424,8 @@ function generateJsonReport() {
     federation: getFederationStats(),
     modules: countModuleDirs(),
     ontology: getOntologyVersion(),
-    buffer_pending: getBufferStatus()
+    buffer_pending: getBufferStatus(),
+    hibernation: getHibernationStatus()
   };
 }
 

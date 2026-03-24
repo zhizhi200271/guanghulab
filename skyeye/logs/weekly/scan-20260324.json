@@ -1,7 +1,7 @@
 {
   "scan_id": "SCAN-20260324",
   "mode": "full",
-  "timestamp": "2026-03-24T04:19:44.731Z",
+  "timestamp": "2026-03-24T04:24:59.722Z",
   "guard_scan": {
     "total": 5,
     "valid": 5,
@@ -99,8 +99,8 @@
     "errors": []
   },
   "directory_scan": {
-    "checked": 14,
-    "present": 14,
+    "checked": 19,
+    "present": 19,
     "missing": []
   },
   "sub_repo_scan": {
@@ -156,6 +156,6 @@
     "warnings": 0,
     "guards_healthy": "5/5",
     "workflows_found": 84,
-    "directories_ok": "14/14"
+    "directories_ok": "19/19"
   }
 }

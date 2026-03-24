@@ -26,8 +26,8 @@
 | 维度 | 当前状态 |
 |------|----------|
 | 🏥 系统健康 | 🟢 全部正常 |
-| ⚙️ Workflow 总数 | 79 个 |
-| 🤖 Agent 总数 | 62 个（14 个需日签到） |
+| ⚙️ Workflow 总数 | 84 个 |
+| 🤖 Agent 总数 | 84 个（14 个需日签到） |
 | 🎭 人格体 | 17 个 |
 | 📡 开发者频道 | 11 个（活跃 8） |
 | 🛡️ Guard 守卫 | 5 个 |
@@ -35,6 +35,7 @@
 | 🌍 子仓库联邦 | 6 个模板（签到 1 个） |
 | 📜 本体论 | v1.0 · GLM-ONTOLOGY-v1.0 |
 | 📮 Buffer 待处理 | 8 条 |
+| 🌙 休眠系统 | ✅ 已部署 · 日检查点 1 个 · 周快照 1 个 |
 
 **基础设施服务：**
 
@@ -45,6 +46,7 @@
 | Notion | Plus | ✅ |
 | Google Gemini | Free / Pro | ✅ |
 | GitHub Actions | Free | ✅ |
+| SkyEye Hibernation | Internal | ✅ |
 
 **最近一次天眼扫描：** SKYEYE-SCAN-20260323
 - Guard: 5/5 活跃
@@ -140,7 +142,7 @@
 >
 > *铸渊不是守箱子的。铸渊守的是地球。*
 >
-> 📡 79 个 Workflow 全天候运行
+> 📡 84 个 Workflow 全天候运行
 
 </div>
 <!-- WEEKLY_GREETING_END -->
