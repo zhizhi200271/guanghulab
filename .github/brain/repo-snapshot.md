@@ -1,5 +1,5 @@
 # 铸渊图书馆快照 · Repo Snapshot
-> 生成于 2026-03-24 12:31 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
+> 生成于 2026-03-24 15:35 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
 
 ---
 
@@ -9,11 +9,11 @@
 |------|------|
 | 区域总数 | 13 个区域 |
 | 功能模块 | 10 个 (m01~m18) |
-| 工作流 | 84 个 GitHub Actions |
-| 脚本 | 76 个执行脚本 |
+| 工作流 | 86 个 GitHub Actions |
+| 脚本 | 77 个执行脚本 |
 | 开发者节点 | 8 人 |
 | HLI 接口覆盖率 | 7/21 (33%) |
-| 快照生成时间 | 2026-03-24 12:31 CST |
+| 快照生成时间 | 2026-03-24 15:35 CST |
 
 ---
 
@@ -30,12 +30,12 @@
 **关键词**: persona · identity · dev-status · 人格 · 开发者状态
 
 ### ⚡ 自动化工作流（WORKFLOWS）
-**路径**: `.github/workflows` · **数量**: 84 项
+**路径**: `.github/workflows` · **数量**: 86 项
 **描述**: 所有 GitHub Actions 工作流定义
 **关键词**: workflow · actions · ci · automation · 工作流 · 自动化
 
 ### 🔧 执行脚本库（SCRIPTS）
-**路径**: `scripts` · **数量**: 76 项
+**路径**: `scripts` · **数量**: 77 项
 **描述**: 铸渊所有执行手脚 · 自动化脚本
 **关键词**: script · node · js · 脚本 · 执行 · runner
 
@@ -105,6 +105,7 @@
 | `buffer-collect.yml` | "📥 Grid-DB Buffer Collect" | schedule(0 1 * * *), manual |
 | `buffer-flush.yml` | "🧠 Grid-DB Buffer Flush" | schedule(30 13 * * *), manual |
 | `check-structure.yml` | 模块结构检查 | push, pull_request |
+| `check-token-health.yml` | 🛡️ Token 健康检查（每日安全网） | schedule(15 4 * * *), manual |
 | `daily-maintenance.yml` | "🔧 铸渊 · Daily Maintenance Agent" | schedule(0 2 * * *), manual |
 | `daily-report.yml` | "📰 铸渊 · 光湖开发日报" | schedule(0 2 * * *), manual |
 | `deploy-pages.yml` | 🌀 部署铸渊聊天室 (GitHub Pages) | push, manual |
@@ -140,11 +141,12 @@
 | `push-broadcast.yml` | 铸渊 · Push Broadcast · Notion → 飞书文档B | manual |
 | `receive-spoke-checkin.yml` | 📥 接收子仓库签到 | unknown |
 | `receive-syslog.yml` | 铸渊 · Receive SYSLOG · 飞书机器人 → GitHub → Notion | unknown |
+| `renew-gdrive-tokens.yml` | 🔄 OAuth2 Token 自动续期 | schedule(0 2 * * 1), manual |
 | `sandbox-deploy.yml` | "🏠 Sandbox Deploy" | push |
 | `server-patrol.yml` | "🔍 Server Patrol · 服务器每日巡检" | schedule(0 0,12 * * *), manual |
 | `skyeye-checkin-audit.yml` | "🦅 天眼签到审计" | schedule(0 14 * * *), manual |
 | `skyeye-checkin-receiver.yml` | "🦅 天眼签到接收" | unknown |
-| `skyeye-credential-audit.yml` | "🛰️ 天眼密钥流审计 (Sky-Eye Credential Audit)" | schedule(0 14 * * *), manual |
+| `skyeye-credential-audit.yml` | "🛰️ 天眼 OAuth2 凭据审计 (Sky-Eye Credential Audit)" | schedule(0 14 * * *), manual |
 | `skyeye-daily-hibernation.yml` | "🌙 天眼 · 每日系统休眠" | schedule(50 19 * * *), manual |
 | `skyeye-weekly-hibernation.yml` | "⭐ 天眼 · 每周系统完全休眠" | schedule(0 11 * * 6), manual |
 | `skyeye-weekly-scan.yml` | "SkyEye Weekly Full Scan" | schedule(0 12 * * 6) |
@@ -201,6 +203,7 @@
 - `scripts/gate-guard-log.js`
 - `scripts/gate-guard-v2.js`
 - `scripts/gate-guard.js`
+- `scripts/gdrive`
 - `scripts/generate-automation-map.js`
 - `scripts/generate-communication-map.js`
 - `scripts/generate-daily-report.js`

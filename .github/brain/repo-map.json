@@ -1,14 +1,14 @@
 {
   "description": "铸渊图书馆目录 · Library Catalog for 铸渊 (Zhùyuān)",
   "version": "2.0",
-  "generated_at": "2026-03-24T04:31:37.995Z",
+  "generated_at": "2026-03-24T07:35:05.481Z",
   "generated_by": "scripts/generate-repo-map.js",
   "repo": "qinfendebingshuo/guanghulab",
   "stats": {
     "zones": 13,
     "total_modules": 10,
-    "total_workflows": 84,
-    "total_scripts": 76,
+    "total_workflows": 86,
+    "total_scripts": 77,
     "total_dev_nodes": 8,
     "hli_interfaces": 21,
     "hli_implemented": 7,
@@ -333,6 +333,14 @@
           ]
         },
         {
+          "file": "check-token-health.yml",
+          "name": "🛡️ Token 健康检查（每日安全网）",
+          "triggers": [
+            "schedule(15 4 * * *)",
+            "manual"
+          ]
+        },
+        {
           "file": "daily-maintenance.yml",
           "name": "\"🔧 铸渊 · Daily Maintenance Agent\"",
           "triggers": [
@@ -599,6 +607,14 @@
           ]
         },
         {
+          "file": "renew-gdrive-tokens.yml",
+          "name": "🔄 OAuth2 Token 自动续期",
+          "triggers": [
+            "schedule(0 2 * * 1)",
+            "manual"
+          ]
+        },
+        {
           "file": "sandbox-deploy.yml",
           "name": "\"🏠 Sandbox Deploy\"",
           "triggers": [
@@ -630,7 +646,7 @@
         },
         {
           "file": "skyeye-credential-audit.yml",
-          "name": "\"🛰️ 天眼密钥流审计 (Sky-Eye Credential Audit)\"",
+          "name": "\"🛰️ 天眼 OAuth2 凭据审计 (Sky-Eye Credential Audit)\"",
           "triggers": [
             "schedule(0 14 * * *)",
             "manual"
@@ -868,7 +884,7 @@
           ]
         }
       ],
-      "item_count": 84
+      "item_count": 86
     },
     {
       "zone_id": "SCRIPTS",
@@ -950,6 +966,9 @@
         },
         {
           "file": "gate-guard.js"
+        },
+        {
+          "file": "gdrive"
         },
         {
           "file": "generate-automation-map.js"
@@ -1114,7 +1133,7 @@
           "file": "zhuyuan-wakeup.js"
         }
       ],
-      "item_count": 76
+      "item_count": 77
     },
     {
       "zone_id": "SRC",
@@ -1959,6 +1978,9 @@
     "check-structure": [
       "WORKFLOWS::check-structure.yml"
     ],
+    "check-token-health": [
+      "WORKFLOWS::check-token-health.yml"
+    ],
     "daily-maintenance": [
       "WORKFLOWS::daily-maintenance.yml"
     ],
@@ -2070,6 +2092,9 @@
     "receive-syslog": [
       "WORKFLOWS::receive-syslog.yml",
       "SCRIPTS::receive-syslog.js"
+    ],
+    "renew-gdrive-tokens": [
+      "WORKFLOWS::renew-gdrive-tokens.yml"
     ],
     "sandbox-deploy": [
       "WORKFLOWS::sandbox-deploy.yml"
@@ -2254,6 +2279,9 @@
     ],
     "gate-guard": [
       "SCRIPTS::gate-guard.js"
+    ],
+    "gdrive": [
+      "SCRIPTS::gdrive"
     ],
     "generate-automation-map": [
       "SCRIPTS::generate-automation-map.js"
