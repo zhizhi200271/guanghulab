@@ -1,5 +1,5 @@
 # 铸渊图书馆快照 · Repo Snapshot
-> 生成于 2026-03-24 19:08 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
+> 生成于 2026-03-24 19:09 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
 
 ---
 
@@ -10,10 +10,10 @@
 | 区域总数 | 13 个区域 |
 | 功能模块 | 10 个 (m01~m18) |
 | 工作流 | 88 个 GitHub Actions |
-| 脚本 | 77 个执行脚本 |
+| 脚本 | 78 个执行脚本 |
 | 开发者节点 | 8 人 |
 | HLI 接口覆盖率 | 7/21 (33%) |
-| 快照生成时间 | 2026-03-24 19:08 CST |
+| 快照生成时间 | 2026-03-24 19:09 CST |
 
 ---
 
@@ -35,7 +35,7 @@
 **关键词**: workflow · actions · ci · automation · 工作流 · 自动化
 
 ### 🔧 执行脚本库（SCRIPTS）
-**路径**: `scripts` · **数量**: 77 项
+**路径**: `scripts` · **数量**: 78 项
 **描述**: 铸渊所有执行手脚 · 自动化脚本
 **关键词**: script · node · js · 脚本 · 执行 · runner
 
@@ -251,6 +251,7 @@
 - `scripts/utils`
 - `scripts/verify-modules.js`
 - `scripts/wake-persona.js`
+- `scripts/web-deploy-diag.sh`
 - `scripts/write-notion-syslog.js`
 - `scripts/zhuyuan-daily-agent.js`
 - `scripts/zhuyuan-daily-selfcheck.js`
