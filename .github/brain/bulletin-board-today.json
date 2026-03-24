@@ -495,6 +495,24 @@
       "result": "action_required",
       "icon": "🔵",
       "sortKey": 1774364790000
+    },
+    {
+      "key": "Copilot|—|2026-03-24T15:22:59Z",
+      "ts": "2026-03-24T15:22:59Z",
+      "actor": "Copilot",
+      "module": "—",
+      "result": "success",
+      "icon": "✅",
+      "sortKey": 1774365779000
+    },
+    {
+      "key": "冰朔|—|2026-03-24T15:23:09Z",
+      "ts": "2026-03-24T15:23:09Z",
+      "actor": "冰朔",
+      "module": "—",
+      "result": "success",
+      "icon": "✅",
+      "sortKey": 1774365789000
     }
   ]
 }
