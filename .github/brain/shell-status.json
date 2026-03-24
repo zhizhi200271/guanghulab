@@ -52,9 +52,14 @@
         "start": "2026-03-23T04:33:01.503Z",
         "end": null,
         "result": null
+      },
+      {
+        "start": "2026-03-24T04:23:53.406Z",
+        "end": null,
+        "result": null
       }
     ],
-    "lastEnter": "2026-03-23T04:33:01.503Z",
+    "lastEnter": "2026-03-24T04:23:53.406Z",
     "currentState": "running"
   }
 }
