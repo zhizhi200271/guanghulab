@@ -1,0 +1,87 @@
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 🪞 光湖格点库 → Google Drive 全量同步
+#
+# 守护: PER-ZY001 铸渊 (Zhuyuan)
+# 系统: SYS-GLW-0001
+# 主控: TCS-0002∞ (冰朔)
+#
+# 方案: 宿主机直装 rclone（替代 wei/rclone 容器方案）
+# 凭证: GOOGLE_DRIVE_SERVICE_ACCOUNT (Service Account JSON)
+# 目标: Google Drive 文件夹 1fqWdLPaZkUZYt4OT_h3fJQHnd-q5QN3G
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+name: "🪞 光湖格点库 → Google Drive 同步"
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync-to-drive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "📦 Checkout repository"
+        uses: actions/checkout@v4
+
+      - name: "🔧 Install rclone"
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq rclone
+          rclone version
+
+      - name: "🔑 Configure rclone (Service Account)"
+        env:
+          GOOGLE_DRIVE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_DRIVE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "${GOOGLE_DRIVE_SERVICE_ACCOUNT}" ]; then
+            echo "::error::GOOGLE_DRIVE_SERVICE_ACCOUNT secret is not set"
+            exit 1
+          fi
+
+          SA_FILE="$(mktemp "${RUNNER_TEMP}/gd-sa-XXXXXX.json")"
+          printf '%s\n' "${GOOGLE_DRIVE_SERVICE_ACCOUNT}" > "${SA_FILE}"
+          chmod 600 "${SA_FILE}"
+
+          mkdir -p "${HOME}/.config/rclone"
+          {
+            echo "[gdrive]"
+            echo "type = drive"
+            echo "scope = drive"
+            echo "service_account_file = ${SA_FILE}"
+            echo "root_folder_id = 1fqWdLPaZkUZYt4OT_h3fJQHnd-q5QN3G"
+          } > "${HOME}/.config/rclone/rclone.conf"
+          chmod 600 "${HOME}/.config/rclone/rclone.conf"
+
+          echo "SA_FILE=${SA_FILE}" >> "${GITHUB_ENV}"
+          echo "✅ rclone configured with Service Account"
+
+      - name: "🪞 Sync to Google Drive"
+        # 使用 copy（非 sync）—— 仅添加/更新文件，不删除 Drive 端已有文件（防误删）
+        run: |
+          rclone copy . gdrive: \
+            --exclude ".git/**" \
+            --exclude "node_modules/**" \
+            --exclude ".env" \
+            --exclude "*.bak" \
+            --exclude "*.log" \
+            --transfers 4 \
+            --checkers 8 \
+            --retries 3 \
+            --low-level-retries 10 \
+            --stats 30s \
+            --stats-one-line \
+            -v
+
+      - name: "🧹 Cleanup credentials"
+        if: always()
+        run: |
+          rm -f "${SA_FILE}"
+          rm -f "${HOME}/.config/rclone/rclone.conf"
+          echo "✅ Credentials cleaned up"
