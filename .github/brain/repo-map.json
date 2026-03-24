@@ -1,14 +1,14 @@
 {
   "description": "铸渊图书馆目录 · Library Catalog for 铸渊 (Zhùyuān)",
   "version": "2.0",
-  "generated_at": "2026-03-24T00:40:32.515Z",
+  "generated_at": "2026-03-24T01:23:00.904Z",
   "generated_by": "scripts/generate-repo-map.js",
   "repo": "qinfendebingshuo/guanghulab",
   "stats": {
     "zones": 13,
     "total_modules": 10,
-    "total_workflows": 80,
-    "total_scripts": 75,
+    "total_workflows": 81,
+    "total_scripts": 76,
     "total_dev_nodes": 8,
     "hli_interfaces": 21,
     "hli_implemented": 7,
@@ -730,6 +730,13 @@
           ]
         },
         {
+          "file": "tcs-semantic-landing.yml",
+          "name": "🛰️ TCS 语义直连落盘 · Semantic Landing",
+          "triggers": [
+            "issues"
+          ]
+        },
+        {
           "file": "test-notion-bridge.yml",
           "name": "\"🧪 Notion Bridge Connectivity Test\"",
           "triggers": [
@@ -837,7 +844,7 @@
           ]
         }
       ],
-      "item_count": 80
+      "item_count": 81
     },
     {
       "zone_id": "SCRIPTS",
@@ -1035,6 +1042,9 @@
           "file": "sync-patrol-to-notion.js"
         },
         {
+          "file": "tcs-semantic-landing.js"
+        },
+        {
           "file": "update-brain.js"
         },
         {
@@ -1080,7 +1090,7 @@
           "file": "zhuyuan-wakeup.js"
         }
       ],
-      "item_count": 75
+      "item_count": 76
     },
     {
       "zone_id": "SRC",
@@ -2091,6 +2101,10 @@
     ],
     "syslog-pipeline": [
       "WORKFLOWS::syslog-pipeline.yml"
+    ],
+    "tcs-semantic-landing": [
+      "WORKFLOWS::tcs-semantic-landing.yml",
+      "SCRIPTS::tcs-semantic-landing.js"
     ],
     "test-notion-bridge": [
       "WORKFLOWS::test-notion-bridge.yml"
