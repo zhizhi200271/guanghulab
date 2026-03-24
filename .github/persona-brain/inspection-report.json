@@ -1,11 +1,15 @@
 {
-  "title": "[铸渊巡检] 2026-03-23 每日巡检报告",
+  "title": "[铸渊巡检] 2026-03-24 每日巡检报告",
   "type": "巡检报告",
-  "date": "2026-03-23",
+  "date": "2026-03-24",
   "checked_in": [
     {
       "agent_id": "AG-ZY-004",
       "agent_name": "冰朔主控神经系统 · 自动维护"
+    },
+    {
+      "agent_id": "AG-ZY-007",
+      "agent_name": "铸渊 · Bridge E · GitHub Changes → Notion"
     },
     {
       "agent_id": "AG-ZY-008",
@@ -18,6 +22,10 @@
     {
       "agent_id": "AG-ZY-014",
       "agent_name": "📰 铸渊 · 光湖开发日报"
+    },
+    {
+      "agent_id": "AG-ZY-016",
+      "agent_name": "🚀 铸渊 CD · 自动部署到 guanghulab.com"
     },
     {
       "agent_id": "AG-ZY-023",
@@ -50,36 +58,12 @@
   ],
   "missing_agents": [
     {
-      "agent_id": "AG-ZY-007",
-      "agent_name": "铸渊 · Bridge E · GitHub Changes → Notion"
-    },
-    {
-      "agent_id": "AG-ZY-016",
-      "agent_name": "🚀 铸渊 CD · 自动部署到 guanghulab.com"
-    },
-    {
       "agent_id": "AG-ZY-017",
       "agent_name": "铸渊 · 广播分发"
     }
   ],
   "auto_repaired": [],
   "intervention_required": [
-    {
-      "agent_id": "AG-ZY-007",
-      "agent_name": "铸渊 · Bridge E · GitHub Changes → Notion",
-      "workflow": "bridge-changes-to-notion.yml",
-      "reason": "自修复失败：workflow_dispatch 触发失败",
-      "recent_failures": [
-        "action_required (2026-03-23T04:01:17Z)"
-      ]
-    },
-    {
-      "agent_id": "AG-ZY-016",
-      "agent_name": "🚀 铸渊 CD · 自动部署到 guanghulab.com",
-      "workflow": "deploy-to-server.yml",
-      "reason": "不支持自修复",
-      "recent_failures": []
-    },
     {
       "agent_id": "AG-ZY-017",
       "agent_name": "铸渊 · 广播分发",
@@ -90,10 +74,10 @@
   ],
   "summary": {
     "total": 14,
-    "checked_in": 11,
-    "missing": 3,
+    "checked_in": 13,
+    "missing": 1,
     "auto_repaired": 0,
-    "needs_intervention": 3
+    "needs_intervention": 1
   },
   "push_targets": [
     "零点原核",
