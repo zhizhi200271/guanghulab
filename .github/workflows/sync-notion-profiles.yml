@@ -41,6 +41,9 @@ jobs:
           git config user.name "铸渊 (ZhùYuān)"
           git config user.email "zhuyuan@guanghulab.com"
           git add .github/notion-cache/
-          git diff --cached --quiet && echo "无变更" && exit 0
+          if git diff --cached --quiet; then
+            echo "📡 Notion 画像无变更，跳过提交"
+            exit 0
+          fi
           git commit -m "📡 同步 Notion 开发者画像 · $(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M')"
           git push origin main

@@ -1818,7 +1818,7 @@ async function submitToZhuyuan(instructionText, instructionId, moduleName) {
       const err = await res.json().catch(function() { return {}; });
       console.warn('[铸渊] Issue 创建失败:', res.status, err.message);
       alert('Issue 创建失败：' + (err.message || res.status) + '\n\n可能需要有仓库写权限的 Token。指令已复制到剪贴板，可手动提交。');
-      navigator.clipboard.writeText(instructionText).catch(function() {});
+      navigator.clipboard.writeText(instructionText).catch(function() { console.warn('[铸渊] 复制到剪贴板失败'); });
       return null;
     }
   } catch (e) {

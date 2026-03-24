@@ -34,6 +34,7 @@ const DEV_REGISTRY = {
 function notionRequest(method, apiPath, body) {
   return new Promise((resolve, reject) => {
     if (!NOTION_TOKEN) {
+      console.warn('⚠️ NOTION_TOKEN 未配置，跳过 Notion API 调用');
       resolve({ error: 'NOTION_TOKEN not configured' });
       return;
     }
@@ -52,7 +53,10 @@ function notionRequest(method, apiPath, body) {
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
         try { resolve(JSON.parse(data)); }
-        catch (_) { resolve({ raw: data }); }
+        catch (parseErr) {
+          console.warn('⚠️ Notion API 响应解析失败:', parseErr.message);
+          resolve({ error: 'JSON parse failed', raw: data });
+        }
       });
     });
     req.on('error', reject);
