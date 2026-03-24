@@ -71,11 +71,11 @@ function run() {
     console.log(`   超出阈值 ${OVERTIME_THRESHOLD * 100}%（预计 ${result.threshold}min）`);
 
     // 输出供 readme-status-updater 使用
-    console.log(`::set-output name=overtime::true`);
-    console.log(`::set-output name=message::${result.message}`);
+    console.log(`[RESULT] overtime=true`);
+    console.log(`[RESULT] message=${result.message}`);
   } else {
     console.log(`✅ 休眠时间正常，剩余 ${result.remaining}min`);
-    console.log(`::set-output name=overtime::false`);
+    console.log(`[RESULT] overtime=false`);
   }
 
   return result;

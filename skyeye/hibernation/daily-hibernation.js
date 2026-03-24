@@ -277,10 +277,10 @@ function run() {
   console.log(`  修复: ${checkpoint.issues_auto_fixed} 项`);
   console.log('═══════════════════════════════════════════════');
 
-  // 输出供 workflow 使用
-  console.log(`::set-output name=checkpoint_id::${checkpoint.checkpoint_id}`);
-  console.log(`::set-output name=optimizations::${optimizations.length}`);
-  console.log(`::set-output name=guards_online::${Object.keys(healthResults.guards).length}`);
+  // 输出关键结果到 stdout 方便 workflow 日志检索
+  console.log(`[RESULT] checkpoint_id=${checkpoint.checkpoint_id}`);
+  console.log(`[RESULT] optimizations=${optimizations.length}`);
+  console.log(`[RESULT] guards_online=${Object.keys(healthResults.guards).length}`);
 
   return checkpoint;
 }

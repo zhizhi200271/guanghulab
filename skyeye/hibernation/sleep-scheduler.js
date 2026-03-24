@@ -476,9 +476,9 @@ function run() {
   fs.writeFileSync(outputPath, JSON.stringify(result, null, 2) + '\n', 'utf8');
   console.log(`[SkyEye Sleep Scheduler] Decision written to: ${outputPath}`);
 
-  // 也输出到 stdout 方便 workflow 捕获
-  console.log('::set-output name=sleep_minutes::' + (result.decision.total_minutes || 0));
-  console.log('::set-output name=sleep_decision::' + JSON.stringify(result.decision));
+  // 输出关键结果到 stdout 方便 workflow 日志检索
+  console.log(`[RESULT] sleep_minutes=${result.decision.total_minutes || 0}`);
+  console.log(`[RESULT] sleep_decision=${JSON.stringify(result.decision)}`);
 
   return result;
 }
