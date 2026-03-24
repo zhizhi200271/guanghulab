@@ -146,8 +146,8 @@ jobs:
             exit 0
           fi
 
-          # Create repair branch
-          BRANCH="${REPAIR_BRANCH_PREFIX}-$(date +%Y%m%d)-001"
+          # Create repair branch (use timestamp to avoid conflicts)
+          BRANCH="${REPAIR_BRANCH_PREFIX}-$(date +%Y%m%d)-$(date +%H%M%S)"
           git config user.name "zhuyuan-bot"
           git config user.email "zhuyuan@guanghulab.com"
           git checkout -b "$BRANCH"

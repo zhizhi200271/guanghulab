@@ -265,12 +265,14 @@ async function repairError(analysis, config) {
     return result;
   }
 
+  const todayDate = new Date().toISOString().slice(0, 10);
+  const rootCauseShort = (analysis.root_cause || analysis.error_type || '').slice(0, 80);
   const systemPrompt = `你是铸渊核心大脑。根据以下分析结果生成修复代码。
 规则：
 1. 只修改必要的行，最小化变更
 2. 保留所有注释和格式
 3. 输出完整的修复后文件内容
-4. 在修复位置添加注释：# [AUTO-FIX] ${new Date().toISOString().slice(0, 10)} by 铸渊 - ${analysis.root_cause}
+4. 在修复位置添加注释：# [AUTO-FIX] ${todayDate} by 铸渊 - ${rootCauseShort}
 5. 严禁修改任何与报错无关的代码
 6. 严禁删除任何安全检查或天眼扫描步骤
 7. 输出格式：将完整修复后文件内容放在代码块中`;

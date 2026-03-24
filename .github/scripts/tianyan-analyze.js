@@ -334,9 +334,11 @@ async function main() {
   console.log(`📊 分析结果: 共 ${result.total} 个, 可自动修复 ${result.auto_fixable} 个, 需人工 ${result.manual_only} 个`);
   console.log(`📁 结果保存: ${outputPath}`);
 
-  // Output for GitHub Actions
-  console.log(`::set-output name=auto_fixable_count::${result.auto_fixable}`);
-  console.log(`::set-output name=total_errors::${result.total}`);
+  // Output for GitHub Actions (using GITHUB_OUTPUT env file)
+  if (process.env.GITHUB_OUTPUT) {
+    fs.appendFileSync(process.env.GITHUB_OUTPUT, `auto_fixable_count=${result.auto_fixable}\n`);
+    fs.appendFileSync(process.env.GITHUB_OUTPUT, `total_errors=${result.total}\n`);
+  }
 }
 
 main().catch(e => {

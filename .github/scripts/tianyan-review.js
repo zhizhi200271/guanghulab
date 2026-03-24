@@ -103,10 +103,16 @@ function checkH2_FileSyntax(modifiedFiles) {
         if (content.includes('\t')) {
           throw new Error('YAML contains tab characters');
         }
-        // Check for basic YAML structure (should start with valid YAML content)
+        // Basic YAML structural check: must have at least one key-value or comment
         const trimmed = content.trim();
-        if (trimmed.length > 0 && !trimmed.startsWith('#') && !trimmed.startsWith('name:') && !trimmed.startsWith('on:') && !trimmed.startsWith('---') && !trimmed.match(/^[a-zA-Z_]/)) {
-          throw new Error('YAML does not start with valid content');
+        if (trimmed.length > 0) {
+          const hasValidStructure = trimmed.split('\n').some(line => {
+            const l = line.trim();
+            return l.startsWith('#') || l.startsWith('---') || l.includes(':') || l.startsWith('-');
+          });
+          if (!hasValidStructure) {
+            throw new Error('YAML does not contain valid structure');
+          }
         }
       }
       result.details.push(`${filePath}: ✅ syntax OK`);
@@ -199,7 +205,7 @@ function checkH6_ChangeScope(modifiedFiles, config) {
   const maxTotal = config.safety.max_total_changed_lines || 200;
 
   for (const filePath of modifiedFiles) {
-    const diff = gitExec(`git diff --numstat HEAD~1 -- "${filePath}"`);
+    const diff = gitExec(`git diff --numstat main -- "${filePath}"`) || gitExec(`git diff --numstat HEAD -- "${filePath}"`);
     if (!diff) continue;
 
     const parts = diff.split('\t');
@@ -234,8 +240,8 @@ function checkH7_SecretsIntegrity(modifiedFiles) {
   for (const filePath of modifiedFiles) {
     if (!filePath.endsWith('.yml') && !filePath.endsWith('.yaml')) continue;
 
-    // Get original content from git
-    const originalContent = gitExec(`git show HEAD~1:"${filePath}" 2>/dev/null`);
+    // Get original content from git (use main branch as reference)
+    const originalContent = gitExec(`git show main:"${filePath}" 2>/dev/null`) || gitExec(`git show HEAD:"${filePath}" 2>/dev/null`);
     const absPath = path.join(ROOT, filePath);
     if (!fs.existsSync(absPath)) continue;
     const newContent = fs.readFileSync(absPath, 'utf8');

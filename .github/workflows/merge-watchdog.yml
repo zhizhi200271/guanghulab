@@ -74,14 +74,24 @@ jobs:
 
           echo "PR #$PR_NUM: $PR_TITLE"
 
-          # 从 PR 标题中提取目标 Workflow
-          # 格式约定: 🌙 [AUTO-FIX] YYYY-MM-DD 天眼夜间自动修复 (N个修复)
-          WORKFLOW=$(echo "$PR_TITLE" | grep -oP '\[AUTO-FIX\]\s+\K[^(]+' | sed 's/天眼夜间自动修复//' | xargs || echo "unknown")
+          # 从 PR body/commits 中提取修复的目标 Workflow
+          # 先尝试从 PR body 获取修复清单，再用 PR 标题作为回退
+          if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
+            PR_BODY="${{ github.event.pull_request.body }}"
+            # Try to extract workflow names from commit messages or PR body
+            WORKFLOW=$(echo "$PR_BODY" | grep -oP '\b[\w-]+\.yml\b' | sort -u | head -5 | tr '\n' ',' | sed 's/,$//' || echo "")
+          fi
+
+          if [ -z "$WORKFLOW" ]; then
+            # Fallback: use branch name to extract date info, mark as "nightly-repair"
+            BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
+            WORKFLOW="nightly-repair-$(echo "$BRANCH_NAME" | grep -oP '\d{8}' || echo 'unknown')"
+          fi
 
           echo "target_workflows=$WORKFLOW" >> $GITHUB_OUTPUT
           echo "should_watch=true" >> $GITHUB_OUTPUT
           echo "pr_number=$PR_NUM" >> $GITHUB_OUTPUT
-          echo "👁️ 开始看守: PR #$PR_NUM"
+          echo "👁️ 开始看守: PR #$PR_NUM (targets: $WORKFLOW)"
 
   # ========================================
   # 注册看守 + 观察目标 Workflow 运行结果
