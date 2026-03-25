@@ -28,15 +28,12 @@ var DEV_REGISTRY = {
 router.get('/dev/:devId', async function(req, res) {
   var devId = req.params.devId;
 
-  // 验证 devId 格式
-  if (!/^DEV-\d{3}$/.test(devId)) {
-    return res.status(400).json({ error: true, code: 'INVALID_DEV_ID', message: '无效的开发者编号格式' });
+  // 验证 devId
+  if (!DEV_REGISTRY[devId]) {
+    return res.status(404).json({ error: true, code: 'DEV_NOT_FOUND', message: '开发者不存在' });
   }
 
   var devInfo = DEV_REGISTRY[devId];
-  if (!devInfo) {
-    return res.status(404).json({ error: true, code: 'DEV_NOT_FOUND', message: '开发者不存在' });
-  }
 
   var profile = {
     dev_id: devId,

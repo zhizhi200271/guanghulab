@@ -18,7 +18,6 @@ const app = express();
 app.use(cors({
   origin: [
     'https://guanghulab.com',
-    'http://guanghulab.com',
     'https://www.guanghulab.com',
     'https://qinfendebingshuo.github.io'
   ],

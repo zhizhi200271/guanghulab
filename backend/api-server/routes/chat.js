@@ -55,7 +55,7 @@ router.post('/chat/context', async function(req, res) {
   // 获取 Agent 注册表计数
   try {
     if (dbConfig.agentRegistry) {
-      var agents = await notionService.queryDB(dbConfig.agentRegistry, null, null, 1);
+      var agents = await notionService.queryDB(dbConfig.agentRegistry, null, null, 100);
       context.agents_count = agents.results ? agents.results.length : 0;
     }
   } catch (_) {}
@@ -66,7 +66,7 @@ router.post('/chat/context', async function(req, res) {
       var syslogs = await notionService.queryDB(dbConfig.syslogInbox, {
         property: 'DEV编号',
         rich_text: { equals: devId }
-      }, null, 1);
+      }, null, 100);
       context.syslogs_count = syslogs.results ? syslogs.results.length : 0;
     }
   } catch (_) {}
@@ -75,7 +75,7 @@ router.post('/chat/context', async function(req, res) {
   try {
     if (dbConfig.ticketBook) {
       var tickets = await notionService.queryDB(dbConfig.ticketBook,
-        { property: '状态', select: { does_not_equal: '已完成' } }, null, 1);
+        { property: '状态', select: { does_not_equal: '已完成' } }, null, 100);
       context.tickets_count = tickets.results ? tickets.results.length : 0;
     }
   } catch (_) {}

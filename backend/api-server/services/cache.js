@@ -14,7 +14,7 @@ var store = new Map();
 function get(key) {
   var item = store.get(key);
   if (!item) return null;
-  if (Date.now() - item.time > (item.ttl || DEFAULT_TTL)) {
+  if (Date.now() - item.time >= (item.ttl || DEFAULT_TTL)) {
     store.delete(key);
     return null;
   }
