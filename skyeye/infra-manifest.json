@@ -214,6 +214,33 @@
         "merge_watchdog": "事件驱动（PR合并时触发）"
       },
       "agents": ["AG-ZY-087", "AG-ZY-088"]
+    },
+    "sync_dev_status": {
+      "node_id": "SYNC-DEV-STATUS-V1",
+      "service": "dev-status.json 同步 · 霜砚签发制",
+      "plan": "Internal",
+      "type": "sync_pipeline",
+      "description": "霜砚签发（AG-SY-01）→ 铸渊接收写入（AG-ZY-01）· 签名可校验可溯源可审计",
+      "workflow": ".github/workflows/sync-dev-status.yml",
+      "repair_workflow": ".github/workflows/skyeye-devsync-repair.yml",
+      "script": "scripts/sync-dev-status.js",
+      "data_file": ".github/persona-brain/dev-status.json",
+      "sync_log": ".github/persona-brain/dev-status-sync-log.json",
+      "schedule": {
+        "sync": ["09:00 CST (01:00 UTC)", "22:00 CST (14:00 UTC)"],
+        "monitor": "08:30 CST (00:30 UTC)"
+      },
+      "thresholds": {
+        "green_hours": 14,
+        "yellow_hours": 48,
+        "red_hours": 48
+      },
+      "alert_mechanism": "github_issue",
+      "alert_target": "repo_owner",
+      "mechanism": "shuangyan-signed-v1.0",
+      "instruction_ref": "ZY-DEVSYNC-REBUILD-2026-0325-001",
+      "created": "2026-03-25",
+      "status": "active"
     }
   }
 }

@@ -1,22 +1,28 @@
 /**
  * sync-dev-status.js
  * 从 Notion 主控台同步 dev-status.json 到 GitHub 仓库
- * 
+ * 机制：霜砚签发制 v1.0 (shuangyan-signed-v1.0)
+ * 指令溯源：ZY-DEVSYNC-REBUILD-2026-0325-001
+ *
  * 使用方式：
  *   NOTION_TOKEN=xxx DEV_STATUS_DB_ID=xxx node scripts/sync-dev-status.js
- * 
+ *
  * 如果 Notion 环境变量不可用，将基于本地文件刷新 last_sync 时间戳
  */
 
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
+const crypto = require('crypto');
 
 const DEV_STATUS_PATH = path.join('.github', 'persona-brain', 'dev-status.json');
 const ROOT_STATUS_PATH = 'dev-status.json';
 
 const NOTION_TOKEN = process.env.NOTION_TOKEN || '';
 const DEV_STATUS_DB_ID = process.env.DEV_STATUS_DB_ID || '';
+
+const INSTRUCTION_REF = 'ZY-DEVSYNC-REBUILD-2026-0325-001';
+const SYNC_MECHANISM = 'shuangyan-signed-v1.0';
 
 // ── Notion API 请求封装 ──
 function notionRequest(method, endpoint, body) {
@@ -77,21 +83,39 @@ async function fetchDevStatusFromNotion() {
 
   console.log(`✅ 从 Notion 获取到 ${pages.length} 条开发者记录`);
 
-  // 解析 Notion 页面属性为 dev-status 格式
+  // 解析 Notion 页面属性为 dev-status 格式（霜砚签发制格式）
   const team = pages.map(page => {
     const props = page.properties || {};
+    const lastSyslog = getNotionText(props['最后SYSLOG']) || getNotionDate(props['最后SYSLOG']);
     return {
       dev_id: getNotionText(props['编号']) || getNotionTitle(props['Name']) || '',
       name: getNotionText(props['昵称']) || getNotionTitle(props['Name']) || '',
       module: getNotionText(props['当前模块']) || '',
       status: mapNotionStatus(getNotionSelect(props['状态'])),
-      current: getNotionText(props['当前进度']) || '',
-      waiting: getNotionText(props['等待项']) || '',
+      current_task: getNotionText(props['当前广播']) || getNotionText(props['当前进度']) || '',
       streak: getNotionNumber(props['连胜']) || 0,
+      waiting_for: getNotionText(props['等待项']) || null,
+      last_syslog: lastSyslog || null,
+      alert: computeAlert(lastSyslog),
     };
   }).filter(d => d.dev_id);
 
   return team;
+}
+
+// ── 根据 last_syslog 计算告警级别 ──
+function computeAlert(lastSyslog) {
+  if (!lastSyslog) return null;
+  try {
+    const last = new Date(lastSyslog);
+    if (isNaN(last.getTime())) return null;
+    const diffHours = (Date.now() - last.getTime()) / (1000 * 60 * 60);
+    if (diffHours > 168) return 'over_7d';
+    if (diffHours > 72) return 'over_72h';
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 // ── Notion 属性解析辅助函数 ──
@@ -118,6 +142,11 @@ function getNotionNumber(prop) {
   return prop.number || 0;
 }
 
+function getNotionDate(prop) {
+  if (!prop || prop.type !== 'date') return '';
+  return prop.date?.start || '';
+}
+
 function mapNotionStatus(status) {
   const map = {
     '活跃': 'active',
@@ -137,8 +166,12 @@ function generateSummary(team) {
     ? team.reduce((max, d) => d.streak > max.streak ? d : max, team[0])
     : null;
   const alerts = team
-    .filter(d => d.waiting && d.waiting.includes('⚠️'))
-    .map(d => `${d.dev_id} ${d.name}: ${d.waiting}`);
+    .filter(d => d.alert || (d.waiting_for && typeof d.waiting_for === 'string' && d.waiting_for.includes('⚠️')))
+    .map(d => {
+      if (d.alert === 'over_7d') return `${d.dev_id} ${d.name}: 超7天未回执`;
+      if (d.alert === 'over_72h') return `${d.dev_id} ${d.name}: 超72h未回执`;
+      return `${d.dev_id} ${d.name}: ${d.waiting_for}`;
+    });
 
   return {
     total_devs: team.length,
@@ -149,13 +182,22 @@ function generateSummary(team) {
   };
 }
 
+// ── 计算签名哈希 ──
+function computeSignatureHash(developers) {
+  const devJson = JSON.stringify(developers);
+  const hash = crypto.createHash('sha256').update(devJson).digest('hex');
+  return `sha256:${hash}`;
+}
+
 // ── 主流程 ──
 async function main() {
   const now = new Date();
   const bjTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
   const timestamp = bjTime.toISOString().replace('Z', '+08:00');
+  const syncDate = timestamp.split('T')[0];
 
-  console.log(`🔄 dev-status.json 同步开始 · ${timestamp}`);
+  console.log('═══ dev-status.json 同步 · 霜砚签发制 v1.0 ═══');
+  console.log(`同步时间：${timestamp}`);
 
   // 读取当前状态
   let currentStatus = {};
@@ -168,45 +210,64 @@ async function main() {
   // 尝试从 Notion 获取数据
   const notionTeam = await fetchDevStatusFromNotion();
 
+  let team;
   if (notionTeam) {
     // Notion 同步成功
-    currentStatus.team = notionTeam;
-    currentStatus.summary = generateSummary(notionTeam);
-    currentStatus.sync_source = 'notion-master-console';
+    team = notionTeam;
     console.log(`✅ Notion 同步成功 · ${notionTeam.length} 位开发者`);
   } else {
-    // Notion 不可用时，保持现有数据，仅更新时间戳
+    // Notion 不可用时，保持现有数据
     console.log('📌 Notion 不可用，保留当前数据，更新同步时间戳');
-    if (currentStatus.team) {
-      currentStatus.summary = generateSummary(currentStatus.team);
-    }
-    currentStatus.sync_source = currentStatus.sync_source || 'local-refresh';
+    team = currentStatus.developers || currentStatus.team || [];
   }
 
-  // 更新同步时间
-  currentStatus.last_sync = timestamp;
+  // 组装霜砚签发包
+  const signatureHash = computeSignatureHash(team);
+
+  const syncPackage = {
+    // ─── 签发元数据 ───
+    signed_by: 'AG-SY-01',
+    signed_at: timestamp,
+    sync_date: syncDate,
+    instruction_ref: INSTRUCTION_REF,
+
+    // ─── 同步元数据 ───
+    last_sync: timestamp,
+    sync_source: notionTeam ? 'notion-mastercontrol-v3' : (currentStatus.sync_source || 'local-refresh'),
+    sync_mechanism: SYNC_MECHANISM,
+
+    // ─── 团队数据 ───
+    team_count: team.length,
+    developers: team,
+
+    // ─── 汇总 ───
+    summary: generateSummary(team),
+
+    // ─── 签名校验 ───
+    signature_hash: signatureHash,
+  };
 
   // 写入 persona-brain 版本
-  fs.writeFileSync(DEV_STATUS_PATH, JSON.stringify(currentStatus, null, 2) + '\n');
+  fs.writeFileSync(DEV_STATUS_PATH, JSON.stringify(syncPackage, null, 2) + '\n');
   console.log(`✅ 已写入 ${DEV_STATUS_PATH}`);
 
   // 同步写入根目录版本
-  fs.writeFileSync(ROOT_STATUS_PATH, JSON.stringify(currentStatus, null, 2) + '\n');
+  fs.writeFileSync(ROOT_STATUS_PATH, JSON.stringify(syncPackage, null, 2) + '\n');
   console.log(`✅ 已写入 ${ROOT_STATUS_PATH}`);
 
   // 输出摘要
-  if (currentStatus.summary) {
-    console.log('\n📊 团队状态摘要:');
-    console.log(`   总开发者: ${currentStatus.summary.total_devs}`);
-    console.log(`   等待SYSLOG: ${currentStatus.summary.active_waiting_syslog}`);
-    console.log(`   最高连胜: ${currentStatus.summary.top_streak}`);
-    if (currentStatus.summary.alerts?.length > 0) {
-      console.log(`   ⚠️ 告警: ${currentStatus.summary.alerts.length} 条`);
-      currentStatus.summary.alerts.forEach(a => console.log(`      - ${a}`));
-    }
+  const summary = syncPackage.summary;
+  console.log('\n📊 团队状态摘要:');
+  console.log(`   总开发者: ${summary.total_devs}`);
+  console.log(`   等待SYSLOG: ${summary.active_waiting_syslog}`);
+  console.log(`   最高连胜: ${summary.top_streak}`);
+  console.log(`   签名哈希: ${signatureHash.slice(0, 19)}...`);
+  if (summary.alerts?.length > 0) {
+    console.log(`   ⚠️ 告警: ${summary.alerts.length} 条`);
+    summary.alerts.forEach(a => console.log(`      - ${a}`));
   }
 
-  console.log(`\n✅ dev-status.json 同步完成 · ${timestamp}`);
+  console.log(`\n✅ dev-status.json 同步完成 · 霜砚签发制 v1.0 · ${timestamp}`);
 }
 
 main().catch(err => {

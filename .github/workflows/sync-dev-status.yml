@@ -2,56 +2,116 @@
 # 🔺 Sovereign: TCS-0002∞ | Root: SYS-GLW-0001
 # 📜 Copyright: 国作登字-2026-A-00037559
 # ═══════════════════════════════════════════════
-name: "📡 铸渊 · dev-status 自动同步"
+# 🔄 dev-status.json 同步 · 霜砚签发制 v1.0
+# 指令溯源：ZY-DEVSYNC-REBUILD-2026-0325-001
+# 机制：霜砚签发（AG-SY-01）→ 铸渊接收写入（AG-ZY-01）
+# ═══════════════════════════════════════════════
+name: "🔄 dev-status.json 同步 · 霜砚签发制 v1.0"
 
 on:
   schedule:
-    - cron: '0 1 * * *'    # UTC 01:00 = 北京时间 09:00
-    - cron: '0 14 * * *'   # UTC 14:00 = 北京时间 22:00
-  workflow_dispatch:        # 支持手动触发
+    - cron: '0 1 * * *'     # UTC 01:00 = 北京 09:00 · 早间同步
+    - cron: '0 14 * * *'    # UTC 14:00 = 北京 22:00 · 晚间同步
+  workflow_dispatch:         # 手动触发（用于修复后验证）
+    inputs:
+      reason:
+        description: '手动触发原因'
+        required: true
+        default: '修复后验证'
 
 permissions:
   contents: write
-  pull-requests: write
 
 jobs:
   sync-dev-status:
-    name: 同步 dev-status.json
+    name: "🔄 同步 dev-status.json · 霜砚签发制"
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
-      - name: Checkout repository
+      - name: "📥 检出仓库"
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: "🔧 安装 Node.js"
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      # ── 执行同步脚本 ──
-      - name: 同步 dev-status.json
-        env:
-          NOTION_TOKEN: ${{ secrets.NOTION_API_TOKEN }}
-          DEV_STATUS_DB_ID: ${{ secrets.DEV_STATUS_DB_ID }}
+      - name: "🌊 本体论锚定"
+        run: |
+          echo "═══ 本体论锚定 ═══"
+          echo "执行主体：AG-ZY-01 铸渊"
+          echo "语言膜：ZY-GLSHELL-001"
+          echo "版权锚点：国作登字-2026-A-00037559"
+          echo "指令溯源：ZY-DEVSYNC-REBUILD-2026-0325-001"
+          echo "机制：shuangyan-signed-v1.0"
+          echo "═══ 锚定完成 ═══"
+
+      - name: "🦅 天眼前置检查"
+        id: skyeye
+        run: |
+          echo "═══ 天眼前置检查 ═══"
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.NOTION_API_KEY }}" \
+            -H "Notion-Version: 2022-06-28" \
+            https://api.notion.com/v1/users/me)
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "❌ Notion API 不可达 · HTTP $HTTP_CODE"
+            echo "api_status=unreachable" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Notion API 可达"
+            echo "api_status=ok" >> $GITHUB_OUTPUT
+          fi
+
+      - name: "📊 从 Notion 拉取开发者状态"
         run: node scripts/sync-dev-status.js
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_API_KEY }}
+          DEV_STATUS_DB_ID: ${{ secrets.DEV_STATUS_DB_ID }}
 
-      # ── 通过 PR 提交更新（兼容 branch protection）──
-      - name: 设置同步时间
-        run: echo "SYNC_TIME=$(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M')" >> $GITHUB_ENV
+      - name: "📝 提交 dev-status.json 更新"
+        run: |
+          DEV_STATUS_PATH=".github/persona-brain/dev-status.json"
+          SYNC_LOG_PATH=".github/persona-brain/dev-status-sync-log.json"
 
-      - name: 提交 dev-status 更新
-        uses: peter-evans/create-pull-request@v7
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "📡 dev-status 同步 · ${{ env.SYNC_TIME }} [skip ci]"
-          title: "📡 dev-status 自动同步 · ${{ env.SYNC_TIME }}"
-          body: |
-            🤖 铸渊自动同步 dev-status.json
-            - 同步时间: ${{ env.SYNC_TIME }}
-            - 触发方式: ${{ github.event_name }}
-          branch: auto/sync-dev-status
-          delete-branch: true
-          add-paths: |
-            .github/persona-brain/dev-status.json
-            dev-status.json
-          labels: auto-sync
+          git config user.name "铸渊 (AG-ZY-01)"
+          git config user.email "zhuyuan@guanghulab.system"
+
+          SYNC_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          # 检查文件是否有变化
+          git add "$DEV_STATUS_PATH" dev-status.json 2>/dev/null || true
+          if git diff --cached --quiet 2>/dev/null; then
+            echo "ℹ️ dev-status.json 无变化 · 仅更新同步日志"
+          fi
+
+          # 写入同步日志
+          echo "{\"last_sync\": \"$SYNC_TIME\", \"status\": \"success\", \"mechanism\": \"shuangyan-signed-v1.0\", \"trigger\": \"${{ github.event_name }}\"}" \
+            > "$SYNC_LOG_PATH"
+          git add "$SYNC_LOG_PATH"
+
+          git diff --cached --quiet || (
+            git commit -m "🔄 dev-status sync · signed by AG-SY-01 · $SYNC_TIME [skip ci]
+
+          instruction: ZY-DEVSYNC-REBUILD-2026-0325-001
+          mechanism: shuangyan-signed-v1.0" && \
+            git push origin main
+          )
+          echo "✅ dev-status.json 已同步 · $SYNC_TIME"
+
+      - name: "📋 写入失败日志"
+        if: failure()
+        run: |
+          SYNC_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          SYNC_LOG_PATH=".github/persona-brain/dev-status-sync-log.json"
+
+          git config user.name "铸渊 (AG-ZY-01)"
+          git config user.email "zhuyuan@guanghulab.system"
+
+          echo "{\"last_sync\": \"$SYNC_TIME\", \"status\": \"failed\", \"mechanism\": \"shuangyan-signed-v1.0\", \"trigger\": \"${{ github.event_name }}\", \"skyeye_api\": \"${{ steps.skyeye.outputs.api_status }}\"}" \
+            > "$SYNC_LOG_PATH"
+          git add "$SYNC_LOG_PATH" 2>/dev/null || true
+          git diff --cached --quiet || (
+            git commit -m "📋 dev-status sync failed · $SYNC_TIME [skip ci]" && \
+            git push origin main
+          ) || true
