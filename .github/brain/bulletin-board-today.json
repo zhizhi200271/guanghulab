@@ -54,6 +54,15 @@
       "result": "success",
       "icon": "✅",
       "sortKey": 1774404959000
+    },
+    {
+      "key": "Copilot|—|2026-03-25T02:16:07Z",
+      "ts": "2026-03-25T02:16:07Z",
+      "actor": "Copilot",
+      "module": "—",
+      "result": "action_required",
+      "icon": "🔵",
+      "sortKey": 1774404967000
     }
   ]
 }
