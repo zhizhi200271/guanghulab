@@ -1,0 +1,152 @@
+{
+  "digest_id": "NEURAL-DIGEST-2026-03-25",
+  "timestamp": "2026-03-25T14:10:32.512Z",
+  "timestamp_cst": "2026-03-25T22:10:32.512+08:00",
+  "version": "3.0.0",
+  "instruction_ref": "ZY-NEURAL-UPGRADE-2026-0325-R2-002",
+  "overall_health": "🟡",
+  "failure_rate_percent": 14,
+  "workflow_summary": {
+    "total_runs_24h": 100,
+    "success": 52,
+    "failure": 14,
+    "cancelled": 26,
+    "in_progress": 1
+  },
+  "brain_summary": {
+    "AG-TY-01": {
+      "name": "天眼 Notion 大脑",
+      "total_workflows": 5,
+      "healthy": 0,
+      "failed": 0,
+      "no_data": 5,
+      "workflows": [
+        {
+          "id": "zhuyuan-skyeye",
+          "name": "天眼主引擎",
+          "status": "⚠️",
+          "runs": 0,
+          "successes": 0,
+          "failures": 0
+        },
+        {
+          "id": "skyeye-weekly-scan",
+          "name": "周六大巡检",
+          "status": "⚠️",
+          "runs": 0,
+          "successes": 0,
+          "failures": 0
+        },
+        {
+          "id": "server-patrol",
+          "name": "服务器巡检",
+          "status": "⚠️",
+          "runs": 0,
+          "successes": 0,
+          "failures": 0
+        },
+        {
+          "id": "zhuyuan-daily-selfcheck",
+          "name": "核心大脑自检",
+          "status": "⚠️",
+          "runs": 0,
+          "successes": 0,
+          "failures": 0
+        },
+        {
+          "id": "neural-daily-digest",
+          "name": "汇总引擎",
+          "status": "⚠️",
+          "runs": 0,
+          "successes": 0,
+          "failures": 0
+        }
+      ]
+    },
+    "AG-SY-01": {
+      "name": "霜砚",
+      "total_workflows": 3,
+      "healthy": 0,
+      "failed": 0,
+      "no_data": 3,
+      "workflows": [
+        {
+          "id": "zhuyuan-gate-guard",
+          "name": "智能门禁",
+          "status": "⚠️",
+          "runs": 0,
+          "successes": 0,
+          "failures": 0
+        },
+        {
+          "id": "deploy-to-server",
+          "name": "CD 自动部署",
+          "status": "⚠️",
+          "runs": 0,
+          "successes": 0,
+          "failures": 0
+        },
+        {
+          "id": "zhuyuan-exec-engine",
+          "name": "远程执行引擎",
+          "status": "⚠️",
+          "runs": 0,
+          "successes": 0,
+          "failures": 0
+        }
+      ]
+    },
+    "SY-03": {
+      "name": "运营巡检 Agent",
+      "total_workflows": 3,
+      "healthy": 0,
+      "failed": 0,
+      "no_data": 3,
+      "workflows": [
+        {
+          "id": "syslog-pipeline",
+          "name": "SYSLOG 处理",
+          "status": "⚠️",
+          "runs": 0,
+          "successes": 0,
+          "failures": 0
+        },
+        {
+          "id": "distribute-broadcasts",
+          "name": "广播分发",
+          "status": "⚠️",
+          "runs": 0,
+          "successes": 0,
+          "failures": 0
+        },
+        {
+          "id": "sync-dev-status",
+          "name": "开发者状态同步",
+          "status": "⚠️",
+          "runs": 0,
+          "successes": 0,
+          "failures": 0
+        }
+      ]
+    }
+  },
+  "skyeye_status": {
+    "overall_health": "🟡",
+    "last_scan": "2026-03-25T05:45:00Z",
+    "total_issues": 0
+  },
+  "guard_status": {
+    "total": 6,
+    "active": 6,
+    "suspended": 0
+  },
+  "quota_status": {
+    "overall": "healthy",
+    "alerts": [],
+    "last_updated": "2026-03-24T04:20:00.000Z"
+  },
+  "issues_detected": [],
+  "recommendations": [],
+  "neural_map_version": "3.0.0",
+  "unmapped_workflows": []
+}
