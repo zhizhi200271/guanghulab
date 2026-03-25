@@ -1,7 +1,7 @@
 {
   "scan_id": "SCAN-20260325",
   "mode": "full",
-  "timestamp": "2026-03-25T06:10:34.404Z",
+  "timestamp": "2026-03-25T06:22:39.125Z",
   "guard_scan": {
     "total": 6,
     "valid": 5,
@@ -185,7 +185,7 @@
       {
         "item": "未映射 Workflow 检查",
         "status": "✅",
-        "detail": "85 个未映射（非核心 Workflow 可不映射）"
+        "detail": "85 个未映射（非核心 Workflow 可不映射，已映射 11 个）"
       },
       {
         "item": "Brain 注册完整性",
