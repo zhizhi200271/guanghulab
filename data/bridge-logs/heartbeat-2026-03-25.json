@@ -1,0 +1,14 @@
+[
+  {
+    "timestamp": "2026-03-25T02:52:27.866Z",
+    "notion": {
+      "healthy": true,
+      "status": 200,
+      "latency": 420,
+      "user": "曜冥纪元-HoloLake"
+    },
+    "queue": {
+      "created": false
+    }
+  }
+]
