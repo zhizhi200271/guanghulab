@@ -1,7 +1,7 @@
 {
   "description": "铸渊图书馆目录 · Library Catalog for 铸渊 (Zhùyuān)",
   "version": "2.0",
-  "generated_at": "2026-03-25T02:21:28.674Z",
+  "generated_at": "2026-03-25T03:56:03.199Z",
   "generated_by": "scripts/generate-repo-map.js",
   "repo": "qinfendebingshuo/guanghulab",
   "stats": {
@@ -138,6 +138,9 @@
           "file": "decision-log.md"
         },
         {
+          "file": "dev-status-sync-log.json"
+        },
+        {
           "file": "dev-status.json"
         },
         {
@@ -192,7 +195,7 @@
           "file": "zhuyuan-signature-registry.json"
         }
       ],
-      "item_count": 21
+      "item_count": 22
     },
     {
       "zone_id": "WORKFLOWS",
@@ -1271,7 +1274,7 @@
         {
           "module_id": "M01",
           "dir": "m01-login",
-          "files": 1,
+          "files": 2,
           "has_readme": true
         },
         {
@@ -1301,7 +1304,7 @@
         {
           "module_id": "M10",
           "dir": "m10-cloud",
-          "files": 4,
+          "files": 5,
           "has_readme": true
         },
         {
@@ -1319,13 +1322,13 @@
         {
           "module_id": "M15",
           "dir": "m15-cloud-drive",
-          "files": 4,
+          "files": 5,
           "has_readme": true
         },
         {
           "module_id": "M18",
           "dir": "m18-health-check",
-          "files": 6,
+          "files": 7,
           "has_readme": true
         }
       ],
@@ -1511,10 +1514,16 @@
           "file": "diag-devsync-20260325.json"
         },
         {
+          "file": "diag-humanside-20260325.json"
+        },
+        {
           "file": "index.json"
+        },
+        {
+          "file": "syslog-humanside-fix-20260325.json"
         }
       ],
-      "item_count": 3
+      "item_count": 5
     },
     {
       "zone_id": "NOTION_PUSH",
@@ -1957,6 +1966,9 @@
     ],
     "decision-log": [
       "PERSONA_BRAIN::decision-log.md"
+    ],
+    "dev-status-sync-log": [
+      "PERSONA_BRAIN::dev-status-sync-log.json"
     ],
     "growth-journal": [
       "PERSONA_BRAIN::growth-journal.md"
@@ -2720,6 +2732,12 @@
     ],
     "diag-devsync-20260325": [
       "SIGNAL_LOG::diag-devsync-20260325.json"
+    ],
+    "diag-humanside-20260325": [
+      "SIGNAL_LOG::diag-humanside-20260325.json"
+    ],
+    "syslog-humanside-fix-20260325": [
+      "SIGNAL_LOG::syslog-humanside-fix-20260325.json"
     ],
     "notion": [
       "NOTION_PUSH"

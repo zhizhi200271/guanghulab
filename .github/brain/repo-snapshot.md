@@ -1,5 +1,5 @@
 # 铸渊图书馆快照 · Repo Snapshot
-> 生成于 2026-03-25 10:21 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
+> 生成于 2026-03-25 11:56 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
 
 ---
 
@@ -13,7 +13,7 @@
 | 脚本 | 80 个执行脚本 |
 | 开发者节点 | 8 人 |
 | HLI 接口覆盖率 | 7/21 (33%) |
-| 快照生成时间 | 2026-03-25 10:21 CST |
+| 快照生成时间 | 2026-03-25 11:56 CST |
 
 ---
 
@@ -25,7 +25,7 @@
 **关键词**: brain · memory · routing · wake · 大脑 · 记忆
 
 ### 🎭 人格大脑（PERSONA_BRAIN）
-**路径**: `.github/persona-brain` · **数量**: 21 项
+**路径**: `.github/persona-brain` · **数量**: 22 项
 **描述**: 铸渊人格记忆 · 开发者状态 · 知识库 · 成长日记
 **关键词**: persona · identity · dev-status · 人格 · 开发者状态
 
@@ -60,7 +60,7 @@
 **关键词**: broadcast · outbox · task · 广播 · 发件箱
 
 ### 📡 信号日志库（SIGNAL_LOG）
-**路径**: `signal-log` · **数量**: 3 项
+**路径**: `signal-log` · **数量**: 5 项
 **描述**: ESP 邮件信号收发日志 · GL-CMD / GL-ACK / GL-DATA
 **关键词**: signal · log · esp · gl-cmd · gl-ack · trace
 
@@ -324,16 +324,16 @@
 
 ## 📦 功能模块区（各开发者工作目录）
 
-- `m01-login/` — 1 个文件 (有README)
+- `m01-login/` — 2 个文件 (有README)
 - `m03-personality/` — 1 个文件 (有README)
 - `m05-user-center/` — 4 个文件 (有README)
 - `m06-ticket/` — 1 个文件 (有README)
 - `m07-dialogue-ui/` — 4 个文件 (有README)
-- `m10-cloud/` — 4 个文件 (有README)
+- `m10-cloud/` — 5 个文件 (有README)
 - `m11-module/` — 4 个文件 (有README)
 - `m12-kanban/` — 1 个文件 (有README)
-- `m15-cloud-drive/` — 4 个文件 (有README)
-- `m18-health-check/` — 6 个文件 (有README)
+- `m15-cloud-drive/` — 5 个文件 (有README)
+- `m18-health-check/` — 7 个文件 (有README)
 
 ---
 
