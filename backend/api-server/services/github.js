@@ -1,0 +1,132 @@
+/**
+ * GitHub API 服务封装
+ *
+ * 通过 GitHub API 获取仓库状态、提交记录等信息。
+ * 使用 GITHUB_TOKEN 环境变量认证。
+ * 版权：国作登字-2026-A-00037559
+ */
+
+'use strict';
+
+var https = require('https');
+
+var GITHUB_TOKEN = process.env.GITHUB_TOKEN || '';
+var ORG = 'qinfendebingshuo';
+
+// ====== 内存缓存（5分钟有效）======
+var cache = new Map();
+var CACHE_TTL = 5 * 60 * 1000;
+
+function getCached(key) {
+  var item = cache.get(key);
+  if (item && Date.now() - item.time < CACHE_TTL) return item.data;
+  return null;
+}
+
+function setCache(key, data) {
+  cache.set(key, { data: data, time: Date.now() });
+}
+
+function githubRequest(apiPath) {
+  return new Promise(function(resolve, reject) {
+    var headers = {
+      'Accept': 'application/vnd.github.v3+json',
+      'User-Agent': 'guanghu-api-server/1.0'
+    };
+    if (GITHUB_TOKEN) {
+      headers['Authorization'] = 'Bearer ' + GITHUB_TOKEN;
+    }
+
+    var options = {
+      hostname: 'api.github.com',
+      port: 443,
+      path: apiPath,
+      method: 'GET',
+      headers: headers
+    };
+
+    var req = https.request(options, function(res) {
+      var data = '';
+      res.on('data', function(chunk) { data += chunk; });
+      res.on('end', function() {
+        try { resolve(JSON.parse(data)); }
+        catch (e) { resolve({ error: 'JSON parse failed' }); }
+      });
+    });
+    req.on('error', reject);
+    req.end();
+  });
+}
+
+// ====== 获取仓库信息 ======
+async function getRepoStatus(repoName) {
+  repoName = repoName || 'guanghulab';
+  var cacheKey = 'repo:' + repoName;
+  var cached = getCached(cacheKey);
+  if (cached) return cached;
+
+  var repo = await githubRequest('/repos/' + ORG + '/' + repoName);
+  var result = {
+    name: repo.name,
+    full_name: repo.full_name,
+    description: repo.description,
+    default_branch: repo.default_branch,
+    open_issues_count: repo.open_issues_count,
+    stargazers_count: repo.stargazers_count,
+    updated_at: repo.updated_at,
+    pushed_at: repo.pushed_at
+  };
+  setCache(cacheKey, result);
+  return result;
+}
+
+// ====== 获取最近提交 ======
+async function getRecentCommits(repoName, count) {
+  repoName = repoName || 'guanghulab';
+  count = count || 10;
+  var cacheKey = 'commits:' + repoName + ':' + count;
+  var cached = getCached(cacheKey);
+  if (cached) return cached;
+
+  var commits = await githubRequest('/repos/' + ORG + '/' + repoName + '/commits?per_page=' + count);
+  var result = Array.isArray(commits) ? commits.map(function(c) {
+    return {
+      sha: c.sha ? c.sha.substring(0, 7) : '',
+      message: c.commit ? c.commit.message.split('\n')[0] : '',
+      date: c.commit && c.commit.author ? c.commit.author.date : '',
+      author: c.commit && c.commit.author ? c.commit.author.name : ''
+    };
+  }) : [];
+  setCache(cacheKey, result);
+  return result;
+}
+
+// ====== 获取 Workflow 状态 ======
+async function getWorkflowRuns(repoName, count) {
+  repoName = repoName || 'guanghulab';
+  count = count || 10;
+  var cacheKey = 'workflows:' + repoName + ':' + count;
+  var cached = getCached(cacheKey);
+  if (cached) return cached;
+
+  var runs = await githubRequest('/repos/' + ORG + '/' + repoName + '/actions/runs?per_page=' + count);
+  var result = (runs.workflow_runs || []).map(function(r) {
+    return {
+      id: r.id,
+      name: r.name,
+      status: r.status,
+      conclusion: r.conclusion,
+      created_at: r.created_at,
+      updated_at: r.updated_at,
+      html_url: r.html_url
+    };
+  });
+  setCache(cacheKey, result);
+  return result;
+}
+
+module.exports = {
+  getRepoStatus: getRepoStatus,
+  getRecentCommits: getRecentCommits,
+  getWorkflowRuns: getWorkflowRuns
+};
