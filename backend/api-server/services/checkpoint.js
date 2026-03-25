@@ -158,7 +158,7 @@ CheckpointManager.prototype.escalateToAdmin = async function(checkpoint, error) 
           rich_text: [{
             text: {
               content: '检查点 ' + checkpoint.id + ' (' + checkpoint.label +
-                       ') 回滚失败: ' + error.message + '。需要冰朔人工介入。'
+                       ') 回滚失败: ' + error.message + '。需要系统管理员人工介入。'
             }
           }]
         }

@@ -23,6 +23,9 @@ var executionLock = require('../middleware/execution-lock');
 var checkpoint = require('./checkpoint');
 var CheckpointManager = checkpoint.CheckpointManager;
 
+// 锁释放延迟（给前端时间拉取最终状态）
+var LOCK_RELEASE_DELAY_MS = 10000;
+
 /**
  * 原子执行器
  * @param {string} devId - 开发者编号
@@ -109,7 +112,7 @@ AtomicExecutor.prototype.execute = async function(operationName, fn) {
     lock.result = result;
 
     // 延迟释放锁（给前端时间拉取最终状态）
-    setTimeout(function() { executionLock.releaseLock(devId); }, 10000);
+    setTimeout(function() { executionLock.releaseLock(devId); }, LOCK_RELEASE_DELAY_MS);
 
     return {
       success: true,
@@ -142,7 +145,7 @@ AtomicExecutor.prototype.execute = async function(operationName, fn) {
     lock.state = 'failed';
     lock.error = { message: e.message };
 
-    setTimeout(function() { executionLock.releaseLock(devId); }, 10000);
+    setTimeout(function() { executionLock.releaseLock(devId); }, LOCK_RELEASE_DELAY_MS);
 
     return {
       success: false,

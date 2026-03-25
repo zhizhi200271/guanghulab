@@ -34,9 +34,7 @@ function startWatchdog() {
     var activeLocks = executionLock.getActiveLocks();
     var now = Date.now();
 
-    for (var entry of activeLocks) {
-      var devId = entry[0];
-      var lock = entry[1];
+    for (var [devId, lock] of activeLocks) {
 
       if (lock.state !== 'running') continue;
 

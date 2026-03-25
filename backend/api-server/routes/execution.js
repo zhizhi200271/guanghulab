@@ -64,7 +64,7 @@ router.post('/:executionId/cancel', function(_req, res) {
     error: true,
     code: 'CANCEL_FORBIDDEN',
     reply: '🔒 执行中的操作不可取消。\n\n' +
-           '系统已开始执行，90+ 个自动化流程正在联动。' +
+           '系统已开始执行，多个自动化流程正在联动。' +
            '中途中断会导致数据不一致和级联故障。\n\n' +
            '请等待执行完成。如果结果不理想，你可以说：\n' +
            '「前面的我没想好，我们重新来」\n' +
