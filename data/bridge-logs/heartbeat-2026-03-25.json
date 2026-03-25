@@ -22,5 +22,14 @@
     "queue": {
       "created": false
     }
+  },
+  {
+    "timestamp": "2026-03-25T13:41:34.904Z",
+    "notion": {
+      "healthy": false
+    },
+    "queue": {
+      "created": false
+    }
   }
 ]
