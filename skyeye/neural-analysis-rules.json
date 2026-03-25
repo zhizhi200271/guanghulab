@@ -1,0 +1,94 @@
+{
+  "version": "3.0.0",
+  "description": "天眼 Notion 大脑 · 日报分析规则",
+  "created_by": "ZY-NEURAL-UPGRADE-2026-0325-R2-002",
+  "copyright": "国作登字-2026-A-00037559 · TCS-0002∞ 冰朔",
+
+  "severity_rules": {
+    "P0_immediate": {
+      "description": "立即处理 · 系统不可用级",
+      "conditions": [
+        { "field": "overall_health", "operator": "equals", "value": "🔴" },
+        { "field": "workflow_summary.failure", "operator": "greater_than_percent", "value": 20, "of": "workflow_summary.total_runs_24h" },
+        { "field": "guard_status.active", "operator": "equals", "value": 0 },
+        { "field": "skyeye_status.overall_health", "operator": "equals", "value": "🔴" }
+      ],
+      "action": "generate_p0_work_order",
+      "notify": ["冰朔", "霜砚"],
+      "timeout_hours": 2
+    },
+    "P1_urgent": {
+      "description": "紧急 · 功能受损级",
+      "conditions": [
+        { "field": "overall_health", "operator": "equals", "value": "🟡" },
+        { "field": "guard_status.suspended", "operator": "greater_than", "value": 0 },
+        { "field": "unmapped_workflows", "operator": "not_empty" },
+        { "field": "quota_status", "operator": "contains", "value": "warning" }
+      ],
+      "action": "generate_p1_work_order",
+      "notify": ["霜砚"],
+      "timeout_hours": 24
+    },
+    "P2_optimize": {
+      "description": "优化 · 非紧急改进",
+      "conditions": [
+        { "field": "workflow_summary.cancelled", "operator": "greater_than", "value": 3 },
+        { "field": "brain_summary.*.no_data", "operator": "greater_than", "value": 0 }
+      ],
+      "action": "generate_p2_work_order",
+      "notify": [],
+      "timeout_hours": 72
+    }
+  },
+
+  "trend_detection": {
+    "lookback_days": 7,
+    "rules": [
+      {
+        "name": "failure_rate_rising",
+        "description": "失败率连续上升",
+        "condition": "连续 3 天 failure_rate_percent 递增",
+        "severity": "P1"
+      },
+      {
+        "name": "workflow_going_silent",
+        "description": "某 Workflow 连续无运行记录",
+        "condition": "某 workflow 连续 3 天 runs = 0",
+        "severity": "P1"
+      },
+      {
+        "name": "guard_flapping",
+        "description": "Guard 反复 active/suspended",
+        "condition": "同一 Guard 7天内状态切换 > 3 次",
+        "severity": "P2"
+      },
+      {
+        "name": "quota_approaching_limit",
+        "description": "配额逼近上限",
+        "condition": "任一资源 usage/limit > 80%",
+        "severity": "P1"
+      }
+    ]
+  },
+
+  "auto_heal_rules": {
+    "rules": [
+      {
+        "name": "retry_failed_workflow",
+        "condition": "单个 Workflow 失败 1 次且非 P0",
+        "action": "generate_retry_command",
+        "max_retries": 2
+      },
+      {
+        "name": "clean_old_reports",
+        "condition": "neural-reports/ 下超过 7 天的报告文件",
+        "action": "generate_cleanup_command"
+      },
+      {
+        "name": "restart_suspended_guard",
+        "condition": "Guard suspended 且当前配额已恢复",
+        "action": "generate_guard_restart_command"
+      }
+    ]
+  }
+}

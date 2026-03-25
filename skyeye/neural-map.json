@@ -1,0 +1,149 @@
+{
+  "version": "3.0.0",
+  "created": "2026-03-25",
+  "created_by": "ZY-NEURAL-UPGRADE-2026-0325-R2-001",
+  "description": "Notion↔GitHub 双端 Agent 映射表",
+  "copyright": "国作登字-2026-A-00037559 · TCS-0002∞ 冰朔",
+
+  "notion_brains": {
+    "AG-TY-01": {
+      "name": "天眼 Notion 大脑",
+      "role": "总控中枢",
+      "managed_workflows": [
+        "zhuyuan-skyeye",
+        "skyeye-weekly-scan",
+        "server-patrol",
+        "zhuyuan-daily-selfcheck",
+        "neural-daily-digest"
+      ]
+    },
+    "AG-SY-01": {
+      "name": "霜砚",
+      "role": "Notion 执行体 · 指令签发",
+      "managed_workflows": [
+        "zhuyuan-gate-guard",
+        "deploy-to-server",
+        "zhuyuan-exec-engine"
+      ]
+    },
+    "SY-03": {
+      "name": "运营巡检 Agent",
+      "role": "运营层巡检",
+      "managed_workflows": [
+        "syslog-pipeline",
+        "distribute-broadcasts",
+        "sync-dev-status"
+      ]
+    },
+    "SY-02": {
+      "name": "结构快照 Agent",
+      "role": "Notion 结构快照",
+      "managed_workflows": []
+    },
+    "SY-01": {
+      "name": "工单引擎 Agent",
+      "role": "工单处理",
+      "managed_workflows": []
+    }
+  },
+
+  "github_workflows": {
+    "zhuyuan-skyeye": {
+      "file": ".github/workflows/zhuyuan-skyeye.yml",
+      "name": "天眼主引擎",
+      "trigger": "cron 06:00 CST + workflow_dispatch",
+      "brain": "AG-TY-01",
+      "report_path": "data/neural-reports/skyeye/",
+      "priority": "P0"
+    },
+    "skyeye-weekly-scan": {
+      "file": ".github/workflows/skyeye-weekly-scan.yml",
+      "name": "周六大巡检",
+      "trigger": "cron 周六 20:00 CST",
+      "brain": "AG-TY-01",
+      "report_path": "data/neural-reports/weekly-scan/",
+      "priority": "P0"
+    },
+    "zhuyuan-gate-guard": {
+      "file": ".github/workflows/zhuyuan-gate-guard.yml",
+      "name": "智能门禁",
+      "trigger": "push",
+      "brain": "AG-SY-01",
+      "report_path": "data/neural-reports/gate-guard/",
+      "priority": "P0"
+    },
+    "deploy-to-server": {
+      "file": ".github/workflows/deploy-to-server.yml",
+      "name": "CD 自动部署",
+      "trigger": "push main",
+      "brain": "AG-SY-01",
+      "report_path": "data/neural-reports/cd-deploy/",
+      "priority": "P0"
+    },
+    "syslog-pipeline": {
+      "file": ".github/workflows/syslog-pipeline.yml",
+      "name": "SYSLOG 处理",
+      "trigger": "push (syslog路径)",
+      "brain": "SY-03",
+      "report_path": "data/neural-reports/syslog/",
+      "priority": "P1"
+    },
+    "distribute-broadcasts": {
+      "file": ".github/workflows/distribute-broadcasts.yml",
+      "name": "广播分发",
+      "trigger": "push (broadcast路径)",
+      "brain": "SY-03",
+      "report_path": "data/neural-reports/broadcast/",
+      "priority": "P1"
+    },
+    "server-patrol": {
+      "file": ".github/workflows/server-patrol.yml",
+      "name": "服务器巡检",
+      "trigger": "cron 08:00 + 20:00 CST",
+      "brain": "AG-TY-01",
+      "report_path": "data/neural-reports/server-patrol/",
+      "priority": "P0"
+    },
+    "zhuyuan-daily-selfcheck": {
+      "file": ".github/workflows/zhuyuan-daily-selfcheck.yml",
+      "name": "核心大脑自检",
+      "trigger": "cron 08:00 CST",
+      "brain": "AG-TY-01",
+      "report_path": "data/neural-reports/brain-check/",
+      "priority": "P0"
+    },
+    "sync-dev-status": {
+      "file": ".github/workflows/sync-dev-status.yml",
+      "name": "开发者状态同步",
+      "trigger": "cron 09:00 + 22:00 CST",
+      "brain": "SY-03",
+      "report_path": "data/neural-reports/dev-status/",
+      "priority": "P1"
+    },
+    "zhuyuan-exec-engine": {
+      "file": ".github/workflows/zhuyuan-exec-engine.yml",
+      "name": "远程执行引擎",
+      "trigger": "issue labeled zhuyuan-exec",
+      "brain": "AG-SY-01",
+      "report_path": "data/neural-reports/exec-engine/",
+      "priority": "P0"
+    },
+    "neural-daily-digest": {
+      "file": ".github/workflows/neural-daily-digest.yml",
+      "name": "汇总引擎",
+      "trigger": "cron 21:00 CST",
+      "brain": "AG-TY-01",
+      "report_path": "data/neural-reports/daily-digest/",
+      "priority": "P0"
+    }
+  },
+
+  "unmapped_workflows": [],
+
+  "validation_rules": {
+    "every_workflow_must_have_brain": true,
+    "every_workflow_must_have_report_path": true,
+    "no_duplicate_brain_assignment": false,
+    "orphan_check_frequency": "daily"
+  }
+}

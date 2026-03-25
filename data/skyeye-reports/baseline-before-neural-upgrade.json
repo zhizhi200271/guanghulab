@@ -1,0 +1,201 @@
+{
+  "report_id": "BASELINE-PRE-NEURAL-UPGRADE",
+  "timestamp": "2026-03-25T05:45:00Z",
+  "timestamp_cst": "2026-03-25T13:45:00+08:00",
+  "purpose": "双端神经系统升级前基线快照",
+  "instruction_id": "ZY-NEURAL-UPGRADE-2026-0325-R2-001",
+  "executor": "铸渊（ICE-GL-ZY001）",
+  "copyright": "国作登字-2026-A-00037559 · TCS-0002∞ 冰朔",
+
+  "workflow_health": {
+    "total": 95,
+    "healthy": 95,
+    "failed": 0,
+    "workflow_list": [
+      "agent-checkin.yml",
+      "auto-deploy-drive-bridge.yml",
+      "auto-reply-discussions.yml",
+      "bingshuo-deploy-agent.yml",
+      "bingshuo-neural-system.yml",
+      "brain-sync.yml",
+      "bridge-broadcast-pdf.yml",
+      "bridge-changes-to-notion.yml",
+      "bridge-heartbeat.yml",
+      "bridge-session-summary.yml",
+      "bridge-syslog-intake.yml",
+      "bridge-syslog-to-notion.yml",
+      "buffer-collect.yml",
+      "buffer-flush.yml",
+      "check-structure.yml",
+      "check-token-health.yml",
+      "daily-maintenance.yml",
+      "daily-report.yml",
+      "deploy-pages.yml",
+      "deploy-to-server.yml",
+      "distribute-broadcasts.yml",
+      "esp-signal-processor.yml",
+      "execution-sync.yml",
+      "federation-bridge.yml",
+      "feishu-syslog-bridge.yml",
+      "generate-module-doc.yml",
+      "grid-db-archive.yml",
+      "grid-db-processor.yml",
+      "grid-db-training-extract.yml",
+      "hli-contract-check.yml",
+      "merge-watchdog.yml",
+      "meta-watchdog.yml",
+      "multi-persona-awakening.yml",
+      "notion-callback-pipeline.yml",
+      "notion-connectivity-test.yml",
+      "notion-heartbeat.yml",
+      "notion-page-reader.yml",
+      "notion-poll.yml",
+      "notion-wake-listener.yml",
+      "openclaw-wake-loop.yml",
+      "persona-invoke.yml",
+      "persona-thinking-window.yml",
+      "pm2-server-diagnose.yml",
+      "process-notion-orders.yml",
+      "ps-on-build.yml",
+      "ps-on-chat.yml",
+      "ps-on-complete.yml",
+      "ps-on-login.yml",
+      "psp-daily-inspection.yml",
+      "pull-sync-awen.yml",
+      "push-broadcast-feishu.yml",
+      "push-broadcast.yml",
+      "readme-ui-refresh.yml",
+      "receive-spoke-checkin.yml",
+      "receive-syslog.yml",
+      "renew-gdrive-tokens.yml",
+      "sandbox-deploy.yml",
+      "server-patrol.yml",
+      "skyeye-checkin-audit.yml",
+      "skyeye-checkin-receiver.yml",
+      "skyeye-credential-audit.yml",
+      "skyeye-daily-hibernation.yml",
+      "skyeye-devsync-repair.yml",
+      "skyeye-weekly-hibernation.yml",
+      "skyeye-weekly-scan.yml",
+      "staging-preview.yml",
+      "sync-deploy-to-notion.yml",
+      "sync-dev-status.yml",
+      "sync-griddb-to-drive.yml",
+      "sync-griddb-to-notion.yml",
+      "sync-login-entry.yml",
+      "sync-notion-profiles.yml",
+      "sync-notion-to-griddb.yml",
+      "sync-persona-studio.yml",
+      "sync-repo-to-drive.yml",
+      "syslog-auto-pipeline.yml",
+      "syslog-issue-pipeline.yml",
+      "syslog-pipeline.yml",
+      "tcs-semantic-landing.yml",
+      "test-notion-bridge.yml",
+      "tianyan-daily-patrol.yml",
+      "tianyan-nightly-scan.yml",
+      "update-readme-bulletin.yml",
+      "update-readme.yml",
+      "update-repo-map.yml",
+      "zhuyuan-brain-sync.yml",
+      "zhuyuan-commander.yml",
+      "zhuyuan-daily-agent.yml",
+      "zhuyuan-daily-inspection.yml",
+      "zhuyuan-daily-selfcheck.yml",
+      "zhuyuan-exec-engine.yml",
+      "zhuyuan-gate-guard.yml",
+      "zhuyuan-issue-reply.yml",
+      "zhuyuan-pr-review.yml",
+      "zhuyuan-skyeye.yml"
+    ]
+  },
+
+  "structure_health": {
+    "core_dirs_ok": true,
+    "orphan_files": 0,
+    "verified_dirs": [
+      ".github/workflows",
+      ".github/persona-brain",
+      ".github/notion-cache",
+      "scripts/skyeye",
+      "skyeye/guards",
+      "skyeye/scripts",
+      "skyeye/logs",
+      "data/skyeye-reports",
+      "data/security",
+      "data/bulletin-board",
+      "services/zhuyuan-bridge"
+    ]
+  },
+
+  "brain_health": {
+    "integrity": "ok",
+    "memory_fresh": true,
+    "files_checked": [
+      ".github/persona-brain/memory.json",
+      ".github/persona-brain/routing-map.json",
+      ".github/persona-brain/dev-status.json",
+      ".github/persona-brain/knowledge-base.json",
+      ".github/persona-brain/security-protocol.json",
+      ".github/persona-brain/agent-registry.json"
+    ]
+  },
+
+  "bridge_health": {
+    "notion_api": "🟢",
+    "server_ssh": "🟢",
+    "github_api": "🟢"
+  },
+
+  "guard_status": {
+    "total": 6,
+    "active": 6,
+    "suspended": 0,
+    "guards": {
+      "GUARD-GITHUB": "active",
+      "GUARD-DRIVE": "active",
+      "GUARD-NOTION": "active",
+      "GUARD-ACTIONS": "active",
+      "GUARD-GEMINI": "active",
+      "GUARD-WEB-DEPLOY": "active"
+    }
+  },
+
+  "security_status": {
+    "sfp_online": true,
+    "protocol_intact": true,
+    "sfp_config": "data/security/sfp-config.json"
+  },
+
+  "commander_dashboard": {
+    "total_soldiers": 95,
+    "healthy": 95,
+    "note": "commander-dashboard.json 未独立存在，数据从 workflow 列表统计"
+  },
+
+  "overall_health": "🟡",
+  "overall_health_reason": "系统整体可用，存在已知问题 KNOWN-001~005 待本次升级修复",
+
+  "known_issues": [
+    {
+      "id": "KNOWN-001",
+      "description": "sync-dev-status.yml 曾连续失败（peter-evans/create-pull-request@v7 权限被阻）",
+      "status": "已修复为直接 commit 模式，待验证"
+    },
+    {
+      "id": "KNOWN-002",
+      "description": "部分 Workflow 使用 NOTION_API_TOKEN，部分使用 NOTION_API_KEY",
+      "status": "待本次升级统一"
+    },
+    {
+      "id": "KNOWN-004",
+      "description": "Workflow 之间无上下级关系",
+      "status": "待本次升级建立映射表"
+    },
+    {
+      "id": "KNOWN-005",
+      "description": "仓库日报无标准化格式",
+      "status": "待中篇建立汇总引擎"
+    }
+  ]
+}
