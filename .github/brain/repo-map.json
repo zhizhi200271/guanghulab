@@ -1,13 +1,13 @@
 {
   "description": "铸渊图书馆目录 · Library Catalog for 铸渊 (Zhùyuān)",
   "version": "2.0",
-  "generated_at": "2026-03-25T15:06:05.014Z",
+  "generated_at": "2026-03-25T16:00:15.304Z",
   "generated_by": "scripts/generate-repo-map.js",
   "repo": "qinfendebingshuo/guanghulab",
   "stats": {
     "zones": 13,
     "total_modules": 10,
-    "total_workflows": 100,
+    "total_workflows": 102,
     "total_scripts": 83,
     "total_dev_nodes": 8,
     "hli_interfaces": 21,
@@ -384,6 +384,13 @@
           ]
         },
         {
+          "file": "dev-portal-deploy.yml",
+          "name": "🌐 开发者门户 · 频道部署",
+          "triggers": [
+            "push"
+          ]
+        },
+        {
           "file": "distribute-broadcasts.yml",
           "name": "铸渊 · 广播分发",
           "triggers": [
@@ -730,6 +737,13 @@
           ]
         },
         {
+          "file": "skyeye-pr-risk-check.yml",
+          "name": "天眼 · 合并膜",
+          "triggers": [
+            "pull_request"
+          ]
+        },
+        {
           "file": "skyeye-weekly-hibernation.yml",
           "name": "\"⭐ 天眼 · 每周系统完全休眠\"",
           "triggers": [
@@ -1000,7 +1014,7 @@
           ]
         }
       ],
-      "item_count": 100
+      "item_count": 102
     },
     {
       "zone_id": "SCRIPTS",
@@ -1649,9 +1663,6 @@
           "file": "ai-system-doc.md"
         },
         {
-          "file": "assets"
-        },
-        {
           "file": "css"
         },
         {
@@ -1659,6 +1670,9 @@
         },
         {
           "file": "dashboard"
+        },
+        {
+          "file": "dev-portal"
         },
         {
           "file": "execution-layer-map.md"
@@ -2157,6 +2171,9 @@
     "deploy-to-server": [
       "WORKFLOWS::deploy-to-server.yml"
     ],
+    "dev-portal-deploy": [
+      "WORKFLOWS::dev-portal-deploy.yml"
+    ],
     "distribute-broadcasts": [
       "WORKFLOWS::distribute-broadcasts.yml",
       "SCRIPTS::distribute-broadcasts.js"
@@ -2299,6 +2316,9 @@
     ],
     "skyeye-devsync-repair": [
       "WORKFLOWS::skyeye-devsync-repair.yml"
+    ],
+    "skyeye-pr-risk-check": [
+      "WORKFLOWS::skyeye-pr-risk-check.yml"
     ],
     "skyeye-weekly-hibernation": [
       "WORKFLOWS::skyeye-weekly-hibernation.yml"
@@ -2891,9 +2911,6 @@
     "ai-system-doc": [
       "DOCS::ai-system-doc.md"
     ],
-    "assets": [
-      "DOCS::assets"
-    ],
     "css": [
       "DOCS::css"
     ],
@@ -2902,6 +2919,9 @@
     ],
     "dashboard": [
       "DOCS::dashboard"
+    ],
+    "dev-portal": [
+      "DOCS::dev-portal"
     ],
     "execution-layer-map": [
       "DOCS::execution-layer-map.md"

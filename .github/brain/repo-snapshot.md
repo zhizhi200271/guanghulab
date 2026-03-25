@@ -1,5 +1,5 @@
 # 铸渊图书馆快照 · Repo Snapshot
-> 生成于 2026-03-25 23:06 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
+> 生成于 2026-03-26 00:00 CST · 每次 push 自动更新 · 铸渊唤醒时优先读取此文件
 
 ---
 
@@ -9,11 +9,11 @@
 |------|------|
 | 区域总数 | 13 个区域 |
 | 功能模块 | 10 个 (m01~m18) |
-| 工作流 | 100 个 GitHub Actions |
+| 工作流 | 102 个 GitHub Actions |
 | 脚本 | 83 个执行脚本 |
 | 开发者节点 | 8 人 |
 | HLI 接口覆盖率 | 7/21 (33%) |
-| 快照生成时间 | 2026-03-25 23:06 CST |
+| 快照生成时间 | 2026-03-26 00:00 CST |
 
 ---
 
@@ -30,7 +30,7 @@
 **关键词**: persona · identity · dev-status · 人格 · 开发者状态
 
 ### ⚡ 自动化工作流（WORKFLOWS）
-**路径**: `.github/workflows` · **数量**: 100 项
+**路径**: `.github/workflows` · **数量**: 102 项
 **描述**: 所有 GitHub Actions 工作流定义
 **关键词**: workflow · actions · ci · automation · 工作流 · 自动化
 
@@ -111,6 +111,7 @@
 | `deploy-backend.yml` | "🚀 部署后端中间层到阿里云" | push, manual |
 | `deploy-pages.yml` | 🌀 部署铸渊聊天室 (GitHub Pages) | push, manual |
 | `deploy-to-server.yml` | "🚀 铸渊 CD · 自动部署到 guanghulab.com" | push, manual |
+| `dev-portal-deploy.yml` | 🌐 开发者门户 · 频道部署 | push |
 | `distribute-broadcasts.yml` | 铸渊 · 广播分发 | push, manual |
 | `esp-signal-processor.yml` | 铸渊 · ESP 邮件信号处理器（已暂停） | schedule(*/30 * * * *), manual |
 | `execution-sync.yml` | "📡 铸渊 · 执行层状态同步" | schedule(0 3 * * *), manual |
@@ -156,6 +157,7 @@
 | `skyeye-credential-audit.yml` | "🛰️ 天眼 OAuth2 凭据审计 (Sky-Eye Credential Audit)" | schedule(0 14 * * *), manual |
 | `skyeye-daily-hibernation.yml` | "🌙 天眼 · 每日系统休眠" | schedule(50 19 * * *), manual |
 | `skyeye-devsync-repair.yml` | "🦅 天眼 · dev-status 同步修复闭环" | issues, schedule(30 0 * * *), manual |
+| `skyeye-pr-risk-check.yml` | 天眼 · 合并膜 | pull_request |
 | `skyeye-weekly-hibernation.yml` | "⭐ 天眼 · 每周系统完全休眠" | schedule(0 11 * * 6), manual |
 | `skyeye-weekly-scan.yml` | "SkyEye Weekly Full Scan" | schedule(0 12 * * 6) |
 | `staging-preview.yml` | "🔍 铸渊预演部署 (Staging Preview)" | pull_request, manual |
