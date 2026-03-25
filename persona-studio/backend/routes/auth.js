@@ -19,6 +19,17 @@ const USERS_DB_PATH = path.join(__dirname, '..', '..', '..', 'data', 'users.json
 
 // In-memory session store (server restart clears sessions)
 const sessions = new Map();
+const SESSION_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+// Periodic session cleanup (every hour)
+setInterval(() => {
+  const now = Date.now();
+  for (const [token, session] of sessions) {
+    if (now - new Date(session.created_at).getTime() > SESSION_TTL_MS) {
+      sessions.delete(token);
+    }
+  }
+}, 60 * 60 * 1000);
 
 function loadHumanRegistry() {
   try {

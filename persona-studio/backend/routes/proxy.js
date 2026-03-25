@@ -19,6 +19,10 @@ const MODEL_API_KEY = process.env.MODEL_API_KEY || process.env.YUNWU_API_KEY || 
 const MODEL_API_BASE = process.env.MODEL_API_BASE || 'https://api.yunwu.ai/v1';
 const DEFAULT_MODEL = process.env.DEFAULT_MODEL || 'gemini-2.0-flash';
 
+if (!MODEL_API_KEY) {
+  console.warn('[Proxy] ⚠️ MODEL_API_KEY / YUNWU_API_KEY 未配置，服务器代理模式不可用。用户需使用自有 API 密钥。');
+}
+
 /**
  * 检查服务器端代理是否可用
  * GET /api/ps/proxy/status
