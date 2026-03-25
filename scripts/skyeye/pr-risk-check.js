@@ -1,52 +1,45 @@
 #!/usr/bin/env node
 // scripts/skyeye/pr-risk-check.js
-// 天眼·合并膜 — PR合并前风险检查引擎 (SkyEye Merge Membrane)
+// 天眼·合并膜 — PR合并前全系统审核引擎 (SkyEye Merge Membrane)
 //
 // ═══════════════════════════════════════════════
 // 🔺 Sovereign: TCS-0002∞ | Root: SYS-GLW-0001
 // 📜 Copyright: 国作登字-2026-A-00037559
 // ═══════════════════════════════════════════════
 //
+// 核心原则（冰朔 2026-03-25 确认）：
+//   所有合并到 main 的 PR — 无论冰朔还是其他开发者
+//   均全部启动天眼系统全局全仓库架构审核
+//   不符合现有仓库整体系统结构 → 物理切断合并通道
+//   不再区分身份放行 — 天眼对所有人一视同仁
+//
 // 架构背景：
-//   所有开发者共用 qinfendebingshuo 账号（企业权限单人仓库）
-//   代理（Copilot Agent）以 copilot/* 分支开发，通过 PR 合并
-//   无法通过 GitHub username 区分身份 → 改用分支名/commit元数据识别
+//   两条完全分离的部署路径：
+//   Path A · 主站 (guanghulab.com) — 全PR审核，物理阻塞
+//   Path B · 开发者门户 (dev-portal/) — 沙箱隔离，频道部署
 //
-// 沙箱隔离原则：
-//   开发者在各自分支自由开发（沙箱）→ 天眼不干预
-//   合并到 main 时 → 天眼合并膜启动，全系统审核
-//   天眼审核不通过 → 物理层拒绝合并（exit 1 = GitHub Status Check 失败）
-//
-// 身份识别（不依赖 GitHub username）：
-//   I1 · 分支名模式匹配（copilot/* = 代理PR）
-//   I2 · Commit 签名提取（Co-authored-by, Agent-Logs-Url）
-//   I3 · PR 标题/描述中的开发者编号（DEV-XXX, TCS-GL-XX）
-//
-// 风险检测维度：
-//   R1 · 关键文件覆盖检测（docs/index.html 等核心文件）
-//   R2 · 天眼系统包裹区域入侵检测（.github/, scripts/, skyeye/ 等）
-//   R3 · 构建产物误入检测（Vite/Webpack hash文件）
-//   R4 · 天眼核心配置篡改检测（security-protocol, gate-guard-config 等）
-//   R5 · 大规模删除检测（>500行删除）
-//   R6 · 工作流篡改检测（.github/workflows/ 修改）
+// 风险检测维度（全PR适用）：
+//   R1 · 关键文件覆盖检测
+//   R2 · 构建产物误入检测
+//   R3 · 大规模删除检测
+//   R4 · 天眼核心配置篡改检测（仅代理PR触发 critical）
+//   R5 · 工作流篡改检测（仅代理PR触发 critical）
+//   R6 · 开发者门户框架保护
+//   R7 · 仓库结构完整性验证（全PR适用 — 核心审计维度）
 //
 // 输入环境变量：
-//   PR_AUTHOR      — PR 作者 GitHub username
-//   PR_BRANCH      — PR 源分支名
-//   PR_TITLE       — PR 标题
-//   PR_FILES       — 变更文件列表路径（默认 /tmp/pr_files.txt）
-//   PR_STATS       — 变更统计路径（默认 /tmp/pr_stats.txt）
-//   PR_COMMITS     — PR commit 信息路径（默认 /tmp/pr_commits.txt）
+//   PR_AUTHOR, PR_BRANCH, PR_TITLE
+//   PR_FILES, PR_STATS, PR_COMMITS
 //
 // 输出：
 //   exit 0 → pass（允许合并）
 //   exit 1 → block（物理层拒绝合并）
-//   GITHUB_OUTPUT → risk_level, risk_summary, decision, identity_source
 
 'use strict';
 
 const fs   = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
 // ━━━ 配置路径 ━━━
 const ROOT = path.resolve(__dirname, '../..');
@@ -58,41 +51,14 @@ const PR_STATS_PATH = process.env.PR_STATS || '/tmp/pr_stats.txt';
 const PR_COMMITS_PATH = process.env.PR_COMMITS || '/tmp/pr_commits.txt';
 const GITHUB_OUTPUT = process.env.GITHUB_OUTPUT || '/dev/null';
 
-// ━━━ 仓库主人 ━━━
-const REPO_OWNER = 'qinfendebingshuo';
-
 // ━━━ Copilot Agent 分支模式 ━━━
 const AGENT_BRANCH_PATTERNS = [
-  /^copilot\//,           // GitHub Copilot agent branches
-  /^agent\//,             // Generic agent branches
-  /^bot\//                // Bot branches
+  /^copilot\//,
+  /^agent\//,
+  /^bot\//
 ];
 
-// ━━━ 天眼系统包裹区域 — 这些路径构成天眼保护的核心系统 ━━━
-const SKYEYE_WRAPPED_PATHS = [
-  '.github/workflows/',
-  '.github/persona-brain/',
-  '.github/brain/',
-  '.github/gate-guard-config.json',
-  'scripts/',
-  'skyeye/',
-  'core/',
-  'connectors/',
-  'backend/api-server/',
-  'docs/index.html',
-  'docs/CNAME',
-  'docs/.nojekyll',
-  'docs/js/',
-  'docs/css/',
-  'docs/dashboard/',
-  'data/system-health.json',
-  'data/bulletin-board.json',
-  'README.md',
-  'package.json',
-  'package-lock.json'
-];
-
-// ━━━ 天眼核心配置 — 最高保护等级，任何修改都触发 block ━━━
+// ━━━ 天眼核心配置 — 代理PR修改触发 critical ━━━
 const SKYEYE_CORE_FILES = [
   '.github/persona-brain/security-protocol.json',
   '.github/persona-brain/gate-guard-config.json',
@@ -102,6 +68,12 @@ const SKYEYE_CORE_FILES = [
   'scripts/gate-guard.js',
   'scripts/gate-guard-v2.js',
   'scripts/skyeye/pr-risk-check.js'
+];
+
+// ━━━ 门户框架文件 — 不可被开发者修改 ━━━
+const PORTAL_FRAMEWORK_FILES = [
+  'docs/dev-portal/index.html',
+  'docs/dev-portal/manifest.json'
 ];
 
 // ━━━ 构建产物特征 ━━━
@@ -115,10 +87,35 @@ const BUILD_ARTIFACT_PATTERNS = [
   /\.bundle\.(js|css)$/
 ];
 
+// ━━━ 仓库必需目录 — R7 结构完整性检查 ━━━
+const REQUIRED_DIRS = [
+  '.github/workflows',
+  '.github/persona-brain',
+  'scripts',
+  'scripts/skyeye',
+  'skyeye',
+  'skyeye/guards',
+  'skyeye/scripts',
+  'core',
+  'docs',
+  'data'
+];
+
+// ━━━ 仓库必需文件 — R7 结构完整性检查 ━━━
+const REQUIRED_FILES = [
+  '.github/persona-brain/security-protocol.json',
+  '.github/persona-brain/gate-guard-config.json',
+  '.github/persona-brain/agent-registry.json',
+  'docs/index.html',
+  'docs/CNAME',
+  'README.md',
+  'package.json'
+];
+
 // ━━━ 大规模删除阈值 ━━━
 const MASS_DELETE_THRESHOLD = 500;
 
-// ━━━ 安全读取 JSON ━━━
+// ━━━ 工具函数 ━━━
 function readJSON(filePath) {
   try {
     if (!fs.existsSync(filePath)) return null;
@@ -129,126 +126,25 @@ function readJSON(filePath) {
   }
 }
 
-// ━━━ 输出到 GITHUB_OUTPUT ━━━
 function setOutput(key, value) {
   try {
     fs.appendFileSync(GITHUB_OUTPUT, `${key}=${value}\n`);
-  } catch (e) {
-    // silent fail for local testing
-  }
+  } catch (e) { /* silent */ }
 }
 
-// ━━━ I1 · 检测是否为代理（Agent）PR ━━━
 function isAgentBranch(branchName) {
   if (!branchName) return false;
   return AGENT_BRANCH_PATTERNS.some(p => p.test(branchName));
 }
 
-// ━━━ I2 · 从 commit 元数据提取代理身份 ━━━
-function extractAgentIdentity(commitsPath, prTitle) {
-  const identity = {
-    isAgent: false,
-    agentName: null,
-    devId: null,
-    devName: null,
-    source: 'unknown'
-  };
-
-  // Check PR title for dev identifiers
-  if (prTitle) {
-    const devMatch = prTitle.match(/\b(DEV-\d{3})\b/i);
-    const tcsMatch = prTitle.match(/\b(TCS-GL-\d{2})\b/i);
-    if (devMatch) {
-      identity.devId = devMatch[1].toUpperCase();
-      identity.source = 'pr_title';
-    }
-    if (tcsMatch) {
-      identity.devId = tcsMatch[1].toUpperCase();
-      identity.source = 'pr_title';
-    }
-  }
-
-  // Check commit messages
-  try {
-    if (fs.existsSync(commitsPath)) {
-      const content = fs.readFileSync(commitsPath, 'utf8');
-
-      // Agent-Logs-Url indicates Copilot agent
-      if (content.includes('Agent-Logs-Url:')) {
-        identity.isAgent = true;
-        identity.source = 'agent_logs_url';
-      }
-
-      // Co-authored-by pattern
-      const coAuthorMatch = content.match(/Co-authored-by:\s*(.+?)\s*</);
-      if (coAuthorMatch) {
-        identity.agentName = coAuthorMatch[1].trim();
-        identity.isAgent = true;
-        if (identity.source === 'unknown') identity.source = 'co_authored_by';
-      }
-
-      // Persona signature in commit messages [PER-XXX] [TCS-XXX]
-      const sigMatch = content.match(/^\[([A-Z]+-[A-Z0-9\-∞]+)\]/m);
-      if (sigMatch) {
-        identity.devId = identity.devId || sigMatch[1];
-        if (identity.source === 'unknown') identity.source = 'commit_signature';
-      }
-
-      // DEV-XXX in commit messages
-      const devInCommit = content.match(/\b(DEV-\d{3})\b/i);
-      if (devInCommit && !identity.devId) {
-        identity.devId = devInCommit[1].toUpperCase();
-        if (identity.source === 'unknown') identity.source = 'commit_message';
-      }
-    }
-  } catch (e) {
-    // Non-fatal - continue without commit analysis
-  }
-
-  return identity;
-}
-
-// ━━━ 加载门禁配置 ━━━
-function loadConfig() {
-  const brainConfig = readJSON(BRAIN_CONFIG_PATH);
-  const ownerConfig = readJSON(OWNER_CONFIG_PATH);
-
-  if (!brainConfig && !ownerConfig) {
-    console.error('⚠️ 门禁配置缺失，使用最小安全配置');
-    return {
-      whitelist: ['github-actions[bot]', 'zhuyuan-bot'],
-      system_protected_paths: ['.github/', 'scripts/', 'docs/', 'data/', 'core/', 'connectors/'],
-      developers: {}
-    };
-  }
-
-  return {
-    whitelist: (brainConfig?.whitelist_actors || ownerConfig?.whitelist || [])
-      .filter(u => u !== REPO_OWNER), // Do NOT whitelist owner for agent PRs
-    system_protected_paths: brainConfig?.system_protected_paths || ownerConfig?.protected_paths || [],
-    developers_brain: brainConfig?.developer_permissions || {},
-    developers_owner: ownerConfig?.developers || {}
-  };
-}
-
-// ━━━ 读取 PR 变更文件列表 ━━━
 function loadPRFiles() {
   try {
-    if (!fs.existsSync(PR_FILES_PATH)) {
-      console.warn('⚠️ PR文件列表不存在: ' + PR_FILES_PATH);
-      return [];
-    }
+    if (!fs.existsSync(PR_FILES_PATH)) return [];
     return fs.readFileSync(PR_FILES_PATH, 'utf8')
-      .split('\n')
-      .map(f => f.trim())
-      .filter(f => f.length > 0);
-  } catch (e) {
-    console.error('⚠️ 无法读取PR文件列表: ' + e.message);
-    return [];
-  }
+      .split('\n').map(f => f.trim()).filter(f => f.length > 0);
+  } catch (e) { return []; }
 }
 
-// ━━━ 读取 PR 变更统计 ━━━
 function loadPRStats() {
   try {
     if (!fs.existsSync(PR_STATS_PATH)) return null;
@@ -262,37 +158,32 @@ function loadPRStats() {
       }
     }
     return { totalDeletions };
-  } catch (e) {
-    return null;
-  }
+  } catch (e) { return null; }
 }
 
-// ━━━ 根据 devId 查找注册开发者 ━━━
-function findDeveloperByDevId(devId, config) {
-  if (!devId) return null;
+// ━━━ 身份提取（用于日志/上下文，不用于放行决策）━━━
+function extractIdentity(commitsPath, prTitle) {
+  const identity = { isAgent: false, agentName: null, devId: null, source: 'unknown' };
 
-  if (config.developers_brain) {
-    for (const [id, dev] of Object.entries(config.developers_brain)) {
-      if (id === devId) {
-        return { devId: id, name: dev.name, allowed_paths: dev.allowed_paths || [] };
-      }
-    }
+  if (prTitle) {
+    const devMatch = prTitle.match(/\b(DEV-\d{3})\b/i);
+    if (devMatch) { identity.devId = devMatch[1].toUpperCase(); identity.source = 'pr_title'; }
   }
 
-  if (config.developers_owner) {
-    for (const [, dev] of Object.entries(config.developers_owner)) {
-      if (dev.dev_id === devId) {
-        return { devId: dev.dev_id, name: dev.name, allowed_paths: dev.allowed_paths || [] };
+  try {
+    if (fs.existsSync(commitsPath)) {
+      const content = fs.readFileSync(commitsPath, 'utf8');
+      if (content.includes('Agent-Logs-Url:')) { identity.isAgent = true; identity.source = 'agent_logs_url'; }
+      const coAuth = content.match(/Co-authored-by:\s*(.+?)\s*</);
+      if (coAuth) { identity.agentName = coAuth[1].trim(); identity.isAgent = true; }
+      if (!identity.devId) {
+        const devMatch = content.match(/\b(DEV-\d{3})\b/i);
+        if (devMatch) { identity.devId = devMatch[1].toUpperCase(); }
       }
     }
-  }
+  } catch (e) { /* non-fatal */ }
 
-  return null;
-}
-
-// ━━━ 检查文件是否在天眼包裹区域内 ━━━
-function isInSkyeyeZone(file) {
-  return SKYEYE_WRAPPED_PATHS.some(p => file === p || file.startsWith(p));
+  return identity;
 }
 
 // ━━━ R1 · 关键文件覆盖检测 ━━━
@@ -304,61 +195,21 @@ function checkCriticalFiles(files) {
   ];
   for (const file of files) {
     if (criticalFiles.includes(file)) {
-      risks.push({
-        dimension: 'R1',
-        severity: 'high',
-        file,
-        detail: `关键文件被修改: ${file}`
-      });
+      risks.push({ dimension: 'R1', severity: 'high', file,
+        detail: `关键文件被修改: ${file}` });
     }
   }
   return risks;
 }
 
-// ━━━ R2 · 天眼包裹区域入侵检测 ━━━
-function checkSkyeyeZoneIntrusion(files, developer) {
-  const risks = [];
-
-  for (const file of files) {
-    if (!isInSkyeyeZone(file)) continue;
-
-    // If developer is identified, check allowed_paths
-    if (developer) {
-      const isAllowed = developer.allowed_paths.some(p => file.startsWith(p));
-      if (!isAllowed) {
-        risks.push({
-          dimension: 'R2',
-          severity: 'high',
-          file,
-          detail: `${developer.name}(${developer.devId}) 修改了天眼包裹区域: ${file}`
-        });
-      }
-    } else {
-      // Unknown identity touching SkyEye zone
-      risks.push({
-        dimension: 'R2',
-        severity: 'high',
-        file,
-        detail: `代理PR修改天眼包裹区域: ${file}`
-      });
-    }
-  }
-
-  return risks;
-}
-
-// ━━━ R3 · 构建产物误入检测 ━━━
+// ━━━ R2 · 构建产物误入检测 ━━━
 function checkBuildArtifacts(files) {
   const risks = [];
   for (const file of files) {
     for (const pattern of BUILD_ARTIFACT_PATTERNS) {
       if (pattern.test(file)) {
-        risks.push({
-          dimension: 'R3',
-          severity: 'high',
-          file,
-          detail: `构建产物不应提交到仓库: ${file}`
-        });
+        risks.push({ dimension: 'R2', severity: 'high', file,
+          detail: `构建产物不应提交到仓库: ${file}` });
         break;
       }
     }
@@ -366,100 +217,153 @@ function checkBuildArtifacts(files) {
   return risks;
 }
 
-// ━━━ R4 · 天眼核心配置篡改检测 ━━━
-function checkCoreConfigTampering(files) {
-  const risks = [];
-  for (const file of files) {
-    if (SKYEYE_CORE_FILES.includes(file)) {
-      risks.push({
-        dimension: 'R4',
-        severity: 'critical',
-        file,
-        detail: `天眼核心配置被修改: ${file} — 此文件仅限 TCS-0002∞ 主权者修改`
-      });
-    }
-  }
-  return risks;
-}
-
-// ━━━ R5 · 大规模删除检测 ━━━
+// ━━━ R3 · 大规模删除检测 ━━━
 function checkMassDeletion(stats) {
   const risks = [];
   if (stats && stats.totalDeletions > MASS_DELETE_THRESHOLD) {
-    risks.push({
-      dimension: 'R5',
-      severity: 'high',
-      file: '(multiple)',
-      detail: `大规模删除检测: ${stats.totalDeletions} 行被删除（阈值: ${MASS_DELETE_THRESHOLD}）`
-    });
+    risks.push({ dimension: 'R3', severity: 'high', file: '(multiple)',
+      detail: `大规模删除: ${stats.totalDeletions} 行被删除（阈值: ${MASS_DELETE_THRESHOLD}）` });
   }
   return risks;
 }
 
-// ━━━ R6 · 工作流篡改检测 ━━━
-function checkWorkflowTampering(files) {
+// ━━━ R4 · 天眼核心配置篡改检测（代理PR = critical，手动PR = high） ━━━
+function checkCoreConfigTampering(files, isAgent) {
+  const risks = [];
+  for (const file of files) {
+    if (SKYEYE_CORE_FILES.includes(file)) {
+      risks.push({ dimension: 'R4', severity: isAgent ? 'critical' : 'high', file,
+        detail: `天眼核心配置被修改: ${file}` });
+    }
+  }
+  return risks;
+}
+
+// ━━━ R5 · 工作流篡改检测（代理PR = critical，手动PR = high） ━━━
+function checkWorkflowTampering(files, isAgent) {
   const risks = [];
   for (const file of files) {
     if (file.startsWith('.github/workflows/') && (file.endsWith('.yml') || file.endsWith('.yaml'))) {
-      risks.push({
-        dimension: 'R6',
-        severity: 'critical',
-        file,
-        detail: `工作流文件被修改: ${file} — 代理PR不应修改自动化管线`
-      });
+      risks.push({ dimension: 'R5', severity: isAgent ? 'critical' : 'high', file,
+        detail: `工作流文件被修改: ${file}` });
     }
   }
   return risks;
 }
 
-// ━━━ 天眼系统完整性验证 ━━━
-function verifySkyeyeIntegrity() {
-  const issues = [];
+// ━━━ R6 · 开发者门户框架保护 ━━━
+function checkPortalFramework(files, isAgent) {
+  if (!isAgent) return []; // Owner can modify portal framework
+  const risks = [];
+  for (const file of files) {
+    if (PORTAL_FRAMEWORK_FILES.includes(file)) {
+      risks.push({ dimension: 'R6', severity: 'critical', file,
+        detail: `门户框架文件被修改: ${file} — 仅限天眼系统维护` });
+    }
+  }
+  return risks;
+}
 
-  // Check security protocol
+// ━━━ R7 · 仓库结构完整性验证（核心审计维度 — 对所有PR生效）━━━
+function checkStructuralIntegrity(files) {
+  const risks = [];
+
+  // 7a. Security protocol must remain intact
   const protocol = readJSON(SECURITY_PROTOCOL_PATH);
   if (!protocol) {
-    issues.push('security-protocol.json 不存在或无法读取');
+    risks.push({ dimension: 'R7', severity: 'critical', file: '.github/persona-brain/security-protocol.json',
+      detail: '安全协议文件不存在或无法解析 — 仓库安全基础被破坏' });
   } else {
-    if (!protocol.permanent) issues.push('security-protocol.json: permanent 标记缺失');
+    if (!protocol.permanent || !protocol.cannot_be_overridden) {
+      risks.push({ dimension: 'R7', severity: 'critical', file: '.github/persona-brain/security-protocol.json',
+        detail: '安全协议 permanent/cannot_be_overridden 标记丢失' });
+    }
     if (!protocol.root_rules || protocol.root_rules.length < 3) {
-      issues.push('security-protocol.json: root_rules 不完整');
+      risks.push({ dimension: 'R7', severity: 'critical', file: '.github/persona-brain/security-protocol.json',
+        detail: '安全协议 root_rules 不完整（需 3 条根规则）' });
     }
   }
 
-  // Check gate-guard configs
-  if (!readJSON(BRAIN_CONFIG_PATH) && !readJSON(OWNER_CONFIG_PATH)) {
-    issues.push('门禁配置文件全部缺失');
+  // 7b. Gate guard config must remain valid
+  const brainConfig = readJSON(BRAIN_CONFIG_PATH);
+  const ownerConfig = readJSON(OWNER_CONFIG_PATH);
+  if (!brainConfig && !ownerConfig) {
+    risks.push({ dimension: 'R7', severity: 'critical', file: '(gate-guard-config)',
+      detail: '门禁配置文件全部缺失 — 系统安全体系被破坏' });
   }
 
-  return issues;
+  // 7c. Check that required directories still exist
+  for (const dir of REQUIRED_DIRS) {
+    const dirPath = path.join(ROOT, dir);
+    if (!fs.existsSync(dirPath)) {
+      risks.push({ dimension: 'R7', severity: 'high', file: dir + '/',
+        detail: `必需目录缺失: ${dir}/` });
+    }
+  }
+
+  // 7d. Check that required files still exist
+  for (const file of REQUIRED_FILES) {
+    const filePath = path.join(ROOT, file);
+    if (!fs.existsSync(filePath)) {
+      risks.push({ dimension: 'R7', severity: 'high', file,
+        detail: `必需文件缺失: ${file}` });
+    }
+  }
+
+  // 7e. Check that PR doesn't DELETE required files
+  for (const file of files) {
+    if (REQUIRED_FILES.includes(file)) {
+      const filePath = path.join(ROOT, file);
+      // File is in the PR diff — check if it still exists in the working tree
+      // (if checkout has the merged version, missing = deleted)
+      if (!fs.existsSync(filePath)) {
+        risks.push({ dimension: 'R7', severity: 'critical', file,
+          detail: `PR删除了仓库必需文件: ${file}` });
+      }
+    }
+  }
+
+  // 7f. Run structural scan scripts if available
+  const scanScripts = [
+    { name: 'scan-structure', path: path.join(ROOT, 'scripts/skyeye/scan-structure.js') },
+    { name: 'scan-brain-health', path: path.join(ROOT, 'scripts/skyeye/scan-brain-health.js') },
+    { name: 'scan-security-protocol', path: path.join(ROOT, 'scripts/skyeye/scan-security-protocol.js') }
+  ];
+
+  for (const script of scanScripts) {
+    if (fs.existsSync(script.path)) {
+      try {
+        const output = execSync(`node "${script.path}" 2>&1`, {
+          cwd: ROOT, timeout: 30000, encoding: 'utf8'
+        });
+        // Check for failure indicators in output
+        if (output.includes('❌') || output.includes('FAIL') || output.includes('ERROR')) {
+          const failLines = output.split('\n').filter(l =>
+            l.includes('❌') || l.includes('FAIL') || l.includes('ERROR')
+          ).slice(0, 3);
+          risks.push({ dimension: 'R7', severity: 'high', file: `(${script.name})`,
+            detail: `结构扫描 ${script.name} 报告问题: ${failLines.join('; ').slice(0, 200)}` });
+        }
+      } catch (e) {
+        // Script execution failure is itself a structural concern
+        const errMsg = (e.stderr || e.message || '').slice(0, 100);
+        risks.push({ dimension: 'R7', severity: 'high', file: `(${script.name})`,
+          detail: `结构扫描 ${script.name} 执行失败: ${errMsg}` });
+      }
+    }
+  }
+
+  return risks;
 }
 
-// ━━━ 风险评估决策 ━━━
-function makeDecision(risks, touchesSkyeyeZone) {
+// ━━━ 风险决策 ━━━
+function makeDecision(risks) {
   const hasCritical = risks.some(r => r.severity === 'critical');
   const highCount = risks.filter(r => r.severity === 'high').length;
 
-  // Any critical risk = immediate block
-  if (hasCritical) {
-    return { decision: 'block', risk_level: 'critical' };
-  }
-
-  // Multiple high risks = block
-  if (highCount >= 2) {
-    return { decision: 'block', risk_level: 'high' };
-  }
-
-  // Single high risk = warn (allow merge but notify)
-  if (highCount === 1) {
-    return { decision: 'warn', risk_level: 'high' };
-  }
-
-  // No SkyEye zone touched = safe pass
-  if (!touchesSkyeyeZone) {
-    return { decision: 'pass', risk_level: 'low' };
-  }
-
+  if (hasCritical) return { decision: 'block', risk_level: 'critical' };
+  if (highCount >= 2) return { decision: 'block', risk_level: 'high' };
+  if (highCount === 1) return { decision: 'warn', risk_level: 'high' };
   return { decision: 'pass', risk_level: 'low' };
 }
 
@@ -477,54 +381,31 @@ function run() {
   console.log(`标题: ${prTitle || '(unknown)'}`);
   console.log(`时间: ${new Date().toISOString()}`);
   console.log('');
+  console.log('⚖️ 审核模式: 全员全审 — 不区分身份，天眼对所有人一视同仁');
+  console.log('');
 
-  // ─── 检测 PR 来源类型 ───
-  const fromAgent = isAgentBranch(branch);
-  const identity = extractAgentIdentity(PR_COMMITS_PATH, prTitle);
-  const isAgentPR = fromAgent || identity.isAgent;
+  // ─── 身份识别（仅用于日志/上下文，不影响审核决策）───
+  const isAgent = isAgentBranch(branch);
+  const identity = extractIdentity(PR_COMMITS_PATH, prTitle);
+  const isAgentPR = isAgent || identity.isAgent;
 
   if (isAgentPR) {
-    console.log('🤖 代理PR检测: 是');
-    console.log(`   分支匹配: ${fromAgent ? '是' : '否'}`);
-    console.log(`   Agent标记: ${identity.isAgent ? '是' : '否'}`);
-    if (identity.agentName) console.log(`   代理名称: ${identity.agentName}`);
+    console.log('🤖 PR来源: 代理 (Copilot Agent)');
     if (identity.devId) console.log(`   开发者编号: ${identity.devId}`);
-    console.log(`   身份来源: ${identity.source}`);
+    if (identity.agentName) console.log(`   代理名称: ${identity.agentName}`);
   } else {
-    // Non-agent PR from repo owner — this is the owner's own manual work
-    console.log('👤 主权者手动PR — 天眼合并膜放行');
-    console.log('   (非代理分支，无Agent标记)');
-    setOutput('decision', 'pass');
-    setOutput('risk_level', 'none');
-    setOutput('identity_source', 'owner_manual');
-    setOutput('risk_summary', '主权者手动PR，天眼合并膜放行');
-    process.exit(0);
+    console.log('👤 PR来源: 手动提交');
   }
   console.log('');
 
-  // ─── 天眼系统完整性预检 ───
-  console.log('━━━ 天眼系统完整性预检 ━━━');
-  const integrityIssues = verifySkyeyeIntegrity();
-  if (integrityIssues.length > 0) {
-    console.log('⚠️ 天眼系统完整性问题:');
-    integrityIssues.forEach(i => console.log(`  · ${i}`));
-  } else {
-    console.log('✅ 天眼系统完整性: 正常');
-  }
-  console.log('');
-
-  // ─── 加载配置和文件 ───
-  const config = loadConfig();
+  // ─── 加载变更文件 ───
   const files = loadPRFiles();
-
   if (files.length === 0) {
     console.log('⚠️ 无变更文件或文件列表不可用');
-    // For agent PRs with no file info, we block to be safe
-    console.log('❌ 代理PR无法获取变更文件列表 — 安全起见阻止合并');
+    console.log('❌ 无法获取变更文件列表 — 安全起见阻止合并');
     setOutput('decision', 'block');
     setOutput('risk_level', 'unknown');
-    setOutput('identity_source', identity.source);
-    setOutput('risk_summary', '代理PR变更文件列表不可用');
+    setOutput('risk_summary', 'PR变更文件列表不可用');
     process.exit(1);
   }
 
@@ -532,59 +413,33 @@ function run() {
   files.forEach(f => console.log(`  · ${f}`));
   console.log('');
 
-  // ─── 查找注册开发者（通过 devId） ───
-  const developer = identity.devId ? findDeveloperByDevId(identity.devId, config) : null;
-  if (developer) {
-    console.log(`👤 已识别开发者: ${developer.name} (${developer.devId})`);
-  } else if (identity.devId) {
-    console.log(`⚠️ 开发者编号 ${identity.devId} 未在门禁系统注册`);
-  } else {
-    console.log('⚠️ 无法识别开发者身份');
-  }
-  console.log('');
-
-  // ─── 分析天眼区域接触情况 ───
-  const skyeyeZoneFiles = files.filter(f => isInSkyeyeZone(f));
-  const nonSkyeyeFiles = files.filter(f => !isInSkyeyeZone(f));
-  const touchesSkyeyeZone = skyeyeZoneFiles.length > 0;
-
-  console.log(`🛡️ 天眼包裹区域文件: ${skyeyeZoneFiles.length}/${files.length}`);
-  if (touchesSkyeyeZone) {
-    console.log('   ⚠️ 此PR修改了天眼系统包裹区域 — 启动完整审核');
-    skyeyeZoneFiles.forEach(f => console.log(`   🔒 ${f}`));
-  } else {
-    console.log('   ✅ 此PR未触及天眼包裹区域 — 沙箱内操作');
-  }
-  if (nonSkyeyeFiles.length > 0) {
-    console.log(`   📦 沙箱区域文件: ${nonSkyeyeFiles.length}`);
-  }
-  console.log('');
-
-  // ─── 如果完全在沙箱内且有注册身份 → 放行 ───
-  if (!touchesSkyeyeZone && developer) {
-    console.log('✅ 沙箱内操作 + 已注册开发者 — 天眼合并膜放行');
-    setOutput('decision', 'pass');
-    setOutput('risk_level', 'low');
-    setOutput('identity_source', identity.source);
-    setOutput('risk_summary', `${developer.name}(${developer.devId}) 沙箱内操作，未触及天眼区域`);
-    process.exit(0);
-  }
-
-  // ─── 加载统计 ───
   const stats = loadPRStats();
 
-  // ─── 风险检测 ───
-  console.log('━━━ 天眼风险检测启动 ━━━');
-  const allRisks = [
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 天眼全系统审核 — 对所有PR生效，无例外
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  console.log('━━━ 天眼全系统审核启动 ━━━');
+  console.log('');
+
+  // Phase 1: 风险维度检测 (R1-R6)
+  console.log('[Phase 1] 风险维度检测 (R1-R6)...');
+  const riskChecks = [
     ...checkCriticalFiles(files),
-    ...checkSkyeyeZoneIntrusion(files, developer),
     ...checkBuildArtifacts(files),
-    ...checkCoreConfigTampering(files),
     ...checkMassDeletion(stats),
-    ...checkWorkflowTampering(files)
+    ...checkCoreConfigTampering(files, isAgentPR),
+    ...checkWorkflowTampering(files, isAgentPR),
+    ...checkPortalFramework(files, isAgentPR)
   ];
 
-  // Deduplicate by file + dimension
+  // Phase 2: 仓库结构完整性验证 (R7)
+  console.log('[Phase 2] 仓库结构完整性验证 (R7)...');
+  const structuralRisks = checkStructuralIntegrity(files);
+
+  // Combine all risks
+  const allRisks = [...riskChecks, ...structuralRisks];
+
+  // Deduplicate
   const seen = new Set();
   const risks = allRisks.filter(r => {
     const key = `${r.dimension}:${r.file}`;
@@ -593,32 +448,22 @@ function run() {
     return true;
   });
 
-  if (risks.length === 0 && !touchesSkyeyeZone) {
-    console.log('✅ 未检测到风险（沙箱内操作）');
-    console.log('');
-    console.log('═══ 决策: PASS ═══');
-    setOutput('decision', 'pass');
-    setOutput('risk_level', 'low');
-    setOutput('identity_source', identity.source);
-    setOutput('risk_summary', '沙箱内操作，未检测到风险');
-    process.exit(0);
-  }
+  console.log('');
 
-  if (risks.length === 0 && touchesSkyeyeZone) {
-    // Touches SkyEye zone but no specific risks detected
-    // This could happen if a registered developer touches their allowed paths
-    console.log('✅ 天眼区域变更已验证 — 在授权范围内');
+  // ─── 结果报告 ───
+  if (risks.length === 0) {
+    console.log('✅ 天眼全系统审核通过');
+    console.log('   风险维度检测: 无风险');
+    console.log('   仓库结构完整性: 正常');
     console.log('');
     console.log('═══ 决策: PASS ═══');
     setOutput('decision', 'pass');
     setOutput('risk_level', 'low');
-    setOutput('identity_source', identity.source);
-    setOutput('risk_summary', '天眼区域变更已验证，在授权范围内');
+    setOutput('risk_summary', '天眼全系统审核通过');
     process.exit(0);
   }
 
   // ─── 输出风险报告 ───
-  console.log('');
   console.log(`⚠️ 检测到 ${risks.length} 项风险:`);
   for (const risk of risks) {
     const icon = risk.severity === 'critical' ? '🔴' : risk.severity === 'high' ? '🟠' : '🟡';
@@ -627,23 +472,21 @@ function run() {
   console.log('');
 
   // ─── 决策 ───
-  const { decision, risk_level } = makeDecision(risks, touchesSkyeyeZone);
+  const { decision, risk_level } = makeDecision(risks);
   const summary = risks.map(r => `[${r.dimension}] ${r.detail}`).join(' | ');
 
   setOutput('decision', decision);
   setOutput('risk_level', risk_level);
-  setOutput('identity_source', identity.source);
   setOutput('risk_summary', summary.slice(0, 500));
 
   if (decision === 'block') {
     console.log(`═══ 决策: BLOCK (风险等级: ${risk_level}) ═══`);
-    console.log('❌ 天眼合并膜: 物理层拒绝合并');
-    console.log('   此PR的变更触及天眼系统包裹区域且未通过审核');
-    console.log('   请联系主权者 TCS-0002∞ 审核后手动合并');
+    console.log('❌ 天眼合并膜: 物理切断合并通道');
+    console.log('   此PR不符合仓库整体系统结构要求');
     process.exit(1);
   } else if (decision === 'warn') {
     console.log(`═══ 决策: WARN (风险等级: ${risk_level}) ═══`);
-    console.log('⚠️ 天眼合并膜: 存在风险 — 建议主权者审核');
+    console.log('⚠️ 天眼合并膜: 存在风险项，建议审核后合并');
     process.exit(0);
   } else {
     console.log(`═══ 决策: PASS (风险等级: ${risk_level}) ═══`);

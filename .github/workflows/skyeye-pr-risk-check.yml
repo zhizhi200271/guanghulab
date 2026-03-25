@@ -92,28 +92,6 @@ jobs:
           PR_COMMITS: /tmp/pr_commits.txt
         run: node scripts/skyeye/pr-risk-check.js
 
-      - name: 🧠 天眼全系统审计
-        if: failure()
-        id: skyeye_audit
-        run: |
-          echo "━━━ 天眼全系统审计（合并被阻止后触发）━━━"
-          echo ""
-          
-          # Run SkyEye scan dimensions that can be checked locally
-          echo "📡 D1 · 目录结构检查..."
-          node scripts/skyeye/scan-structure.js 2>/dev/null || echo "⚠️ scan-structure 执行失败"
-          
-          echo ""
-          echo "🧠 D2 · 大脑健康检查..."
-          node scripts/skyeye/scan-brain-health.js 2>/dev/null || echo "⚠️ scan-brain-health 执行失败"
-          
-          echo ""
-          echo "🔐 D3 · 安全协议完整性检查..."
-          node scripts/skyeye/scan-security-protocol.js 2>/dev/null || echo "⚠️ scan-security-protocol 执行失败"
-          
-          echo ""
-          echo "━━━ 天眼审计完成 ━━━"
-
       - name: 📝 写入天眼审核报告
         if: always()
         uses: actions/github-script@v7
@@ -134,20 +112,16 @@ jobs:
             body += `| **检查时间** | ${new Date().toISOString()} |\n\n`;
             
             if (decision === 'success') {
-              body += '### ✅ 天眼合并膜: 通过\n\n';
-              body += '此 PR 的变更已通过天眼系统审核，可以安全合并。\n\n';
-              if (!isAgentBranch) {
-                body += '> 💡 非代理分支（主权者手动操作），天眼合并膜自动放行\n';
-              }
+              body += '### ✅ 天眼全系统审核: 通过\n\n';
+              body += '此 PR 已通过天眼全局仓库架构审核，符合系统结构要求，可以合并。\n';
             } else {
-              body += '### ❌ 天眼合并膜: 物理层拒绝合并\n\n';
-              body += '此 PR 的变更触及了天眼系统包裹区域且未通过审核。\n\n';
+              body += '### ❌ 天眼合并膜: 物理切断合并通道\n\n';
+              body += '此 PR 不符合仓库整体系统结构要求。\n\n';
               body += '**处理方式:**\n';
-              body += '1. 🔍 检查上方日志中标记的风险项\n';
-              body += '2. 📦 确保代理PR的变更限制在沙箱区域内\n';
-              body += '3. 👑 如需修改天眼包裹区域，请联系主权者 TCS-0002∞ 审核\n\n';
-              body += '> ⛔ 天眼合并膜已阻止此PR合并。\n';
-              body += '> 主权者可手动批准后合并（需在 Branch Protection 中 bypass）。\n';
+              body += '1. 🔍 检查上方 Actions 日志中标记的风险项\n';
+              body += '2. 📦 修复不符合仓库结构的变更\n';
+              body += '3. 🔄 推送修复后天眼将自动重新审核\n\n';
+              body += '> ⛔ 天眼合并膜已物理切断合并通道。\n';
             }
             
             body += '\n---\n';
