@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "last_updated": "2026-03-25T20:38:31+08:00",
+  "last_updated": "2026-03-25T20:49:12+08:00",
   "system_status": "healthy",
   "metrics": {
     "ai_personas": {
@@ -22,13 +22,13 @@
     },
     "guards": {
       "total": 7,
-      "active": 6,
+      "active": 7,
       "warnings": 0
     },
     "modules": {
       "total": 10
     },
-    "buffer_pending": 8,
+    "buffer_pending": 0,
     "ontology_version": "v1.0",
     "neural_system_version": "v3.0",
     "evolution_days": 0,
