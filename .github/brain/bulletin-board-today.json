@@ -306,6 +306,15 @@
       "result": "success",
       "icon": "✅",
       "sortKey": 1774431150000
+    },
+    {
+      "key": "Copilot|—|2026-03-25T09:34:00Z",
+      "ts": "2026-03-25T09:34:00Z",
+      "actor": "Copilot",
+      "module": "—",
+      "result": "action_required",
+      "icon": "🔵",
+      "sortKey": 1774431240000
     }
   ]
 }
