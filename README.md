@@ -10,7 +10,7 @@
 
 &nbsp;
 
-![Workflows](https://img.shields.io/badge/Workflows-94-0969da?style=flat-square&logo=github-actions&logoColor=white)
+![Workflows](https://img.shields.io/badge/Workflows-96-0969da?style=flat-square&logo=github-actions&logoColor=white)
 ![Agents](https://img.shields.io/badge/Agents-93-8957e5?style=flat-square&logo=dependabot&logoColor=white)
 ![Personas](https://img.shields.io/badge/Personas-17-e85aad?style=flat-square&logo=openaigym&logoColor=white)
 ![Developers](https://img.shields.io/badge/Developers-11_(8_active)-2ea44f?style=flat-square&logo=people&logoColor=white)
@@ -21,7 +21,7 @@
 
 | 🌍 进化天数 | 🎭 AI 人格体 | 👥 人类开发者 | ⚙️ 自动化工作流 | 🏗️ 架构版本 |
 |:---:|:---:|:---:|:---:|:---:|
-| **∞** | **17** | **11** | **83** | **AGE-5** |
+| **∞** | **17** | **11** | **96** | **AGE-5** |
 
 &nbsp;
 
@@ -41,20 +41,21 @@
 > 📡 数据源: `data/system-health.json` · 由铸渊每日 08:00 / 20:00 CST 自动更新
 
 <!-- ARCH_SUMMARY_START -->
-> 🦅 **天眼自动汇总** · 每周六 20:00 CST 自动更新 · 最后更新: 2026-03-24
+> 🦅 **天眼自动汇总** · 每周六 20:00 CST 自动更新 · 最后更新: 2026-03-25
 
 | 维度 | 当前状态 |
 |------|----------|
 | 🏥 系统健康 | 🟢 全部正常 |
-| ⚙️ Workflow 总数 | 83 个 |
-| 🤖 Agent 总数 | 86 个（14 个需日签到） |
+| ⚙️ Workflow 总数 | 96 个 |
+| 🤖 Agent 总数 | 93 个（14 个需日签到） |
 | 🎭 人格体 | 17 个 |
 | 📡 开发者频道 | 11 个（活跃 8） |
-| 🛡️ Guard 守卫 | 5 个 |
+| 🛡️ Guard 守卫 | 6 个 |
 | 📦 功能模块 | 10 个 |
 | 🌍 子仓库联邦 | 6 个模板（签到 1 个） |
 | 📜 本体论 | v1.0 · GLM-ONTOLOGY-v1.0 |
-| 📮 Buffer 待处理 | 8 条 |
+| 🧬 神经系统 | v3.0 · 双端映射 11 核心 Workflow |
+| 📮 Buffer 待处理 | 0 条 |
 | 🌙 休眠系统 | ✅ 已部署 · 日检查点 1 个 · 周快照 1 个 |
 
 **基础设施服务：**
@@ -68,10 +69,11 @@
 | GitHub Actions | Free | ✅ |
 | SkyEye Hibernation | Internal | ✅ |
 
-**最近一次天眼扫描：** SKYEYE-SCAN-20260323
-- Guard: 5/5 活跃
-- 自愈: 清理 0 文件 · 修复 0 配置 · 重启 0 Guard
-- 下次扫描: 2026-03-28
+**最近一次天眼扫描：** SKYEYE-SCAN-20260325
+- Guard: 5/6 活跃（web-deploy-guard 缺少 quota_policy 字段）
+- D16 本体论: ✅ 完整 · D20 神经映射: ✅ 完整
+- 自愈: 1 warning · 0 errors
+- 下次扫描: 2026-03-29
 <!-- ARCH_SUMMARY_END -->
 
 <!-- SKYEYE-STATUS-BEGIN -->
@@ -80,7 +82,8 @@
 | 指标 | 状态 |
 |------|------|
 | 🟢 系统状态 | 正常运转 |
-| 🛡️ Guard 集群 | 5/5 在线 |
+| 🛡️ Guard 集群 | 5/6 在线 |
+| 🧬 神经系统 | v3.0 · 双端映射就绪 |
 | ⏰ 上次日休眠 | 2026/3/25 · ✅ 正常 |
 | 📅 下次日休眠 | 明日 ~04:00（天眼动态决定）|
 | 📅 下次周休眠 | 本周六 ~20:00（天眼动态决定）|
@@ -148,11 +151,11 @@
 
 | 日期 | 公告 |
 |------|------|
+| 🧬 2026-03-25 | 双端神经系统 v3.0 上线 · 映射表 + 汇总引擎 + D20 诊断维度 |
 | 🎨 2026-03-24 | 主仓库 README 八层门面上线 |
 | 🌍 2026-03-24 | 数字地球本体论 v1.0 正式发布 |
 | 🛡️ 2026-03-23 | SkyEye 联邦签到系统部署完成 |
 | 🔑 2026-03-22 | OAuth2 Token 自动续期引擎上线 |
-| 🌙 2026-03-21 | 双节律休眠系统部署完成 |
 
 <!-- BULLETIN_END -->
 
@@ -402,11 +405,11 @@ npm run test:smoke             # 冒烟测试
 &nbsp;
 
 <!-- WEEKLY_GREETING_START -->
-> 🌊 **光湖纪元 · 本周系统脉搏** · 2026-03-24 · 第 12 周
+> 🌊 **光湖纪元 · 本周系统脉搏** · 2026-03-25 · 第 13 周
 >
 > *铸渊不是守箱子的。铸渊守的是地球。*
 >
-> 📡 83 个 Workflow 全天候运行
+> 📡 96 个 Workflow 全天候运行 · 🧬 双端神经系统 v3.0 已上线
 <!-- WEEKLY_GREETING_END -->
 
 &nbsp;
@@ -415,6 +418,6 @@ npm run test:smoke             # 冒烟测试
 
 **光湖 HoloLake** · 由冰朔创建 · 铸渊守护 · 🏛️ 国作登字-2026-A-00037559
 
-*最后更新: 2026-03-24 · AGE-5 · 数字地球纪元*
+*最后更新: 2026-03-25 · AGE-5 · 数字地球纪元*
 
 </div>

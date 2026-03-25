@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "last_updated": "2026-03-25T09:15:18+08:00",
+  "last_updated": "2026-03-25T14:22:00+08:00",
   "system_status": "healthy",
   "metrics": {
     "ai_personas": {
@@ -13,24 +13,40 @@
       "active_24h": 8
     },
     "workflows": {
-      "total": 94,
-      "active": 83,
+      "total": 96,
+      "active": 96,
       "failed": 0
+    },
+    "agents": {
+      "total": 93
     },
     "guards": {
       "total": 6,
-      "active": 6
+      "active": 5,
+      "warnings": 1
     },
     "modules": {
       "total": 10
     },
     "buffer_pending": 0,
     "ontology_version": "v1.0",
+    "neural_system_version": "v3.0",
     "evolution_days": 0
   },
   "hibernation": {
     "next_weekly": "周六 20:00-00:00 CST",
     "next_daily": "每日 04:00-04:10 CST"
+  },
+  "last_skyeye_scan": {
+    "id": "SCAN-20260325",
+    "workflows": 96,
+    "guards": "5/6",
+    "directories": "19/19",
+    "d16_ontology": "✅",
+    "d20_neural_map": "✅",
+    "issues": 1,
+    "errors": 0,
+    "warnings": 1
   },
   "alerts": []
 }
