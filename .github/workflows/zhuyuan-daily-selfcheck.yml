@@ -82,7 +82,7 @@ jobs:
 
       - name: DC-01 Notion Usage Snapshot
         env:
-          NOTION_TOKEN: ${{ secrets.NOTION_API_TOKEN }}
+          NOTION_TOKEN: ${{ secrets.NOTION_API_KEY }}
         run: node scripts/dc-notion-usage.js
 
       - name: DC-02 Workflow Performance Snapshot

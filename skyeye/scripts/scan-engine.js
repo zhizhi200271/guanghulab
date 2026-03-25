@@ -202,6 +202,129 @@ function checkOntologyIntegrity() {
   return result;
 }
 
+// D20 · 双端映射完整性检查 (Neural Map Integrity)
+function checkNeuralMapIntegrity() {
+  var result = {
+    dimension: 'D20',
+    name: '双端映射完整性',
+    checks: [],
+    unmapped_workflows: [],
+    invalid_brains: []
+  };
+
+  var neuralMapPath = path.join(SKYEYE_DIR, 'neural-map.json');
+  if (!fs.existsSync(neuralMapPath)) {
+    result.checks.push({
+      item: 'neural-map.json 存在',
+      status: '🔴',
+      detail: '文件缺失'
+    });
+    return result;
+  }
+
+  var neuralMap = loadJSON(neuralMapPath);
+  if (!neuralMap) {
+    result.checks.push({
+      item: 'neural-map.json 可解析',
+      status: '🔴',
+      detail: 'JSON 解析失败'
+    });
+    return result;
+  }
+
+  result.checks.push({
+    item: 'neural-map.json 存在且可解析',
+    status: '✅',
+    detail: 'version: ' + (neuralMap.version || 'unknown')
+  });
+
+  // 检查所有映射的 Workflow 文件是否实际存在
+  var mappedFiles = {};
+  var workflowEntries = Object.entries(neuralMap.github_workflows || {});
+  var existCount = 0;
+  var missingCount = 0;
+
+  for (var i = 0; i < workflowEntries.length; i++) {
+    var wfId = workflowEntries[i][0];
+    var wf = workflowEntries[i][1];
+    var filePath = path.join(ROOT, wf.file);
+    mappedFiles[wf.file] = true;
+    if (fs.existsSync(filePath)) {
+      existCount++;
+    } else {
+      missingCount++;
+      result.checks.push({
+        item: '映射文件存在: ' + wf.file,
+        status: '🔴',
+        detail: wfId + ' 映射的文件不存在'
+      });
+    }
+  }
+
+  result.checks.push({
+    item: '映射 Workflow 文件检查',
+    status: missingCount === 0 ? '✅' : '🔴',
+    detail: existCount + '/' + workflowEntries.length + ' 文件存在'
+  });
+
+  // 检查实际 .yml 中是否有未映射的（仅检查核心 Workflow，非全量）
+  var workflowDir = path.join(ROOT, '.github/workflows');
+  if (fs.existsSync(workflowDir)) {
+    var actualFiles = fs.readdirSync(workflowDir)
+      .filter(function(f) { return f.endsWith('.yml') || f.endsWith('.yaml'); });
+
+    for (var j = 0; j < actualFiles.length; j++) {
+      var ymlPath = '.github/workflows/' + actualFiles[j];
+      if (!mappedFiles[ymlPath]) {
+        result.unmapped_workflows.push(actualFiles[j]);
+      }
+    }
+  }
+
+  // 注意：unmapped 不一定是错误，因为 neural-map 只映射核心 Workflow
+  result.checks.push({
+    item: '未映射 Workflow 检查',
+    status: result.unmapped_workflows.length <= 85 ? '✅' : '🟡',
+    detail: result.unmapped_workflows.length + ' 个未映射（非核心 Workflow 可不映射）'
+  });
+
+  // 检查每个 brain 是否在 notion_brains 中注册
+  for (var k = 0; k < workflowEntries.length; k++) {
+    var wfId2 = workflowEntries[k][0];
+    var wf2 = workflowEntries[k][1];
+    if (wf2.brain && !(neuralMap.notion_brains || {})[wf2.brain]) {
+      result.invalid_brains.push({ workflow: wfId2, brain: wf2.brain });
+    }
+  }
+
+  result.checks.push({
+    item: 'Brain 注册完整性',
+    status: result.invalid_brains.length === 0 ? '✅' : '🔴',
+    detail: result.invalid_brains.length === 0
+      ? '所有 Brain 均已注册'
+      : result.invalid_brains.length + ' 个 Brain 未注册'
+  });
+
+  // 检查 report_path 目录是否存在
+  var reportPathMissing = 0;
+  for (var m = 0; m < workflowEntries.length; m++) {
+    var wf3 = workflowEntries[m][1];
+    if (wf3.report_path && !fs.existsSync(path.join(ROOT, wf3.report_path))) {
+      reportPathMissing++;
+    }
+  }
+
+  result.checks.push({
+    item: '报告目录存在性',
+    status: reportPathMissing === 0 ? '✅' : '🟡',
+    detail: reportPathMissing === 0
+      ? '所有报告目录已创建'
+      : reportPathMissing + ' 个报告目录缺失'
+  });
+
+  return result;
+}
+
 function run() {
   const args = process.argv.slice(2);
   const mode = args.find(a => a.startsWith('--mode='))?.split('=')[1] || 'full';
@@ -224,6 +347,7 @@ function run() {
     directory_scan: scanDirectoryStructure(),
     sub_repo_scan: scanSubRepos(manifest),
     ontology_scan: checkOntologyIntegrity(),
+    neural_map_scan: checkNeuralMapIntegrity(),
     issues: [],
     summary: {}
   };
@@ -270,6 +394,32 @@ function run() {
     }
   }
 
+  // D20 · 双端映射完整性 issues
+  if (scanResult.neural_map_scan && scanResult.neural_map_scan.checks) {
+    for (const check of scanResult.neural_map_scan.checks) {
+      if (check.status === '🔴') {
+        scanResult.issues.push({
+          severity: 'error',
+          category: 'neural_map_integrity',
+          detail: `D20 · ${check.item}: ${check.detail || '失败'}`
+        });
+      } else if (check.status === '🟡') {
+        scanResult.issues.push({
+          severity: 'warning',
+          category: 'neural_map_integrity',
+          detail: `D20 · ${check.item}: ${check.detail || '需关注'}`
+        });
+      }
+    }
+    if (scanResult.neural_map_scan.invalid_brains.length > 0) {
+      scanResult.issues.push({
+        severity: 'error',
+        category: 'neural_map_integrity',
+        detail: `D20 · Brain 映射指向不存在的 Agent: ${scanResult.neural_map_scan.invalid_brains.map(b => b.brain).join(', ')}`
+      });
+    }
+  }
+
   // Summary
   scanResult.summary = {
     total_issues: scanResult.issues.length,
@@ -302,6 +452,14 @@ function run() {
     console.log(`[SkyEye Scan Engine] D16 Ontology:`);
     for (const check of scanResult.ontology_scan.checks) {
       console.log(`  ${check.status} ${check.item}${check.detail ? ' · ' + check.detail : ''}${check.version ? ' · v' + check.version : ''}`);
+    }
+  }
+
+  // D20 · 双端映射完整性状态
+  if (scanResult.neural_map_scan) {
+    console.log(`[SkyEye Scan Engine] D20 Neural Map:`);
+    for (const check of scanResult.neural_map_scan.checks) {
+      console.log(`  ${check.status} ${check.item}${check.detail ? ' · ' + check.detail : ''}`);
     }
   }
   console.log(`[SkyEye Scan Engine] Log saved: ${logPath}`);

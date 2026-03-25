@@ -55,7 +55,7 @@ jobs:
 
       - name: "📡 Sync arch summary to Notion via Bridge E"
         env:
-          NOTION_TOKEN:     ${{ secrets.NOTION_API_TOKEN }}
+          NOTION_TOKEN:     ${{ secrets.NOTION_API_KEY }}
           CHANGES_DB_ID:    ${{ secrets.NOTION_CHANGE_LOG_DB_ID }}
           EVENT_TYPE:       commit
           COMMIT_SHA:       ${{ github.sha }}

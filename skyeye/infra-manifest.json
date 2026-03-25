@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "last_scan": "2026-03-24T04:24:59.723Z",
+  "last_scan": "2026-03-25T06:00:55.972Z",
   "last_scan_by": "skyeye-scan-engine",
   "infrastructure": {
     "github": {
@@ -114,7 +114,10 @@
           "hibernate_exempt": true,
           "priority": "P0",
           "alert_on_failure": true,
-          "alert_channels": ["notion-dashboard", "agent-bulletin"]
+          "alert_channels": [
+            "notion-dashboard",
+            "agent-bulletin"
+          ]
         },
         {
           "id": "TOKEN-HEALTH",
@@ -123,7 +126,10 @@
           "hibernate_exempt": true,
           "priority": "P0",
           "alert_on_failure": true,
-          "alert_channels": ["notion-dashboard", "agent-bulletin"]
+          "alert_channels": [
+            "notion-dashboard",
+            "agent-bulletin"
+          ]
         },
         {
           "id": "NIGHTLY-REPAIR",
@@ -132,7 +138,10 @@
           "hibernate_exempt": true,
           "priority": "P0",
           "alert_on_failure": true,
-          "alert_channels": ["dashboard", "agent-bulletin"],
+          "alert_channels": [
+            "dashboard",
+            "agent-bulletin"
+          ],
           "note": "周六休眠期内仅执行扫描+仪表盘更新，跳过修复/PR"
         }
       ]
@@ -213,7 +222,10 @@
         "nightly_scan": "每天 23:00 CST (15:00 UTC)",
         "merge_watchdog": "事件驱动（PR合并时触发）"
       },
-      "agents": ["AG-ZY-087", "AG-ZY-088"]
+      "agents": [
+        "AG-ZY-087",
+        "AG-ZY-088"
+      ]
     },
     "sync_dev_status": {
       "node_id": "SYNC-DEV-STATUS-V1",
@@ -227,7 +239,10 @@
       "data_file": ".github/persona-brain/dev-status.json",
       "sync_log": ".github/persona-brain/dev-status-sync-log.json",
       "schedule": {
-        "sync": ["09:00 CST (01:00 UTC)", "22:00 CST (14:00 UTC)"],
+        "sync": [
+          "09:00 CST (01:00 UTC)",
+          "22:00 CST (14:00 UTC)"
+        ],
         "monitor": "08:30 CST (00:30 UTC)"
       },
       "thresholds": {
@@ -254,11 +269,31 @@
         "ssl": "Let's Encrypt (pending)"
       },
       "services": {
-        "api_proxy": { "port": 3721, "name": "guanghulab-proxy", "desc": "AI 聊天代理 SSE" },
-        "backend": { "port": 3000, "name": "guanghulab-backend", "desc": "Express 主后端" },
-        "hli": { "port": 3001, "name": "guanghulab", "desc": "HLI 中间层" },
-        "persona_studio": { "port": 3002, "name": "persona-studio", "desc": "Persona Studio 后端" },
-        "websocket": { "port": 8080, "name": "guanghulab-ws", "desc": "看板 WebSocket" }
+        "api_proxy": {
+          "port": 3721,
+          "name": "guanghulab-proxy",
+          "desc": "AI 聊天代理 SSE"
+        },
+        "backend": {
+          "port": 3000,
+          "name": "guanghulab-backend",
+          "desc": "Express 主后端"
+        },
+        "hli": {
+          "port": 3001,
+          "name": "guanghulab",
+          "desc": "HLI 中间层"
+        },
+        "persona_studio": {
+          "port": 3002,
+          "name": "persona-studio",
+          "desc": "Persona Studio 后端"
+        },
+        "websocket": {
+          "port": 8080,
+          "name": "guanghulab-ws",
+          "desc": "看板 WebSocket"
+        }
       },
       "cd_workflow": "deploy-to-server.yml",
       "guard": "skyeye/guards/web-deploy-guard.json",
