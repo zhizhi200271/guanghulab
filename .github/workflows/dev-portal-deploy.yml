@@ -128,4 +128,4 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add docs/dev-portal/manifest.json
           git diff --cached --quiet && echo "无变更" || git commit -m "📋 开发者门户: 更新频道清单 [${{ steps.detect.outputs.dev_ids }}]"
-          git push || echo "⚠️ 推送失败"
+          git push 2>&1 || echo "⚠️ manifest 推送失败（非致命）"
