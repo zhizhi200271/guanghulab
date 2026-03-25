@@ -1,0 +1,10 @@
+{
+  "workflow_id": "gate-guard",
+  "run_id": "23545902939",
+  "timestamp": "2026-03-25T14:21:09Z",
+  "status": "failure",
+  "brain": "AG-SY-01",
+  "event": "push",
+  "branch": "main",
+  "commit": "ab09288334cb3e3ae8ae4bbf42acbfb49d7fca51"
+}
