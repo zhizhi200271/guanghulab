@@ -285,13 +285,13 @@
 <!-- BINGSHUO_BULLETIN_START -->
 | 时间 | 检查项 | 状态 |
 |------|--------|------|
-| 03-25 17:34 | 🔵 铸渊 · Bridge E · GitHub Changes → Notion · action_required | Copilot |
-| 03-25 17:33 | 🔧 系统更新: `docs/` | 铸渊 (ZhuYuan Bot) |
-| 03-25 17:33 | ✅ 📢 更新系统公告区 · 成功 | 冰朔 |
-| 03-25 17:32 | 🔧 系统更新: `.github/` | github-actions[bot] |
-| 03-25 17:32 | 🔵 铸渊 · Bridge E · GitHub Changes → Notion · action_required | 冰朔 |
+| 03-25 18:12 | ⏹️ 📢 更新系统公告区 · cancelled | 冰朔 |
+| 03-25 18:12 | ✅ 铸渊 · Bridge E · GitHub Changes → Notion · 成功 | 冰朔 |
+| 03-25 18:12 | 🔧 系统更新: `.github/` | 铸渊 (ZhùYuān) |
+| 03-25 18:12 | 🔧 系统更新: `docs/` | 铸渊 (ZhùYuān) |
+| 03-25 18:12 | 🔵 铸渊 · Bridge E · GitHub Changes → Notion · action_required | 冰朔 |
+| 03-25 18:06 | ✅ Notion Heartbeat Monitor · 成功 | 冰朔 |
 | 03-25 17:01 | ✅ 每日巡检 ✅ 通过 | 冰朔 |
-| 03-25 16:10 | 🔧 系统更新: `scripts/` | 铸渊 (Copilot) |
 | 03-24 17:02 | ✅ 每日巡检 ✅ 通过 | 冰朔 |
 | 03-23 17:08 | ✅ 每日巡检 ✅ 通过 | 冰朔 |
 | 03-22 16:47 | ✅ 每日巡检 ✅ 通过 | 冰朔 |
