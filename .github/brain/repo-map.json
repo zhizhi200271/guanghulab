@@ -1,7 +1,7 @@
 {
   "description": "铸渊图书馆目录 · Library Catalog for 铸渊 (Zhùyuān)",
   "version": "2.0",
-  "generated_at": "2026-03-25T13:24:50.382Z",
+  "generated_at": "2026-03-25T14:21:11.172Z",
   "generated_by": "scripts/generate-repo-map.js",
   "repo": "qinfendebingshuo/guanghulab",
   "stats": {
@@ -1649,6 +1649,9 @@
           "file": "ai-system-doc.md"
         },
         {
+          "file": "assets"
+        },
+        {
           "file": "css"
         },
         {
@@ -1685,7 +1688,7 @@
           "file": "使用指南.md"
         }
       ],
-      "item_count": 17
+      "item_count": 18
     },
     {
       "zone_id": "TESTS",
@@ -2887,6 +2890,9 @@
     ],
     "ai-system-doc": [
       "DOCS::ai-system-doc.md"
+    ],
+    "assets": [
+      "DOCS::assets"
     ],
     "css": [
       "DOCS::css"
