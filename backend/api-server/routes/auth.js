@@ -177,6 +177,11 @@ router.post('/auth/team-login', function(req, res) {
  * 验证当前会话是否有效
  */
 router.get('/auth/verify', function(req, res) {
+  var clientIp = req.ip || req.connection.remoteAddress || 'unknown';
+  if (!checkRateLimit(clientIp)) {
+    return res.status(429).json({ valid: false, message: '请求过于频繁' });
+  }
+
   var authHeader = req.headers['authorization'] || '';
   var token = authHeader.replace(/^Bearer\s+/i, '');
   var result = verifySessionToken(token);
