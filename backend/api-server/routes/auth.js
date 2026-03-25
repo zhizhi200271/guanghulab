@@ -20,6 +20,25 @@ var TEAM_API_KEY = process.env.TEAM_API_KEY || '';
 // 会话 token 签名密钥
 var SESSION_SECRET = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex');
 
+// 简易速率限制（防暴力枚举）
+var loginAttempts = new Map();
+var RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1分钟窗口
+var RATE_LIMIT_MAX = 10; // 每分钟最多10次
+
+function checkRateLimit(ip) {
+  var now = Date.now();
+  var entry = loginAttempts.get(ip);
+  if (!entry || now - entry.windowStart > RATE_LIMIT_WINDOW_MS) {
+    loginAttempts.set(ip, { windowStart: now, count: 1 });
+    return true;
+  }
+  entry.count++;
+  if (entry.count > RATE_LIMIT_MAX) {
+    return false;
+  }
+  return true;
+}
+
 // 开发者数据库（后续对接 Notion）
 var DEV_DATABASE = {
   'DEV-000': { name: '冰朔', level: 3, channel: 'system' },
@@ -111,6 +130,15 @@ function requireSession(req, res, next) {
  * 开发者编号免配置登录
  */
 router.post('/auth/team-login', function(req, res) {
+  // 速率限制检查
+  var clientIp = req.ip || req.connection.remoteAddress || 'unknown';
+  if (!checkRateLimit(clientIp)) {
+    return res.status(429).json({
+      success: false,
+      message: '⚠️ 登录请求过于频繁，请稍后再试。'
+    });
+  }
+
   var devId = (req.body.devId || '').trim().toUpperCase();
 
   if (!devId || !/^DEV-\d{3}$/.test(devId)) {

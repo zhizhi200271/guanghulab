@@ -252,6 +252,18 @@ jobs:
             "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" "
               DP='${{ secrets.DEPLOY_PATH }}'
 
+              # dashboard → docs/dashboard（仪表盘在 docs/ 子目录下）
+              if [ -d \"\$DP/docs/dashboard\" ] && [ ! -e \"\$DP/dashboard\" ]; then
+                ln -s \"\$DP/docs/dashboard\" \"\$DP/dashboard\"
+                echo '✅ dashboard → docs/dashboard'
+              elif [ -L \"\$DP/dashboard\" ]; then
+                echo '✅ dashboard symlink 已存在'
+              elif [ -d \"\$DP/dashboard\" ]; then
+                echo '✅ dashboard 目录已存在'
+              else
+                echo '⚠️ docs/dashboard 不存在，跳过'
+              fi
+
               # devboard → modules/devboard（开发者看板在 modules/ 子目录下）
               if [ -d \"\$DP/modules/devboard\" ] && [ ! -e \"\$DP/devboard\" ]; then
                 ln -s \"\$DP/modules/devboard\" \"\$DP/devboard\"
