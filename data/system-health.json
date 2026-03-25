@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "last_updated": "2026-03-25T15:20:18+08:00",
+  "last_updated": "2026-03-25T15:38:14+08:00",
   "system_status": "healthy",
   "metrics": {
     "ai_personas": {
@@ -13,8 +13,8 @@
       "active_24h": 8
     },
     "workflows": {
-      "total": 97,
-      "active": 97,
+      "total": 98,
+      "active": 98,
       "failed": 0
     },
     "agents": {
