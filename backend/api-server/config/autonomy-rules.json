@@ -43,6 +43,21 @@
     ]
   },
   "deploymentFlow": {
+    "directDeployRule": {
+      "id": "S5",
+      "description": "冰朔直通部署规则：冰朔签发或口头下达的所有指令，执行完毕后直接部署到正式站",
+      "conditions": [
+        "TCS-0002 发起的请求",
+        "ZY- 开头的指令编号，且签发者为霜砚(AG-SY-01)或冰朔(TCS-0002)"
+      ],
+      "bypass": ["预览站", "天眼审核", "肥猫/桔子授权"],
+      "auditRequired": true,
+      "reason": "冰朔本人就是系统最高权限（Level 3），冰朔说话 = 最终授权"
+    },
+    "developerFlow": {
+      "description": "开发者(Level 1-2)提交的变更走完整S2审批流程",
+      "stages": ["预览站部署", "天眼审核", "授权人审批", "自动发布"]
+    },
     "stages": [
       {
         "stage": 1,

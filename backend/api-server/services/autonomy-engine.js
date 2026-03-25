@@ -113,11 +113,32 @@ function getDualLineConfig() {
   return autonomyRules.dualLineArchitecture;
 }
 
+/**
+ * 判断请求是否来自冰朔直通部署路径 (S5)
+ * @param {string} devId - 开发者编号
+ * @param {string} instructionId - 指令编号
+ * @param {string} signedBy - 签发者编号
+ * @returns {boolean}
+ */
+function isDirectDeploySource(devId, instructionId, signedBy) {
+  // 冰朔本人
+  if (devId === 'TCS-0002') return true;
+
+  // ZY- 指令 + 可信签发者
+  if (instructionId && /^ZY-/.test(instructionId)) {
+    var trustedSigners = ['AG-SY-01', 'TCS-0002', 'ICE-0002'];
+    if (signedBy && trustedSigners.indexOf(signedBy) !== -1) return true;
+  }
+
+  return false;
+}
+
 module.exports = {
   checkAutonomyCompliance: checkAutonomyCompliance,
   detectInteractionMode: detectInteractionMode,
   logAutonomousAction: logAutonomousAction,
   getDeploymentStages: getDeploymentStages,
   getDualLineConfig: getDualLineConfig,
-  writeAutonomyLog: writeAutonomyLog
+  writeAutonomyLog: writeAutonomyLog,
+  isDirectDeploySource: isDirectDeploySource
 };

@@ -1,8 +1,9 @@
 /**
- * 部署授权流程路由 · Phase 8
+ * 部署授权流程路由 · Phase 8 + S5 直通规则
  *
- * 天眼审核通过后 → 推送授权请求给授权人 → 授权人确认/拒绝 → 自动发布
- * 系统绝不自动跳过授权步骤。没有人类点确认，就不发布。
+ * 部署流分两条路径：
+ * A) 冰朔直通：TCS-0002 或 ZY- 指令签发 → 直接部署到正式站，跳过预览/天眼/授权
+ * B) 开发者流程：天眼审核 → 推送授权请求给授权人 → 确认/拒绝 → 自动发布
  *
  * POST /api/approval/request          — 创建授权请求（天眼/系统内部调用）
  * POST /api/approval/:id/decide       — 授权人确认/拒绝
@@ -24,6 +25,36 @@ var approversConfig = require('../config/approvers.json');
 
 // ====== 内存中的授权记录（生产环境可迁移到持久化存储）======
 var approvalStore = new Map();
+
+// ====== S5 直通部署判断 ======
+
+var autonomyEngine = require('../services/autonomy-engine');
+
+/**
+ * 判断部署请求是否来自冰朔直通路径（委托给 autonomy-engine 单一来源）
+ */
+function isDirectDeploySource(user, body) {
+  var instructionId = body.instructionId || body.deployId || '';
+  var signedBy = body.signedBy || '';
+  return autonomyEngine.isDirectDeploySource(user.devId, instructionId, signedBy);
+}
+
+/**
+ * 写入部署日志（直通和审批部署共用，保持可追溯性）
+ */
+function writeDeployLog(entry) {
+  var logDir = process.env.AUDIT_LOG_DIR || path.join(__dirname, '../../logs/audit');
+  try {
+    fs.mkdirSync(logDir, { recursive: true });
+    var today = new Date().toISOString().split('T')[0];
+    var logFile = path.join(logDir, 'deploy-' + today + '.jsonl');
+    fs.appendFile(logFile, JSON.stringify(entry) + '\n', function(err) {
+      if (err) console.error('部署日志写入失败:', err.message);
+    });
+  } catch (e) {
+    console.error('部署日志写入失败:', e.message);
+  }
+}
 
 // ====== 辅助函数 ======
 
@@ -60,6 +91,7 @@ router.use(auditMiddleware.auditLog);
 
 /**
  * 创建授权请求（天眼审核通过后由系统调用）
+ * S5: 冰朔直通路径 → 跳过审批，直接部署到正式站
  */
 router.post('/request', function(req, res) {
   // 仅系统内部或管理员可创建授权请求
@@ -76,6 +108,74 @@ router.post('/request', function(req, res) {
   var module = body.module;
   var channel = body.channel || '系统';
   var reviewReport = body.reviewReport || {};
+
+  if (!deployId || !module) {
+    return res.status(400).json({
+      error: true,
+      code: 'MISSING_FIELDS',
+      reply: '❌ 缺少必要字段：deployId, module'
+    });
+  }
+
+  // ====== S5 直通判断 ======
+  if (isDirectDeploySource(req.user, body)) {
+    // 冰朔/霜砚指令 → 直接部署，不走审批流程
+    writeDeployLog({
+      action: 'direct_deploy',
+      deployId: deployId,
+      module: module,
+      channel: channel,
+      source: req.user.devId,
+      signedBy: body.signedBy || req.user.devId,
+      instructionId: body.instructionId || deployId,
+      reason: 'S5 冰朔直通部署规则：冰朔签发或口头下达的指令直接部署到正式站',
+      timestamp: new Date().toISOString()
+    });
+
+    // 直接触发正式站部署
+    var githubService;
+    try {
+      githubService = require('../services/github');
+    } catch (_) {
+      githubService = null;
+    }
+
+    if (githubService && githubService.triggerWorkflow) {
+      githubService.triggerWorkflow('deploy-to-server.yml', {
+        module: module,
+        deploy_id: deployId,
+        approved_by: req.user.devId,
+        target: 'production',
+        direct_deploy: 'true'
+      }).then(function() {
+        writeDeployLog({
+          action: 'direct_deploy_triggered',
+          deployId: deployId,
+          module: module,
+          source: req.user.devId,
+          timestamp: new Date().toISOString()
+        });
+      }).catch(function(err) {
+        console.error('直通部署触发失败:', err.message);
+        writeDeployLog({
+          action: 'direct_deploy_failed',
+          deployId: deployId,
+          error: err.message,
+          timestamp: new Date().toISOString()
+        });
+      });
+    }
+
+    return res.json({
+      success: true,
+      directDeploy: true,
+      deployId: deployId,
+      reply: '🚀 冰朔直通部署：' + module + ' 已直接触发正式站（guanghulab.com）部署。' +
+             '不经预览站、不经天眼审核、不经授权审批。部署日志已记录。'
+    });
+  }
+
+  // ====== 开发者流程：走完整 S2 审批 ======
 
   if (!deployId || !module) {
     return res.status(400).json({
