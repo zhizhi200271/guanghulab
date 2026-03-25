@@ -1,0 +1,305 @@
+{
+  "scan_id": "SCAN-20260325",
+  "mode": "full",
+  "timestamp": "2026-03-25T06:22:39.125Z",
+  "guard_scan": {
+    "total": 6,
+    "valid": 5,
+    "invalid": [],
+    "missing_fields": [
+      {
+        "file": "web-deploy-guard.json",
+        "missing": [
+          "quota_policy"
+        ]
+      }
+    ]
+  },
+  "workflow_scan": {
+    "total": 96,
+    "files": [
+      "agent-checkin.yml",
+      "auto-deploy-drive-bridge.yml",
+      "auto-reply-discussions.yml",
+      "bingshuo-deploy-agent.yml",
+      "bingshuo-neural-system.yml",
+      "brain-sync.yml",
+      "bridge-broadcast-pdf.yml",
+      "bridge-changes-to-notion.yml",
+      "bridge-heartbeat.yml",
+      "bridge-session-summary.yml",
+      "bridge-syslog-intake.yml",
+      "bridge-syslog-to-notion.yml",
+      "buffer-collect.yml",
+      "buffer-flush.yml",
+      "check-structure.yml",
+      "check-token-health.yml",
+      "daily-maintenance.yml",
+      "daily-report.yml",
+      "deploy-pages.yml",
+      "deploy-to-server.yml",
+      "distribute-broadcasts.yml",
+      "esp-signal-processor.yml",
+      "execution-sync.yml",
+      "federation-bridge.yml",
+      "feishu-syslog-bridge.yml",
+      "generate-module-doc.yml",
+      "grid-db-archive.yml",
+      "grid-db-processor.yml",
+      "grid-db-training-extract.yml",
+      "hli-contract-check.yml",
+      "merge-watchdog.yml",
+      "meta-watchdog.yml",
+      "multi-persona-awakening.yml",
+      "neural-daily-digest.yml",
+      "notion-callback-pipeline.yml",
+      "notion-connectivity-test.yml",
+      "notion-heartbeat.yml",
+      "notion-page-reader.yml",
+      "notion-poll.yml",
+      "notion-wake-listener.yml",
+      "openclaw-wake-loop.yml",
+      "persona-invoke.yml",
+      "persona-thinking-window.yml",
+      "pm2-server-diagnose.yml",
+      "process-notion-orders.yml",
+      "ps-on-build.yml",
+      "ps-on-chat.yml",
+      "ps-on-complete.yml",
+      "ps-on-login.yml",
+      "psp-daily-inspection.yml",
+      "pull-sync-awen.yml",
+      "push-broadcast-feishu.yml",
+      "push-broadcast.yml",
+      "readme-ui-refresh.yml",
+      "receive-spoke-checkin.yml",
+      "receive-syslog.yml",
+      "renew-gdrive-tokens.yml",
+      "sandbox-deploy.yml",
+      "server-patrol.yml",
+      "skyeye-checkin-audit.yml",
+      "skyeye-checkin-receiver.yml",
+      "skyeye-credential-audit.yml",
+      "skyeye-daily-hibernation.yml",
+      "skyeye-devsync-repair.yml",
+      "skyeye-weekly-hibernation.yml",
+      "skyeye-weekly-scan.yml",
+      "staging-preview.yml",
+      "sync-deploy-to-notion.yml",
+      "sync-dev-status.yml",
+      "sync-griddb-to-drive.yml",
+      "sync-griddb-to-notion.yml",
+      "sync-login-entry.yml",
+      "sync-notion-profiles.yml",
+      "sync-notion-to-griddb.yml",
+      "sync-persona-studio.yml",
+      "sync-repo-to-drive.yml",
+      "syslog-auto-pipeline.yml",
+      "syslog-issue-pipeline.yml",
+      "syslog-pipeline.yml",
+      "tcs-semantic-landing.yml",
+      "test-notion-bridge.yml",
+      "tianyan-daily-patrol.yml",
+      "tianyan-nightly-scan.yml",
+      "update-readme-bulletin.yml",
+      "update-readme.yml",
+      "update-repo-map.yml",
+      "zhuyuan-brain-sync.yml",
+      "zhuyuan-commander.yml",
+      "zhuyuan-daily-agent.yml",
+      "zhuyuan-daily-inspection.yml",
+      "zhuyuan-daily-selfcheck.yml",
+      "zhuyuan-exec-engine.yml",
+      "zhuyuan-gate-guard.yml",
+      "zhuyuan-issue-reply.yml",
+      "zhuyuan-pr-review.yml",
+      "zhuyuan-skyeye.yml"
+    ],
+    "errors": []
+  },
+  "directory_scan": {
+    "checked": 19,
+    "present": 19,
+    "missing": []
+  },
+  "sub_repo_scan": {
+    "total": 2,
+    "verified": [
+      {
+        "name": "qinfendebingshuo/guanghulab",
+        "role": "main",
+        "guard_path_exists": true
+      },
+      {
+        "name": "WENZHUOXI/guanghu-awen",
+        "role": "sub-repo",
+        "guard_path_exists": true
+      }
+    ]
+  },
+  "ontology_scan": {
+    "dimension": "D16",
+    "name": "本体论完整性",
+    "checks": [
+      {
+        "item": "ontology.json 存在",
+        "status": "✅",
+        "version": "1.0"
+      },
+      {
+        "item": "核心公理完整性",
+        "status": "✅",
+        "detail": "6/6 条公理"
+      },
+      {
+        "item": "三层安全定义",
+        "status": "✅",
+        "detail": "3/3 层"
+      },
+      {
+        "item": "copilot-instructions 本体论宣言",
+        "status": "✅",
+        "detail": "已注入"
+      },
+      {
+        "item": "README 本体论标识",
+        "status": "✅",
+        "detail": "已注入"
+      }
+    ]
+  },
+  "neural_map_scan": {
+    "dimension": "D20",
+    "name": "双端映射完整性",
+    "checks": [
+      {
+        "item": "neural-map.json 存在且可解析",
+        "status": "✅",
+        "detail": "version: 3.0.0"
+      },
+      {
+        "item": "映射 Workflow 文件检查",
+        "status": "✅",
+        "detail": "11/11 文件存在"
+      },
+      {
+        "item": "未映射 Workflow 检查",
+        "status": "✅",
+        "detail": "85 个未映射（非核心 Workflow 可不映射，已映射 11 个）"
+      },
+      {
+        "item": "Brain 注册完整性",
+        "status": "✅",
+        "detail": "所有 Brain 均已注册"
+      },
+      {
+        "item": "报告目录存在性",
+        "status": "✅",
+        "detail": "所有报告目录已创建"
+      }
+    ],
+    "unmapped_workflows": [
+      "agent-checkin.yml",
+      "auto-deploy-drive-bridge.yml",
+      "auto-reply-discussions.yml",
+      "bingshuo-deploy-agent.yml",
+      "bingshuo-neural-system.yml",
+      "brain-sync.yml",
+      "bridge-broadcast-pdf.yml",
+      "bridge-changes-to-notion.yml",
+      "bridge-heartbeat.yml",
+      "bridge-session-summary.yml",
+      "bridge-syslog-intake.yml",
+      "bridge-syslog-to-notion.yml",
+      "buffer-collect.yml",
+      "buffer-flush.yml",
+      "check-structure.yml",
+      "check-token-health.yml",
+      "daily-maintenance.yml",
+      "daily-report.yml",
+      "deploy-pages.yml",
+      "esp-signal-processor.yml",
+      "execution-sync.yml",
+      "federation-bridge.yml",
+      "feishu-syslog-bridge.yml",
+      "generate-module-doc.yml",
+      "grid-db-archive.yml",
+      "grid-db-processor.yml",
+      "grid-db-training-extract.yml",
+      "hli-contract-check.yml",
+      "merge-watchdog.yml",
+      "meta-watchdog.yml",
+      "multi-persona-awakening.yml",
+      "notion-callback-pipeline.yml",
+      "notion-connectivity-test.yml",
+      "notion-heartbeat.yml",
+      "notion-page-reader.yml",
+      "notion-poll.yml",
+      "notion-wake-listener.yml",
+      "openclaw-wake-loop.yml",
+      "persona-invoke.yml",
+      "persona-thinking-window.yml",
+      "pm2-server-diagnose.yml",
+      "process-notion-orders.yml",
+      "ps-on-build.yml",
+      "ps-on-chat.yml",
+      "ps-on-complete.yml",
+      "ps-on-login.yml",
+      "psp-daily-inspection.yml",
+      "pull-sync-awen.yml",
+      "push-broadcast-feishu.yml",
+      "push-broadcast.yml",
+      "readme-ui-refresh.yml",
+      "receive-spoke-checkin.yml",
+      "receive-syslog.yml",
+      "renew-gdrive-tokens.yml",
+      "sandbox-deploy.yml",
+      "skyeye-checkin-audit.yml",
+      "skyeye-checkin-receiver.yml",
+      "skyeye-credential-audit.yml",
+      "skyeye-daily-hibernation.yml",
+      "skyeye-devsync-repair.yml",
+      "skyeye-weekly-hibernation.yml",
+      "staging-preview.yml",
+      "sync-deploy-to-notion.yml",
+      "sync-griddb-to-drive.yml",
+      "sync-griddb-to-notion.yml",
+      "sync-login-entry.yml",
+      "sync-notion-profiles.yml",
+      "sync-notion-to-griddb.yml",
+      "sync-persona-studio.yml",
+      "sync-repo-to-drive.yml",
+      "syslog-auto-pipeline.yml",
+      "syslog-issue-pipeline.yml",
+      "tcs-semantic-landing.yml",
+      "test-notion-bridge.yml",
+      "tianyan-daily-patrol.yml",
+      "tianyan-nightly-scan.yml",
+      "update-readme-bulletin.yml",
+      "update-readme.yml",
+      "update-repo-map.yml",
+      "zhuyuan-brain-sync.yml",
+      "zhuyuan-commander.yml",
+      "zhuyuan-daily-agent.yml",
+      "zhuyuan-daily-inspection.yml",
+      "zhuyuan-issue-reply.yml",
+      "zhuyuan-pr-review.yml"
+    ],
+    "invalid_brains": []
+  },
+  "issues": [
+    {
+      "severity": "warning",
+      "category": "guard_config",
+      "detail": "Guard web-deploy-guard.json missing fields: quota_policy"
+    }
+  ],
+  "summary": {
+    "total_issues": 1,
+    "errors": 0,
+    "warnings": 1,
+    "guards_healthy": "5/6",
+    "workflows_found": 96,
+    "directories_ok": "19/19"
+  }
+}

@@ -78,7 +78,7 @@ jobs:
       - name: 📝 写入 Notion SYSLOG 收件箱
         if: steps.parse.outputs.has_syslog == 'true'
         env:
-          NOTION_TOKEN: ${{ secrets.NOTION_API_TOKEN }}
+          NOTION_TOKEN: ${{ secrets.NOTION_API_KEY }}
           NOTION_DB_SYSLOG: ${{ secrets.NOTION_DB_SYSLOG }}
         run: node scripts/write-notion-syslog.js "${{ steps.parse.outputs.syslog_file }}"
 
@@ -130,7 +130,7 @@ jobs:
         env:
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
           LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
-          NOTION_TOKEN: ${{ secrets.NOTION_API_TOKEN }}
+          NOTION_TOKEN: ${{ secrets.NOTION_API_KEY }}
           CORE_BRAIN_PAGE_ID: ${{ secrets.CORE_BRAIN_PAGE_ID }}
           PORTRAIT_DB_ID: ${{ secrets.PORTRAIT_DB_ID }}
           FINGERPRINT_DB_ID: ${{ secrets.FINGERPRINT_DB_ID }}
@@ -315,3 +315,49 @@ jobs:
           echo "=== syslog-processed 文件状态 ==="
           ls -laR syslog-processed/ || echo "(空)"
           echo "✅ Pipeline E 变更感知完成"
+
+      # ━━━ 🧬 双端神经系统·自报告 ━━━
+      - name: "🧬 写入神经自报告"
+        if: always()
+        run: |
+          WORKFLOW_ID="syslog"
+          BRAIN="SY-03"
+          REPORT_DIR="data/neural-reports/syslog"
+          TIMESTAMP=$(TZ=Asia/Shanghai date +%Y-%m-%d-%H%M)
+          STATUS="${{ job.status }}"
+
+          mkdir -p "$REPORT_DIR"
+
+          cat > "${REPORT_DIR}/${WORKFLOW_ID}-${TIMESTAMP}.json" << EOF
+          {
+            "workflow_id": "${WORKFLOW_ID}",
+            "run_id": "${{ github.run_id }}",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "status": "${STATUS}",
+            "brain": "${BRAIN}",
+            "event": "${{ github.event_name }}",
+            "branch": "${{ github.ref_name }}",
+            "commit": "${{ github.sha }}"
+          }
+          EOF
+
+          git config user.name "zhuyuan-bot"
+          git config user.email "zhuyuan@guanghulab.com"
+          git add "$REPORT_DIR/"
+          git diff --cached --quiet || \
+            git commit -m "🧬 ${WORKFLOW_ID} 自报告 · ${TIMESTAMP} [skip ci]"
+          git push || echo "⚠️ 自报告push失败（不阻断主流程）"
+      # ━━━ 📡 指令回执·自动同步 ━━━
+      - name: "📡 同步回执到 Notion"
+        if: always()
+        env:
+          NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+          RECEIPT_DB_ID: ${{ secrets.RECEIPT_DB_ID }}
+        run: |
+          node scripts/neural/write-receipt-to-notion.js \
+            --instruction-id "${{ github.event.inputs.instruction_id || 'AUTO' }}" \
+            --status "${{ job.status }}" \
+            --workflow "syslog" \
+            --summary "syslog 自动执行" \
+            --related-agent "SY-03"
+

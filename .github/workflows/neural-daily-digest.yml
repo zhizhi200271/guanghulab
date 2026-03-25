@@ -1,0 +1,222 @@
+name: "🧬 铸渊 · 双端神经系统 · 每日汇总引擎"
+
+on:
+  schedule:
+    - cron: '0 13 * * *'    # UTC 13:00 = CST 21:00
+  workflow_dispatch:          # 手动触发
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  daily-digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # ━━━ Phase 1: 唤醒核心大脑 ━━━
+      - name: "🧠 唤醒核心大脑"
+        run: |
+          echo "🧬 双端神经系统·汇总引擎启动"
+          echo "时间：$(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M CST')"
+          for f in memory.json routing-map.json; do
+            [ -f ".github/persona-brain/$f" ] && echo "✅ $f" || echo "❌ $f 缺失"
+          done
+
+      # ━━━ Phase 2: 收集全 Workflow 运行数据 ━━━
+      - name: "📊 收集 Workflow 运行数据"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "📊 收集最近24h所有Workflow运行数据..."
+          mkdir -p /tmp/neural-digest
+
+          gh run list --limit 100 \
+            --json name,status,conclusion,createdAt,updatedAt,headBranch,event \
+            > /tmp/neural-digest/all-runs.json
+
+          node -e "
+            const runs = require('/tmp/neural-digest/all-runs.json');
+            const now = Date.now();
+            const h24 = 24*60*60*1000;
+            const recent = runs.filter(r => now - new Date(r.createdAt).getTime() < h24);
+            const summary = {
+              total: recent.length,
+              success: recent.filter(r => r.conclusion === 'success').length,
+              failure: recent.filter(r => r.conclusion === 'failure').length,
+              cancelled: recent.filter(r => r.conclusion === 'cancelled').length,
+              in_progress: recent.filter(r => r.status === 'in_progress').length,
+              by_workflow: {}
+            };
+            recent.forEach(r => {
+              if (!summary.by_workflow[r.name]) {
+                summary.by_workflow[r.name] = { runs: 0, success: 0, failure: 0 };
+              }
+              summary.by_workflow[r.name].runs++;
+              if (r.conclusion === 'success') summary.by_workflow[r.name].success++;
+              if (r.conclusion === 'failure') summary.by_workflow[r.name].failure++;
+            });
+            require('fs').writeFileSync('/tmp/neural-digest/workflow-summary.json', JSON.stringify(summary, null, 2));
+            console.log('最近24h运行统计:', JSON.stringify(summary, null, 2));
+          "
+
+      # ━━━ Phase 3: 收集各 Workflow 自报告 ━━━
+      - name: "📋 收集各 Workflow 自报告"
+        run: |
+          echo "📋 读取各 Workflow 的神经报告..."
+          mkdir -p /tmp/neural-digest/reports
+
+          if [ -f "skyeye/neural-map.json" ]; then
+            node -e "
+              const map = require('./skyeye/neural-map.json');
+              const fs = require('fs');
+              const path = require('path');
+              const reports = {};
+              for (const [id, wf] of Object.entries(map.github_workflows)) {
+                const reportDir = wf.report_path;
+                if (fs.existsSync(reportDir)) {
+                  const files = fs.readdirSync(reportDir)
+                    .filter(f => f.endsWith('.json'))
+                    .sort().reverse();
+                  if (files.length > 0) {
+                    try {
+                      reports[id] = JSON.parse(fs.readFileSync(path.join(reportDir, files[0]), 'utf8'));
+                      console.log('✅ ' + id + ': 读取 ' + files[0]);
+                    } catch(e) {
+                      reports[id] = { error: 'parse_failed', file: files[0] };
+                      console.log('❌ ' + id + ': JSON解析失败');
+                    }
+                  } else {
+                    reports[id] = { error: 'no_reports' };
+                    console.log('⚠️ ' + id + ': 无报告文件');
+                  }
+                } else {
+                  reports[id] = { error: 'dir_not_found' };
+                  console.log('⚠️ ' + id + ': 报告目录不存在');
+                }
+              }
+              fs.writeFileSync('/tmp/neural-digest/workflow-reports.json', JSON.stringify(reports, null, 2));
+            "
+          else
+            echo "⚠️ neural-map.json 不存在，跳过自报告收集"
+          fi
+
+      # ━━━ Phase 4: 收集天眼 + Guard + 配额 ━━━
+      - name: "🦅 收集天眼 + Guard + 配额"
+        run: |
+          # 天眼报告
+          if [ -d "data/skyeye-reports" ]; then
+            LATEST=$(ls -t data/skyeye-reports/*.json 2>/dev/null | head -1)
+            [ -n "$LATEST" ] && cp "$LATEST" /tmp/neural-digest/skyeye-latest.json && echo "✅ 天眼: $LATEST" || echo "⚠️ 无天眼报告"
+          fi
+          # Guard 状态
+          if [ -d "skyeye/guards" ]; then
+            node -e "
+              const fs = require('fs'); const path = require('path');
+              const guards = {};
+              fs.readdirSync('skyeye/guards')
+                .filter(f => f.endsWith('.json') && f !== 'guard-template.json')
+                .forEach(f => {
+                  try { guards[f.replace('.json','')] = JSON.parse(fs.readFileSync(path.join('skyeye/guards', f), 'utf8')); }
+                  catch(e) { guards[f.replace('.json','')] = { error: 'parse_failed' }; }
+                });
+              fs.writeFileSync('/tmp/neural-digest/guard-status.json', JSON.stringify(guards, null, 2));
+            "
+          fi
+          # 配额
+          [ -f "skyeye/quota-ledger.json" ] && cp skyeye/quota-ledger.json /tmp/neural-digest/quota-status.json && echo "✅ 配额" || echo "⚠️ 无配额"
+
+      # ━━━ Phase 5: 生成标准化日报 ━━━
+      - name: "📝 生成标准化日报"
+        run: node scripts/neural/generate-daily-digest.js
+
+      # ━━━ Phase 6: 保存日报到仓库 ━━━
+      - name: "💾 保存日报"
+        run: |
+          DATE=$(TZ=Asia/Shanghai date +%Y-%m-%d)
+          mkdir -p data/neural-reports/daily-digest
+          cp /tmp/neural-digest/daily-digest.json \
+            "data/neural-reports/daily-digest/digest-${DATE}.json"
+          git config user.name "zhuyuan-bot"
+          git config user.email "zhuyuan@guanghulab.com"
+          git add data/neural-reports/
+          git diff --cached --quiet || \
+            git commit -m "🧬 双端日报 · ${DATE} [skip ci]"
+          git push || echo "⚠️ push失败（不阻断）"
+
+      # ━━━ Phase 7: 推送到 Notion ━━━
+      - name: "📡 推送日报到 Notion"
+        if: always()
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_API_KEY }}
+        run: |
+          node scripts/neural/sync-digest-to-notion.js || \
+            echo "⚠️ Notion推送失败（不阻断）"
+
+      # ━━━ Phase 8: 自动分析日报 + 生成工单 ━━━
+      - name: "🧬 分析日报 · 生成工单"
+        if: always()
+        run: |
+          echo "🧬 自动分析日报..."
+          node scripts/neural/analyze-digest.js
+          if [ -d "data/neural-reports/work-orders" ]; then
+            git add data/neural-reports/work-orders/
+            git diff --cached --quiet || \
+              git commit -m "🧬 天眼工单 · $(TZ=Asia/Shanghai date +%Y-%m-%d) [skip ci]"
+            git push || echo "⚠️ 工单push失败"
+          fi
+
+      # ━━━ 🧬 双端神经系统·自报告 ━━━
+      - name: "🧬 写入神经自报告"
+        if: always()
+        run: |
+          WORKFLOW_ID="neural-daily-digest"
+          BRAIN="AG-TY-01"
+          REPORT_DIR="data/neural-reports/daily-digest"
+          TIMESTAMP=$(TZ=Asia/Shanghai date +%Y-%m-%d-%H%M)
+          STATUS="${{ job.status }}"
+
+          mkdir -p "$REPORT_DIR"
+
+          cat > "${REPORT_DIR}/${WORKFLOW_ID}-${TIMESTAMP}.json" << EOF
+          {
+            "workflow_id": "${WORKFLOW_ID}",
+            "run_id": "${{ github.run_id }}",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "status": "${STATUS}",
+            "brain": "${BRAIN}",
+            "event": "${{ github.event_name }}",
+            "branch": "${{ github.ref_name }}",
+            "commit": "${{ github.sha }}"
+          }
+          EOF
+
+          git config user.name "zhuyuan-bot"
+          git config user.email "zhuyuan@guanghulab.com"
+          git add "$REPORT_DIR/"
+          git diff --cached --quiet || \
+            git commit -m "🧬 ${WORKFLOW_ID} 自报告 · ${TIMESTAMP} [skip ci]"
+          git push || echo "⚠️ 自报告push失败（不阻断主流程）"
+      # ━━━ 📡 指令回执·自动同步 ━━━
+      - name: "📡 同步回执到 Notion"
+        if: always()
+        env:
+          NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+          RECEIPT_DB_ID: ${{ secrets.RECEIPT_DB_ID }}
+        run: |
+          node scripts/neural/write-receipt-to-notion.js \
+            --instruction-id "${{ github.event.inputs.instruction_id || 'AUTO' }}" \
+            --status "${{ job.status }}" \
+            --workflow "neural-daily-digest" \
+            --summary "neural-daily-digest 自动执行" \
+            --related-agent "AG-TY-01"
+
