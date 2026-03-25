@@ -1,0 +1,44 @@
+{
+  "report_id": "DIAG-DEVSYNC-20260325",
+  "instruction_ref": "ZY-DEVSYNC-REBUILD-2026-0325-001",
+  "diagnosis_time": "2026-03-25T09:53:00+08:00",
+  "executor": "AG-ZY-01",
+  "executor_name": "铸渊",
+  "copyright_anchor": "国作登字-2026-A-00037559",
+
+  "sync_workflow": {
+    "exists": true,
+    "file": ".github/workflows/sync-dev-status.yml",
+    "cron": ["0 1 * * * (UTC 01:00 = 北京 09:00)", "0 14 * * * (UTC 14:00 = 北京 22:00)"],
+    "secrets_used": ["NOTION_API_TOKEN", "DEV_STATUS_DB_ID", "GITHUB_TOKEN"]
+  },
+
+  "actions_history": {
+    "total_runs": 18,
+    "all_failed": true,
+    "last_success": "从未成功",
+    "last_failure": "2026-03-24T15:02:00Z",
+    "failure_root_cause": "E (Workflow不存在/配置错误 — PR创建被拒绝)",
+    "failure_detail": "peter-evans/create-pull-request@v7 报错：GitHub Actions is not permitted to create or approve pull requests. 仓库设置不允许 Actions 创建 PR，导致每次同步数据拉取成功但提交失败。"
+  },
+
+  "secrets_status": {
+    "NOTION_API_TOKEN": "⚠️ 配置名可能不匹配（workflow 用 NOTION_API_TOKEN，但其他 workflow 用 NOTION_API_KEY）",
+    "DEV_STATUS_DB_ID": "⚠️ 待验证",
+    "GITHUB_TOKEN": "✅ 默认可用（但旧 workflow 需要 pull-requests:write 权限被拒绝）"
+  },
+
+  "dev_status_json": {
+    "exists": true,
+    "path": ".github/persona-brain/dev-status.json",
+    "last_sync": "2026-03-16T12:01:00+08:00",
+    "sync_source": "notion-master-console",
+    "team_count": 11,
+    "structure": "完整（含 team + summary 字段）",
+    "has_signed_by": false,
+    "has_signature_hash": false
+  },
+
+  "conclusion": "同步机制自建立以来从未成功运行。根因是 workflow 使用 peter-evans/create-pull-request@v7 创建 PR，但 GitHub Actions 权限设置不允许创建 PR。此外 Secret 名称可能不匹配（NOTION_API_TOKEN vs NOTION_API_KEY）。dev-status.json 数据停留在 2026-03-16，已中断 213h+。",
+  "recommendation": "废弃 PR 提交方式，改为直接 push 到 main。统一使用 NOTION_API_KEY 作为 Secret 名。建立霜砚签发制新机制 + 天眼三次修复闭环。"
+}
