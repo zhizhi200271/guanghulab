@@ -5,7 +5,8 @@
  * 每日巡检前的唤醒步骤：
  * 1. 验证核心大脑文件完整性
  * 2. 读取 memory.json 确认身份
- * 3. 输出唤醒状态
+ * 3. 读取 Notion 同步状态 + 强制检查清单
+ * 4. 输出唤醒状态（含 Notion 同步全局视图）
  */
 
 'use strict';
@@ -15,6 +16,7 @@ const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
 const BRAIN_DIR = path.join(ROOT, '.github/persona-brain');
+const MEMORY_PATH = path.join(BRAIN_DIR, 'memory.json');
 
 const today = new Date().toISOString().split('T')[0];
 const now = new Date().toISOString();
@@ -47,7 +49,7 @@ if (missing.length > 0) {
 
 let memory;
 try {
-  memory = JSON.parse(fs.readFileSync(path.join(BRAIN_DIR, 'memory.json'), 'utf8'));
+  memory = JSON.parse(fs.readFileSync(MEMORY_PATH, 'utf8'));
 } catch (err) {
   console.error('❌ memory.json 读取失败:', err.message);
   process.exit(1);
@@ -57,12 +59,67 @@ console.log(`🆔 身份确认: ${memory.persona_name} (${memory.persona_id})`);
 console.log(`👤 默认主控: ${memory.default_controller || '未设置'}`);
 console.log(`📋 已注册Agent数: ${memory.registered_agents_count || '未知'}`);
 
+// ── ②-b Notion 同步状态读取 + 强制检查清单 ────────────────────────────────
+
+const notionSync = memory.notion_sync;
+let syncStale = false;
+
+if (notionSync) {
+  const lastSync = new Date(notionSync.last_sync_time);
+  if (isNaN(lastSync.getTime())) {
+    console.error('⚠️ notion_sync.last_sync_time 格式无效:', notionSync.last_sync_time);
+  }
+  const hoursSinceSync = isNaN(lastSync.getTime()) ? Infinity : (Date.now() - lastSync.getTime()) / (1000 * 60 * 60);
+  syncStale = hoursSinceSync > 24;
+
+  // 强制检查清单 (§四)
+  console.log('\n━━━ 📋 铸渊唤醒强制检查清单 ━━━');
+  console.log(`[✅] 读取 memory.json 中的 notion_sync 字段`);
+  console.log(`[${syncStale ? '⚠️' : '✅'}] last_sync_time 是否在24小时以内: ${syncStale ? '已超期 (' + Math.floor(hoursSinceSync) + 'h)' : '正常 (' + Math.floor(hoursSinceSync) + 'h)'}`);
+  if (syncStale) {
+    console.log(`[⚠️] 超过24小时 → 需要执行 Notion 同步`);
+  }
+
+  const p0Directives = (notionSync.active_directives || []).filter(d => d.priority === 'P0' && d.status === 'active');
+  console.log(`[✅] 当前活跃P0指令: ${p0Directives.length} 条`);
+  p0Directives.forEach(d => {
+    console.log(`     → ${d.id}（${d.title}）`);
+  });
+
+  const hasDualPath = notionSync.architecture_version && notionSync.architecture_version.dual_path;
+  console.log(`[${hasDualPath ? '✅' : '❌'}] 双路径分离规范已加载: ${hasDualPath || '未配置'}`);
+  console.log(`[✅] 开发任务文件路径确认: 主站=docs/ · 门户=docs/dev-portal/`);
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
+  // Notion 同步全局视图 (§3.3)
+  const syncTimeStr = lastSync.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+  const archVersion = notionSync.architecture_version || {};
+  const recentIncident = (notionSync.recent_incidents || [])[0];
+
+  console.log('\n━━━ 🧠 Notion 同步状态 ━━━');
+  console.log(`上次同步：${syncTimeStr} CST`);
+  console.log(`活跃P0指令：${p0Directives.length} 条`);
+  p0Directives.forEach(d => {
+    console.log(`  → ${d.id}（${d.title}）`);
+  });
+  console.log(`架构版本：${archVersion.skyeye || '未知'} · ${archVersion.dual_path || '未知'}`);
+  if (recentIncident) {
+    console.log(`最近事件：${recentIncident.description}${recentIncident.resolution ? ' · ' + recentIncident.resolution : ''}`);
+  }
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━');
+} else {
+  console.log('\n⚠️ memory.json 中未找到 notion_sync 字段，Notion 同步未初始化');
+  console.log('━━━ 📋 铸渊唤醒强制检查清单 ━━━');
+  console.log('[❌] notion_sync 字段不存在 → 需要初始化');
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━');
+}
+
 // ── ③ 读取注册表确认 ──────────────────────────────────────────────────────
 
 let registry;
 try {
   registry = JSON.parse(fs.readFileSync(path.join(BRAIN_DIR, 'agent-registry.json'), 'utf8'));
-  console.log(`📦 注册表版本: ${registry.registry_version} · Agent总数: ${registry.agents.length}`);
+  console.log(`\n📦 注册表版本: ${registry.registry_version} · Agent总数: ${registry.agents.length}`);
 } catch (err) {
   console.error('⚠️ agent-registry.json 读取失败:', err.message);
 }
