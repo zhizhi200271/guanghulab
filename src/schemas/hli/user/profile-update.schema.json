@@ -1,0 +1,26 @@
+{
+  "hli_id": "HLI-USER-002",
+  "version": "v0.1-stub",
+  "route": "/hli/user/profile/update",
+  "method": "PUT",
+  "type": "REQUEST",
+  "status": "stub",
+  "target_phase": "P1",
+  "input": {
+    "type": "object",
+    "properties": {
+      "display_name": { "type": "string" },
+      "avatar_url": { "type": "string" }
+    }
+  },
+  "output": {
+    "type": "object",
+    "properties": {
+      "status": { "type": "string", "enum": ["not_implemented"] },
+      "phase": { "type": "string" }
+    }
+  },
+  "changelog": [
+    { "date": "2026-03-26", "note": "501 stub — Phase 0 占位，P1 实现" }
+  ]
+}

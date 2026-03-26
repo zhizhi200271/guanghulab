@@ -1,0 +1,27 @@
+{
+  "hli_id": "HLI-TICKET-001",
+  "version": "v0.1-stub",
+  "route": "/hli/ticket/create",
+  "method": "POST",
+  "type": "REQUEST",
+  "status": "stub",
+  "target_phase": "P2",
+  "input": {
+    "type": "object",
+    "required": ["title"],
+    "properties": {
+      "title": { "type": "string" },
+      "description": { "type": "string" }
+    }
+  },
+  "output": {
+    "type": "object",
+    "properties": {
+      "status": { "type": "string", "enum": ["not_implemented"] },
+      "phase": { "type": "string" }
+    }
+  },
+  "changelog": [
+    { "date": "2026-03-26", "note": "501 stub — Phase 0 占位，P2 实现" }
+  ]
+}
