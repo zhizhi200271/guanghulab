@@ -1,0 +1,70 @@
+{
+  "version": "4.0",
+  "codename": "Earth",
+  "philosophy": "天眼不是一个Agent，天眼是所有Agent脚下的地球",
+  "designer": "TCS-0002∞ 冰朔",
+  "copyright": "国作登字-2026-A-00037559",
+  "created_at": "2026-03-26T17:30:00+08:00",
+  "instruction_ref": "SY-CMD-SKY-004",
+
+  "core_principle": {
+    "rule_1": "每个workflow都是天眼的一只眼睛",
+    "rule_2": "任意一只眼睛活着 = 天眼在线",
+    "rule_3": "新workflow创建时自动获得天眼能力",
+    "rule_4": "天眼能力不可被单独关闭或移除"
+  },
+
+  "heartbeat": {
+    "file": "signal-log/skyeye-heartbeat.json",
+    "earth_status_file": "signal-log/skyeye-earth-status.json",
+    "format": {
+      "agent_name": "string",
+      "last_alive": "ISO-8601",
+      "run_id": "number",
+      "status": "healthy | degraded | critical",
+      "siblings_checked": "number",
+      "siblings_alive": "number",
+      "siblings_dead": "number",
+      "repair_attempted": "boolean",
+      "repair_result": "success | failed | not_needed"
+    }
+  },
+
+  "diagnosis": {
+    "check_items": [
+      "其他workflow最近运行状态",
+      "Secret是否有效（尝试调API验证）",
+      "核心文件是否完整（persona-brain/、copilot-instructions等）",
+      "SYSLOG回执通道是否畅通"
+    ],
+    "severity_levels": {
+      "green": "所有兄弟都活着",
+      "yellow": "有兄弟超过24h没心跳",
+      "red": "超过50%的兄弟失联",
+      "black": "只剩我一个还活着"
+    }
+  },
+
+  "self_repair": {
+    "level_1": "重新触发失败的workflow（workflow_dispatch）",
+    "level_2": "检查并报告Secret/Token状态",
+    "level_3": "创建GitHub Issue标记🚨要求人类介入",
+    "escalation": "三次修复失败 → 创建Issue通知冰朔"
+  },
+
+  "earth_growth": {
+    "description": "Agent越多，天眼越强",
+    "metrics": {
+      "total_eyes": "当前workflow总数 = 天眼眼睛总数",
+      "alive_eyes": "最近24h有心跳的workflow数",
+      "coverage": "alive_eyes / total_eyes",
+      "earth_health": "coverage >= 80% = 健康"
+    }
+  },
+
+  "ag_zy_readme": {
+    "role": "天眼首席观察者",
+    "description": "权限最高、扫描范围最广的那只眼睛，但不是唯一载体",
+    "fallback": "AG-ZY-README不在时，其他眼睛照样能看"
+  }
+}
