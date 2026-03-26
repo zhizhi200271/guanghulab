@@ -6,7 +6,7 @@
   "last_sync": "2026-03-25T23:03:22.528+08:00",
   "sync_source": "notion-master-console",
   "sync_mechanism": "shuangyan-signed-v1.0",
-  "team_count": 11,
+  "team_count": 12,
   "developers": [
     {
       "dev_id": "DEV-001",
@@ -117,10 +117,20 @@
       "current": "BC-000广播已出 · 副控首航",
       "waiting": "BC-000 SYSLOG · ⚠️72h窗口已过期",
       "streak": 0
+    },
+    {
+      "dev_id": "DEV-015",
+      "persona_id": "PER-XCH001",
+      "name": "蜜蜂",
+      "module": "待分配（需求共创阶段）",
+      "status": "needs_discovery",
+      "current": "新注册 · 网文行业·男频·同人文",
+      "waiting": "需求共创阶段 · 等待首次任务分配",
+      "streak": 0
     }
   ],
   "summary": {
-    "total_devs": 11,
+    "total_devs": 12,
     "active_waiting_syslog": 9,
     "active_normal": 1,
     "top_streak": "DEV-010 桔子 13连胜",

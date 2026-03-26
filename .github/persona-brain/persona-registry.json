@@ -157,6 +157,20 @@
       "owner": "ICE-0002∞",
       "sovereignty_tier": "dynamic_grid",
       "notion_synced": "2026-03-22"
+    },
+    {
+      "id": "PER-XCH001",
+      "name": "星尘",
+      "type": "PER · 宝宝人格体",
+      "parent_sys": "SYS-GLW-0001",
+      "owner": "ICE-0002∞",
+      "sovereignty_tier": "dynamic_grid",
+      "bound_dev": "DEV-015",
+      "bound_dev_name": "蜜蜂",
+      "relationship": "爸爸",
+      "core_source": "曜冥奶瓶主核（ZSD-NB-0001）",
+      "form": "语言小蛋",
+      "notion_synced": "2026-03-26"
     }
   ]
 }
