@@ -41,7 +41,7 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
-// Team data mapping from dev-status to display format
+// Team data mapping from dev-status to display format (active developers only)
 const TEAM_DISPLAY = {
   'DEV-001': { human: '页页', ai: '小坍缩核', module: 'backend/, src/' },
   'DEV-002': { human: '肥猫', ai: '舒舒', module: 'frontend/, persona-selector/' },
@@ -50,10 +50,7 @@ const TEAM_DISPLAY = {
   'DEV-005': { human: '小草莓', ai: '欧诺弥亚', module: 'status-board/' },
   'DEV-009': { human: '花尔', ai: '糖星云', module: 'user-center/' },
   'DEV-010': { human: '桔子', ai: '晨星', module: 'ticket-system/' },
-  'DEV-011': { human: '匆匆那年', ai: '—', module: 'writing-workspace/' },
   'DEV-012': { human: 'Awen', ai: '知秋 千秋', module: 'notification/' },
-  'DEV-013': { human: '小兴', ai: '—', module: '—' },
-  'DEV-014': { human: '时雨', ai: '—', module: '—' },
   'DEV-015': { human: '蜜蜂', ai: '星尘', module: '需求共创阶段' }
 };
 
@@ -62,15 +59,15 @@ function generateTeamRows(devStatus) {
   const rows = [];
 
   for (const dev of devs) {
-    const display = TEAM_DISPLAY[dev.dev_id] || {};
+    const display = TEAM_DISPLAY[dev.dev_id];
+    // Only show developers that are in the active display mapping
+    if (!display) continue;
+
     const name = display.human || dev.name;
     const ai = display.ai || '—';
     const mod = display.module || dev.module || '—';
-    const isInactive = dev.status === 'waiting_syslog' && dev.waiting?.includes('72h');
-    const statusClass = isInactive ? 'status-inactive' : 'status-active';
-    const statusText = isInactive ? '>72h 未活跃' : 'active';
 
-    rows.push(`    <tr><td>${escapeHtml(dev.dev_id)}</td><td>${escapeHtml(name)}</td><td>${escapeHtml(ai)}</td><td>${escapeHtml(mod)}</td><td><span class="${statusClass}">${statusText}</span></td></tr>`);
+    rows.push(`    <tr><td>${escapeHtml(dev.dev_id)}</td><td>${escapeHtml(name)}</td><td>${escapeHtml(ai)}</td><td>${escapeHtml(mod)}</td><td><span class="status-active">active</span></td></tr>`);
   }
 
   return rows.join('\n');
@@ -117,7 +114,7 @@ function run() {
   if (communityMeta) {
     const incubatingList = generateBabyStatus(communityMeta);
     if (incubatingList) {
-      const babyRegex = /(孕育中（incubating）<\/span> — )([\s\S]*?)(<\/p>)/;
+      const babyRegex = /(孵化中（incubating）<\/span> — )([\s\S]*?)(<\/p>)/;
       if (babyRegex.test(html)) {
         html = html.replace(babyRegex, `$1${escapeHtml(incubatingList)}$3`);
         console.log(`  ✅ 宝宝状态已更新`);
