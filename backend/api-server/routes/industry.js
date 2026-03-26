@@ -19,6 +19,32 @@ var authModule = require('./auth');
 var requireSession = authModule.requireSession;
 var DEV_DATABASE = authModule.DEV_DATABASE;
 
+// Rate limiting (same pattern as auth.js)
+var requestCounts = new Map();
+var RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute window
+var RATE_LIMIT_MAX = 10; // max 10 requests per minute
+
+function rateLimit(req, res, next) {
+  var ip = req.ip || req.connection.remoteAddress || 'unknown';
+  var now = Date.now();
+  var entry = requestCounts.get(ip);
+  if (!entry || now - entry.windowStart > RATE_LIMIT_WINDOW_MS) {
+    requestCounts.set(ip, { windowStart: now, count: 1 });
+    return next();
+  }
+  entry.count++;
+  if (entry.count > RATE_LIMIT_MAX) {
+    return res.status(429).json({
+      error: true,
+      code: 'RATE_LIMITED',
+      message: '请求过于频繁，请稍后再试'
+    });
+  }
+  next();
+}
+
+// Apply rate limiting to all industry routes via per-route middleware
+
 /**
  * Check if a dev ID is a registered developer
  * @param {string} devId
@@ -29,13 +55,14 @@ function isRegisteredDev(devId) {
 }
 
 /**
- * Generate a new industry ID
+ * Generate a new industry ID using a counter
  * @returns {string}
  */
+var industryCounter = 1;
 function generateIndustryId() {
-  // Simple incremental ID; in production this would query existing IDs
-  var timestamp = Date.now().toString(36).toUpperCase();
-  return 'IND-' + timestamp.slice(-3).padStart(3, '0');
+  var id = 'IND-' + String(industryCounter).padStart(3, '0');
+  industryCounter++;
+  return id;
 }
 
 /**
@@ -52,7 +79,7 @@ function hashPAT(pat) {
  * Register a new industry with a representative developer
  * Requires authenticated session (DEV-XXX)
  */
-router.post('/industry/register', requireSession, function(req, res) {
+router.post('/industry/register', rateLimit, requireSession, function(req, res) {
   var industry_name = (req.body.industry_name || '').trim();
   var rep_dev_id = (req.body.rep_dev_id || '').trim().toUpperCase();
   var github_username = (req.body.github_username || '').trim();
@@ -88,13 +115,13 @@ router.post('/industry/register', requireSession, function(req, res) {
     });
   }
 
-  // Step 3: validate PAT format (basic check — real validation against GitHub API
-  //         is done asynchronously after registration)
-  if (pat.length < 10) {
+  // Step 3: validate PAT format (GitHub classic tokens start with ghp_,
+  //         fine-grained tokens start with github_pat_)
+  if (pat.length < 10 || !(pat.startsWith('ghp_') || pat.startsWith('github_pat_'))) {
     return res.status(400).json({
       error: true,
       code: 'INVALID_PAT',
-      message: 'PAT 格式无效'
+      message: 'PAT 格式无效 · 需要以 ghp_ 或 github_pat_ 开头的有效 GitHub Personal Access Token'
     });
   }
 
@@ -148,7 +175,7 @@ router.post('/industry/register', requireSession, function(req, res) {
  * GET /api/industry/list
  * List all registered industries (admin only)
  */
-router.get('/industry/list', requireSession, function(req, res) {
+router.get('/industry/list', rateLimit, requireSession, function(req, res) {
   var sessionDev = req.sessionDev;
   if (!sessionDev || sessionDev.level < 3) {
     return res.status(403).json({
@@ -177,7 +204,7 @@ router.get('/industry/list', requireSession, function(req, res) {
  * GET /api/industry/status/:id
  * Get status of a specific industry
  */
-router.get('/industry/status/:id', requireSession, function(req, res) {
+router.get('/industry/status/:id', rateLimit, requireSession, function(req, res) {
   var industryId = req.params.id;
 
   // In production: lookup from database

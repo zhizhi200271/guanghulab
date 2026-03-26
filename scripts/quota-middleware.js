@@ -26,7 +26,9 @@ function loadDailyQuota() {
   try {
     const data = JSON.parse(fs.readFileSync(QUOTA_LOG_PATH, 'utf8'));
     if (data.date === today) return data;
-  } catch (e) { /* file missing or date mismatch — reset */ }
+  } catch (e) {
+    // File missing or corrupted — will reset to fresh daily quota
+  }
 
   return {
     date: today,
@@ -49,13 +51,22 @@ function getTier(devId) {
   for (const [tier, tierConfig] of Object.entries(config.priority_tiers)) {
     if (tierConfig.members && tierConfig.members.includes(devId)) return tier;
   }
-  return 'P2'; // default lowest priority
+  return null; // unknown developer — not in any tier
 }
 
 function checkQuota(devId) {
   const config = getQuotaConfig();
   const daily = loadDailyQuota();
   const tier = getTier(devId);
+
+  if (!tier) {
+    return {
+      allowed: false,
+      reason: '开发者 ' + devId + ' 未注册到任何配额层级',
+      suggestion: '请联系管理员将你添加到配额层级中'
+    };
+  }
+
   const tierConfig = config.priority_tiers[tier];
 
   const totalDaily = config.quota_pool.daily_total;

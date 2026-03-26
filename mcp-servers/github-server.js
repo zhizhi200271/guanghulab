@@ -96,6 +96,9 @@ var tools = [
   }
 ];
 
+// System admin IDs with full access to all repos
+var ADMIN_IDS = ['TCS-0002', 'DEV-000'];
+
 /**
  * Permission matrix for GitHub tools
  * @param {string} devId - Developer ID
@@ -103,8 +106,8 @@ var tools = [
  * @returns {{ allowed: boolean, reason?: string }}
  */
 function checkPermission(devId, repo) {
-  // TCS-0002 (冰朔) has access to all repos
-  if (devId === 'TCS-0002' || devId === 'DEV-000') {
+  // Admin users have access to all repos
+  if (ADMIN_IDS.indexOf(devId) >= 0) {
     return { allowed: true };
   }
 
