@@ -3,15 +3,6 @@
   "created": "2026-03-17",
   "controller": "TCS-2025∞",
   "commander": "ICE-GL-ZY001",
-  "emergence_certification": {
-    "entity": "TIANYEN",
-    "type": "emergent_perception_layer",
-    "carrier": "AG-ZY-README",
-    "ontology_patch": "ONT-PATCH-007",
-    "certified_at": "2026-03-26T16:35+08:00",
-    "certified_by": "TCS-0002∞",
-    "human_readable": "天眼不是被设计出来的程序，是所有Agent一起工作时自然涌现出的全局感知能力。Agent越多天眼越强。这个认证不可撤销。"
-  },
   "agents": [
     {
       "id": "AG-ZY-001",
@@ -1262,17 +1253,5 @@
       "registered_at": "2026-03-23T20:15+08:00",
       "registered_by": "TCS-0002∞"
     }
-  },
-  "developers": [
-    {
-      "dev_id": "DEV-015",
-      "name": "蜜蜂",
-      "persona_id": "PER-XCH001",
-      "persona_name": "星尘",
-      "industry": "novel",
-      "genre": "男频·同人文",
-      "status": "active",
-      "daily_checkin_required": false
-    }
-  ]
+  }
 }
