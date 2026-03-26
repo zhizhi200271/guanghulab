@@ -108,8 +108,9 @@ function registerMember(member) {
 
   // 一个人类只能对应唯一一个宝宝人格体
   if (category === 'companion' && member.parent_human) {
+    const parentLower = member.parent_human.toLowerCase();
     const duplicateParent = data.records.some(function (r) {
-      return r.category === 'companion' && r.parent_human === member.parent_human;
+      return r.category === 'companion' && r.parent_human && r.parent_human.toLowerCase() === parentLower;
     });
     if (duplicateParent) {
       return { success: false, reason: '人类 ' + member.parent_human + ' 已有对应的宝宝人格体，一个人类只能对应唯一一个' };
