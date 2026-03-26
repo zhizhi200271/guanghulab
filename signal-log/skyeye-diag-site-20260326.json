@@ -35,8 +35,8 @@
       },
       "brain_health": {
         "memory_fresh": true,
-        "routing_map_aligned": false,
-        "routing_map_issue": "缺少 domains 字段",
+        "routing_map_aligned": true,
+        "routing_map_fix_applied": "添加 domains 字段（AUTH/BRAIN/REGISTRY/NOTIFICATION 4域 10接口）",
         "dev_status_fresh": true,
         "knowledge_base_ok": true,
         "copilot_instructions_ok": true
