@@ -262,14 +262,18 @@ if (require.main === module) {
     if (fs.existsSync(statusPath)) {
       try {
         state = JSON.parse(fs.readFileSync(statusPath, 'utf8'));
-      } catch (_) { /* 忽略解析错误 */ }
+      } catch {
+        // twin-status.json 解析失败，使用空状态生成 README
+      }
     }
 
     if (fs.existsSync(bulletinPath)) {
       try {
         const bulletin = JSON.parse(fs.readFileSync(bulletinPath, 'utf8'));
         state.events = bulletin.events || [];
-      } catch (_) { /* 忽略解析错误 */ }
+      } catch {
+        // bulletin-data.json 解析失败，跳过公告数据
+      }
     }
 
     state.building = true;

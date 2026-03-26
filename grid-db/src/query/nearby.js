@@ -77,7 +77,7 @@ class NearbyQuery {
           results.push({ cell, data, distance });
         }
       } catch {
-        // 跳过无效键
+        // 跳过无效键格式（fromKey 解析失败），不影响其他键的查询
       }
     }
 

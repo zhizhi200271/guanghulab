@@ -125,7 +125,9 @@ if (require.main === module) {
     try {
       const status = JSON.parse(fs.readFileSync(statusPath, 'utf8'));
       metrics = { balance: status.balance, drift: status.drift, recentChanges: 0 };
-    } catch (_) { /* 忽略 */ }
+    } catch {
+      // twin-status.json 损坏或不可读，使用默认空指标继续评估
+    }
   }
 
   const evaluation = evaluateSchedule('AG-ZY-TWIN', metrics);

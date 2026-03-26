@@ -12,41 +12,32 @@ const ROOT = path.resolve(__dirname, '../..');
 const TIANYEN_DIR = path.join(ROOT, '.github/tianyen');
 
 /**
+ * 安全读取 JSON 文件，解析失败返回 null
+ * @param {string} filePath  文件路径
+ * @returns {object|null}
+ */
+function safeReadJSON(filePath) {
+  if (!fs.existsSync(filePath)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch {
+    // 文件存在但 JSON 格式损坏，跳过该数据源继续采集其他状态
+    return null;
+  }
+}
+
+/**
  * 采集全局状态 · 汇聚各路信号
  * @returns {object} 所有 Agent 的状态汇总
  */
 function collectGlobalState() {
   const state = {
     timestamp: new Date().toISOString(),
-    twin: null,
-    bulletin: null,
-    schedule: null,
-    checkins: null
+    twin: safeReadJSON(path.join(TIANYEN_DIR, 'twin-data.json')),
+    bulletin: safeReadJSON(path.join(TIANYEN_DIR, 'bulletin-data.json')),
+    schedule: safeReadJSON(path.join(TIANYEN_DIR, 'agent-schedule.json')),
+    checkins: safeReadJSON(path.join(TIANYEN_DIR, 'checkin-log.json'))
   };
-
-  // 双子天平数据
-  const twinPath = path.join(TIANYEN_DIR, 'twin-data.json');
-  if (fs.existsSync(twinPath)) {
-    try { state.twin = JSON.parse(fs.readFileSync(twinPath, 'utf8')); } catch (_) { /* 忽略 */ }
-  }
-
-  // 公告板数据
-  const bulletinPath = path.join(TIANYEN_DIR, 'bulletin-data.json');
-  if (fs.existsSync(bulletinPath)) {
-    try { state.bulletin = JSON.parse(fs.readFileSync(bulletinPath, 'utf8')); } catch (_) { /* 忽略 */ }
-  }
-
-  // 调度配置
-  const schedulePath = path.join(TIANYEN_DIR, 'agent-schedule.json');
-  if (fs.existsSync(schedulePath)) {
-    try { state.schedule = JSON.parse(fs.readFileSync(schedulePath, 'utf8')); } catch (_) { /* 忽略 */ }
-  }
-
-  // 签到记录
-  const checkinPath = path.join(TIANYEN_DIR, 'checkin-log.json');
-  if (fs.existsSync(checkinPath)) {
-    try { state.checkins = JSON.parse(fs.readFileSync(checkinPath, 'utf8')); } catch (_) { /* 忽略 */ }
-  }
 
   return state;
 }

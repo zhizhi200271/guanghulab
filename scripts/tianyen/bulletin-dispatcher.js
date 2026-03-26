@@ -13,6 +13,21 @@ const TIANYEN_DIR = path.join(ROOT, '.github/tianyen');
 const DISPATCH_PATH = path.join(TIANYEN_DIR, 'bulletin-dispatch.json');
 
 /**
+ * 安全读取 JSON 文件
+ * @param {string} filePath
+ * @returns {object|null}
+ */
+function safeReadJSON(filePath) {
+  if (!fs.existsSync(filePath)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch {
+    // JSON 损坏，跳过该数据源
+    return null;
+  }
+}
+
+/**
  * 采集所有 Agent 状态
  * @returns {object[]}
  */
@@ -20,34 +35,28 @@ function collectAllAgentStatus() {
   const statuses = [];
 
   // 签到记录
-  const checkinPath = path.join(TIANYEN_DIR, 'checkin-log.json');
-  if (fs.existsSync(checkinPath)) {
-    try {
-      const log = JSON.parse(fs.readFileSync(checkinPath, 'utf8'));
-      for (const [agentId, record] of Object.entries(log.checkins || {})) {
-        statuses.push({
-          agentId,
-          status: record.status || 'unknown',
-          lastSeen: record.timestamp || null
-        });
-      }
-    } catch (_) { /* 忽略 */ }
+  const log = safeReadJSON(path.join(TIANYEN_DIR, 'checkin-log.json'));
+  if (log) {
+    for (const [agentId, record] of Object.entries(log.checkins || {})) {
+      statuses.push({
+        agentId,
+        status: record.status || 'unknown',
+        lastSeen: record.timestamp || null
+      });
+    }
   }
 
   // 调度配置
-  const schedulePath = path.join(TIANYEN_DIR, 'agent-schedule.json');
-  if (fs.existsSync(schedulePath)) {
-    try {
-      const schedule = JSON.parse(fs.readFileSync(schedulePath, 'utf8'));
-      for (const [agentId, config] of Object.entries(schedule.agents || {})) {
-        const existing = statuses.find(s => s.agentId === agentId);
-        if (existing) {
-          existing.schedule = config;
-        } else {
-          statuses.push({ agentId, status: 'configured', lastSeen: null, schedule: config });
-        }
+  const schedule = safeReadJSON(path.join(TIANYEN_DIR, 'agent-schedule.json'));
+  if (schedule) {
+    for (const [agentId, config] of Object.entries(schedule.agents || {})) {
+      const existing = statuses.find(s => s.agentId === agentId);
+      if (existing) {
+        existing.schedule = config;
+      } else {
+        statuses.push({ agentId, status: 'configured', lastSeen: null, schedule: config });
       }
-    } catch (_) { /* 忽略 */ }
+    }
   }
 
   return statuses;
