@@ -13,6 +13,11 @@ const WAL = require('./storage/wal');
 const PageManager = require('./storage/page-manager');
 const EventLog = require('./events/event-log');
 const GridAPI = require('./api/grid-api');
+const BTree = require('./index/btree');
+const NamespaceManager = require('./core/namespace');
+const RangeScanner = require('./query/scan');
+const NearbyQuery = require('./query/nearby');
+const SecondaryIndex = require('./index/secondary-index');
 
 /**
  * Grid-DB 初始化器
@@ -82,5 +87,10 @@ module.exports = {
   GridCell,
   WAL,
   PageManager,
-  EventLog
+  EventLog,
+  BTree,
+  NamespaceManager,
+  RangeScanner,
+  NearbyQuery,
+  SecondaryIndex
 };

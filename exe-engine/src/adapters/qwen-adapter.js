@@ -119,12 +119,44 @@ class QwenAdapter extends BaseAdapter {
   }
 
   /**
+   * 流式执行推理请求
+   *
+   * Phase 1 占位：内部仍调用非流式接口，将完整结果作为单个 chunk 返回。
+   * Phase 2 将对接真正的 SSE 流式传输。
+   *
+   * @param {object} request
+   * @param {string} request.prompt       用户 prompt
+   * @param {string} [request.systemPrompt] 系统 prompt
+   * @param {string} [request.taskType]   任务类型
+   * @param {number} [request.maxTokens]  最大输出 token
+   * @param {number} [request.temperature] 温度
+   * @returns {AsyncGenerator<object>} 异步生成器，yield chunk 对象
+   */
+  async *executeStream(request) {
+    // Phase 1：回退到非流式执行，yield 完整结果作为单个 chunk
+    const result = await this.execute(request);
+    yield {
+      type: 'chunk',
+      content: result.output,
+      model: result.model,
+      usage: result.usage,
+      finishReason: result.finishReason || 'stop',
+      done: true
+    };
+  }
+
+  /**
    * 根据任务类型解析具体模型名
+   * - code_generation → qwen-coder-plus-latest（代码专用模型）
+   * - text / text_processing → qwen-max-latest（文本最新版本）
+   * - reasoning / 默认 → qwen-max（通用稳定版本）
    * @param {string} taskType
    * @returns {string}
    */
   _resolveModel(taskType) {
     if (taskType === 'code_generation') return 'qwen-coder-plus-latest';
+    if (taskType === 'reasoning') return 'qwen-max';
+    if (taskType === 'text' || taskType === 'text_processing') return 'qwen-max-latest';
     return 'qwen-max';
   }
 

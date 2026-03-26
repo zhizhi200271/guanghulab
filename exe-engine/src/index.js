@@ -17,6 +17,13 @@ const BaseAdapter = require('./adapters/base-adapter');
 const DeepSeekAdapter = require('./adapters/deepseek-adapter');
 const QwenAdapter = require('./adapters/qwen-adapter');
 
+// Phase 1 新增模块
+const ContextManager = require('./context/context-manager');
+const Session = require('./context/session');
+const MultiModelExecutor = require('./executor/multi-model');
+const SchedulerV2 = require('./controller/scheduler-v2');
+const MonitorDashboard = require('./monitor/dashboard');
+
 const CONFIG_DIR = path.resolve(__dirname, '../config');
 
 /**
@@ -157,6 +164,13 @@ function createEngine(overrides = {}) {
     poolConfig
   });
 
+  // 7. Phase 1 组件
+  const contextManager = new ContextManager({ cache });
+  const session = new Session({ contextManager });
+  const multiModelExecutor = new MultiModelExecutor({ adapters, loadBalancer: balancer });
+  const scheduler = new SchedulerV2({ agentController: controller });
+  const monitor = new MonitorDashboard({ resourceMeter: meter });
+
   return {
     router,
     meter,
@@ -164,6 +178,11 @@ function createEngine(overrides = {}) {
     controller,
     balancer,
     adapters,
+    contextManager,
+    session,
+    multiModelExecutor,
+    scheduler,
+    monitor,
     config: { modelConfig, poolConfig }
   };
 }
@@ -209,5 +228,10 @@ module.exports = {
   AgentController,
   BaseAdapter,
   DeepSeekAdapter,
-  QwenAdapter
+  QwenAdapter,
+  ContextManager,
+  Session,
+  MultiModelExecutor,
+  SchedulerV2,
+  MonitorDashboard
 };
