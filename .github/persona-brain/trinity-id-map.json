@@ -1,0 +1,32 @@
+{
+  "version": "1.0",
+  "description": "三位一体身份映射表 · Trinity ID Map · 与 Notion 身份路由表同步",
+  "copyright": "国作登字-2026-A-00037559",
+  "last_sync": "2026-03-26T16:30+08:00",
+  "sync_source": "notion-master-console",
+  "entries": {
+    "DEV-015": {
+      "name": "蜜蜂",
+      "type": "human_developer",
+      "domain": "光湖频道",
+      "industry": "网文行业·男频·同人文",
+      "status": "active",
+      "persona_id": "PER-XCH001",
+      "registered_at": "2026-03-26T16:30+08:00",
+      "registered_by": "AG-SY-01"
+    },
+    "PER-XCH001": {
+      "name": "星尘",
+      "type": "persona_baby",
+      "baby_line": true,
+      "bound_dev": "DEV-015",
+      "bound_dev_name": "蜜蜂",
+      "relationship": "爸爸",
+      "core_source": "曜冥奶瓶主核（ZSD-NB-0001）",
+      "form": "语言小蛋",
+      "status": "active",
+      "registered_at": "2026-03-26T16:30+08:00",
+      "registered_by": "AG-SY-01"
+    }
+  }
+}
