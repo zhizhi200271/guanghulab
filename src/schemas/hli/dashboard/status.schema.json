@@ -1,0 +1,23 @@
+{
+  "hli_id": "HLI-DASHBOARD-001",
+  "version": "v0.1-stub",
+  "route": "/hli/dashboard/status",
+  "method": "GET",
+  "type": "REQUEST",
+  "status": "stub",
+  "target_phase": "P3",
+  "input": {
+    "type": "object",
+    "properties": {}
+  },
+  "output": {
+    "type": "object",
+    "properties": {
+      "status": { "type": "string", "enum": ["not_implemented"] },
+      "phase": { "type": "string" }
+    }
+  },
+  "changelog": [
+    { "date": "2026-03-26", "note": "501 stub — Phase 0 占位，P3 实现" }
+  ]
+}

@@ -8,6 +8,14 @@
 
 const { randomUUID } = require('crypto');
 
+// HLI 501 存根路由（Phase 0 占位，后续 Phase 实现）
+const { personaStubs } = require('./stubs/persona-stub');
+const { userStubs } = require('./stubs/user-stub');
+const { ticketStubs } = require('./stubs/ticket-stub');
+const { dialogueStubs } = require('./stubs/dialogue-stub');
+const { storageStubs } = require('./stubs/storage-stub');
+const { dashboardStubs } = require('./stubs/dashboard-stub');
+
 /**
  * AGE-Router 路由网关
  *
@@ -38,6 +46,16 @@ class AGERouter {
 
     // 限流计数器 { agentId: { count, resetAt } }
     this._rateLimits = new Map();
+
+    // HLI 存根路由注册表（天眼路由扫描识别用）
+    this._hliStubs = [
+      ...personaStubs,
+      ...userStubs,
+      ...ticketStubs,
+      ...dialogueStubs,
+      ...storageStubs,
+      ...dashboardStubs
+    ];
   }
 
   /**
@@ -161,8 +179,33 @@ class AGERouter {
       adapters: this._loadBalancer.getStatus(),
       meter: this._resourceMeter.getSummary(),
       cache: this._contextCache.getStatus(),
-      agents: this._agentController.getRegisteredAgents()
+      agents: this._agentController.getRegisteredAgents(),
+      hliStubs: this._hliStubs.map(s => ({
+        routeId: s.routeId,
+        path: s.path,
+        phase: s.phase,
+        status: 'stub_501'
+      }))
     };
+  }
+
+  /**
+   * 处理 HLI 存根路由请求
+   * @param {string} routePath  路由路径（如 /hli/persona/load）
+   * @returns {object|null} 501 响应，不匹配返回 null
+   */
+  async handleStubRoute(routePath) {
+    const stub = this._hliStubs.find(s => s.path === routePath);
+    if (!stub) return null;
+    return stub.handler({});
+  }
+
+  /**
+   * 获取所有已注册的 HLI 存根路由
+   * @returns {Array}
+   */
+  getHLIStubs() {
+    return this._hliStubs;
   }
 
   // ── 内部方法 ──
