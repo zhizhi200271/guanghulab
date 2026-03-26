@@ -18,7 +18,9 @@ const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
 const OUTPUT = path.join(ROOT, 'docs', 'zh', 'index.html');
-const TEMPLATE = path.join(ROOT, 'docs', 'zh', 'index.html');
+
+// Template is the same file — script performs in-place updates
+const TEMPLATE = OUTPUT;
 
 function loadJSON(relPath) {
   const full = path.join(ROOT, relPath);

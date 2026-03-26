@@ -163,7 +163,8 @@ function validateDirectory(dataDir, schemaDir) {
 
           // Skip non-HLDP files
           if (!data.hldp_version) {
-            results.files.push({ file: fullPath, status: 'skipped', reason: 'not HLDP format' });
+            results.total--;
+            results.files.push({ file: path.relative(ROOT, fullPath), status: 'skipped', reason: 'not HLDP format' });
             continue;
           }
 

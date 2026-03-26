@@ -31,5 +31,16 @@
       "errors": 0
     },
     "engine_version": "1.0"
+  },
+  {
+    "timestamp": "2026-03-26T13:38:19.658Z",
+    "direction": "notion-to-github",
+    "scope": "all",
+    "stats": {
+      "fetched": 0,
+      "converted": 0,
+      "errors": 0
+    },
+    "engine_version": "1.0"
   }
 ]

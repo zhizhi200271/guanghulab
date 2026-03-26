@@ -84,7 +84,11 @@ if [[ "$SEVERITY" == "red" ]] || [[ "$SEVERITY" == "black" ]]; then
   echo "🚨 Level 3: 严重告警 → 创建 GitHub Issue"
 
   ISSUE_TITLE="🚨 天眼地球层告警：${SEVERITY} 级别 · 需要人类介入"
-  ISSUE_BODY="## 天眼地球层 v4.0 自动告警
+
+  # Write issue body to temp file to avoid shell quoting issues
+  ISSUE_BODY_FILE=$(mktemp)
+  cat > "$ISSUE_BODY_FILE" <<EOFBODY
+## 天眼地球层 v4.0 自动告警
 
 **告警时间**: ${NOW}
 **告警级别**: ${SEVERITY}
@@ -112,18 +116,30 @@ ${DEAD_LIST:-[]}
 4. 手动重新运行失败的 workflow
 
 ---
-*此 Issue 由天眼地球层 v4.0 自动创建 · ${CURRENT_AGENT}*"
+*此 Issue 由天眼地球层 v4.0 自动创建 · ${CURRENT_AGENT}*
+EOFBODY
 
-  # Create issue via GitHub API
+  # Create issue via GitHub API using temp file for body
+  ISSUE_PAYLOAD_FILE=$(mktemp)
+  node -e "
+    const fs = require('fs');
+    const body = fs.readFileSync('${ISSUE_BODY_FILE}', 'utf8');
+    const payload = JSON.stringify({
+      title: '${ISSUE_TITLE}',
+      body: body,
+      labels: ['skyeye-alert', 'urgent']
+    });
+    fs.writeFileSync('${ISSUE_PAYLOAD_FILE}', payload);
+  " 2>/dev/null
+
   ISSUE_RESULT=$(curl -s -X POST \
     -H "Authorization: token ${TOKEN}" \
     -H "Accept: application/vnd.github.v3+json" \
+    -H "Content-Type: application/json" \
     "https://api.github.com/repos/${OWNER}/${REPO_NAME}/issues" \
-    -d "$(node -e "console.log(JSON.stringify({
-      title: '${ISSUE_TITLE}',
-      body: $(node -e "console.log(JSON.stringify(\`${ISSUE_BODY}\`))" 2>/dev/null || echo '""'),
-      labels: ['skyeye-alert', 'urgent']
-    }))" 2>/dev/null || echo '{}')" 2>/dev/null || echo '{"message":"failed"}')
+    -d "@${ISSUE_PAYLOAD_FILE}" 2>/dev/null || echo '{"message":"failed"}')
+
+  rm -f "$ISSUE_BODY_FILE" "$ISSUE_PAYLOAD_FILE"
 
   ISSUE_URL=$(echo "$ISSUE_RESULT" | node -e "
     const d = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));

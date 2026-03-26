@@ -40,13 +40,16 @@ if [[ -n "${GITHUB_TOKEN:-}" ]] || [[ -n "${GH_TOKEN:-}" ]]; then
   echo "🔍 通过 GitHub API 扫描兄弟 workflow 状态..."
 
   # Get recent workflow runs (last 100)
-  RUNS_JSON=$(curl -s -H "Authorization: token ${TOKEN}" \
+  RUNS_TMP=$(mktemp)
+  curl -s -H "Authorization: token ${TOKEN}" \
     -H "Accept: application/vnd.github.v3+json" \
-    "https://api.github.com/repos/${OWNER}/${REPO_NAME}/actions/runs?per_page=100&status=completed" 2>/dev/null || echo '{"workflow_runs":[]}')
+    "https://api.github.com/repos/${OWNER}/${REPO_NAME}/actions/runs?per_page=100&status=completed" \
+    > "$RUNS_TMP" 2>/dev/null || echo '{"workflow_runs":[]}' > "$RUNS_TMP"
 
   if command -v node &>/dev/null; then
     DIAG_RESULT=$(node -e "
-      const runs = JSON.parse(\`$(echo "$RUNS_JSON" | tr '`' "'")\`);
+      const fs = require('fs');
+      const runs = JSON.parse(fs.readFileSync('${RUNS_TMP}', 'utf8'));
       const workflows = {};
       for (const r of (runs.workflow_runs || [])) {
         if (!workflows[r.name]) {
@@ -73,6 +76,7 @@ if [[ -n "${GITHUB_TOKEN:-}" ]] || [[ -n "${GH_TOKEN:-}" ]]; then
       }));
     " 2>/dev/null || echo '{"alive_count":0,"dead_count":0,"total_checked":0,"dead_list":[]}')
 
+    rm -f "$RUNS_TMP"
     ALIVE_COUNT=$(echo "$DIAG_RESULT" | node -e "const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));console.log(d.alive_count)" 2>/dev/null || echo "0")
     DEAD_COUNT=$(echo "$DIAG_RESULT" | node -e "const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));console.log(d.dead_count)" 2>/dev/null || echo "0")
     DEAD_LIST=$(echo "$DIAG_RESULT" | node -e "const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));console.log(JSON.stringify(d.dead_list))" 2>/dev/null || echo "[]")
