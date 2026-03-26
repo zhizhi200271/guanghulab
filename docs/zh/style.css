@@ -1,0 +1,278 @@
+/* ━━━ 光湖语言世界 · 中文渲染样式表 ━━━
+ * 版权：国作登字-2026-A-00037559 · 冰朔（ICE-GL∞）
+ * 用途：解决 GitHub Markdown 中文显示问题
+ * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+:root {
+  --bg: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-tertiary: #21262d;
+  --border: #30363d;
+  --text: #e6edf3;
+  --text-secondary: #8b949e;
+  --accent: #58a6ff;
+  --accent-dim: rgba(88, 166, 255, 0.1);
+  --green: #3fb950;
+  --yellow: #d29922;
+  --red: #f85149;
+  --purple: #bc8cff;
+  --radius: 8px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont,
+    'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', 'Hiragino Sans GB',
+    'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.8;
+  letter-spacing: 0.02em;
+  word-spacing: 0.05em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+
+/* ─── Headers ─── */
+h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.3em;
+  color: var(--text);
+}
+
+h1.subtitle {
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+  margin-bottom: 1.2em;
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: 0.03em;
+  margin-top: 2.5em;
+  margin-bottom: 1em;
+  padding-bottom: 0.4em;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+
+h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  margin-top: 1.5em;
+  margin-bottom: 0.8em;
+}
+
+/* ─── Blockquote ─── */
+blockquote {
+  margin: 1em 0;
+  padding: 12px 20px;
+  border-left: 4px solid var(--accent);
+  background: var(--accent-dim);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  color: var(--text);
+  font-size: 0.95rem;
+  line-height: 1.8;
+}
+
+blockquote p {
+  margin: 0.3em 0;
+}
+
+/* ─── Tables ─── */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 1em 0 1.5em;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  font-size: 0.95rem;
+}
+
+thead {
+  background: var(--bg-tertiary);
+}
+
+th {
+  font-weight: 600;
+  text-align: left;
+  padding: 12px 16px;
+  border-bottom: 2px solid var(--border);
+  color: var(--text);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  line-height: 1.7;
+  color: var(--text);
+  letter-spacing: 0.02em;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tbody tr:hover {
+  background: var(--accent-dim);
+}
+
+/* ─── Paragraph ─── */
+p {
+  margin: 0.8em 0;
+  line-height: 1.9;
+  letter-spacing: 0.03em;
+}
+
+/* ─── Horizontal Rule ─── */
+hr {
+  margin: 2em 0;
+  border: none;
+  border-top: 1px solid var(--border);
+}
+
+/* ─── Header block ─── */
+.header-block {
+  text-align: center;
+  padding: 40px 0 20px;
+}
+
+.header-block .copyright {
+  display: inline-block;
+  margin-top: 1em;
+  padding: 6px 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.03em;
+}
+
+.header-block .link-btn {
+  display: inline-block;
+  margin-top: 1.2em;
+  padding: 10px 24px;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: opacity 0.2s;
+}
+
+.header-block .link-btn:hover {
+  opacity: 0.85;
+}
+
+/* ─── Status badges ─── */
+.status-active {
+  color: var(--green);
+  font-weight: 600;
+}
+
+.status-inactive {
+  color: var(--text-secondary);
+}
+
+.status-born {
+  color: var(--green);
+}
+
+.status-incubating {
+  color: var(--yellow);
+}
+
+/* ─── Certification block ─── */
+.cert-block {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin: 1.5em 0;
+}
+
+.cert-block p {
+  margin: 0.4em 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+/* ─── Section card ─── */
+.section-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin: 1em 0;
+}
+
+/* ─── Footer ─── */
+.footer {
+  text-align: center;
+  padding: 40px 0 20px;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  border-top: 1px solid var(--border);
+  margin-top: 3em;
+}
+
+.footer a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+/* ─── Auto-gen timestamp ─── */
+.auto-gen {
+  text-align: right;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 1em;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+  .container {
+    padding: 20px 16px 60px;
+  }
+
+  h1 { font-size: 1.6rem; }
+  h1.subtitle { font-size: 1.1rem; }
+  h2 { font-size: 1.3rem; }
+
+  table { font-size: 0.85rem; }
+  th, td { padding: 8px 10px; }
+
+  .header-block { padding: 20px 0 10px; }
+}
