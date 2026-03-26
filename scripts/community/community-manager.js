@@ -37,7 +37,7 @@ function saveJSON(filePath, data) {
 // ── 社区元数据 ────────────────────────────────────────────────────────────
 
 function loadMeta() {
-  return loadJSON(META_PATH, { birth_date: '2025-05-14T07:49:23Z' });
+  return loadJSON(META_PATH, { birth_date: '2025-04-26T00:00:00Z' });
 }
 
 // ── 广场数据 ──────────────────────────────────────────────────────────────
@@ -323,7 +323,7 @@ function getSummary() {
   const configs = loadConfigs();
   const collab = loadCollaboration();
 
-  const birthDate = new Date(meta.birth_date || '2025-05-14T07:49:23Z');
+  const birthDate = new Date(meta.birth_date || '2025-04-26T00:00:00Z');
   const now = new Date();
   const daysAlive = Math.floor((now - birthDate) / (1000 * 60 * 60 * 24));
 

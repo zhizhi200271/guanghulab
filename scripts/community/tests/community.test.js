@@ -36,7 +36,7 @@ fs.mkdirSync(TIANYEN_DIR, { recursive: true });
 // 写入测试用社区元数据
 fs.writeFileSync(path.join(COMMUNITY_DIR, 'community-meta.json'), JSON.stringify({
   community_name: '测试社区',
-  birth_date: '2025-05-14T07:49:23Z'
+  birth_date: '2025-04-26T00:00:00Z'
 }, null, 2));
 
 // 写入空的广场数据
@@ -90,17 +90,17 @@ console.log('── 测试 1: Timeline Tracker ──');
 
 const { daysAlive, getMilestone, wakeGreeting, getTimelineStatus, SYSTEM_BIRTH } = require('../timeline-tracker');
 
-assert(SYSTEM_BIRTH === '2025-05-14T07:49:23Z', 'SYSTEM_BIRTH 常量正确');
+assert(SYSTEM_BIRTH === '2025-04-26T00:00:00Z', 'SYSTEM_BIRTH 常量正确');
 
 // daysAlive 基本测试
-const testNow = new Date('2025-05-15T07:49:23Z');
-assert(daysAlive('2025-05-14T07:49:23Z', testNow) === 1, 'daysAlive: 1天后 = 1');
+const testNow = new Date('2025-04-27T00:00:00Z');
+assert(daysAlive('2025-04-26T00:00:00Z', testNow) === 1, 'daysAlive: 1天后 = 1');
 
-const testNow2 = new Date('2025-05-14T07:49:23Z');
-assert(daysAlive('2025-05-14T07:49:23Z', testNow2) === 0, 'daysAlive: 同一天 = 0');
+const testNow2 = new Date('2025-04-26T00:00:00Z');
+assert(daysAlive('2025-04-26T00:00:00Z', testNow2) === 0, 'daysAlive: 同一天 = 0');
 
-const testNow3 = new Date('2025-06-13T07:49:23Z');
-assert(daysAlive('2025-05-14T07:49:23Z', testNow3) === 30, 'daysAlive: 30天后 = 30');
+const testNow3 = new Date('2025-05-26T00:00:00Z');
+assert(daysAlive('2025-04-26T00:00:00Z', testNow3) === 30, 'daysAlive: 30天后 = 30');
 
 // getMilestone 测试
 const ms1 = getMilestone(0);
@@ -526,7 +526,7 @@ communityFiles.forEach(function (f) {
 const metaRaw = JSON.parse(fs.readFileSync(path.join(ROOT_DIR, '.github/community/community-meta.json'), 'utf8'));
 assert(typeof metaRaw.community_name === 'string', '元数据包含 community_name');
 assert(typeof metaRaw.birth_date === 'string', '元数据包含 birth_date');
-assert(metaRaw.birth_date.startsWith('2025-05-14'), '诞生日期正确');
+assert(metaRaw.birth_date.startsWith('2025-04-26'), '诞生日期正确');
 assert(typeof metaRaw.philosophy === 'object', '元数据包含 philosophy');
 assert(typeof metaRaw.governance === 'object', '元数据包含 governance');
 assert(typeof metaRaw.features === 'object', '元数据包含 features');

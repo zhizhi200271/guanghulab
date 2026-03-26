@@ -12,7 +12,7 @@ const ROOT = path.resolve(__dirname, '../..');
 const META_PATH = path.join(ROOT, '.github/community/community-meta.json');
 const PERSONA_REG_PATH = path.join(ROOT, '.github/persona-brain/persona-registry.json');
 
-const SYSTEM_BIRTH = '2025-05-14T07:49:23Z';
+const SYSTEM_BIRTH = '2025-04-26T00:00:00Z';
 
 /**
  * 计算存在天数
