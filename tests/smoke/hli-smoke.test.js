@@ -75,4 +75,7 @@ async function run() {
   }
 }
 
-run();
+run().catch((e) => {
+  console.error('❌ 冒烟测试执行异常:', e.message);
+  process.exit(1);
+});
