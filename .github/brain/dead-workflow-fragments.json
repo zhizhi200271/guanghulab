@@ -17,9 +17,15 @@
     "phase_3_archive": {
       "status": "completed",
       "completed_at": "2026-03-27T02:00:00Z",
-      "files_archived": 57,
+      "files_archived": 54,
+      "files_restored": 3,
       "destination": ".github/archived-workflows/",
-      "note": "56 archive + 1 duplicate (zhuyuan-daily-agent.yml). 2 duplicates (neural-daily-digest.yml, skyeye-devsync-repair.yml) already counted in archive category."
+      "restored_files": [
+        {"file": "merge-watchdog.yml", "reason": "§3 天眼看守者 — 需要活跃运行"},
+        {"file": "persona-thinking-window.yml", "reason": "§4 人格体元认知引擎 — 每日思考窗口"},
+        {"file": "multi-persona-awakening.yml", "reason": "§4 多人格体同时唤醒引擎"}
+      ],
+      "note": "56 archive + 1 duplicate archived. 3 restored from archive (merge-watchdog, persona-thinking-window, multi-persona-awakening) as they contain complete implementations needed for §3-§4."
     }
   },
   "absorb": {
