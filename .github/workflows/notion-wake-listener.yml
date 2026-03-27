@@ -24,8 +24,9 @@ name: 📡 铸渊 · Notion Agent 唤醒监听
 
 on:
   schedule:
-    # 每 15 分钟轮询一次 Notion 唤醒请求数据库
-    - cron: '*/15 * * * *'
+    # 每日 UTC 02:00 = 北京 10:00 同步一次（冰朔指令降频·从 */15 改为每天一次）
+    # 其余触发通过 workflow_dispatch 事件驱动（人工主动要求时触发）
+    - cron: '0 2 * * *'
   workflow_dispatch:
 
 permissions:

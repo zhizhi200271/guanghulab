@@ -6,8 +6,8 @@ name: 铸渊 · Notion 工单轮询
 
 on:
   schedule:
-    - cron: '*/15 * * * *'   # 每15分钟轮询一次
-  workflow_dispatch:           # 手动触发
+    - cron: '0 2 * * *'       # 每日 UTC 02:00 = 北京 10:00 同步一次（冰朔指令降频）
+  workflow_dispatch:           # 事件触发：人工主动要求同步时手动触发
 
 jobs:
   notion-poll:
