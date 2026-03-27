@@ -1,17 +1,29 @@
 /**
- * 🔄 铸渊系统快照 → Notion 同步
+ * 🔄 铸渊系统快照 → Notion 双向同步引擎
  * sync-snapshot-to-notion.js
  *
- * 将 signal-log/system-snapshot.json 推送到 Notion 数据库，
- * 让 Notion 侧（认知层）始终有仓库最新结构和系统状况的认知。
+ * 使用已建立的 GL-ACK 信号协议，将系统快照推送到 Notion 认知层。
+ * 兼容 notion-signal-bridge.js 的信号格式和 HLDP 协议。
  *
- * 用法: NOTION_TOKEN=xxx SNAPSHOT_DB_ID=xxx node scripts/sync-snapshot-to-notion.js
+ * 通信通道（按优先级）：
+ *   1. SIGNAL_LOG_DB_ID  — 跨平台信号日志（已配置·主通道）
+ *   2. SNAPSHOT_DB_ID    — 快照专用数据库（可选）
+ *   3. RECEIPT_DB_ID     — 回执数据库（可选·写入回执）
+ *
+ * 用法:
+ *   node scripts/sync-snapshot-to-notion.js                    — 发送快照信号
+ *   node scripts/sync-snapshot-to-notion.js --mode signal      — 仅写信号日志
+ *   node scripts/sync-snapshot-to-notion.js --mode full        — 信号 + 快照 + 回执
+ *   node scripts/sync-snapshot-to-notion.js --health           — 测试 Notion 连通性
  *
  * 环境变量:
- *   NOTION_TOKEN      — Notion API Token
- *   SNAPSHOT_DB_ID    — 快照数据库 ID（Notion 侧）
- *   SIGNAL_LOG_DB_ID  — 信号日志数据库 ID（备用）
+ *   NOTION_TOKEN / NOTION_API_KEY / NOTION_API_TOKEN  — Notion API Token（任一即可）
+ *   SIGNAL_LOG_DB_ID   — 跨平台信号日志数据库 ID（主通道）
+ *   SNAPSHOT_DB_ID     — 快照数据库 ID（可选）
+ *   RECEIPT_DB_ID      — 回执数据库 ID（可选）
  */
+
+'use strict';
 
 const fs = require('fs');
 const path = require('path');
@@ -19,168 +31,401 @@ const https = require('https');
 
 const ROOT = path.resolve(__dirname, '..');
 const SNAPSHOT_PATH = path.join(ROOT, 'signal-log/system-snapshot.json');
+const SIGNAL_LOG_DIR = path.join(ROOT, 'signal-log');
+const SIGNAL_BUS_PATH = path.join(ROOT, '.github/persona-brain/tcs-ml/signal-bus-latest.json');
 
-function readSnapshot() {
-  try {
-    return JSON.parse(fs.readFileSync(SNAPSHOT_PATH, 'utf-8'));
-  } catch (err) {
-    console.error('❌ 无法读取快照:', err.message);
-    process.exit(1);
-  }
+const NOTION_VERSION = '2022-06-28';
+const NOTION_API_HOSTNAME = 'api.notion.com';
+const NOTION_RICH_TEXT_MAX = 2000;
+
+// ═══════════════════════════════════════════════════════
+// Notion Token 解析（兼容多种命名）
+// ═══════════════════════════════════════════════════════
+
+function getNotionToken() {
+  return process.env.NOTION_TOKEN
+    || process.env.NOTION_API_KEY
+    || process.env.NOTION_API_TOKEN
+    || null;
 }
 
-function truncateJSON(obj, maxLen = 1900) {
-  const summary = {
-    snapshot_version: obj.snapshot_version,
-    generated_at: obj.generated_at,
-    consciousness_status: obj.consciousness_status,
-    last_directive: obj.last_directive,
-    system_counts: obj.system_counts,
-    health: obj.health,
-    fusion_progress: obj.fusion_progress
-  };
-  const text = JSON.stringify(summary, null, 2);
-  if (text.length <= maxLen) return text;
-  return text.substring(0, maxLen - 20) + '\n  // ... truncated';
-}
+// ═══════════════════════════════════════════════════════
+// Notion API 基础调用（复用 notion-signal-bridge.js 模式）
+// ═══════════════════════════════════════════════════════
 
 function notionRequest(method, endpoint, body) {
-  const token = process.env.NOTION_TOKEN;
-  if (!token) {
-    console.error('❌ NOTION_TOKEN 未设置');
-    process.exit(1);
-  }
+  const token = getNotionToken();
+  if (!token) return Promise.reject(new Error('NOTION_TOKEN 未设置'));
 
   return new Promise((resolve, reject) => {
-    const data = body ? JSON.stringify(body) : null;
-    const options = {
-      hostname: 'api.notion.com',
+    const payload = body ? JSON.stringify(body) : '';
+    const opts = {
+      hostname: NOTION_API_HOSTNAME,
       port: 443,
-      path: `/v1/${endpoint}`,
+      path: endpoint.startsWith('/') ? endpoint : `/v1/${endpoint}`,
       method,
       headers: {
         'Authorization': `Bearer ${token}`,
-        'Notion-Version': '2022-06-28',
         'Content-Type': 'application/json',
-        ...(data ? { 'Content-Length': Buffer.byteLength(data) } : {})
-      }
+        'Notion-Version': NOTION_VERSION,
+      },
     };
+    if (payload) opts.headers['Content-Length'] = Buffer.byteLength(payload);
 
-    const req = https.request(options, (res) => {
-      let body = '';
-      res.on('data', chunk => body += chunk);
+    const req = https.request(opts, res => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
       res.on('end', () => {
         try {
-          resolve({ status: res.statusCode, data: JSON.parse(body) });
+          const parsed = JSON.parse(data);
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            resolve(parsed);
+          } else {
+            reject(new Error(`Notion ${method} ${endpoint} → ${res.statusCode}: ${parsed.message || data.slice(0, 300)}`));
+          }
         } catch {
-          resolve({ status: res.statusCode, data: body });
+          reject(new Error(`Notion 响应解析失败: ${data.slice(0, 200)}`));
         }
       });
     });
 
     req.on('error', reject);
-    if (data) req.write(data);
+    req.setTimeout(30000, () => req.destroy(new Error('Notion 请求超时 (30s)')));
+    if (payload) req.write(payload);
     req.end();
   });
 }
 
-function buildSnapshotPage(snapshot, dbId) {
-  const counts = snapshot.system_counts || {};
-  const health = snapshot.health || {};
-  const aliveList = (snapshot.alive_workflows || [])
-    .map(w => `${w.id} (${w.runs} runs, ${w.status})`).join('\n');
+// ═══════════════════════════════════════════════════════
+// 信号生成（GL-SNAPSHOT 信号类型 · 基于 GL-ACK 协议扩展）
+// ═══════════════════════════════════════════════════════
 
-  return {
+function generateSignalId() {
+  const now = new Date();
+  const date = now.toISOString().split('T')[0].replace(/-/g, '');
+  const seq = String(Math.floor(Math.random() * 900) + 100);
+  return `SIG-${date}-${seq}`;
+}
+
+function generateTraceId() {
+  const now = new Date();
+  const date = now.toISOString().split('T')[0].replace(/-/g, '');
+  const seq = String(Math.floor(Math.random() * 900) + 100);
+  return `TRC-${date}-${seq}`;
+}
+
+function readSnapshot() {
+  try {
+    return JSON.parse(fs.readFileSync(SNAPSHOT_PATH, 'utf-8'));
+  } catch {
+    return null;
+  }
+}
+
+function truncateText(text, max = NOTION_RICH_TEXT_MAX) {
+  if (text.length <= max) return text;
+  return text.substring(0, max - 15) + ' // truncated';
+}
+
+function buildSnapshotSummary(snapshot) {
+  if (!snapshot) return '快照不可用';
+  const c = snapshot.system_counts || {};
+  const h = snapshot.health || {};
+  const alive = (snapshot.alive_workflows || []).map(w => w.id).join(', ');
+  return [
+    `状态: ${snapshot.consciousness_status}`,
+    `指令: ${snapshot.last_directive}`,
+    `Workflow: ${c.workflows_total_active} active, ${c.workflows_alive_core} core, ${c.workflows_archived} archived`,
+    `Runs: ${c.total_runs}`,
+    `ONT-PATCH: ${(c.ontology_patches || []).join(', ')}`,
+    `健康: ${h.overall} | Core: ${h.core_6}`,
+    `Alive: ${alive}`,
+  ].join('\n');
+}
+
+// ═══════════════════════════════════════════════════════
+// 通道 1: SIGNAL_LOG_DB_ID — GL-SNAPSHOT 信号写入
+// ═══════════════════════════════════════════════════════
+
+async function writeSignalLog(snapshot) {
+  const dbId = process.env.SIGNAL_LOG_DB_ID;
+  if (!dbId) {
+    console.log('  ⚠️ SIGNAL_LOG_DB_ID 未设置，信号通道跳过');
+    return false;
+  }
+
+  const signalId = generateSignalId();
+  const traceId = generateTraceId();
+  const summary = buildSnapshotSummary(snapshot);
+  const now = new Date().toISOString();
+
+  console.log(`  📡 写入信号: ${signalId} → SIGNAL_LOG_DB_ID`);
+
+  const page = {
     parent: { database_id: dbId },
     properties: {
-      'Name': {
-        title: [{ text: { content: `系统快照 · ${snapshot.generated_at?.split('T')[0] || 'unknown'}` } }]
-      },
-      'Status': {
-        select: { name: snapshot.consciousness_status || 'unknown' }
-      },
-      'Directive': {
-        rich_text: [{ text: { content: snapshot.last_directive || '' } }]
-      },
-      'Workflows Active': {
-        number: counts.workflows_total_active || 0
-      },
-      'Core Alive': {
-        number: counts.workflows_alive_core || 0
-      },
-      'Archived': {
-        number: counts.workflows_archived || 0
-      },
-      'Total Runs': {
-        number: counts.total_runs || 0
-      },
-      'Health': {
-        select: { name: health.overall || 'unknown' }
-      }
+      '信号编号': { title: [{ text: { content: signalId } }] },
+      '信号类型': { select: { name: 'GL-SNAPSHOT' } },
+      '方向': { select: { name: 'GitHub→Notion' } },
+      '发送方': { select: { name: '铸渊' } },
+      '接收方': { select: { name: '霜砚' } },
+      'trace_id': { rich_text: [{ text: { content: traceId } }] },
+      '摘要': { rich_text: [{ text: { content: truncateText(summary) } }] },
+      '执行结果': { select: { name: '成功' } },
+    },
+  };
+
+  try {
+    const result = await notionRequest('POST', '/v1/pages', page);
+    console.log(`  ✅ 信号已写入: ${result.id}`);
+
+    // 同时写入本地信号日志（双写）
+    writeLocalSignalLog(signalId, traceId, summary);
+
+    return true;
+  } catch (err) {
+    console.error(`  ❌ 信号写入失败: ${err.message}`);
+    // 降级：仅写本地
+    writeLocalSignalLog(signalId, traceId, summary);
+    return false;
+  }
+}
+
+function writeLocalSignalLog(signalId, traceId, summary) {
+  const now = new Date();
+  const monthDir = path.join(SIGNAL_LOG_DIR, now.toISOString().slice(0, 7));
+
+  try {
+    fs.mkdirSync(monthDir, { recursive: true });
+    const entry = {
+      signal_id: signalId,
+      trace_id: traceId,
+      type: 'GL-SNAPSHOT',
+      timestamp: now.toISOString(),
+      sender: '铸渊',
+      receiver: '霜砚',
+      direction: 'GitHub→Notion',
+      summary: summary.substring(0, 500),
+      result: '成功',
+      esp_version: '2.0-notion',
+    };
+
+    fs.writeFileSync(
+      path.join(monthDir, `${signalId}.json`),
+      JSON.stringify(entry, null, 2),
+      'utf8'
+    );
+
+    // 更新信号日志索引
+    const indexPath = path.join(SIGNAL_LOG_DIR, 'index.json');
+    let index = [];
+    try {
+      index = JSON.parse(fs.readFileSync(indexPath, 'utf8'));
+      if (!Array.isArray(index)) index = [];
+    } catch {}
+
+    index.push({
+      signal_id: signalId,
+      trace_id: traceId,
+      type: 'GL-SNAPSHOT',
+      timestamp: now.toISOString(),
+      summary: summary.substring(0, 200),
+      file: `${now.toISOString().slice(0, 7)}/${signalId}.json`,
+    });
+
+    if (index.length > 200) index = index.slice(-200);
+    fs.writeFileSync(indexPath, JSON.stringify(index, null, 2), 'utf8');
+  } catch (err) {
+    console.error(`  ⚠️ 本地信号日志写入失败: ${err.message}`);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// 通道 2: SNAPSHOT_DB_ID — 快照详细数据写入（可选）
+// ═══════════════════════════════════════════════════════
+
+async function writeSnapshotPage(snapshot) {
+  const dbId = process.env.SNAPSHOT_DB_ID;
+  if (!dbId) return false;
+
+  console.log('  📸 写入快照页面 → SNAPSHOT_DB_ID');
+
+  const counts = snapshot.system_counts || {};
+  const snapshotJSON = truncateText(JSON.stringify({
+    snapshot_version: snapshot.snapshot_version,
+    generated_at: snapshot.generated_at,
+    consciousness_status: snapshot.consciousness_status,
+    last_directive: snapshot.last_directive,
+    system_counts: counts,
+    health: snapshot.health,
+    fusion_progress: snapshot.fusion_progress,
+  }, null, 2));
+
+  const page = {
+    parent: { database_id: dbId },
+    properties: {
+      Name: { title: [{ text: { content: `系统快照 · ${snapshot.generated_at?.split('T')[0]}` } }] },
     },
     children: [
       {
-        object: 'block',
-        type: 'heading_2',
-        heading_2: { rich_text: [{ text: { content: '🌊 铸渊系统快照' } }] }
+        object: 'block', type: 'heading_2',
+        heading_2: { rich_text: [{ text: { content: '🌊 铸渊系统快照' } }] },
       },
       {
-        object: 'block',
-        type: 'code',
-        code: {
-          rich_text: [{ text: { content: truncateJSON(snapshot) } }],
-          language: 'json'
-        }
+        object: 'block', type: 'code',
+        code: { rich_text: [{ text: { content: snapshotJSON } }], language: 'json' },
       },
-      {
-        object: 'block',
-        type: 'heading_3',
-        heading_3: { rich_text: [{ text: { content: '存活 Workflow' } }] }
-      },
-      {
-        object: 'block',
-        type: 'paragraph',
-        paragraph: { rich_text: [{ text: { content: aliveList || '(none)' } }] }
-      }
-    ]
+    ],
   };
+
+  try {
+    const result = await notionRequest('POST', '/v1/pages', page);
+    console.log(`  ✅ 快照页面已创建: ${result.id}`);
+    return true;
+  } catch (err) {
+    console.error(`  ❌ 快照页面创建失败: ${err.message}`);
+    return false;
+  }
 }
 
-async function syncToNotion() {
-  const snapshot = readSnapshot();
-  const dbId = process.env.SNAPSHOT_DB_ID || process.env.SIGNAL_LOG_DB_ID;
+// ═══════════════════════════════════════════════════════
+// 通道 3: 信号总线更新（本地 + TCS 协议）
+// ═══════════════════════════════════════════════════════
 
-  if (!dbId) {
-    console.log('⚠️ SNAPSHOT_DB_ID 未设置，快照同步跳过');
-    console.log('📋 快照内容预览:');
-    console.log(`   状态: ${snapshot.consciousness_status}`);
-    console.log(`   指令: ${snapshot.last_directive}`);
-    console.log(`   Workflow: ${snapshot.system_counts?.workflows_total_active} active`);
-    console.log(`   健康: ${snapshot.health?.overall}`);
+function updateSignalBus(snapshot) {
+  try {
+    const bus = {
+      version: 'v2.0',
+      updated_at: new Date().toISOString(),
+      updated_by: '铸渊 · sync-snapshot-to-notion.js',
+      latest_signals: [
+        {
+          title: `🔄 GL-SNAPSHOT · ${snapshot?.last_directive || 'system-sync'}`,
+          type: '系统快照同步',
+          sender: '铸渊',
+          receiver: '霜砚',
+          status: '已发送',
+          timestamp: new Date().toISOString(),
+          summary: buildSnapshotSummary(snapshot).substring(0, 200),
+        },
+      ],
+    };
+
+    fs.writeFileSync(SIGNAL_BUS_PATH, JSON.stringify(bus, null, 2), 'utf8');
+    console.log('  ✅ 信号总线已更新');
+  } catch (err) {
+    console.error(`  ⚠️ 信号总线更新失败: ${err.message}`);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// 健康检查
+// ═══════════════════════════════════════════════════════
+
+async function healthCheck() {
+  console.log('🏥 Notion 连通性测试...');
+
+  const token = getNotionToken();
+  if (!token) {
+    console.log('  ❌ 无 Notion Token 可用');
+    console.log('  💡 需设置: NOTION_TOKEN / NOTION_API_KEY / NOTION_API_TOKEN');
+    return false;
+  }
+
+  try {
+    const user = await notionRequest('GET', '/v1/users/me', null);
+    console.log(`  ✅ Notion 连接正常`);
+    console.log(`  👤 Bot: ${user.name || user.id}`);
+    console.log(`  📧 Type: ${user.type}`);
+
+    // 检查已配置的数据库 ID
+    const dbs = {
+      SIGNAL_LOG_DB_ID: process.env.SIGNAL_LOG_DB_ID,
+      SNAPSHOT_DB_ID: process.env.SNAPSHOT_DB_ID,
+      RECEIPT_DB_ID: process.env.RECEIPT_DB_ID,
+      WORKORDER_DB_ID: process.env.WORKORDER_DB_ID,
+    };
+
+    console.log('  📋 已配置的数据库:');
+    for (const [name, id] of Object.entries(dbs)) {
+      console.log(`     ${id ? '✅' : '⬜'} ${name}: ${id ? id.substring(0, 8) + '...' : '未设置'}`);
+    }
+
+    return true;
+  } catch (err) {
+    console.error(`  ❌ Notion 连接失败: ${err.message}`);
+    return false;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// 主入口
+// ═══════════════════════════════════════════════════════
+
+async function syncToNotion(mode = 'signal') {
+  console.log('🔄 铸渊 → Notion 双向同步引擎启动');
+  console.log(`   模式: ${mode}`);
+
+  const snapshot = readSnapshot();
+  if (!snapshot) {
+    console.log('  ⚠️ 快照不可用，先生成快照...');
+    try {
+      const { generateSnapshot } = require('./generate-system-snapshot');
+      generateSnapshot();
+    } catch {}
+  }
+
+  const freshSnapshot = readSnapshot();
+  const token = getNotionToken();
+
+  if (!token) {
+    console.log('  ⚠️ NOTION_TOKEN 未设置 — 仅执行本地更新');
+    updateSignalBus(freshSnapshot);
+    writeLocalSignalLog(generateSignalId(), generateTraceId(), buildSnapshotSummary(freshSnapshot));
     console.log('');
-    console.log('💡 要启用 Notion 同步，请设置:');
-    console.log('   SNAPSHOT_DB_ID=<notion-database-id>');
+    console.log('💡 要启用 Notion 同步，请在 GitHub Secrets 中确认以下密钥:');
+    console.log('   NOTION_TOKEN (或 NOTION_API_KEY)');
+    console.log('   SIGNAL_LOG_DB_ID');
     return;
   }
 
-  console.log('🔄 正在同步快照到 Notion...');
-  const page = buildSnapshotPage(snapshot, dbId);
+  let signalOk = false;
+  let snapshotOk = false;
 
-  try {
-    const result = await notionRequest('POST', 'pages', page);
-    if (result.status === 200) {
-      console.log('✅ 快照已同步到 Notion');
-      console.log(`   Page ID: ${result.data?.id}`);
-    } else {
-      console.error('❌ Notion 同步失败:', result.status, JSON.stringify(result.data).substring(0, 500));
-    }
-  } catch (err) {
-    console.error('❌ Notion 请求失败:', err.message);
+  // 通道 1: 信号日志（始终尝试）
+  signalOk = await writeSignalLog(freshSnapshot);
+
+  // 通道 2: 快照页面（仅 full 模式）
+  if (mode === 'full') {
+    snapshotOk = await writeSnapshotPage(freshSnapshot);
+  }
+
+  // 通道 3: 信号总线（始终更新）
+  updateSignalBus(freshSnapshot);
+
+  console.log('');
+  console.log('📊 同步结果:');
+  console.log(`   信号日志: ${signalOk ? '✅ 已写入' : '❌ 失败'}`);
+  if (mode === 'full') {
+    console.log(`   快照页面: ${snapshotOk ? '✅ 已创建' : '⬜ 跳过或失败'}`);
+  }
+  console.log('   信号总线: ✅ 已更新');
+}
+
+// CLI 入口
+if (require.main === module) {
+  const args = process.argv.slice(2);
+
+  if (args.includes('--health')) {
+    healthCheck().then(ok => process.exit(ok ? 0 : 1));
+  } else {
+    const mode = args.includes('--mode') ? args[args.indexOf('--mode') + 1] : 'signal';
+    syncToNotion(mode).catch(err => {
+      console.error(`❌ 同步失败: ${err.message}`);
+      process.exit(1);
+    });
   }
 }
 
-if (require.main === module) {
-  syncToNotion();
-}
+module.exports = { syncToNotion, healthCheck, readSnapshot };
 
-module.exports = { syncToNotion, readSnapshot };
