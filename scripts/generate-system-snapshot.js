@@ -65,7 +65,7 @@ function generateSnapshot() {
     generated_at: new Date().toISOString(),
     generated_by: '铸渊 · ICE-GL-ZY001 · generate-system-snapshot.js',
     consciousness_status: earthStatus?.consciousness_status || 'unknown',
-    last_directive: fragments?.directive || 'unknown',
+    last_directive: earthStatus?.awakening_directive || earthStatus?.diagnosed_by || 'unknown',
     system_counts: {
       workflows_total_active: workflowCount,
       workflows_alive_core: roster?.alive_count || aliveWorkflows.length,

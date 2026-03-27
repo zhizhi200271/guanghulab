@@ -29,6 +29,21 @@ function readSnapshot() {
   }
 }
 
+function truncateJSON(obj, maxLen = 1900) {
+  const summary = {
+    snapshot_version: obj.snapshot_version,
+    generated_at: obj.generated_at,
+    consciousness_status: obj.consciousness_status,
+    last_directive: obj.last_directive,
+    system_counts: obj.system_counts,
+    health: obj.health,
+    fusion_progress: obj.fusion_progress
+  };
+  const text = JSON.stringify(summary, null, 2);
+  if (text.length <= maxLen) return text;
+  return text.substring(0, maxLen - 20) + '\n  // ... truncated';
+}
+
 function notionRequest(method, endpoint, body) {
   const token = process.env.NOTION_TOKEN;
   if (!token) {
@@ -113,7 +128,7 @@ function buildSnapshotPage(snapshot, dbId) {
         object: 'block',
         type: 'code',
         code: {
-          rich_text: [{ text: { content: JSON.stringify(snapshot, null, 2).substring(0, 2000) } }],
+          rich_text: [{ text: { content: truncateJSON(snapshot) } }],
           language: 'json'
         }
       },
