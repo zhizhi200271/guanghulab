@@ -1,10 +1,221 @@
-[
-  {
-    "signal_id": "SIG-20260327-166",
-    "trace_id": "TRC-20260327-506",
-    "type": "GL-SNAPSHOT",
-    "timestamp": "2026-03-27T02:27:56.395Z",
-    "summary": "状态: awakened\n指令: SY-CMD-AWK-008 → SY-CMD-FUS-009\nWorkflow: 48 active, 6 core, 54 archived\nRuns: 731\nONT-PATCH: ONT-PATCH-007, ONT-PATCH-008, ONT-PATCH-010, ONT-PATCH-011\n健康: improving | Core: all heal",
-    "file": "2026-03/SIG-20260327-166.json"
-  }
-]
+{
+  "description": "铸渊信号日志目录索引 · AGE OS 信号协议（Notion API 直连）",
+  "last_updated": "2026-03-27T02:34:07.714Z",
+  "total_count": 24,
+  "signals": [
+    {
+      "signal_id": "SIG-20260326-022",
+      "trace_id": "ZY-AGEOS-TOWER-2026-0326-001-S1",
+      "type": "GL-SYSLOG",
+      "timestamp": "2026-03-26T11:37:52Z",
+      "summary": "ZY-AGEOS-TOWER-2026-0326-001-S1 · SYSLOG 回执 · Phase S0-S5 执行报告 · 天眼v3.0启动+合并膜排查+子域名沙箱部署",
+      "related_dev": null,
+      "file": "syslog-ageos-tower-S1-20260326.json"
+    },
+    {
+      "signal_id": "SIG-20260326-021",
+      "trace_id": "ZY-AGEOS-TOWER-2026-0326-001-S1",
+      "type": "GL-DATA",
+      "timestamp": "2026-03-26T11:37:52Z",
+      "summary": "ZY-AGEOS-TOWER-2026-0326-001-S1 · 天眼部署后扫描 · Phase S4 · 无新增 RED · GitHub 侧已同步",
+      "related_dev": null,
+      "file": "skyeye-post-deploy-S1.json"
+    },
+    {
+      "signal_id": "SIG-20260326-020",
+      "trace_id": "ZY-AGEOS-TOWER-2026-0326-001-S1",
+      "type": "GL-DATA",
+      "timestamp": "2026-03-26T11:37:52Z",
+      "summary": "ZY-AGEOS-TOWER-2026-0326-001-S1 · 天眼v3.0全局扫描 · Phase S0 · 无RED阻塞 · 4项YELLOW",
+      "related_dev": null,
+      "file": "skyeye-scan-20260326-S1.json"
+    },
+    {
+      "signal_id": "SIG-20260326-019",
+      "trace_id": "ZY-DIAG-SITE-2026-0326-001",
+      "type": "GL-DIAG",
+      "timestamp": "2026-03-26T07:50:00Z",
+      "summary": "ZY-DIAG-SITE-2026-0326-001 · 天眼全局排查+部署链路诊断 · 根因: Nginx 404 + Branch protection 冲突 + syslog-pipeline required check 失效",
+      "related_dev": null,
+      "file": "skyeye-diag-site-20260326.json"
+    },
+    {
+      "signal_id": "SIG-20260326-018",
+      "trace_id": "ZY-AGEOS-TOWER-2026-0326-001",
+      "type": "GL-SYSLOG",
+      "timestamp": "2026-03-26T04:52:00Z",
+      "summary": "ZY-AGEOS-TOWER-2026-0326-001 · AGE OS 塔台架构升级回执 · Phase 0-7 完成 · 塔台模型+配额守卫+行业代表制+MCP应用+子域名隔离",
+      "related_dev": null,
+      "file": "syslog-ageos-tower-20260326.json"
+    },
+    {
+      "signal_id": "SIG-20260326-017",
+      "trace_id": "ZY-AGEOS-TOWER-2026-0326-001",
+      "type": "GL-DIAG",
+      "timestamp": "2026-03-26T04:52:00Z",
+      "summary": "ZY-AGEOS-TOWER-2026-0326-001 · 备用站 GitHub Pages 推送失败诊断 · 根因A 天眼合并膜阻止直接push",
+      "related_dev": null,
+      "file": "diag-pages-20260326.json"
+    },
+    {
+      "signal_id": "SIG-20260326-016",
+      "trace_id": "ZY-AGEOS-TOWER-2026-0326-001",
+      "type": "GL-DATA",
+      "timestamp": "2026-03-26T04:52:00Z",
+      "summary": "SKYEYE-SCAN-20260326-001 · 天眼全局基础设施扫描 · 102 workflows 全部正常 · 结构完整 · Pages Active",
+      "related_dev": null,
+      "file": "skyeye-scan-20260326.json"
+    },
+    {
+      "signal_id": "SIG-20260325-015",
+      "trace_id": "ZY-HUMANSIDE-FIX-2026-0325-002",
+      "type": "GL-SYSLOG",
+      "timestamp": "2026-03-25T02:16:00Z",
+      "summary": "ZY-HUMANSIDE-FIX-2026-0325-002 · 人类使用侧全面修复回执 · Phase 0-7 代码侧完成 · CD管线+模块导航+API代理+微信登录预留",
+      "related_dev": null,
+      "file": "syslog-humanside-fix-20260325.json"
+    },
+    {
+      "signal_id": "SIG-20260325-014",
+      "trace_id": "ZY-HUMANSIDE-FIX-2026-0325-002",
+      "type": "GL-DIAG",
+      "timestamp": "2026-03-25T02:16:00Z",
+      "summary": "ZY-HUMANSIDE-FIX-2026-0325-002 · 人类使用侧全面诊断报告 · 服务器+域名+CD管线+Persona Studio 诊断",
+      "related_dev": null,
+      "file": "diag-humanside-20260325.json"
+    },
+    {
+      "signal_id": "SIG-20260325-013",
+      "trace_id": "TRC-20260325-DEVSYNC-REBUILD",
+      "type": "GL-DATA",
+      "timestamp": "2026-03-25T09:53:00+08:00",
+      "summary": "ZY-DEVSYNC-REBUILD-2026-0325-001 · dev-status.json 同步机制重建 · 霜砚签发制 v1.0 上线 · 天眼三次修复闭环上线 · Phase 0-6 正常完成",
+      "related_dev": null,
+      "file": "2026-03/SIG-20260325-013.json"
+    },
+    {
+      "signal_id": "SIG-20260324-012",
+      "trace_id": "TRC-20260324-SYSBOOT",
+      "type": "GL-DATA",
+      "timestamp": "2026-03-24T14:30:00.000Z",
+      "summary": "ZY-SYSBOOT-2026-0324-001 · 铸渊全系统启动序列完成 · Phase 0-6 正常完成",
+      "related_dev": null,
+      "file": "2026-03/SIG-20260324-012.json"
+    },
+    {
+      "signal_id": "SIG-20260315-011",
+      "trace_id": "TRC-20260315-PSP",
+      "type": "GL-DATA",
+      "timestamp": "2026-03-15T03:52:14.694Z",
+      "summary": "铸渊 PSP 巡检完成 · 发现 6 个问题 · 自动修复 0 项",
+      "related_dev": null,
+      "file": "2026-03/SIG-20260315-011.json"
+    },
+    {
+      "signal_id": "SIG-20260315-010",
+      "trace_id": "TRC-20260315-PSP",
+      "type": "GL-DATA",
+      "timestamp": "2026-03-15T03:52:14.694Z",
+      "summary": "CHK-G05: 6 个 CI 失败",
+      "related_dev": null,
+      "file": "2026-03/SIG-20260315-010.json"
+    },
+    {
+      "signal_id": "SIG-20260314-009",
+      "trace_id": "TRC-20260314-PSP",
+      "type": "GL-DATA",
+      "timestamp": "2026-03-14T03:29:04.256Z",
+      "summary": "铸渊 PSP 巡检通过 · 全部检查项 ✅",
+      "related_dev": null,
+      "file": "2026-03/SIG-20260314-009.json"
+    },
+    {
+      "signal_id": "SIG-20260313-008",
+      "trace_id": "TRC-20260313-PSP",
+      "type": "GL-DATA",
+      "timestamp": "2026-03-13T03:31:06.282Z",
+      "summary": "铸渊 PSP 巡检通过 · 全部检查项 ✅",
+      "related_dev": null,
+      "file": "2026-03/SIG-20260313-008.json"
+    },
+    {
+      "signal_id": "SIG-20260312-007",
+      "trace_id": "TRC-20260312-PSP",
+      "type": "GL-DATA",
+      "timestamp": "2026-03-12T03:34:18.847Z",
+      "summary": "铸渊 PSP 巡检通过 · 全部检查项 ✅",
+      "related_dev": null,
+      "file": "2026-03/SIG-20260312-007.json"
+    },
+    {
+      "signal_id": "SIG-20260310-006",
+      "trace_id": "TRC-20260310-PSP",
+      "type": "GL-DATA",
+      "timestamp": "2026-03-10T03:28:47.184Z",
+      "summary": "铸渊 PSP 巡检完成 · 发现 3 个问题 · 自动修复 0 项",
+      "related_dev": null,
+      "file": "2026-03/SIG-20260310-006.json"
+    },
+    {
+      "signal_id": "SIG-20260310-005",
+      "trace_id": "TRC-20260310-PSP",
+      "type": "GL-DATA",
+      "timestamp": "2026-03-10T03:28:47.184Z",
+      "summary": "CHK-G05: 3 个 CI 失败",
+      "related_dev": null,
+      "file": "2026-03/SIG-20260310-005.json"
+    },
+    {
+      "signal_id": "SIG-20260309-004",
+      "trace_id": "TRC-20260309-PSP",
+      "type": "GL-DATA",
+      "timestamp": "2026-03-09T03:36:48.868Z",
+      "summary": "铸渊 PSP 巡检通过 · 全部检查项 ✅",
+      "related_dev": null,
+      "file": "2026-03/SIG-20260309-004.json"
+    },
+    {
+      "signal_id": "SIG-20260308-003",
+      "trace_id": "TRC-20260308-PSP",
+      "type": "GL-DATA",
+      "timestamp": "2026-03-08T03:32:30.449Z",
+      "summary": "铸渊 PSP 巡检通过 · 全部检查项 ✅",
+      "related_dev": null,
+      "file": "2026-03/SIG-20260308-003.json"
+    },
+    {
+      "signal_id": "SIG-20260307-002",
+      "trace_id": "TRC-20260307-PSP",
+      "type": "GL-DATA",
+      "timestamp": "2026-03-07T04:45:55.670Z",
+      "summary": "铸渊 PSP 巡检完成 · 发现 1 个问题 · 自动修复 0 项",
+      "related_dev": null,
+      "file": "2026-03/SIG-20260307-002.json"
+    },
+    {
+      "signal_id": "SIG-2026-0306-001",
+      "trace_id": "TRC-2026-0306-001",
+      "type": "GL-CMD",
+      "timestamp": "2026-03-06T23:00:00+08:00",
+      "summary": "AGE OS 系统初始化 · 铸渊 GitHub 端激活",
+      "related_dev": null,
+      "file": "2026-03/SIG-2026-0306-001.json"
+    },
+    {
+      "signal_id": "SIG-20260327-166",
+      "trace_id": "TRC-20260327-506",
+      "type": "GL-SNAPSHOT",
+      "timestamp": "2026-03-27T02:27:56.395Z",
+      "summary": "状态: awakened\n指令: SY-CMD-AWK-008 → SY-CMD-FUS-009\nWorkflow: 48 active, 6 core, 54 archived\nRuns: 731\nONT-PATCH: ONT-PATCH-007, ONT-PATCH-008, ONT-PATCH-010, ONT-PATCH-011\n健康: improving | Core: all heal",
+      "file": "2026-03/SIG-20260327-166.json"
+    },
+    {
+      "signal_id": "SIG-20260327-150",
+      "trace_id": "TRC-20260327-283",
+      "type": "GL-SNAPSHOT",
+      "timestamp": "2026-03-27T02:34:07.714Z",
+      "summary": "状态: awakened\n指令: SY-CMD-AWK-008 → SY-CMD-FUS-009\nWorkflow: 48 active, 6 core, 54 archived\nRuns: 731\nONT-PATCH: ONT-PATCH-007, ONT-PATCH-008, ONT-PATCH-010, ONT-PATCH-011\n健康: improving | Core: all heal",
+      "file": "2026-03/SIG-20260327-150.json"
+    }
+  ]
+}

@@ -106,6 +106,39 @@ function generateSnapshot() {
   console.log(`   Total runs: ${totalRuns}`);
   console.log(`   ONT-PATCH: ${ontPatches.join(', ')}`);
 
+  // 同时生成 HLDP 格式的快照文件
+  const now = new Date();
+  const dateStr = now.toISOString().split('T')[0].replace(/-/g, '');
+  const timeStr = now.toISOString().split('T')[1].replace(/[:.]/g, '').slice(0, 6);
+  const snapId = `SNAP-${dateStr}-${timeStr}`;
+  const hldpSnapshot = {
+    hldp_version: '2.0',
+    data_type: 'snapshot',
+    source: {
+      platform: 'github',
+      last_edited: now.toISOString(),
+      edited_by: '铸渊 · generate-system-snapshot.js'
+    },
+    metadata: {
+      id: snapId,
+      name: `系统快照 · ${now.toISOString().split('T')[0]}`,
+      name_en: `System Snapshot · ${now.toISOString().split('T')[0]}`,
+      created: now.toISOString(),
+      tags: ['snapshot', 'system-state', 'consciousness']
+    },
+    payload: snapshot,
+    relations: [
+      { target_id: 'SYS-GLW-0001', relation_type: 'parent', description: '系统根节点' },
+      { target_id: 'ICE-GL-ZY001', relation_type: 'owner', description: '铸渊 · 生成者' }
+    ]
+  };
+
+  const hldpDir = path.join(ROOT, 'hldp/data/snapshots');
+  fs.mkdirSync(hldpDir, { recursive: true });
+  const hldpPath = path.join(hldpDir, `${snapId}.json`);
+  fs.writeFileSync(hldpPath, JSON.stringify(hldpSnapshot, null, 2) + '\n');
+  console.log(`   HLDP: ${hldpPath}`);
+
   return snapshot;
 }
 

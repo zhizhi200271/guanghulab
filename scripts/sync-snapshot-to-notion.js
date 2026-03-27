@@ -103,15 +103,15 @@ function notionRequest(method, endpoint, body) {
 function generateSignalId() {
   const now = new Date();
   const date = now.toISOString().split('T')[0].replace(/-/g, '');
-  const seq = String(Math.floor(Math.random() * 900) + 100);
-  return `SIG-${date}-${seq}`;
+  const ms = String(now.getTime()).slice(-6);
+  return `SIG-${date}-${ms}`;
 }
 
 function generateTraceId() {
   const now = new Date();
   const date = now.toISOString().split('T')[0].replace(/-/g, '');
-  const seq = String(Math.floor(Math.random() * 900) + 100);
-  return `TRC-${date}-${seq}`;
+  const ms = String(now.getTime()).slice(-6);
+  return `TRC-${date}-${ms}`;
 }
 
 function readSnapshot() {
@@ -216,25 +216,36 @@ function writeLocalSignalLog(signalId, traceId, summary) {
       'utf8'
     );
 
-    // 更新信号日志索引
+    // 更新信号日志索引（保持原始对象格式）
     const indexPath = path.join(SIGNAL_LOG_DIR, 'index.json');
-    let index = [];
+    let indexData = { description: '铸渊信号日志目录索引 · AGE OS 信号协议', last_updated: null, total_count: 0, signals: [] };
     try {
-      index = JSON.parse(fs.readFileSync(indexPath, 'utf8'));
-      if (!Array.isArray(index)) index = [];
+      const raw = JSON.parse(fs.readFileSync(indexPath, 'utf8'));
+      if (Array.isArray(raw)) {
+        // 兼容：如果已被改为数组格式，恢复为对象格式
+        indexData.signals = raw;
+        indexData.total_count = raw.length;
+      } else {
+        indexData = raw;
+        if (!Array.isArray(indexData.signals)) indexData.signals = [];
+      }
     } catch {}
 
-    index.push({
+    indexData.signals.push({
       signal_id: signalId,
       trace_id: traceId,
       type: 'GL-SNAPSHOT',
       timestamp: now.toISOString(),
       summary: summary.substring(0, 200),
+      related_dev: null,
       file: `${now.toISOString().slice(0, 7)}/${signalId}.json`,
     });
 
-    if (index.length > 200) index = index.slice(-200);
-    fs.writeFileSync(indexPath, JSON.stringify(index, null, 2), 'utf8');
+    if (indexData.signals.length > 200) indexData.signals = indexData.signals.slice(-200);
+    indexData.last_updated = now.toISOString();
+    indexData.total_count = indexData.signals.length;
+
+    fs.writeFileSync(indexPath, JSON.stringify(indexData, null, 2), 'utf8');
   } catch (err) {
     console.error(`  ⚠️ 本地信号日志写入失败: ${err.message}`);
   }
