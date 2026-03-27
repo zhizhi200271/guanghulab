@@ -13,8 +13,8 @@ name: 铸渊 · 🌉 桥接·心跳检测
 
 on:
   schedule:
-    - cron: '0 0,6,12,18 * * *'  # UTC 每6小时 = 北京 08:00/14:00/20:00/02:00
-  workflow_dispatch:
+    - cron: '0 0 * * *'  # 每日 UTC 00:00 = 北京 08:00（冰朔指令降频·从每6小时改为每日一次）
+  workflow_dispatch:      # 事件触发：需要时手动触发
 
 jobs:
   # ── AGE OS v1.0: 核心大脑唤醒 ──
