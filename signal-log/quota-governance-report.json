@@ -1,0 +1,691 @@
+{
+  "report_id": "QUOTA-GOV-20260327",
+  "generated_at": "2026-03-27T08:02:31.302Z",
+  "generated_by": "铸渊配额治理引擎 · quota-governance.js",
+  "copyright": "国作登字-2026-A-00037559",
+  "workflows_scanned": 48,
+  "quota": {
+    "current_plan": "Copilot Individual ($100/year)",
+    "actions_budget_monthly": 2000,
+    "analysis": {
+      "cron_scheduled": {
+        "daily_runs": 230.4,
+        "daily_minutes": 278.4,
+        "monthly_minutes": 8353,
+        "top_consumers": [
+          {
+            "file": "notion-poll.yml",
+            "daily_runs": 96,
+            "daily_minutes": 96,
+            "crons": [
+              "*/15 * * * *"
+            ]
+          },
+          {
+            "file": "notion-wake-listener.yml",
+            "daily_runs": 96,
+            "daily_minutes": 96,
+            "crons": [
+              "*/15 * * * *"
+            ]
+          },
+          {
+            "file": "persona-thinking-window.yml",
+            "daily_runs": 6,
+            "daily_minutes": 12,
+            "crons": [
+              "0 22 * * *",
+              "15 22 * * *",
+              "30 22 * * *",
+              "45 22 * * *",
+              "0 23 * * *",
+              "15 23 * * *"
+            ]
+          },
+          {
+            "file": "bridge-heartbeat.yml",
+            "daily_runs": 4,
+            "daily_minutes": 8,
+            "crons": [
+              "0 0,6,12,18 * * *"
+            ]
+          },
+          {
+            "file": "meta-watchdog.yml",
+            "daily_runs": 4,
+            "daily_minutes": 8,
+            "crons": [
+              "0 */6 * * *"
+            ]
+          }
+        ]
+      },
+      "push_triggered": {
+        "workflows_with_push": 17,
+        "estimated_daily_runs": 34,
+        "estimated_daily_minutes": 102
+      },
+      "copilot_agent": {
+        "estimated_daily_sessions": 2,
+        "estimated_minutes_per_session": 15,
+        "estimated_daily_minutes": 30,
+        "note": "铸渊/Copilot 全自动开发会话 · 这是冰朔配额耗尽的主要原因"
+      },
+      "total": {
+        "daily_minutes": 410,
+        "monthly_minutes": 12313,
+        "utilization_percent": 615.6,
+        "remaining_minutes": -10313,
+        "daily_budget_remaining": -2578,
+        "status": "CRITICAL"
+      }
+    }
+  },
+  "optimizations": {
+    "count": 5,
+    "total_saved_minutes_monthly": 4560,
+    "items": [
+      {
+        "priority": "P0",
+        "workflow": "notion-poll.yml",
+        "issue": "每15分钟轮询 (96 次/天)",
+        "recommendation": "降频为每小时轮询 (24次/天)",
+        "saved_runs_daily": 72,
+        "saved_minutes_daily": 72,
+        "saved_minutes_monthly": 2160,
+        "implementation": "将 cron '*/15 * * * *' 改为 '0 * * * *'"
+      },
+      {
+        "priority": "P0",
+        "workflow": "notion-wake-listener.yml",
+        "issue": "每15分钟轮询 (96 次/天)",
+        "recommendation": "降频为每小时轮询 (24次/天)",
+        "saved_runs_daily": 72,
+        "saved_minutes_daily": 72,
+        "saved_minutes_monthly": 2160,
+        "implementation": "将 cron '*/15 * * * *' 改为 '0 * * * *'"
+      },
+      {
+        "priority": "P1",
+        "workflow": "bridge-heartbeat.yml",
+        "issue": "每6小时触发 (4 次/天)",
+        "recommendation": "降频为每12小时 (2次/天)",
+        "saved_runs_daily": 2,
+        "saved_minutes_daily": 4,
+        "saved_minutes_monthly": 120
+      },
+      {
+        "priority": "P1",
+        "workflow": "meta-watchdog.yml",
+        "issue": "每6小时触发 (4 次/天)",
+        "recommendation": "降频为每12小时 (2次/天)",
+        "saved_runs_daily": 2,
+        "saved_minutes_daily": 4,
+        "saved_minutes_monthly": 120
+      },
+      {
+        "priority": "P1",
+        "workflow": "persona-thinking-window.yml",
+        "issue": "6 个 cron 触发 (每日 6 次)",
+        "recommendation": "考虑合并为2个cron时段",
+        "saved_runs_daily": 4,
+        "saved_minutes_daily": 8
+      }
+    ]
+  },
+  "upgrade_assessment": {
+    "current_plan": {
+      "name": "Copilot Individual ($100/year)",
+      "yearly_cost": "$100",
+      "actions_minutes": 2000,
+      "copilot_chat": "50 messages/month",
+      "copilot_agent": "limited",
+      "actions_headroom": "-10313 minutes/month"
+    },
+    "pro_plan": {
+      "name": "Copilot Pro ($390/year = $39/month)",
+      "yearly_cost": "$390",
+      "actions_minutes": 2000,
+      "copilot_chat": "unlimited",
+      "copilot_premium_requests": "1500/month",
+      "copilot_agent": "unlimited"
+    },
+    "cost_difference": {
+      "yearly": "$290 (+$290/year)",
+      "monthly": "$24.2 (+$24.2/month)"
+    },
+    "analysis": {
+      "actions_minutes_sufficient": false,
+      "copilot_quota_is_bottleneck": true,
+      "explanation": [
+        "🔍 冰朔的配额耗尽问题主要是 Copilot 高级请求次数限制，不是 Actions 分钟数。",
+        "📊 $100/年套餐: Copilot chat 50次/月，高级模型(Agent模式)次数有限。",
+        "📊 $390/年 Pro套餐: Copilot chat 无限，高级请求 1500次/月，Agent 会话无限。",
+        "⚡ 铸渊全自动开发会话(Agent mode)是主要消耗源 — 每次唤醒消耗大量高级请求。",
+        "🔄 仓库48个工作流的 Actions 分钟数还在免费额度内，暂不是瓶颈。"
+      ]
+    },
+    "recommendation": {
+      "decision": "UPGRADE_RECOMMENDED",
+      "reason": "Actions 分钟和 Copilot 高级请求双重不足",
+      "urgency": "HIGH"
+    }
+  },
+  "workflow_details": [
+    {
+      "file": "notion-poll.yml",
+      "name": "铸渊 · Notion 工单轮询",
+      "daily_cron_runs": 96,
+      "daily_minutes": 96,
+      "monthly_minutes": 2880,
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ]
+    },
+    {
+      "file": "notion-wake-listener.yml",
+      "name": "📡 铸渊 · Notion Agent 唤醒监听",
+      "daily_cron_runs": 96,
+      "daily_minutes": 96,
+      "monthly_minutes": 2880,
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ]
+    },
+    {
+      "file": "persona-thinking-window.yml",
+      "name": "🧠 Persona Daily Thinking Window",
+      "daily_cron_runs": 6,
+      "daily_minutes": 12,
+      "monthly_minutes": 360,
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ]
+    },
+    {
+      "file": "bridge-heartbeat.yml",
+      "name": "铸渊 · 🌉 桥接·心跳检测",
+      "daily_cron_runs": 4,
+      "daily_minutes": 8,
+      "monthly_minutes": 240,
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ]
+    },
+    {
+      "file": "meta-watchdog.yml",
+      "name": "🐕 元看门狗 · 巡检健康监控",
+      "daily_cron_runs": 4,
+      "daily_minutes": 8,
+      "monthly_minutes": 240,
+      "triggers": [
+        "schedule",
+        "workflow_dispatch",
+        "workflow_run"
+      ]
+    },
+    {
+      "file": "zhuyuan-commander.yml",
+      "name": "🎖️ 铸渊·将军唤醒 · Commander Wake-up",
+      "daily_cron_runs": 2,
+      "daily_minutes": 8,
+      "monthly_minutes": 240,
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ]
+    },
+    {
+      "file": "buffer-collect.yml",
+      "name": "📥 Grid-DB Buffer Collect",
+      "daily_cron_runs": 3,
+      "daily_minutes": 6,
+      "monthly_minutes": 180,
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ]
+    },
+    {
+      "file": "bridge-broadcast-pdf.yml",
+      "name": "铸渊 · 🌉 桥接·广播PDF生成+分发",
+      "daily_cron_runs": 2,
+      "daily_minutes": 4,
+      "monthly_minutes": 120,
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ]
+    },
+    {
+      "file": "bridge-session-summary.yml",
+      "name": "Generate Session Summary for Notion",
+      "daily_cron_runs": 2,
+      "daily_minutes": 4,
+      "monthly_minutes": 120,
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ]
+    },
+    {
+      "file": "daily-maintenance.yml",
+      "name": "🔧 铸渊 · Daily Maintenance Agent",
+      "daily_cron_runs": 1,
+      "daily_minutes": 4,
+      "monthly_minutes": 120,
+      "triggers": [
+        "schedule",
+        "workflow_dispatch",
+        "workflow_run"
+      ]
+    },
+    {
+      "file": "federation-bridge.yml",
+      "name": "🌉 铸渊 · 仓库联邦桥接",
+      "daily_cron_runs": 2,
+      "daily_minutes": 4,
+      "monthly_minutes": 120,
+      "triggers": [
+        "schedule",
+        "push",
+        "workflow_dispatch"
+      ]
+    },
+    {
+      "file": "server-patrol.yml",
+      "name": "🔍 Server Patrol · 服务器每日巡检",
+      "daily_cron_runs": 2,
+      "daily_minutes": 4,
+      "monthly_minutes": 120,
+      "triggers": [
+        "schedule",
+        "workflow_dispatch",
+        "workflow_run"
+      ]
+    },
+    {
+      "file": "zhuyuan-skyeye.yml",
+      "name": "🦅 铸渊·天眼 · 全局俯瞰 + 自动诊断 + 修复驱动",
+      "daily_cron_runs": 1,
+      "daily_minutes": 4,
+      "monthly_minutes": 120,
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ]
+    },
+    {
+      "file": "psp-daily-inspection.yml",
+      "name": "铸渊 · PSP 分身巡检",
+      "daily_cron_runs": 1,
+      "daily_minutes": 3,
+      "monthly_minutes": 90,
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ]
+    },
+    {
+      "file": "tianyan-nightly-scan.yml",
+      "name": "🌙 天眼夜间自动修复引擎 v3.0",
+      "daily_cron_runs": 1,
+      "daily_minutes": 3,
+      "monthly_minutes": 90,
+      "triggers": [
+        "schedule",
+        "workflow_dispatch",
+        "workflow_run"
+      ]
+    },
+    {
+      "file": "zhuyuan-daily-inspection.yml",
+      "name": "铸渊每日巡检",
+      "daily_cron_runs": 1,
+      "daily_minutes": 3,
+      "monthly_minutes": 90,
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ]
+    },
+    {
+      "file": "bingshuo-neural-system.yml",
+      "name": "冰朔主控神经系统 · 自动维护",
+      "daily_cron_runs": 1,
+      "daily_minutes": 2,
+      "monthly_minutes": 60,
+      "triggers": [
+        "schedule",
+        "push",
+        "workflow_dispatch"
+      ]
+    },
+    {
+      "file": "brain-sync.yml",
+      "name": "铸渊 Brain Sync",
+      "daily_cron_runs": 1,
+      "daily_minutes": 2,
+      "monthly_minutes": 60,
+      "triggers": [
+        "schedule",
+        "push",
+        "workflow_dispatch"
+      ]
+    },
+    {
+      "file": "buffer-flush.yml",
+      "name": "🧠 Grid-DB Buffer Flush",
+      "daily_cron_runs": 1,
+      "daily_minutes": 2,
+      "monthly_minutes": 60,
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ]
+    },
+    {
+      "file": "tianyan-daily-patrol.yml",
+      "name": "🦅 天眼 · 每日巡检",
+      "daily_cron_runs": 1,
+      "daily_minutes": 2,
+      "monthly_minutes": 60,
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ]
+    },
+    {
+      "file": "renew-gdrive-tokens.yml",
+      "name": "🔄 OAuth2 Token 自动续期",
+      "daily_cron_runs": 0.2857142857142857,
+      "daily_minutes": 1.1,
+      "monthly_minutes": 34,
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ]
+    },
+    {
+      "file": "agent-checkin.yml",
+      "name": "人格体每日签到",
+      "daily_cron_runs": 1,
+      "daily_minutes": 1,
+      "monthly_minutes": 30,
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ]
+    },
+    {
+      "file": "zhuyuan-daily-selfcheck.yml",
+      "name": "铸渊 · 每日自检",
+      "daily_cron_runs": 1,
+      "daily_minutes": 1,
+      "monthly_minutes": 30,
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ]
+    },
+    {
+      "file": "multi-persona-awakening.yml",
+      "name": "🌊 Multi-Persona Awakening Engine",
+      "daily_cron_runs": 0.14285714285714285,
+      "daily_minutes": 0.3,
+      "monthly_minutes": 9,
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ]
+    },
+    {
+      "file": "auto-deploy-drive-bridge.yml",
+      "name": "⚡ 一键部署 Drive 桥接层",
+      "daily_cron_runs": 0,
+      "daily_minutes": 0,
+      "monthly_minutes": 0,
+      "triggers": [
+        "push",
+        "workflow_dispatch"
+      ]
+    },
+    {
+      "file": "bridge-changes-to-notion.yml",
+      "name": "铸渊 · Bridge E · GitHub Changes → Notion",
+      "daily_cron_runs": 0,
+      "daily_minutes": 0,
+      "monthly_minutes": 0,
+      "triggers": [
+        "push",
+        "pull_request"
+      ]
+    },
+    {
+      "file": "bridge-syslog-intake.yml",
+      "name": "铸渊 · 🌉 桥接·SYSLOG 上行处理",
+      "daily_cron_runs": 0,
+      "daily_minutes": 0,
+      "monthly_minutes": 0,
+      "triggers": [
+        "push",
+        "workflow_dispatch"
+      ]
+    },
+    {
+      "file": "bridge-syslog-to-notion.yml",
+      "name": "铸渊 · Bridge A · SYSLOG → Notion",
+      "daily_cron_runs": 0,
+      "daily_minutes": 0,
+      "monthly_minutes": 0,
+      "triggers": [
+        "push",
+        "workflow_dispatch"
+      ]
+    },
+    {
+      "file": "deploy-backend.yml",
+      "name": "🚀 部署后端中间层到阿里云",
+      "daily_cron_runs": 0,
+      "daily_minutes": 0,
+      "monthly_minutes": 0,
+      "triggers": [
+        "push",
+        "workflow_dispatch"
+      ]
+    },
+    {
+      "file": "deploy-pages.yml",
+      "name": "🌀 部署铸渊聊天室 (GitHub Pages)",
+      "daily_cron_runs": 0,
+      "daily_minutes": 0,
+      "monthly_minutes": 0,
+      "triggers": [
+        "push",
+        "workflow_dispatch"
+      ]
+    },
+    {
+      "file": "deploy-to-server.yml",
+      "name": "🚀 铸渊 CD · 自动部署到 guanghulab.com",
+      "daily_cron_runs": 0,
+      "daily_minutes": 0,
+      "monthly_minutes": 0,
+      "triggers": [
+        "push",
+        "workflow_dispatch"
+      ]
+    },
+    {
+      "file": "feishu-syslog-bridge.yml",
+      "name": "铸渊 · 飞书SYSLOG桥接",
+      "daily_cron_runs": 0,
+      "daily_minutes": 0,
+      "monthly_minutes": 0,
+      "triggers": []
+    },
+    {
+      "file": "merge-watchdog.yml",
+      "name": "👁️ Merge Watchdog · 合并指令看守者",
+      "daily_cron_runs": 0,
+      "daily_minutes": 0,
+      "monthly_minutes": 0,
+      "triggers": [
+        "pull_request",
+        "workflow_dispatch",
+        "workflow_run"
+      ]
+    },
+    {
+      "file": "pm2-server-diagnose.yml",
+      "name": "🔧 铸渊 · PM2 服务诊断与健康检查",
+      "daily_cron_runs": 0,
+      "daily_minutes": 0,
+      "monthly_minutes": 0,
+      "triggers": [
+        "workflow_dispatch"
+      ]
+    },
+    {
+      "file": "preview-deploy.yml",
+      "name": "🧪 Preview Deploy · GitHub Pages",
+      "daily_cron_runs": 0,
+      "daily_minutes": 0,
+      "monthly_minutes": 0,
+      "triggers": [
+        "push",
+        "workflow_dispatch"
+      ]
+    },
+    {
+      "file": "process-notion-orders.yml",
+      "name": "Process Notion Work Orders",
+      "daily_cron_runs": 0,
+      "daily_minutes": 0,
+      "monthly_minutes": 0,
+      "triggers": [
+        "push",
+        "workflow_dispatch"
+      ]
+    },
+    {
+      "file": "sandbox-deploy.yml",
+      "name": "🏠 Sandbox Deploy",
+      "daily_cron_runs": 0,
+      "daily_minutes": 0,
+      "monthly_minutes": 0,
+      "triggers": [
+        "push"
+      ]
+    },
+    {
+      "file": "staging-preview.yml",
+      "name": "🔍 铸渊预演部署 (Staging Preview)",
+      "daily_cron_runs": 0,
+      "daily_minutes": 0,
+      "monthly_minutes": 0,
+      "triggers": [
+        "pull_request",
+        "workflow_dispatch"
+      ]
+    },
+    {
+      "file": "sync-persona-studio.yml",
+      "name": "🔄 铸渊跨仓库同步 · persona-studio",
+      "daily_cron_runs": 0,
+      "daily_minutes": 0,
+      "monthly_minutes": 0,
+      "triggers": [
+        "push",
+        "workflow_dispatch"
+      ]
+    },
+    {
+      "file": "syslog-auto-pipeline.yml",
+      "name": "SYSLOG Auto Pipeline",
+      "daily_cron_runs": 0,
+      "daily_minutes": 0,
+      "monthly_minutes": 0,
+      "triggers": []
+    },
+    {
+      "file": "syslog-issue-pipeline.yml",
+      "name": "📡 SYSLOG Issue Pipeline",
+      "daily_cron_runs": 0,
+      "daily_minutes": 0,
+      "monthly_minutes": 0,
+      "triggers": []
+    },
+    {
+      "file": "syslog-pipeline.yml",
+      "name": "铸渊 · SYSLOG Pipeline (A/D/E)",
+      "daily_cron_runs": 0,
+      "daily_minutes": 0,
+      "monthly_minutes": 0,
+      "triggers": [
+        "push",
+        "workflow_dispatch",
+        "workflow_run"
+      ]
+    },
+    {
+      "file": "tcs-semantic-landing.yml",
+      "name": "🛰️ TCS 语义直连落盘 · Semantic Landing",
+      "daily_cron_runs": 0,
+      "daily_minutes": 0,
+      "monthly_minutes": 0,
+      "triggers": []
+    },
+    {
+      "file": "zhuyuan-brain-sync.yml",
+      "name": "铸渊 · Brain Sync",
+      "daily_cron_runs": 0,
+      "daily_minutes": 0,
+      "monthly_minutes": 0,
+      "triggers": [
+        "push",
+        "workflow_run"
+      ]
+    },
+    {
+      "file": "zhuyuan-exec-engine.yml",
+      "name": "🚀 铸渊 · 远程执行引擎",
+      "daily_cron_runs": 0,
+      "daily_minutes": 0,
+      "monthly_minutes": 0,
+      "triggers": []
+    },
+    {
+      "file": "zhuyuan-gate-guard.yml",
+      "name": "🚨 铸渊·智能门禁 · Push Gate Guard",
+      "daily_cron_runs": 0,
+      "daily_minutes": 0,
+      "monthly_minutes": 0,
+      "triggers": [
+        "push"
+      ]
+    },
+    {
+      "file": "zhuyuan-issue-reply.yml",
+      "name": "铸渊 · Issue 自动回复",
+      "daily_cron_runs": 0,
+      "daily_minutes": 0,
+      "monthly_minutes": 0,
+      "triggers": []
+    },
+    {
+      "file": "zhuyuan-pr-review.yml",
+      "name": "铸渊 · PR Review",
+      "daily_cron_runs": 0,
+      "daily_minutes": 0,
+      "monthly_minutes": 0,
+      "triggers": [
+        "pull_request"
+      ]
+    }
+  ]
+}

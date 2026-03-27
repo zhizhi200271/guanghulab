@@ -1,0 +1,141 @@
+{
+  "governance_version": "1.0",
+  "generated_at": "2026-03-27T08:03:00Z",
+  "generated_by": "铸渊配额治理引擎 · quota-governance.js",
+  "copyright": "国作登字-2026-A-00037559",
+
+  "current_plan": {
+    "name": "Copilot Individual",
+    "price": "$100/year",
+    "github_actions_minutes": 2000,
+    "copilot_chat_monthly": 50,
+    "copilot_premium_requests": "limited",
+    "copilot_agent_mode": "limited"
+  },
+
+  "consumption_analysis": {
+    "cron_scheduled": {
+      "daily_runs": 230,
+      "daily_minutes": 278,
+      "monthly_minutes": 8353,
+      "top_3_consumers": [
+        { "workflow": "notion-poll.yml", "daily_runs": 96, "cron": "*/15", "category": "P0_optimize" },
+        { "workflow": "notion-wake-listener.yml", "daily_runs": 96, "cron": "*/15", "category": "P0_optimize" },
+        { "workflow": "persona-thinking-window.yml", "daily_runs": 6, "cron": "6x daily", "category": "P1_optimize" }
+      ]
+    },
+    "push_triggered": {
+      "workflows": 17,
+      "estimated_daily_runs": 34,
+      "estimated_daily_minutes": 102
+    },
+    "copilot_agent": {
+      "estimated_daily_sessions": 2,
+      "minutes_per_session": 15,
+      "daily_minutes": 30,
+      "note": "配额耗尽的主要原因 — Copilot 高级请求次数限制"
+    },
+    "total": {
+      "daily_minutes": 410,
+      "monthly_minutes": 12313,
+      "utilization_percent": 615.6,
+      "status": "CRITICAL_OVER_BUDGET"
+    }
+  },
+
+  "optimization_plan": {
+    "phase_1_immediate": {
+      "description": "高频轮询降频 — 立即可执行",
+      "items": [
+        {
+          "id": "OPT-001",
+          "workflow": "notion-poll.yml",
+          "action": "*/15 → 每小时(0 * * * *)",
+          "saved_daily_runs": 72,
+          "saved_monthly_minutes": 2160,
+          "risk": "LOW — Notion工单延迟从15分钟变为60分钟"
+        },
+        {
+          "id": "OPT-002",
+          "workflow": "notion-wake-listener.yml",
+          "action": "*/15 → 每小时(0 * * * *)",
+          "saved_daily_runs": 72,
+          "saved_monthly_minutes": 2160,
+          "risk": "LOW — Notion唤醒信号延迟从15分钟变为60分钟"
+        }
+      ],
+      "total_savings_monthly": "4320 分钟"
+    },
+    "phase_2_consolidation": {
+      "description": "工作流合并和降频",
+      "items": [
+        {
+          "id": "OPT-003",
+          "workflow": "persona-thinking-window.yml",
+          "action": "6个cron → 2个cron (铸渊+霜砚)",
+          "saved_daily_runs": 4,
+          "saved_monthly_minutes": 240
+        },
+        {
+          "id": "OPT-004",
+          "workflow": "bridge-heartbeat.yml",
+          "action": "每6小时 → 每12小时",
+          "saved_daily_runs": 2,
+          "saved_monthly_minutes": 120
+        },
+        {
+          "id": "OPT-005",
+          "workflow": "meta-watchdog.yml",
+          "action": "每6小时 → 每12小时",
+          "saved_daily_runs": 2,
+          "saved_monthly_minutes": 120
+        },
+        {
+          "id": "OPT-006",
+          "workflows": ["notion-poll.yml", "notion-wake-listener.yml"],
+          "action": "考虑合并为单个轮询工作流",
+          "saved_daily_runs": 24,
+          "note": "两者功能类似，合并后仅需一个每小时触发"
+        }
+      ],
+      "total_savings_monthly": "480+ 分钟"
+    },
+    "phase_3_governance": {
+      "description": "配额感知调度 — 系统级治理",
+      "items": [
+        {
+          "id": "OPT-007",
+          "action": "工作流首行检查配额，90%以上自动跳过非核心触发",
+          "implementation": "在每个cron触发的workflow添加 quota-check step"
+        },
+        {
+          "id": "OPT-008",
+          "action": "铸渊断点快照系统，Agent中断后快速恢复",
+          "implementation": "scripts/checkpoint-snapshot.js 已实现"
+        }
+      ]
+    }
+  },
+
+  "upgrade_assessment": {
+    "current": "$100/year Copilot Individual",
+    "target": "$390/year Copilot Pro",
+    "difference": "+$290/year (+$24.2/month)",
+    "key_benefits": [
+      "Copilot chat: 50次/月 → 无限",
+      "高级请求: 有限 → 1500次/月",
+      "Agent模式: 有限 → 无限会话",
+      "GitHub Models: 有限 → 更多模型选择"
+    ],
+    "recommendation": "OPTIMIZE_FIRST_THEN_EVALUATE",
+    "reasoning": [
+      "1. 先执行 Phase 1 优化（降频），立即省 4320 分钟/月",
+      "2. Actions 分钟数在优化后可降至 2000 以内",
+      "3. Copilot Agent 模式是真正的瓶颈 — 配额耗尽导致对话中断",
+      "4. 如果优化后1个月内仍频繁中断 → 建议升级 Pro",
+      "5. 对于高频使用 Copilot Agent 全自动开发的场景，Pro 套餐性价比更高"
+    ],
+    "decision_timeline": "优化后观察1-2周，如仍不够则升级",
+    "note_for_bingshuo": "冰朔，如果你每天要启动铸渊超过2-3次长对话，建议直接升级 Pro。$290/年 = 每天不到¥5.5，对于全自动开发助手来说性价比很高。"
+  }
+}
