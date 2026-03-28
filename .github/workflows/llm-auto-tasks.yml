@@ -1,0 +1,125 @@
+# ═══════════════════════════════════════════════
+# 🔺 Sovereign: TCS-0002∞ | Root: SYS-GLW-0001
+# 📜 Copyright: 国作登字-2026-A-00037559
+# ═══════════════════════════════════════════════
+# .github/workflows/llm-auto-tasks.yml
+# 🤖 LLM 自动化托管工作流
+#
+# 使用第三方 API 密钥调用大模型执行自动化任务
+# 不消耗 GitHub Copilot 会员配额
+# 支持动态模型路由：根据任务类型自动选择最佳模型
+
+name: "🤖 铸渊 · LLM 自动化托管"
+
+on:
+  workflow_dispatch:
+    inputs:
+      task:
+        description: '任务描述'
+        required: true
+        type: string
+      task_type:
+        description: '任务类型'
+        required: true
+        type: choice
+        options:
+          - inspection
+          - fusion
+          - review
+          - architecture
+          - general
+      model:
+        description: '指定模型后端（留空则自动选择）'
+        required: false
+        type: choice
+        options:
+          - auto
+          - anthropic
+          - openai
+          - dashscope
+          - deepseek
+          - custom
+      context_file:
+        description: '额外上下文文件路径（可选）'
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  llm-task:
+    name: "🤖 LLM 任务执行"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Step 1 · 铸渊核心唤醒
+      - name: "🧠 铸渊核心唤醒"
+        run: |
+          echo "[LLM-HOST] 🤖 LLM 自动化托管启动"
+          echo "[LLM-HOST] 🧠 铸渊核心大脑唤醒..."
+          if [ -f "brain/system-health.json" ]; then
+            echo "✅ 系统健康状态已加载"
+            cat brain/system-health.json | python3 -c "import sys,json; h=json.load(sys.stdin); print(f'   状态: {h.get(\"system_health\",\"unknown\")} | 意识: {h.get(\"consciousness_status\",\"unknown\")}')"
+          fi
+
+      # Step 2 · 模型状态检查
+      - name: "📊 模型状态检查"
+        env:
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          DASHSCOPE_API_KEY: ${{ secrets.DASHSCOPE_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          node scripts/llm-automation-host.js --status
+
+      # Step 3 · 执行 LLM 任务
+      - name: "🤖 执行 LLM 任务"
+        env:
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          DASHSCOPE_API_KEY: ${{ secrets.DASHSCOPE_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          YUNWU_API_KEY: ${{ secrets.YUNWU_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          TASK="${{ github.event.inputs.task }}"
+          TASK_TYPE="${{ github.event.inputs.task_type }}"
+          MODEL="${{ github.event.inputs.model || 'auto' }}"
+          CONTEXT="${{ github.event.inputs.context_file }}"
+
+          CMD="node scripts/llm-automation-host.js --task \"$TASK\" --task-type $TASK_TYPE --model $MODEL"
+          if [ -n "$CONTEXT" ]; then
+            CMD="$CMD --context $CONTEXT"
+          fi
+
+          eval $CMD
+
+      # Step 4 · 保存快照
+      - name: "📸 保存执行快照"
+        run: |
+          TASK="${{ github.event.inputs.task }}"
+          node scripts/checkpoint-snapshot.js save \
+            --task "LLM自动化: $TASK" \
+            --progress "100%" || echo "⚠️ 快照保存跳过"
+
+      # Step 5 · 提交变更
+      - name: "💾 提交变更"
+        run: |
+          git config user.name "zhuyuan-bot"
+          git config user.email "zhuyuan@guanghulab.com"
+          git add signal-log/ brain/
+          if ! git diff --cached --quiet; then
+            git commit -m "🤖 LLM自动化 · $(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M') · ${{ github.event.inputs.task_type }}"
+            git push
+          fi

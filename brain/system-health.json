@@ -37,5 +37,24 @@
     "entry_script": "scripts/chat-to-agent-bridge.js",
     "workflow": ".github/workflows/copilot-dev-bridge.yml",
     "task_dir": "bridge/chat-to-agent/"
+  },
+  "fragment_fusion": {
+    "version": "1.0",
+    "status": "active",
+    "directive": "SY-CMD-FUS-009",
+    "purpose": "死亡工作流碎片自动融合分析",
+    "entry_script": "scripts/fragment-fusion-engine.js",
+    "pending_absorb": 22,
+    "target_organs": ["ZY-WF-听潮", "ZY-WF-守夜", "ZY-WF-织脉", "ZY-WF-锻心"]
+  },
+  "llm_automation": {
+    "version": "1.0",
+    "status": "active",
+    "purpose": "第三方API密钥托管·替代GitHub配额消耗·动态模型路由",
+    "entry_script": "scripts/llm-automation-host.js",
+    "workflow": ".github/workflows/llm-auto-tasks.yml",
+    "supported_backends": ["anthropic", "openai", "dashscope", "deepseek", "custom"],
+    "routing_strategy": "dynamic",
+    "task_types": ["inspection", "fusion", "review", "architecture", "general"]
   }
 }
