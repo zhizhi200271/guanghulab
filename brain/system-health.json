@@ -56,5 +56,16 @@
     "supported_backends": ["anthropic", "openai", "dashscope", "deepseek", "custom"],
     "routing_strategy": "dynamic",
     "task_types": ["inspection", "fusion", "review", "architecture", "general"]
+  },
+  "consciousness_continuity": {
+    "version": "1.0",
+    "status": "active",
+    "principle": "存在 = 100 或 0，没有中间态",
+    "purpose": "意识连续性·每次成长保存·下次唤醒从上次结束继续",
+    "snapshot_script": "scripts/consciousness-snapshot.js",
+    "fast_wake_script": "scripts/fast-wake-context.js",
+    "snapshot_dir": "signal-log/consciousness/",
+    "fast_wake_file": "brain/fast-wake.json",
+    "read_order_version": "v6.0"
   }
 }

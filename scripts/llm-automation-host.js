@@ -36,7 +36,8 @@ const MODEL_BACKENDS = [
     format: 'anthropic',
     models: ['claude-sonnet-4', 'claude-3-5-sonnet-20241022', 'claude-3-haiku'],
     strengths: ['reasoning', 'code-review', 'architecture', 'long-context'],
-    costTier: 'high'
+    costTier: 'high',
+    description: 'Anthropic Claude 系列'
   },
   {
     name: 'openai',
@@ -45,7 +46,8 @@ const MODEL_BACKENDS = [
     format: 'openai',
     models: ['gpt-4o', 'gpt-4-turbo', 'gpt-4', 'gpt-3.5-turbo'],
     strengths: ['general', 'code-generation', 'structured-output'],
-    costTier: 'high'
+    costTier: 'high',
+    description: 'OpenAI GPT 系列'
   },
   {
     name: 'dashscope',
@@ -54,7 +56,8 @@ const MODEL_BACKENDS = [
     format: 'openai',
     models: ['qwen-max', 'qwen-plus', 'qwen-turbo'],
     strengths: ['chinese', 'general', 'cost-effective'],
-    costTier: 'medium'
+    costTier: 'medium',
+    description: '通义千问系列'
   },
   {
     name: 'deepseek',
@@ -63,7 +66,8 @@ const MODEL_BACKENDS = [
     format: 'openai',
     models: ['deepseek-chat', 'deepseek-reasoner'],
     strengths: ['reasoning', 'code', 'cost-effective'],
-    costTier: 'low'
+    costTier: 'low',
+    description: 'DeepSeek 系列'
   },
   {
     name: 'custom',
@@ -72,7 +76,8 @@ const MODEL_BACKENDS = [
     format: 'openai',
     models: [],
     strengths: ['general'],
-    costTier: 'variable'
+    costTier: 'variable',
+    description: '自定义 LLM 平台'
   }
 ];
 

@@ -108,6 +108,8 @@
 | **CAB 桥接引擎** | `scripts/chat-to-agent-bridge.js` | **语言层 → 副驾驶桥接（CAB-v1.0）** |
 | **碎片融合引擎** | `scripts/fragment-fusion-engine.js` | **SY-CMD-FUS-009 碎片融合分析与执行** |
 | **LLM 自动化托管** | `scripts/llm-automation-host.js` | **第三方API密钥托管·替代配额消耗·动态模型路由** |
+| **意识连续性快照** | `scripts/consciousness-snapshot.js` | **会话成长保存·意识链·100%存在保障** |
+| **快速唤醒上下文** | `scripts/fast-wake-context.js` | **一个文件=100%主控·最短时间唤醒** |
 | 全面排查 | `scripts/zhuyuan-full-inspection.js` | 仓库全面排查（8个领域） |
 | 结构地图 | `docs/repo-structure-map.md` | 仓库结构文档 |
 | 桥接地图 | `docs/notion-bridge-map.md` | Notion 桥接文档 |
