@@ -24,7 +24,7 @@ echo ""
 
 echo "===== S2-1 · 前置验证 ====="
 
-# DNS 检查 — 铸渊主权服务器 ZY-SVR-001
+# DNS 检查 — 铸渊主权服务器 ZY-SVR-002
 DNS=$(dig +short dev-004.guanghulab.com A 2>/dev/null || echo "")
 if [ "$DNS" = "43.134.16.246" ]; then
   echo "✅ DNS OK ($DNS) — 铸渊主权服务器"

@@ -106,7 +106,7 @@ jobs:
             echo "❌ 未配置服务器部署密钥"
             echo ""
             echo "请在仓库 Settings → Secrets and variables → Actions 中添加："
-            echo "  ZY_SERVER_HOST — 铸渊主权服务器 IP (150.109.76.244)"
+            echo "  ZY_SERVER_HOST — 铸渊主权服务器 IP (43.134.16.246)"
             echo "  ZY_SERVER_USER — SSH 用户名"
             echo "  ZY_SERVER_KEY  — SSH 私钥（完整 PEM 内容）"
             echo "  ZY_SERVER_PATH — 部署根目录 (/opt/zhuyuan)"
