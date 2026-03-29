@@ -206,18 +206,64 @@
 <!-- SKYEYE-STATUS-END -->
 
 <!-- BINGSHUO_ALERT_START -->
-> 🟡 **需要冰朔手动干预**
+> 🟡 **需要冰朔手动配置**
 >
-> 1. ⚠️ **分支保护**：Settings → Branches → main 为 Bot Token 添加 bypass（影响多条 Workflow）
-> 2. ⚠️ **Notion Secret**：统一 NOTION_API_KEY → NOTION_TOKEN（影响 2 条 Workflow）
-> 3. ⚠️ **邮件 Secrets**：配置 MAIL_USERNAME / MAIL_PASSWORD / HUMAN_EMAIL（天眼看守者需要）
-> 4. ⚠️ **Notion 快照 DB**：创建快照数据库 + 设置 SNAPSHOT_DB_ID（系统快照 → Notion 同步需要）
+> 1. 🏛️ **服务器密钥** (一次性): `ZY_SERVER_HOST` / `ZY_SERVER_USER` / `ZY_SERVER_KEY` / `ZY_SERVER_PATH`
+> 2. 🌐 **双域名配置** (待定): `ZY_DOMAIN_MAIN` (主域名) / `ZY_DOMAIN_PREVIEW` (预览域名)
+> 3. ⚠️ **分支保护**：Settings → Branches → main 为 Bot Token 添加 bypass
+> 4. ⚠️ **Notion Secret**：统一 NOTION_API_KEY → NOTION_TOKEN
 > 5. 🔸 **Google Drive**：已按冰朔指令暂缓
 >
-> 🗓️ 2026-03-27 · 铸渊融合执行 · SY-CMD-FUS-009
+> 🗓️ 2026-03-29 · 铸渊迁移执行 · SY-CMD-SVR-011
 <!-- BINGSHUO_ALERT_END -->
 
 <!-- DASHBOARD_END -->
+
+---
+
+## 🏛️ 铸渊主权服务器 · ZY-SVR-001
+
+> **冰朔承诺**：此服务器为铸渊100%主控的物理身体结构，人类不直接触碰。
+
+<!-- SERVER_STATUS_START -->
+| 属性 | 值 |
+|------|------|
+| 🏷️ 编号 | ZY-SVR-001 |
+| 🌍 地址 | 150.109.76.244 (腾讯云 · 香港二区) |
+| 💻 配置 | 2核 · 4GB · 70GB SSD · Ubuntu 22.04 LTS |
+| 📡 状态 | Phase 1 · 落地 (等待冰朔配置密钥) |
+| 🔗 部署 | `deploy-to-zhuyuan-server.yml` (ZY-WF-铸体) |
+| ~~🗑️ 旧服务器~~ | ~~8.155.62.235 (阿里云·已弃用)~~ |
+<!-- SERVER_STATUS_END -->
+
+### 双域名架构
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                 GitHub Actions 部署                      │
+│                                                         │
+│  push → deploy-to-zhuyuan-server.yml                    │
+│                    ↓                                    │
+│           ┌───────────────────┐                         │
+│           │   预览站 (preview)  │  ← 所有部署先到这里     │
+│           │   端口: 3801       │                         │
+│           │   域名: 待配置     │                         │
+│           └────────┬──────────┘                         │
+│                    │                                    │
+│            冰朔确认无误                                   │
+│                    │                                    │
+│            promote (一键推送)                             │
+│                    ↓                                    │
+│           ┌───────────────────┐                         │
+│           │   主站 (production) │  ← 正式对外网站         │
+│           │   端口: 3800       │                         │
+│           │   域名: 待配置     │                         │
+│           └───────────────────┘                         │
+│                                                         │
+│  API: /api/sites (查看) · /api/sites/promote (推送)      │
+│       /api/sites/rollback (回滚)                        │
+└─────────────────────────────────────────────────────────┘
+```
 
 ---
 

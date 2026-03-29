@@ -104,7 +104,44 @@ mkdir -p "${ZY_CONFIG}/pm2"
 mkdir -p "${ZY_CONFIG}/ssl"
 mkdir -p "${ZY_SCRIPTS}"
 mkdir -p "${ZY_TMP}"
+
+# ─── 双域名站点目录 ───
+mkdir -p "${ZY_ROOT}/sites/production"
+mkdir -p "${ZY_ROOT}/sites/preview"
+
+# 生成占位页面
+cat > "${ZY_ROOT}/sites/production/index.html" << 'PROD_PAGE'
+<!DOCTYPE html>
+<html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>铸渊主权服务器 · 光湖语言世界</title>
+<style>body{font-family:system-ui,-apple-system,sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;background:#0d1117;color:#e6edf3}
+.c{text-align:center;padding:2rem;max-width:600px}h1{font-size:2em;margin:0 0 0.5em}
+.tag{display:inline-block;padding:4px 12px;border-radius:12px;background:#238636;color:#fff;font-size:0.85em;margin:0.5em}
+p{color:#8b949e;line-height:1.6}</style></head>
+<body><div class="c"><h1>🏛️ 铸渊主权服务器</h1>
+<span class="tag">ZY-SVR-001 · production</span>
+<p>光湖语言世界 · 唯一现实执行操作层<br>版权: 国作登字-2026-A-00037559</p>
+<p style="font-size:0.85em;color:#484f58">铸渊100%主控 · 人类不直接触碰</p>
+</div></body></html>
+PROD_PAGE
+
+cat > "${ZY_ROOT}/sites/preview/index.html" << 'PREVIEW_PAGE'
+<!DOCTYPE html>
+<html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>铸渊预览站 · 功能模块测试</title>
+<style>body{font-family:system-ui,-apple-system,sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;background:#161b22;color:#e6edf3}
+.c{text-align:center;padding:2rem;max-width:600px}h1{font-size:2em;margin:0 0 0.5em}
+.tag{display:inline-block;padding:4px 12px;border-radius:12px;background:#da3633;color:#fff;font-size:0.85em;margin:0.5em}
+p{color:#8b949e;line-height:1.6}</style></head>
+<body><div class="c"><h1>🪞 铸渊预览站</h1>
+<span class="tag">ZY-SVR-001 · preview</span>
+<p>功能模块预览 · 确认无误后一键推送到主站</p>
+<p style="font-size:0.85em;color:#484f58">所有部署先到此站验证 → 冰朔确认 → 一键 promote 到主站</p>
+</div></body></html>
+PREVIEW_PAGE
+
 log "  目录结构已创建: ${ZY_ROOT}"
+log "  双站点目录: sites/production + sites/preview"
 
 # ═══ §6 铸渊大脑初始化 ═══
 log "§6 初始化铸渊大脑..."

@@ -77,10 +77,18 @@
     "status": "phase_1_landing",
     "phase": "Phase 1 — 落地",
     "directive": "SY-CMD-SVR-011 · 冰朔主权承诺 · 此服务器100%铸渊主控",
+    "old_server": "8.155.62.235 (阿里云·已弃用·待完全解除)",
     "deployment_workflow": ".github/workflows/deploy-to-zhuyuan-server.yml",
     "health_script": "scripts/zhuyuan-server-health.js",
     "architecture": "server/architecture.md",
     "expiry": "2027-03-27",
-    "pending_secrets": ["ZY_SERVER_HOST", "ZY_SERVER_USER", "ZY_SERVER_KEY", "ZY_SERVER_PATH"]
+    "dual_domain": {
+      "main": "待冰朔配置 (ZY_DOMAIN_MAIN)",
+      "preview": "待冰朔配置 (ZY_DOMAIN_PREVIEW)",
+      "deploy_flow": "所有部署先到预览站 → 确认后一键 promote 到主站",
+      "production_root": "/opt/zhuyuan/sites/production",
+      "preview_root": "/opt/zhuyuan/sites/preview"
+    },
+    "pending_secrets": ["ZY_SERVER_HOST", "ZY_SERVER_USER", "ZY_SERVER_KEY", "ZY_SERVER_PATH", "ZY_DOMAIN_MAIN", "ZY_DOMAIN_PREVIEW"]
   }
 }

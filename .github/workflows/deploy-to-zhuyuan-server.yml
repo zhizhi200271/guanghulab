@@ -23,6 +23,15 @@ on:
           - deploy
           - init
           - health-check
+          - promote
+      deploy_target:
+        description: '部署目标站点'
+        required: false
+        default: 'preview'
+        type: choice
+        options:
+          - preview
+          - production
 
 concurrency:
   group: zhuyuan-server-deploy
@@ -45,6 +54,8 @@ jobs:
           mkdir -p ~/.ssh
           install -m 600 /dev/stdin ~/.ssh/zy_key <<< "${{ secrets.ZY_SERVER_KEY }}"
           ssh-keyscan -H ${{ secrets.ZY_SERVER_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: 📦 上传初始化脚本
         run: |
           scp -i ~/.ssh/zy_key \
             server/setup/zhuyuan-server-init.sh \
@@ -56,7 +67,7 @@ jobs:
             ${{ secrets.ZY_SERVER_USER }}@${{ secrets.ZY_SERVER_HOST }} \
             'chmod +x /tmp/zhuyuan-server-init.sh && sudo /tmp/zhuyuan-server-init.sh'
 
-  # ═══ §2 部署应用 ═══
+  # ═══ §2 部署应用 (默认部署到预览站) ═══
   deploy:
     name: 🚀 部署应用代码
     if: github.event.inputs.action == 'deploy' || github.event.inputs.action == '' || github.event_name == 'push'
@@ -72,6 +83,16 @@ jobs:
 
       - name: 📦 同步应用代码
         run: |
+          # 确定部署目标: preview (默认) 或 production
+          TARGET="${{ github.event.inputs.deploy_target || 'preview' }}"
+          TARGET_DIR="/opt/zhuyuan/sites/${TARGET}"
+          echo "📦 部署目标: ${TARGET} → ${TARGET_DIR}"
+
+          # 确保目标目录存在
+          ssh -i ~/.ssh/zy_key \
+            ${{ secrets.ZY_SERVER_USER }}@${{ secrets.ZY_SERVER_HOST }} \
+            "mkdir -p ${TARGET_DIR}"
+
           rsync -avz --delete \
             -e "ssh -i ~/.ssh/zy_key" \
             server/app/ \
@@ -91,8 +112,10 @@ jobs:
 
       - name: 📥 安装依赖 & 重启
         run: |
+          COMMIT_SHA="${{ github.sha }}"
+          REF_NAME="${{ github.ref_name }}"
           ssh -i ~/.ssh/zy_key \
-            ${{ secrets.ZY_SERVER_USER }}@${{ secrets.ZY_SERVER_HOST }} << 'DEPLOY_CMD'
+            ${{ secrets.ZY_SERVER_USER }}@${{ secrets.ZY_SERVER_HOST }} << DEPLOY_CMD
 
           set -e
           cd /opt/zhuyuan/app
@@ -122,7 +145,7 @@ jobs:
             -d "{
               \"operator\": \"铸渊 · GitHub Actions\",
               \"action\": \"自动部署\",
-              \"details\": \"commit: $GITHUB_SHA, branch: $GITHUB_REF_NAME\"
+              \"details\": \"commit: ${COMMIT_SHA}, branch: ${REF_NAME}\"
             }" || true
 
           DEPLOY_CMD
@@ -175,5 +198,71 @@ jobs:
 
           echo "§7 大脑状态:"
           curl -sf http://localhost:3800/api/brain | jq '.files_present, .files_total' 2>/dev/null || echo "大脑API未响应"
+          echo ""
+
+          echo "§8 双站点状态:"
+          curl -sf http://localhost:3800/api/sites | jq . 2>/dev/null || echo "站点API未响应"
 
           HEALTH_CMD
+
+  # ═══ §4 一键推送: 预览站 → 主站 ═══
+  promote:
+    name: 🚀 预览站→主站 一键推送
+    if: github.event.inputs.action == 'promote'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 🔐 配置SSH
+        run: |
+          mkdir -p ~/.ssh
+          install -m 600 /dev/stdin ~/.ssh/zy_key <<< "${{ secrets.ZY_SERVER_KEY }}"
+          ssh-keyscan -H ${{ secrets.ZY_SERVER_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: 🚀 执行推送
+        run: |
+          echo "🚀 一键推送: 预览站 → 主站"
+          RUN_ID="${{ github.run_id }}"
+          ssh -i ~/.ssh/zy_key \
+            ${{ secrets.ZY_SERVER_USER }}@${{ secrets.ZY_SERVER_HOST }} << PROMOTE_CMD
+
+          # 调用铸渊 API 执行推送
+          RESULT=\$(curl -sf -X POST http://localhost:3800/api/sites/promote \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"operator\": \"冰朔 · 通过 GitHub Actions 授权推送\",
+              \"note\": \"workflow_dispatch promote · run_id: ${RUN_ID}\"
+            }" 2>/dev/null)
+
+          if [ \$? -eq 0 ]; then
+            echo "\$RESULT" | jq . 2>/dev/null || echo "\$RESULT"
+            echo ""
+            echo "✅ 预览站已推送到主站"
+          else
+            echo "❌ 推送失败"
+            echo "尝试手动执行..."
+            if [ -d /opt/zhuyuan/sites/preview ] && [ -f /opt/zhuyuan/sites/preview/index.html ]; then
+              rsync -a --delete /opt/zhuyuan/sites/preview/ /opt/zhuyuan/sites/production/
+              echo "✅ 手动推送完成"
+            else
+              echo "❌ 预览站无内容，无法推送"
+              exit 1
+            fi
+          fi
+
+          PROMOTE_CMD
+
+      - name: 💚 推送后验证
+        run: |
+          ssh -i ~/.ssh/zy_key \
+            ${{ secrets.ZY_SERVER_USER }}@${{ secrets.ZY_SERVER_HOST }} << 'VERIFY_CMD'
+
+          echo "═══ 推送后验证 ═══"
+          echo ""
+          echo "主站内容:"
+          ls -la /opt/zhuyuan/sites/production/ | head -10
+          echo ""
+          echo "站点状态:"
+          curl -sf http://localhost:3800/api/sites | jq . 2>/dev/null || echo "API未响应"
+
+          VERIFY_CMD

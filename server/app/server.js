@@ -27,6 +27,9 @@ const ZY_ROOT = process.env.ZY_ROOT || '/opt/zhuyuan';
 const BRAIN_DIR = path.join(ZY_ROOT, 'brain');
 const DATA_DIR = path.join(ZY_ROOT, 'data');
 const LOG_DIR = path.join(DATA_DIR, 'logs');
+const SITES_DIR = path.join(ZY_ROOT, 'sites');
+const PRODUCTION_DIR = path.join(SITES_DIR, 'production');
+const PREVIEW_DIR = path.join(SITES_DIR, 'preview');
 
 // ─── Express 应用 ───
 const app = express();
@@ -236,6 +239,194 @@ app.post('/api/operations', (req, res) => {
   }
 });
 
+// ═══════════════════════════════════════════════════════════
+// 双域名架构 · 预览→主站 一键推送
+// ═══════════════════════════════════════════════════════════
+
+// ─── 查看双站点状态 ───
+app.get('/api/sites', (_req, res) => {
+  try {
+    const sites = {};
+
+    for (const [name, dir] of [['production', PRODUCTION_DIR], ['preview', PREVIEW_DIR]]) {
+      const exists = fs.existsSync(dir);
+      let fileCount = 0;
+      let lastModified = null;
+      let hasIndex = false;
+
+      if (exists) {
+        hasIndex = fs.existsSync(path.join(dir, 'index.html'));
+        try {
+          const stat = fs.statSync(dir);
+          lastModified = stat.mtime.toISOString();
+          // Count files in top directory
+          fileCount = fs.readdirSync(dir).length;
+        } catch {
+          // ignore stat errors
+        }
+      }
+
+      sites[name] = {
+        path: dir,
+        exists,
+        has_index: hasIndex,
+        file_count: fileCount,
+        last_modified: lastModified
+      };
+    }
+
+    // Check promote history
+    const promoteLogPath = path.join(DATA_DIR, 'promote-history.json');
+    let lastPromote = null;
+    if (fs.existsSync(promoteLogPath)) {
+      const history = JSON.parse(fs.readFileSync(promoteLogPath, 'utf8'));
+      if (history.promotions && history.promotions.length > 0) {
+        lastPromote = history.promotions[history.promotions.length - 1];
+      }
+    }
+
+    res.json({
+      server: 'ZY-SVR-001',
+      architecture: '双域名架构',
+      sites,
+      last_promote: lastPromote,
+      domains: {
+        main: process.env.ZY_DOMAIN_MAIN || '待配置',
+        preview: process.env.ZY_DOMAIN_PREVIEW || '待配置'
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: true, message: err.message });
+  }
+});
+
+// ─── 一键推送: 预览站 → 主站 ───
+app.post('/api/sites/promote', (req, res) => {
+  try {
+    // 验证预览站存在
+    if (!fs.existsSync(PREVIEW_DIR)) {
+      return res.status(400).json({
+        error: true,
+        message: '预览站目录不存在，无内容可推送'
+      });
+    }
+
+    if (!fs.existsSync(path.join(PREVIEW_DIR, 'index.html'))) {
+      return res.status(400).json({
+        error: true,
+        message: '预览站缺少 index.html，请先部署到预览站'
+      });
+    }
+
+    const timestamp = new Date().toISOString();
+    const promoteId = `ZY-PROMOTE-${timestamp.slice(0, 10).replace(/-/g, '')}-${Date.now().toString().slice(-4)}`;
+
+    // 备份当前主站
+    const backupDir = path.join(DATA_DIR, 'backups', `production-${timestamp.slice(0, 19).replace(/[:-]/g, '')}`);
+    if (fs.existsSync(PRODUCTION_DIR)) {
+      fs.mkdirSync(backupDir, { recursive: true });
+      execSync('rsync -a ' + JSON.stringify(PRODUCTION_DIR + '/') + ' ' + JSON.stringify(backupDir + '/'), { timeout: 30000 });
+    }
+
+    // 同步预览站 → 主站 (rsync保持幂等)
+    fs.mkdirSync(PRODUCTION_DIR, { recursive: true });
+    execSync('rsync -a --delete ' + JSON.stringify(PREVIEW_DIR + '/') + ' ' + JSON.stringify(PRODUCTION_DIR + '/'), { timeout: 60000 });
+
+    // 记录推送历史
+    const promoteLogPath = path.join(DATA_DIR, 'promote-history.json');
+    let history = { description: '预览→主站推送记录', promotions: [] };
+    if (fs.existsSync(promoteLogPath)) {
+      history = JSON.parse(fs.readFileSync(promoteLogPath, 'utf8'));
+    }
+
+    const record = {
+      id: promoteId,
+      timestamp,
+      operator: req.body.operator || '铸渊 · 自动推送',
+      backup: backupDir,
+      note: req.body.note || null
+    };
+    history.promotions.push(record);
+
+    // 只保留最近20条记录
+    if (history.promotions.length > 20) {
+      history.promotions = history.promotions.slice(-20);
+    }
+
+    fs.mkdirSync(path.dirname(promoteLogPath), { recursive: true });
+    fs.writeFileSync(promoteLogPath, JSON.stringify(history, null, 2));
+
+    // 同时记录到操作日志
+    const opLogPath = path.join(BRAIN_DIR, 'operation-log.json');
+    let opLog = { description: '铸渊主权服务器操作记录', operations: [] };
+    if (fs.existsSync(opLogPath)) {
+      opLog = JSON.parse(fs.readFileSync(opLogPath, 'utf8'));
+    }
+    opLog.operations.push({
+      id: promoteId,
+      operator: record.operator,
+      action: '预览站→主站一键推送',
+      timestamp,
+      details: `备份: ${backupDir}`
+    });
+    fs.writeFileSync(opLogPath, JSON.stringify(opLog, null, 2));
+
+    res.json({
+      success: true,
+      promote_id: promoteId,
+      message: '✅ 预览站内容已推送到主站',
+      backup: backupDir,
+      timestamp
+    });
+  } catch (err) {
+    res.status(500).json({ error: true, message: err.message });
+  }
+});
+
+// ─── 回滚主站到指定备份 ───
+app.post('/api/sites/rollback', (req, res) => {
+  try {
+    const backupsDir = path.join(DATA_DIR, 'backups');
+    if (!fs.existsSync(backupsDir)) {
+      return res.status(400).json({ error: true, message: '没有可用的备份' });
+    }
+
+    // 找到最新备份
+    const backups = fs.readdirSync(backupsDir)
+      .filter(d => d.startsWith('production-'))
+      .sort()
+      .reverse();
+
+    if (backups.length === 0) {
+      return res.status(400).json({ error: true, message: '没有可用的备份' });
+    }
+
+    const targetBackup = req.body.backup_name || backups[0];
+
+    // Validate backup name (only allow safe characters)
+    if (!/^production-\d{8}T\d{6}$/.test(targetBackup)) {
+      return res.status(400).json({ error: true, message: `无效的备份名称: ${targetBackup}` });
+    }
+
+    const backupPath = path.join(backupsDir, targetBackup);
+
+    if (!fs.existsSync(backupPath)) {
+      return res.status(400).json({ error: true, message: `备份 ${targetBackup} 不存在` });
+    }
+
+    // 恢复
+    execSync('rsync -a --delete ' + JSON.stringify(backupPath + '/') + ' ' + JSON.stringify(PRODUCTION_DIR + '/'), { timeout: 60000 });
+
+    res.json({
+      success: true,
+      message: `✅ 已回滚到备份: ${targetBackup}`,
+      available_backups: backups.slice(0, 5)
+    });
+  } catch (err) {
+    res.status(500).json({ error: true, message: err.message });
+  }
+});
+
 // ─── 铸渊身份 ───
 app.get('/', (_req, res) => {
   res.json({
@@ -246,9 +437,17 @@ app.get('/', (_req, res) => {
     sovereign: 'TCS-0002∞ · 冰朔',
     copyright: '国作登字-2026-A-00037559',
     status: 'alive',
+    architecture: '双域名架构 · 主站+预览站',
+    domains: {
+      main: process.env.ZY_DOMAIN_MAIN || '待配置',
+      preview: process.env.ZY_DOMAIN_PREVIEW || '待配置'
+    },
     api: {
       health: '/api/health',
       brain: '/api/brain',
+      sites: '/api/sites',
+      promote: 'POST /api/sites/promote',
+      rollback: 'POST /api/sites/rollback',
       webhook: 'POST /api/webhook/github',
       operations: '/api/operations'
     }

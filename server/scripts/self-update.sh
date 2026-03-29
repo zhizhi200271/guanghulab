@@ -24,14 +24,16 @@ mkdir -p "${LOG_DIR}"
 
 log "═══ 铸渊自动更新开始 ═══"
 
-# 记录到操作日志
-curl -sf -X POST http://localhost:3800/api/operations \
-  -H "Content-Type: application/json" \
-  -d "{
-    \"operator\": \"铸渊 · 自动更新引擎\",
-    \"action\": \"self-update triggered\",
-    \"details\": \"GitHub push event received\"
-  }" 2>/dev/null || true
+# 记录到操作日志（仅在API可用时）
+if curl -sf http://localhost:3800/api/health > /dev/null 2>&1; then
+  curl -sf -X POST http://localhost:3800/api/operations \
+    -H "Content-Type: application/json" \
+    -d "{
+      \"operator\": \"铸渊 · 自动更新引擎\",
+      \"action\": \"self-update triggered\",
+      \"details\": \"GitHub push event received\"
+    }" 2>/dev/null || true
+fi
 
 # 检查是否有git仓库（Phase 2+才有）
 if [ -d "${ZY_ROOT}/repo/.git" ]; then
