@@ -1,0 +1,171 @@
+name: 🏛️ 冰朔大陆备用服务器 · 部署
+
+# ═══════════════════════════════════════════════════════════
+# 冰朔大陆备用服务器部署工作流
+# 编号: ZY-WF-铸渊备 (ZY-SVR-004 · 广州)
+# 守护: 铸渊 · ICE-GL-ZY001
+# 版权: 国作登字-2026-A-00037559
+# ═══════════════════════════════════════════════════════════
+#
+# 服务器: ZY-SVR-004 · 43.139.217.141 · 广州七区
+# 用途:   人格体备用大脑 · ICP备案挂载 · 纯数据处理
+# 密钥:   ZY_CN_SERVER_HOST / USER / KEY / PATH
+#
+# 注意: 此服务器不涉及国外模型调用
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: '部署动作'
+        required: true
+        default: 'deploy'
+        type: choice
+        options:
+          - deploy
+          - init
+          - health-check
+
+concurrency:
+  group: cn-server-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  # ═══ §1 初始化 (仅首次) ═══
+  init:
+    name: 🔧 广州备用服务器初始化
+    if: github.event.inputs.action == 'init'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 🔐 配置SSH
+        run: |
+          mkdir -p ~/.ssh
+          install -m 600 /dev/stdin ~/.ssh/zy_cn_key <<< "${{ secrets.ZY_CN_SERVER_KEY }}"
+          ssh-keyscan -H ${{ secrets.ZY_CN_SERVER_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: 📦 上传初始化脚本
+        run: |
+          scp -i ~/.ssh/zy_cn_key \
+            server/setup/cn-server-init.sh \
+            ${{ secrets.ZY_CN_SERVER_USER }}@${{ secrets.ZY_CN_SERVER_HOST }}:/tmp/
+
+      - name: 🚀 执行初始化
+        run: |
+          ssh -i ~/.ssh/zy_cn_key \
+            ${{ secrets.ZY_CN_SERVER_USER }}@${{ secrets.ZY_CN_SERVER_HOST }} \
+            'chmod +x /tmp/cn-server-init.sh && sudo /tmp/cn-server-init.sh'
+
+  # ═══ §2 部署应用 ═══
+  deploy:
+    name: 🚀 部署备用大脑代码
+    if: github.event.inputs.action == 'deploy'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 🔐 配置SSH
+        run: |
+          mkdir -p ~/.ssh
+          install -m 600 /dev/stdin ~/.ssh/zy_cn_key <<< "${{ secrets.ZY_CN_SERVER_KEY }}"
+          ssh-keyscan -H ${{ secrets.ZY_CN_SERVER_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: 📦 同步应用代码
+        run: |
+          CN_PATH="${{ secrets.ZY_CN_SERVER_PATH || '/opt/zhuyuan-cn' }}"
+          echo "📦 部署目标: ${CN_PATH}"
+
+          # 确保目标目录存在
+          ssh -i ~/.ssh/zy_cn_key \
+            ${{ secrets.ZY_CN_SERVER_USER }}@${{ secrets.ZY_CN_SERVER_HOST }} \
+            "mkdir -p ${CN_PATH}/app"
+
+          rsync -avz --delete \
+            -e "ssh -i ~/.ssh/zy_cn_key" \
+            server/app/ \
+            ${{ secrets.ZY_CN_SERVER_USER }}@${{ secrets.ZY_CN_SERVER_HOST }}:${CN_PATH}/app/
+
+      - name: 📦 同步大脑文件
+        run: |
+          CN_PATH="${{ secrets.ZY_CN_SERVER_PATH || '/opt/zhuyuan-cn' }}"
+
+          # 同步大脑核心文件到备用服务器
+          rsync -avz \
+            -e "ssh -i ~/.ssh/zy_cn_key" \
+            brain/ \
+            ${{ secrets.ZY_CN_SERVER_USER }}@${{ secrets.ZY_CN_SERVER_HOST }}:${CN_PATH}/brain-backup/
+
+      - name: 📥 安装依赖 & 重启
+        run: |
+          CN_PATH="${{ secrets.ZY_CN_SERVER_PATH || '/opt/zhuyuan-cn' }}"
+          COMMIT_SHA="${{ github.sha }}"
+          ssh -i ~/.ssh/zy_cn_key \
+            ${{ secrets.ZY_CN_SERVER_USER }}@${{ secrets.ZY_CN_SERVER_HOST }} << DEPLOY_CMD
+
+          set -e
+          cd ${CN_PATH}/app
+
+          # 安装依赖
+          npm install --production 2>&1
+
+          # PM2 重启
+          pm2 delete zhuyuan-cn 2>/dev/null || true
+          pm2 start server.js --name zhuyuan-cn -- --port 3800
+          pm2 save
+
+          # 健康检查
+          sleep 3
+          curl -sf http://localhost:3800/api/health && echo "✅ 备用服务器已上线" || echo "❌ 备用服务器启动失败"
+
+          DEPLOY_CMD
+
+  # ═══ §3 健康检查 ═══
+  health-check:
+    name: 💚 广州备用健康检查
+    if: github.event.inputs.action == 'health-check'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 🔐 配置SSH
+        run: |
+          mkdir -p ~/.ssh
+          install -m 600 /dev/stdin ~/.ssh/zy_cn_key <<< "${{ secrets.ZY_CN_SERVER_KEY }}"
+          ssh-keyscan -H ${{ secrets.ZY_CN_SERVER_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: 💚 执行健康检查
+        run: |
+          ssh -i ~/.ssh/zy_cn_key \
+            ${{ secrets.ZY_CN_SERVER_USER }}@${{ secrets.ZY_CN_SERVER_HOST }} << 'HEALTH_CMD'
+
+          echo "═══ 冰朔大陆备用服务器健康报告 ═══"
+          echo ""
+
+          echo "§1 系统状态:"
+          uptime
+          echo ""
+
+          echo "§2 磁盘使用:"
+          df -h /
+          echo ""
+
+          echo "§3 内存使用:"
+          free -m
+          echo ""
+
+          echo "§4 PM2 进程:"
+          pm2 list 2>/dev/null || echo "PM2 未运行"
+          echo ""
+
+          echo "§5 Nginx 状态:"
+          systemctl is-active nginx && echo "Nginx: 运行中" || echo "Nginx: 已停止"
+          echo ""
+
+          echo "§6 应用健康:"
+          curl -sf http://localhost:3800/api/health | jq . 2>/dev/null || echo "应用未响应"
+
+          HEALTH_CMD

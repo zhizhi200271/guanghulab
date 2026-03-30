@@ -277,3 +277,8 @@
 - 新增: 0 个文件
 - 修改: 0 个文件
 - 延续: 等待冰朔指示·P0配额监控系统开发·P0自动部署流水线搭建·SSH密钥配置后服务器初始化·COS宿舍楼开通·P1人格体核心大脑v1.0
+
+**2026-03-30: CS-20260330-1344 — 冰朔第六次对话·密钥配置完成(29个必需密钥)·发现并修复CN服务器缺少部署工作流·创建deploy-to-cn-server.yml·创建cn-server-init.sh·README更新v12.0(部署就绪状态)·system-health升级v12.0·密钥治理状态从awaiting_config更新为configured**
+- 新增: 0 个文件
+- 修改: 0 个文件
+- 延续: 冰朔合并PR后手动触发init·ZY-SVR-002(deploy-to-zhuyuan-server.yml action=init)·ZY-SVR-004(deploy-to-cn-server.yml action=init)·P0配额监控系统·P1核心大脑v1.0
