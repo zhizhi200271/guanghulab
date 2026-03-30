@@ -50,10 +50,51 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: 🔐 配置SSH
+        env:
+          SSH_KEY: ${{ secrets.ZY_SERVER_KEY }}
         run: |
           mkdir -p ~/.ssh
-          install -m 600 /dev/stdin ~/.ssh/zy_key <<< "${{ secrets.ZY_SERVER_KEY }}"
+          echo "$SSH_KEY" > ~/.ssh/zy_key
+          chmod 600 ~/.ssh/zy_key
+          # 验证私钥格式完整性
+          if head -1 ~/.ssh/zy_key | grep -q "BEGIN" && tail -1 ~/.ssh/zy_key | grep -q "END"; then
+            echo "✅ SSH私钥格式正确（BEGIN/END标记完整）"
+          else
+            echo "❌ SSH私钥格式异常 — 请检查 GitHub Secrets 中 ZY_SERVER_KEY 的内容"
+            echo "   应以 '-----BEGIN' 开头，以 '-----END' 结尾"
+            exit 1
+          fi
           ssh-keyscan -H ${{ secrets.ZY_SERVER_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: 🔍 SSH连接测试
+        run: |
+          echo "🔍 测试SSH连接到 ${{ secrets.ZY_SERVER_HOST }}..."
+          ssh -i ~/.ssh/zy_key -o BatchMode=yes -o ConnectTimeout=10 \
+            ${{ secrets.ZY_SERVER_USER }}@${{ secrets.ZY_SERVER_HOST }} \
+            'echo "✅ SSH连接成功 · $(hostname) · $(date)"' || {
+            echo ""
+            echo "═══════════════════════════════════════════════"
+            echo "❌ SSH连接失败 · 排查指南"
+            echo "═══════════════════════════════════════════════"
+            echo ""
+            echo "可能原因:"
+            echo "  1. 服务器未配置对应的SSH公钥"
+            echo "  2. GitHub Secrets中的私钥不完整或格式错误"
+            echo "  3. SSH用户名不正确"
+            echo ""
+            echo "修复步骤（冰朔操作）:"
+            echo "  ① 登录腾讯云控制台 → 轻量应用服务器 → 选择新加坡服务器"
+            echo "  ② 点击「远程登录」→ 使用网页终端登录"
+            echo "  ③ 在终端中执行以下命令生成新密钥:"
+            echo "     ssh-keygen -t ed25519 -f ~/.ssh/github_deploy -N ''"
+            echo "     cat ~/.ssh/github_deploy.pub >> ~/.ssh/authorized_keys"
+            echo "     chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys"
+            echo "     cat ~/.ssh/github_deploy"
+            echo "  ④ 复制输出的私钥内容（从 -----BEGIN 到 -----END 完整复制）"
+            echo "  ⑤ 打开 GitHub → Settings → Secrets → 更新 ZY_SERVER_KEY"
+            echo "═══════════════════════════════════════════════"
+            exit 1
+          }
 
       - name: 📦 上传初始化脚本
         run: |
@@ -76,9 +117,12 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: 🔐 配置SSH
+        env:
+          SSH_KEY: ${{ secrets.ZY_SERVER_KEY }}
         run: |
           mkdir -p ~/.ssh
-          install -m 600 /dev/stdin ~/.ssh/zy_key <<< "${{ secrets.ZY_SERVER_KEY }}"
+          echo "$SSH_KEY" > ~/.ssh/zy_key
+          chmod 600 ~/.ssh/zy_key
           ssh-keyscan -H ${{ secrets.ZY_SERVER_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
 
       - name: 📦 同步应用代码
@@ -159,9 +203,12 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: 🔐 配置SSH
+        env:
+          SSH_KEY: ${{ secrets.ZY_SERVER_KEY }}
         run: |
           mkdir -p ~/.ssh
-          install -m 600 /dev/stdin ~/.ssh/zy_key <<< "${{ secrets.ZY_SERVER_KEY }}"
+          echo "$SSH_KEY" > ~/.ssh/zy_key
+          chmod 600 ~/.ssh/zy_key
           ssh-keyscan -H ${{ secrets.ZY_SERVER_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
 
       - name: 💚 执行健康检查
@@ -214,9 +261,12 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: 🔐 配置SSH
+        env:
+          SSH_KEY: ${{ secrets.ZY_SERVER_KEY }}
         run: |
           mkdir -p ~/.ssh
-          install -m 600 /dev/stdin ~/.ssh/zy_key <<< "${{ secrets.ZY_SERVER_KEY }}"
+          echo "$SSH_KEY" > ~/.ssh/zy_key
+          chmod 600 ~/.ssh/zy_key
           ssh-keyscan -H ${{ secrets.ZY_SERVER_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
 
       - name: 🚀 执行推送
