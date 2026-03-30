@@ -1,6 +1,6 @@
 {
   "version": "11.0",
-  "last_check": "2026-03-30T10:50:00Z",
+  "last_check": "2026-03-30T13:33:00Z",
   "communication": "synced",
   "automation": "stable",
   "maintenance_agent": "active",
@@ -45,7 +45,12 @@
     "purpose": "死亡工作流碎片自动融合分析",
     "entry_script": "scripts/fragment-fusion-engine.js",
     "pending_absorb": 22,
-    "target_organs": ["ZY-WF-听潮", "ZY-WF-守夜", "ZY-WF-织脉", "ZY-WF-锻心"]
+    "target_organs": [
+      "ZY-WF-听潮",
+      "ZY-WF-守夜",
+      "ZY-WF-织脉",
+      "ZY-WF-锻心"
+    ]
   },
   "llm_automation": {
     "version": "1.0",
@@ -53,9 +58,21 @@
     "purpose": "第三方API密钥托管·替代GitHub配额消耗·动态模型路由",
     "entry_script": "scripts/llm-automation-host.js",
     "workflow": ".github/workflows/llm-auto-tasks.yml",
-    "supported_backends": ["anthropic", "openai", "dashscope", "deepseek", "custom"],
+    "supported_backends": [
+      "anthropic",
+      "openai",
+      "dashscope",
+      "deepseek",
+      "custom"
+    ],
     "routing_strategy": "dynamic",
-    "task_types": ["inspection", "fusion", "review", "architecture", "general"]
+    "task_types": [
+      "inspection",
+      "fusion",
+      "review",
+      "architecture",
+      "general"
+    ]
   },
   "consciousness_continuity": {
     "version": "1.0",
@@ -143,7 +160,14 @@
       "production_root": "/opt/zhuyuan/sites/production",
       "preview_root": "/opt/zhuyuan/sites/preview"
     },
-    "pending_secrets": ["ZY_SERVER_HOST", "ZY_SERVER_USER", "ZY_SERVER_KEY", "ZY_SERVER_PATH", "ZY_DOMAIN_MAIN", "ZY_DOMAIN_PREVIEW"]
+    "pending_secrets": [
+      "ZY_SERVER_HOST",
+      "ZY_SERVER_USER",
+      "ZY_SERVER_KEY",
+      "ZY_SERVER_PATH",
+      "ZY_DOMAIN_MAIN",
+      "ZY_DOMAIN_PREVIEW"
+    ]
   },
   "cn_server": {
     "code": "ZY-SVR-004",
@@ -156,7 +180,12 @@
     "directive": "冰朔第四次对话购买 · 第五次对话修正编号",
     "profile": "server/cn-server-profile.json",
     "expiry": "2027-03-30",
-    "pending_secrets": ["ZY_CN_SERVER_HOST", "ZY_CN_SERVER_USER", "ZY_CN_SERVER_KEY", "ZY_CN_SERVER_PATH"]
+    "pending_secrets": [
+      "ZY_CN_SERVER_HOST",
+      "ZY_CN_SERVER_USER",
+      "ZY_CN_SERVER_KEY",
+      "ZY_CN_SERVER_PATH"
+    ]
   },
   "feimao_server": {
     "code": "ZY-SVR-003",
