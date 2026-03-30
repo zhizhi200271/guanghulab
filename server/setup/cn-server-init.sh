@@ -200,13 +200,9 @@ log "  自动安全更新已启用"
 
 # ═══ §9 SSH安全加固 ═══
 log "§9 SSH安全加固..."
-if grep -q "^PasswordAuthentication yes" /etc/ssh/sshd_config 2>/dev/null; then
-  sed -i 's/^PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
-  systemctl restart sshd
-  log "  密码登录已禁用，仅允许密钥认证"
-else
-  log "  SSH配置已安全，跳过"
-fi
+sed -i 's/^#*PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
+systemctl restart sshd
+log "  密码登录已禁用，仅允许密钥认证"
 
 # ═══ §10 完成报告 ═══
 log "§10 生成初始化报告..."

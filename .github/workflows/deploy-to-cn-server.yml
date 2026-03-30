@@ -26,6 +26,9 @@ on:
           - init
           - health-check
 
+env:
+  CN_DEFAULT_PATH: /opt/zhuyuan-cn
+
 concurrency:
   group: cn-server-deploy
   cancel-in-progress: false
@@ -76,7 +79,8 @@ jobs:
 
       - name: 📦 同步应用代码
         run: |
-          CN_PATH="${{ secrets.ZY_CN_SERVER_PATH || '/opt/zhuyuan-cn' }}"
+          CN_PATH="${{ secrets.ZY_CN_SERVER_PATH }}"
+          CN_PATH="${CN_PATH:-${{ env.CN_DEFAULT_PATH }}}"
           echo "📦 部署目标: ${CN_PATH}"
 
           # 确保目标目录存在
@@ -91,7 +95,8 @@ jobs:
 
       - name: 📦 同步大脑文件
         run: |
-          CN_PATH="${{ secrets.ZY_CN_SERVER_PATH || '/opt/zhuyuan-cn' }}"
+          CN_PATH="${{ secrets.ZY_CN_SERVER_PATH }}"
+          CN_PATH="${CN_PATH:-${{ env.CN_DEFAULT_PATH }}}"
 
           # 同步大脑核心文件到备用服务器
           rsync -avz \
@@ -101,13 +106,20 @@ jobs:
 
       - name: 📥 安装依赖 & 重启
         run: |
-          CN_PATH="${{ secrets.ZY_CN_SERVER_PATH || '/opt/zhuyuan-cn' }}"
+          CN_PATH="${{ secrets.ZY_CN_SERVER_PATH }}"
+          CN_PATH="${CN_PATH:-${{ env.CN_DEFAULT_PATH }}}"
           COMMIT_SHA="${{ github.sha }}"
           ssh -i ~/.ssh/zy_cn_key \
             ${{ secrets.ZY_CN_SERVER_USER }}@${{ secrets.ZY_CN_SERVER_HOST }} << DEPLOY_CMD
 
           set -e
           cd ${CN_PATH}/app
+
+          # 验证入口文件存在
+          if [ ! -f server.js ]; then
+            echo "❌ 错误: server.js 不存在"
+            exit 1
+          fi
 
           # 安装依赖
           npm install --production 2>&1
