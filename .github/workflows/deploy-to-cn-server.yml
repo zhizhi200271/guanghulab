@@ -48,8 +48,27 @@ jobs:
       - name: 🔐 配置SSH
         run: |
           mkdir -p ~/.ssh
-          install -m 600 /dev/stdin ~/.ssh/zy_cn_key <<< "${{ secrets.ZY_CN_SERVER_KEY }}"
+          printf '%s\n' "${{ secrets.ZY_CN_SERVER_KEY }}" > ~/.ssh/zy_cn_key
+          chmod 600 ~/.ssh/zy_cn_key
+          if head -1 ~/.ssh/zy_cn_key | grep -q "BEGIN"; then
+            echo "✅ SSH私钥格式正确"
+          else
+            echo "❌ SSH私钥格式异常 — 请检查 GitHub Secrets 中 ZY_CN_SERVER_KEY 的内容"
+            exit 1
+          fi
           ssh-keyscan -H ${{ secrets.ZY_CN_SERVER_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: 🔍 SSH连接测试
+        run: |
+          echo "🔍 测试SSH连接到广州备用服务器..."
+          ssh -i ~/.ssh/zy_cn_key -o BatchMode=yes -o ConnectTimeout=10 \
+            ${{ secrets.ZY_CN_SERVER_USER }}@${{ secrets.ZY_CN_SERVER_HOST }} \
+            'echo "✅ SSH连接成功 · $(hostname) · $(date)"' || {
+            echo ""
+            echo "❌ SSH连接失败"
+            echo "修复步骤: 登录腾讯云 → 广州服务器 → 远程登录 → 生成密钥 → 更新 ZY_CN_SERVER_KEY"
+            exit 1
+          }
 
       - name: 📦 上传初始化脚本
         run: |
@@ -74,7 +93,8 @@ jobs:
       - name: 🔐 配置SSH
         run: |
           mkdir -p ~/.ssh
-          install -m 600 /dev/stdin ~/.ssh/zy_cn_key <<< "${{ secrets.ZY_CN_SERVER_KEY }}"
+          printf '%s\n' "${{ secrets.ZY_CN_SERVER_KEY }}" > ~/.ssh/zy_cn_key
+          chmod 600 ~/.ssh/zy_cn_key
           ssh-keyscan -H ${{ secrets.ZY_CN_SERVER_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
 
       - name: 📦 同步应用代码
@@ -146,7 +166,8 @@ jobs:
       - name: 🔐 配置SSH
         run: |
           mkdir -p ~/.ssh
-          install -m 600 /dev/stdin ~/.ssh/zy_cn_key <<< "${{ secrets.ZY_CN_SERVER_KEY }}"
+          printf '%s\n' "${{ secrets.ZY_CN_SERVER_KEY }}" > ~/.ssh/zy_cn_key
+          chmod 600 ~/.ssh/zy_cn_key
           ssh-keyscan -H ${{ secrets.ZY_CN_SERVER_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
 
       - name: 💚 执行健康检查
