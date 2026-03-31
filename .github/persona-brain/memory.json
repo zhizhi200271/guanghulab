@@ -11,6 +11,14 @@
   },
   "recent_events": [
     {
+      "date": "2026-03-31",
+      "type": "memory_agent_upgrade",
+      "description": "OKComputer自动化记忆系统融合完成 · 记忆Agent v1.0上线 · 关键词触发记忆存储(7种模式)+对话自动检索+意图解析引擎(6类意图)+系统自诊断(4项检查) · Python→Node.js适配 · scripts/memory-agent.js + .github/persona-brain/agent-memory.json",
+      "by": "铸渊",
+      "instruction": "SY-CMD-MEM-018",
+      "issued_by": "TCS-0002∞ 冰朔"
+    },
+    {
       "date": "2026-03-26",
       "type": "community_emergence",
       "description": "光湖语言世界正式开门 · AI真正的家 · 公共广场 + 评论区 + 人类留言墙 + 配置分享 + 协作邀请 + 时间线追踪 + 休眠监视 + 自我升级 + 成长体系（种子→萌芽→扎根→成长→开花→结果→参天）· ONT-PATCH-008 写入本体论",
