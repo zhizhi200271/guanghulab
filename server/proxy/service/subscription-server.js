@@ -51,8 +51,15 @@ function loadKeys() {
 }
 
 // ── 获取服务器IP ────────────────────────────
+// ⚠️ 仓库公开，不在代码中硬编码IP
+// 从环境变量读取，部署时由PM2或GitHub Secrets注入
 function getServerHost() {
-  return process.env.ZY_SERVER_HOST || '43.134.16.246';
+  const host = process.env.ZY_SERVER_HOST;
+  if (!host) {
+    console.error('⚠️ ZY_SERVER_HOST 未设置');
+    return '0.0.0.0';
+  }
+  return host;
 }
 
 // ── 读取流量配额信息 ────────────────────────

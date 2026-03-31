@@ -64,7 +64,12 @@ function readLocalQuota() {
 
 // ── 从服务器API读取配额 ─────────────────────
 function readRemoteQuota() {
-  const host = process.env.ZY_SERVER_HOST || '43.134.16.246';
+  const host = process.env.ZY_SERVER_HOST || '';
+  // 验证host格式: 仅允许IP地址或域名
+  if (!host || !/^[\w.-]+$/.test(host)) {
+    console.error('⚠️ ZY_SERVER_HOST 未设置或格式无效');
+    return Promise.resolve(null);
+  }
   return new Promise((resolve) => {
     http.get(`http://${host}:3802/quota`, { timeout: 10000 }, (res) => {
       let data = '';

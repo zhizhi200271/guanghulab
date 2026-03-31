@@ -33,7 +33,7 @@ function loadConfig() {
   const config = {
     smtp_user: process.env.ZY_SMTP_USER || '',
     smtp_pass: process.env.ZY_SMTP_PASS || '',
-    server_host: process.env.ZY_SERVER_HOST || '43.134.16.246',
+    server_host: process.env.ZY_SERVER_HOST || '',
     sub_token: process.env.ZY_PROXY_SUB_TOKEN || ''
   };
 

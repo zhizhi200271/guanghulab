@@ -22,7 +22,8 @@ const path = require('path');
 const DATA_DIR = process.env.ZY_PROXY_DATA_DIR || '/opt/zhuyuan/proxy/data';
 const QUOTA_FILE = path.join(DATA_DIR, 'quota-status.json');
 const HISTORY_FILE = path.join(DATA_DIR, 'traffic-history.json');
-const XRAY_API = '127.0.0.1:10085';
+const XRAY_API_HOST = '127.0.0.1';
+const XRAY_API_PORT = 10085;
 const CHECK_INTERVAL = 5 * 60 * 1000; // 5分钟
 const MONTHLY_QUOTA = 500 * 1024 * 1024 * 1024; // 500GB in bytes
 
@@ -37,7 +38,7 @@ function ensureDataDir() {
 function queryXrayStats() {
   try {
     const result = execSync(
-      `xray api statsquery --server=${XRAY_API} -pattern ""`,
+      `xray api statsquery --server=${XRAY_API_HOST}:${XRAY_API_PORT} -pattern ""`,
       { encoding: 'utf8', timeout: 10000 }
     );
     return JSON.parse(result);
@@ -100,7 +101,7 @@ function checkMonthlyReset(quota) {
     // 重置Xray统计
     try {
       execSync(
-        `xray api statsquery --server=${XRAY_API} -pattern "" -reset`,
+        `xray api statsquery --server=${XRAY_API_HOST}:${XRAY_API_PORT} -pattern "" -reset`,
         { encoding: 'utf8', timeout: 10000 }
       );
     } catch {

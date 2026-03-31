@@ -93,6 +93,12 @@ configure_xray() {
     # shellcheck source=/dev/null
     source "$KEYS_FILE"
 
+    # 验证关键变量
+    if [ -z "${ZY_PROXY_UUID:-}" ]; then
+        echo "❌ 密钥文件中缺少 ZY_PROXY_UUID"
+        exit 1
+    fi
+
     # 用环境变量替换模板
     CONFIG_TEMPLATE="$REPO_PROXY_DIR/config/xray-config-template.json"
     CONFIG_OUTPUT="/usr/local/etc/xray/config.json"

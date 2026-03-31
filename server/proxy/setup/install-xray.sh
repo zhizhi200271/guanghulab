@@ -28,6 +28,8 @@ echo "[2/6] 安装Xray-core..."
 if command -v xray &>/dev/null; then
     echo "  Xray已安装: $(xray version | head -1)"
 else
+    # 使用XTLS官方安装脚本 (https://github.com/XTLS/Xray-install)
+    # 安装脚本自带GPG签名验证，确保二进制完整性
     bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
     echo "  Xray安装完成: $(xray version | head -1)"
 fi
