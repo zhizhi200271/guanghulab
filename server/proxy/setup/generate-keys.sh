@@ -45,7 +45,7 @@ if command -v xray &>/dev/null; then
     KEYS_STDERR=""
 
     # 捕获stdout和stderr分别处理
-    KEYS_STDERR_FILE=$(mktemp /tmp/xray-keys-stderr.XXXXXX)
+    KEYS_STDERR_FILE=$(mktemp)
     KEYS_OUTPUT=$(xray x25519 2>"$KEYS_STDERR_FILE") || true
     KEYS_STDERR=$(cat "$KEYS_STDERR_FILE" 2>/dev/null) || true
     rm -f "$KEYS_STDERR_FILE"
@@ -92,7 +92,7 @@ fi
 # 方法2: 使用 openssl 生成 X25519 密钥
 if [ -z "$PRIVATE_KEY" ] && command -v openssl &>/dev/null; then
     echo "  尝试 openssl X25519 ..."
-    TMPKEY=$(mktemp /tmp/xray-privkey.XXXXXX)
+    TMPKEY=$(mktemp)
 
     if openssl genpkey -algorithm X25519 -out "$TMPKEY" 2>/dev/null; then
         # 从DER格式提取原始32字节密钥，转为base64url (43字符)
