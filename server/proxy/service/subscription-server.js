@@ -167,14 +167,37 @@ function generateClashYaml(keys, serverHost) {
     client-fingerprint: chrome` : '';
 
   // 代理组中的节点列表
+  // SG直连优先 (更可靠的直连节点排在前面作为默认)
   const proxyList = cnRelayHost
-    ? `      - "🇨🇳 铸渊专线-CN中转"
-      - "🏛️ 铸渊专线-SG直连"`
+    ? `      - "🏛️ 铸渊专线-SG直连"
+      - "🇨🇳 铸渊专线-CN中转"`
     : '      - "🏛️ 铸渊专线-SG直连"';
 
   const proxyListWithDirect = cnRelayHost
-    ? `      - "🇨🇳 铸渊专线-CN中转"
+    ? `      - "🏛️ 铸渊专线-SG直连"
+      - "🇨🇳 铸渊专线-CN中转"
+      - DIRECT`
+    : `      - "🏛️ 铸渊专线-SG直连"
+      - DIRECT`;
+
+  // 自动选择组 (url-test: 自动测试延迟，选择最快可用节点)
+  // CN中转如果不可用(connection refused)会自动被排除
+  const autoGroupBlock = cnRelayHost ? `
+  - name: "♻️ 自动选择"
+    type: url-test
+    proxies:
       - "🏛️ 铸渊专线-SG直连"
+      - "🇨🇳 铸渊专线-CN中转"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 300
+    tolerance: 50
+` : '';
+
+  // 主代理组: 有CN时默认使用自动选择，无CN时直接使用SG
+  const mainGroupProxies = cnRelayHost
+    ? `      - "♻️ 自动选择"
+      - "🏛️ 铸渊专线-SG直连"
+      - "🇨🇳 铸渊专线-CN中转"
       - DIRECT`
     : `      - "🏛️ 铸渊专线-SG直连"
       - DIRECT`;
@@ -211,8 +234,8 @@ proxy-groups:
   - name: "🌐 铸渊专线"
     type: select
     proxies:
-${proxyListWithDirect}
-
+${mainGroupProxies}
+${autoGroupBlock}
   - name: "🤖 AI服务"
     type: select
     proxies:
