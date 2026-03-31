@@ -52,7 +52,6 @@
           "xver": 0,
           "serverNames": [
             "www.microsoft.com",
-            "www.apple.com",
             "www.amazon.com"
           ],
           "privateKey": "{{ZY_PROXY_REALITY_PRIVATE_KEY}}",
