@@ -287,16 +287,36 @@ jobs:
           # 通过SG跳板验证CN中转服务状态
           echo "🔍 通过SG跳板验证CN中转..."
 
-          ssh cn-target "
+          VERIFY_RESULT=$(ssh cn-target "
+            FAIL=0
+
             echo '§1 Nginx状态:'
-            systemctl is-active nginx && echo '  ✅ Nginx运行中' || echo '  ❌ Nginx未运行'
+            if systemctl is-active --quiet nginx; then
+              echo '  ✅ Nginx运行中'
+            else
+              echo '  ❌ Nginx未运行'
+              FAIL=1
+            fi
 
             echo '§2 中转端口 2053:'
-            ss -tlnp | grep -q ':2053 ' && echo '  ✅ 端口2053监听中' || echo '  ⚠️ 端口2053未监听'
+            if ss -tlnp | grep -q ':2053'; then
+              echo '  ✅ 端口2053监听中'
+            else
+              echo '  ❌ 端口2053未监听'
+              FAIL=1
+            fi
 
             echo '§3 HTTP健康检查:'
-            curl -sf http://127.0.0.1/health 2>/dev/null && echo '  ✅ HTTP健康检查正常' || echo '  ⚠️ HTTP健康检查未响应'
-          "
+            if curl -sf http://127.0.0.1/health >/dev/null 2>&1; then
+              echo '  ✅ HTTP健康检查正常'
+            else
+              echo '  ⚠️ HTTP健康检查未响应'
+            fi
+
+            exit \$FAIL
+          " 2>&1) && CN_OK=true || CN_OK=false
+
+          echo "$VERIFY_RESULT"
 
           # 从外部验证CN HTTP (GitHub Actions可以通过HTTP访问中国服务器)
           CN_HOST="${{ secrets.ZY_CN_SERVER_HOST }}"
@@ -305,6 +325,14 @@ jobs:
             echo "✅ CN HTTP外部健康检查: 正常"
           else
             echo "⚠️ CN HTTP外部检查: 状态码 $HTTP_CODE (可能需要等待或在防火墙开放80端口)"
+          fi
+
+          # 关键服务必须运行
+          if [ "$CN_OK" = "false" ]; then
+            echo ""
+            echo "❌ CN中转关键服务未就绪 (Nginx未运行或端口2053未监听)"
+            echo "   请检查CN服务器Nginx状态和腾讯云安全组2053端口"
+            exit 1
           fi
 
       - name: '🧹 清理SSH密钥'

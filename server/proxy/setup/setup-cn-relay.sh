@@ -279,8 +279,21 @@ log_step "§5 测试并应用配置"
 
 NGINX_TEST_OUTPUT=$(nginx -t 2>&1)
 if echo "$NGINX_TEST_OUTPUT" | grep -q "test is successful"; then
-    systemctl reload nginx
-    log_info "✅ Nginx配置测试通过 · 已重载"
+    # reload 只能用于已运行的Nginx，如果Nginx未运行则需要 start
+    if systemctl is-active --quiet nginx; then
+        systemctl reload nginx
+        log_info "✅ Nginx配置测试通过 · 已重载"
+    else
+        systemctl enable nginx 2>/dev/null || true
+        systemctl start nginx
+        if systemctl is-active --quiet nginx; then
+            log_info "✅ Nginx配置测试通过 · 已启动"
+        else
+            log_error "Nginx启动失败"
+            systemctl status nginx --no-pager 2>&1 || true
+            exit 1
+        fi
+    fi
 else
     log_warn "Nginx配置测试未通过，尝试自动修复..."
     echo "$NGINX_TEST_OUTPUT"
@@ -299,8 +312,14 @@ else
 
     # 重新测试
     if nginx -t 2>&1; then
-        systemctl reload nginx
-        log_info "✅ 自动修复成功 · Nginx已重载"
+        if systemctl is-active --quiet nginx; then
+            systemctl reload nginx
+            log_info "✅ 自动修复成功 · Nginx已重载"
+        else
+            systemctl enable nginx 2>/dev/null || true
+            systemctl start nginx
+            log_info "✅ 自动修复成功 · Nginx已启动"
+        fi
     else
         log_error "Nginx配置测试失败 (自动修复未能解决)"
         nginx -t 2>&1
@@ -337,18 +356,39 @@ log_step "§7 健康检查"
 
 sleep 1
 
+# 确认Nginx真正在运行
+if ! systemctl is-active --quiet nginx; then
+    log_warn "Nginx未运行，尝试启动..."
+    systemctl enable nginx 2>/dev/null || true
+    systemctl start nginx
+    sleep 2
+fi
+
+HEALTH_OK=true
+
 # 检查中转端口
-if ss -tlnp | grep -q ":${RELAY_PORT} "; then
+if ss -tlnp | grep -q ":${RELAY_PORT}[[:space:]]"; then
     log_info "✅ 中转端口 ${RELAY_PORT}: 监听中"
 else
-    log_warn "中转端口 ${RELAY_PORT}: 未监听 (可能需要等待)"
+    log_error "中转端口 ${RELAY_PORT}: 未监听"
+    HEALTH_OK=false
 fi
 
 # 检查HTTP
 if curl -sf http://127.0.0.1/health >/dev/null 2>&1; then
     log_info "✅ HTTP健康检查: 正常"
 else
-    log_warn "HTTP健康检查: 未响应"
+    log_warn "HTTP健康检查: 未响应 (可能80端口被占用)"
+fi
+
+# 如果关键端口未监听，报告Nginx状态用于调试
+if [ "$HEALTH_OK" = "false" ]; then
+    log_error "关键服务未就绪 · Nginx诊断信息:"
+    systemctl status nginx --no-pager 2>&1 || true
+    echo ""
+    echo "Nginx错误日志 (最后10行):"
+    tail -10 /var/log/nginx/error.log 2>/dev/null || echo "  (无日志)"
+    exit 1
 fi
 
 echo ""
