@@ -371,7 +371,6 @@ rules:
   - DOMAIN-SUFFIX,vercel.app,💻 开发工具
   - DOMAIN-SUFFIX,netlify.app,💻 开发工具
   - DOMAIN-SUFFIX,pypi.org,💻 开发工具
-  - DOMAIN-SUFFIX,registry.npmmirror.com,DIRECT
 
   # 社交媒体 & 流媒体
   - DOMAIN-SUFFIX,tiktok.com,🌐 铸渊专线
@@ -416,6 +415,7 @@ rules:
 
   # 国内常用直连
   - DOMAIN-SUFFIX,cn,DIRECT
+  - DOMAIN-SUFFIX,npmmirror.com,DIRECT
   - DOMAIN-SUFFIX,taobao.com,DIRECT
   - DOMAIN-SUFFIX,tmall.com,DIRECT
   - DOMAIN-SUFFIX,alipay.com,DIRECT
