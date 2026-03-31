@@ -73,6 +73,45 @@
       "deploy_logs": [],
       "created_at": "2026-03-31T08:56:46.485Z",
       "updated_at": "2026-03-31T08:57:18.428Z"
+    },
+    {
+      "id": "WO-20260331-0927",
+      "title": "Merge pull request #240 from qinfendebingshuo/copilot/fix-domain-name-and-ssl-issues",
+      "status": "failed",
+      "commit_sha": "125746568ad6e5481eedcba24b9c66b9805ee682",
+      "branch": "main",
+      "created_by": "qinfendebingshuo",
+      "responsible": "Agent",
+      "retry_count": 0,
+      "max_retries": 3,
+      "timeline": [
+        {
+          "timestamp": "2026-03-31T09:27:54.827Z",
+          "status": "pending",
+          "actor": "system",
+          "message": "工单创建 · Merge pull request #240 from qinfendebingshuo/copilot/fix-domain-name-and-ssl-issues"
+        },
+        {
+          "timestamp": "2026-03-31T09:27:54.866Z",
+          "status": "deploying",
+          "actor": "Agent",
+          "message": "开始部署到测试站"
+        },
+        {
+          "timestamp": "2026-03-31T09:28:30.067Z",
+          "status": "failed",
+          "actor": "Agent",
+          "message": "部署失败"
+        }
+      ],
+      "deploy_logs": [
+        {
+          "timestamp": "2026-03-31T09:28:30.067Z",
+          "content": "服务器健康检查失败"
+        }
+      ],
+      "created_at": "2026-03-31T09:27:54.827Z",
+      "updated_at": "2026-03-31T09:28:30.067Z"
     }
   ]
 }
