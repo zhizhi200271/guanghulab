@@ -1,0 +1,61 @@
+{
+  "_meta": {
+    "name": "铸渊复盘机制",
+    "version": "1.0",
+    "copyright": "国作登字-2026-A-00037559",
+    "description": "定期复盘 · 错题回顾 · 模板优化 · 数据库全面升级",
+    "created": "2026-03-31T03:34:00Z",
+    "last_updated": "2026-03-31T03:51:15.596Z"
+  },
+  "review_cycle": {
+    "frequency_days": 7,
+    "description": "每7天一次全面复盘 · 类似人类的错题本回顾",
+    "next_review": "2026-04-07T03:51:15.595Z",
+    "review_checklist": [
+      "1. 回顾本周所有经验条目 · 有没有遗漏的教训",
+      "2. 检查错题本 · 高频错误是否有新的预防方法",
+      "3. 检查模板库 · 是否有模板可以优化或合并",
+      "4. 检查是否有跨经验的共性模式 · 可以抽象为新规则",
+      "5. 更新review-schedule.json的复盘记录",
+      "6. 更新statistics中的各项指标"
+    ]
+  },
+  "pre_development_protocol": {
+    "description": "每次开发前的必做步骤 · 回忆搜索",
+    "steps": [
+      "1. 读取任务关键词",
+      "2. 搜索experience-db.json中相关经验",
+      "3. 检查error-patterns.json中的已知陷阱",
+      "4. 搜索templates-index.json中可复用模板",
+      "5. 如果有匹配的高频错误 · 设置额外验证步骤"
+    ]
+  },
+  "post_development_protocol": {
+    "description": "每次开发完成后的必做步骤 · 经验入库",
+    "steps": [
+      "1. 记录本次经验到experience-db.json",
+      "2. 如果遇到新错误模式 · 更新error-patterns.json",
+      "3. 如果产出可复用代码 · 更新templates-index.json",
+      "4. 如果遇到已知错误 · 增加occurrence_count",
+      "5. 更新statistics计数器"
+    ]
+  },
+  "statistics": {
+    "total_reviews_completed": 1,
+    "total_experiences_recorded": 1,
+    "total_error_patterns": 3,
+    "total_templates": 3,
+    "most_common_error_category": "bash-scripting",
+    "most_productive_category": "bash-scripting"
+  },
+  "review_history": [
+    {
+      "date": "2026-03-31T03:51:15.595Z",
+      "experiences_reviewed": 1,
+      "error_patterns_total": 3,
+      "templates_total": 3,
+      "high_frequency_alerts": 0,
+      "notes": "自动复盘完成"
+    }
+  ]
+}

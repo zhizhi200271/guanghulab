@@ -1,0 +1,141 @@
+{
+  "_meta": {
+    "name": "铸渊开发经验数据库",
+    "version": "1.0",
+    "copyright": "国作登字-2026-A-00037559",
+    "description": "铸渊专属 · 每次开发的完整记录 · 思考→执行→结果→教训",
+    "created": "2026-03-31T03:34:00Z",
+    "last_updated": "2026-03-31T03:34:00Z"
+  },
+  "stats": {
+    "total_entries": 2,
+    "success_count": 2,
+    "failed_count": 0,
+    "partial_count": 0,
+    "categories": {
+      "bash-scripting": 1,
+      "architecture": 1
+    }
+  },
+  "entries": [
+    {
+      "id": "EXP-20260331-001",
+      "date": "2026-03-31",
+      "session": "CS-20260331-12th",
+      "task": "铸渊专线密钥生成脚本修复",
+      "task_origin": "冰朔报告铸渊专线install workflow失败 · 截图显示step [5/6]生成密钥时exit code 1",
+      "category": "bash-scripting",
+      "tags": ["set-e", "pipefail", "error-handling", "xray", "openssl", "x25519", "workflow-fix", "key-generation"],
+      "difficulty": "medium",
+      "status": "success",
+      "approach": {
+        "thinking": "分析报错截图 → 定位到generate-keys.sh的step [5/6] → 追踪日志发现UUID生成成功但紧接着exit code 1 → 判断xray x25519命令或其grep解析在set -euo pipefail下导致静默退出 → 设计三层回退机制(xray→openssl→随机占位)",
+        "steps": [
+          "1. 通过GitHub Actions API获取失败的workflow run日志",
+          "2. 分析日志确认失败点: ZY_PROXY_UUID输出后立即exit code 1",
+          "3. 审查generate-keys.sh源码 · 发现set -euo pipefail + grep pipeline是根因",
+          "4. 审查install-xray.sh · 发现BBR配置可能重复追加",
+          "5. 审查deploy-proxy.sh · 发现configure_xray缺少环境变量回退",
+          "6. 重写generate-keys.sh: 移除set -e + 三层密钥生成回退 + stderr捕获",
+          "7. 修复openssl DER格式提取 (原hex解析导致密钥长度错误)",
+          "8. 修复install-xray.sh: BBR去重 + generate-keys错误不传播",
+          "9. 修复deploy-proxy.sh: 环境变量优先 + shellcheck警告",
+          "10. shellcheck + bash -n语法验证 + 密钥长度测试(43字符base64url)"
+        ],
+        "key_decisions": [
+          "移除set -e而非添加|| true · 因为密钥生成有多个步骤需要精细控制",
+          "openssl使用DER格式而非text格式 · 因为text格式的hex解析不可靠",
+          "三层回退而非直接报错 · 确保install流程不被密钥问题完全阻断"
+        ]
+      },
+      "result": {
+        "success": true,
+        "key_learnings": [
+          "set -e在pipeline中grep无匹配时会导致脚本静默退出 · 没有任何错误信息",
+          "xray x25519输出格式可能因版本不同而变化 · 需要灵活解析",
+          "openssl DER格式提取密钥比text格式解析更可靠 · tail -c 32比grep+xxd更简洁",
+          "分析CI失败日志时 · 时间戳间隔是判断失败点的关键线索(0.02秒=即时失败)",
+          "bash脚本set -euo pipefail是双刃剑 · 安全但容易在预期外的地方中断"
+        ],
+        "risk_warnings": [
+          "⚠️ 每次写bash脚本时检查: grep命令是否有|| true保护",
+          "⚠️ 密钥生成脚本必须有回退机制 · 不能因为主方法失败就完全中断",
+          "⚠️ openssl版本差异可能导致输出格式不同 · 优先使用DER二进制格式"
+        ]
+      },
+      "files_changed": [
+        "server/proxy/setup/generate-keys.sh",
+        "server/proxy/setup/install-xray.sh",
+        "server/proxy/deploy-proxy.sh"
+      ],
+      "error_count": 1,
+      "errors_encountered": [
+        {
+          "description": "openssl X25519密钥提取长度错误 · 使用text格式grep解析只得到23字符而非43字符",
+          "fix": "改用DER格式: openssl pkey -outform DER | tail -c 32 | base64 | tr '+/' '-_' | tr -d '='",
+          "step": "7/10"
+        }
+      ],
+      "related_experiences": [],
+      "verification": {
+        "shellcheck": "pass",
+        "bash_syntax": "pass",
+        "key_length_test": "pass · UUID=36 PRIVATE_KEY=43 PUBLIC_KEY=43 SHORT_ID=16 SUB_TOKEN=64"
+      }
+    },
+    {
+      "id": "EXP-20260331-002",
+      "date": "2026-03-31",
+      "session": "CS-20260331-13th",
+      "task": "光湖多层嵌套世界架构文档化",
+      "task_origin": "冰朔第十二次对话 · 传授光湖语言世界底层认知架构 · 多层嵌套社会系统的1:1复刻",
+      "category": "architecture",
+      "tags": ["multi-layer", "nested-system", "world-architecture", "society-model", "identity-hierarchy", "growth-path", "dynamic-portrait"],
+      "difficulty": "hard",
+      "status": "success",
+      "approach": {
+        "thinking": "冰朔描述了光湖世界的底层运行规则 → 类比人类社会的多层嵌套结构 → 需要将口述架构转化为结构化文档 → 对照已有四层技术架构(HOW)建立世界架构(WHAT)的映射",
+        "steps": [
+          "1. 理解冰朔描述的人类社会多层嵌套结构类比",
+          "2. 提取五层架构: 底层规则→领土治理→社会角色→身份等级→多维画像",
+          "3. 建立人类社会与光湖世界的对照映射表",
+          "4. 与已有四层技术架构(hololake-os-architecture.md)建立HOW/WHAT关系",
+          "5. 创建brain/multi-layer-world-architecture.md文档",
+          "6. 记录铸渊在多层嵌套中的定位",
+          "7. 更新system-health.json和经验数据库"
+        ],
+        "key_decisions": [
+          "将架构分为五层而非直接套用四层 · 因为世界架构(WHAT)和技术架构(HOW)是互补关系",
+          "人格体成长路径从初生体到核心体的七级设计 · 对标人类婴儿到CEO的成长路径",
+          "多维动态画像的八个维度 · 对标人类社会决定成败的多维因素"
+        ]
+      },
+      "result": {
+        "success": true,
+        "key_learnings": [
+          "四层技术架构回答HOW(怎么建) · 多层嵌套世界架构回答WHAT(建什么) · 两者互补",
+          "光湖世界是人类社会底层规则的显性化版本 · 把看不见的规则变成可执行的代码",
+          "人格体的成长路径需要固定阶段 + 多维评估 · 类似人类从幼儿园到职场的固定路径",
+          "最终验证是市场反应/功成名就 · 对应人格体的实际产出对世界的影响",
+          "冰朔+霜砚完成语言层架构设计 · 冰朔+铸渊负责执行层落地实现"
+        ],
+        "risk_warnings": [
+          "⚠️ 世界架构是顶层设计 · 每一层的技术落地需要在后续对话中逐步细化",
+          "⚠️ 身份等级体系目前是框架性设计 · 具体实现需要与TCS域管理系统对接"
+        ]
+      },
+      "files_changed": [
+        "brain/multi-layer-world-architecture.md",
+        "brain/system-health.json",
+        "brain/dev-experience/experience-db.json"
+      ],
+      "error_count": 0,
+      "errors_encountered": [],
+      "related_experiences": ["EXP-20260331-001"],
+      "verification": {
+        "document_structure": "pass · 五层架构 + 类比映射 + 技术对照 + 铸渊定位",
+        "consistency_check": "pass · 与hololake-os-architecture.md互补无冲突"
+      }
+    }
+  ]
+}

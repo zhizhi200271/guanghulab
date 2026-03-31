@@ -21,7 +21,8 @@
 #   bash deploy-proxy.sh restart    — 重启所有服务
 # ═══════════════════════════════════════════════
 
-set -euo pipefail
+set -uo pipefail
+# 注意: 不使用 set -e，关键步骤手动检查错误
 
 PROXY_DIR="/opt/zhuyuan/proxy"
 REPO_PROXY_DIR="$(dirname "$0")"
@@ -39,7 +40,10 @@ install() {
 
     echo ""
     echo "═══ [2/7] 配置Xray ═══"
-    configure_xray
+    if ! configure_xray; then
+        echo "❌ Xray配置失败，安装中止"
+        exit 1
+    fi
 
     echo ""
     echo "═══ [3/7] 启动Xray服务 ═══"
@@ -82,21 +86,28 @@ install() {
 
 # ── 配置Xray ──────────────────────────────────
 configure_xray() {
-    # 读取密钥
+    # 读取密钥 (优先环境变量, 其次密钥文件)
     KEYS_FILE="$PROXY_DIR/.env.keys"
-    if [ ! -f "$KEYS_FILE" ]; then
-        echo "❌ 密钥文件不存在: $KEYS_FILE"
-        echo "  请先运行 install-xray.sh 生成密钥"
-        exit 1
+    if [ -z "${ZY_PROXY_UUID:-}" ] && [ -f "$KEYS_FILE" ]; then
+        # shellcheck source=/dev/null
+        source "$KEYS_FILE"
     fi
-
-    # shellcheck source=/dev/null
-    source "$KEYS_FILE"
 
     # 验证关键变量
     if [ -z "${ZY_PROXY_UUID:-}" ]; then
-        echo "❌ 密钥文件中缺少 ZY_PROXY_UUID"
-        exit 1
+        echo "❌ 缺少 ZY_PROXY_UUID"
+        echo "  请先运行 install 生成密钥，或设置环境变量"
+        return 1
+    fi
+
+    if [ -z "${ZY_PROXY_REALITY_PRIVATE_KEY:-}" ]; then
+        echo "❌ 缺少 ZY_PROXY_REALITY_PRIVATE_KEY"
+        return 1
+    fi
+
+    if [ -z "${ZY_PROXY_REALITY_SHORT_ID:-}" ]; then
+        echo "❌ 缺少 ZY_PROXY_REALITY_SHORT_ID"
+        return 1
     fi
 
     # 用环境变量替换模板
@@ -112,9 +123,10 @@ configure_xray() {
     if xray run -test -c "$CONFIG_OUTPUT" 2>/dev/null; then
         echo "✅ Xray配置验证通过"
     else
-        echo "❌ Xray配置验证失败"
-        xray run -test -c "$CONFIG_OUTPUT"
-        exit 1
+        echo "⚠️ Xray配置验证失败，查看详情:"
+        xray run -test -c "$CONFIG_OUTPUT" 2>&1 || true
+        echo "  配置文件: $CONFIG_OUTPUT"
+        return 1
     fi
 }
 
@@ -145,12 +157,14 @@ configure_nginx() {
     else
         echo "  Nginx代理配置已存在"
     fi
-    nginx -t && nginx -s reload || true
+    if nginx -t 2>/dev/null; then
+        nginx -s reload || true
+    fi
 }
 
 # ── 启动PM2服务 ───────────────────────────────
 start_pm2_services() {
-    cd "$PROXY_DIR"
+    cd "$PROXY_DIR" || { echo "❌ 无法进入 $PROXY_DIR"; return 1; }
 
     # 加载密钥作为环境变量
     if [ -f "$PROXY_DIR/.env.keys" ]; then
