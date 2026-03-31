@@ -482,7 +482,7 @@ class ZhuyuanMemoryAgent {
       '【用户记忆档案】',
       `用户ID: ${userId}`,
       `共有 ${stats.total} 条记忆记录`,
-      '=' .repeat(40),
+      '='.repeat(40),
     ];
 
     memories.forEach((m, i) => {

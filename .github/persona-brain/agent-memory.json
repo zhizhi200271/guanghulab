@@ -38,15 +38,9 @@
       },
       {
         "id": 4,
-        "content": "铸渊已经完成OKComputer系统融合升级",
-        "category": "general",
-        "created_at": "2026-03-31T13:16:56.452Z"
-      },
-      {
-        "id": 5,
-        "content": "用户身份: 冰朔",
-        "category": "general",
-        "created_at": "2026-03-31T13:19:01.936Z"
+        "content": "铸渊已经完成OKComputer系统融合升级 · 记忆Agent v1.0上线",
+        "category": "system",
+        "created_at": "2026-03-31T13:16:56Z"
       }
     ]
   }
