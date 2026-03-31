@@ -299,10 +299,10 @@ update() {
                 echo "  修复: $conf (将443改为127.0.0.1:8443)"
                 sed -i 's/listen 443 ssl/listen 127.0.0.1:8443 ssl/g' "$conf"
                 # 同时修复sites-available中的源文件
-                local basename
-                basename=$(basename "$conf")
-                if [ -f "/etc/nginx/sites-available/$basename" ]; then
-                    sed -i 's/listen 443 ssl/listen 127.0.0.1:8443 ssl/g' "/etc/nginx/sites-available/$basename"
+                local conf_basename
+                conf_basename=$(basename "$conf")
+                if [ -f "/etc/nginx/sites-available/$conf_basename" ]; then
+                    sed -i 's/listen 443 ssl/listen 127.0.0.1:8443 ssl/g' "/etc/nginx/sites-available/$conf_basename"
                 fi
             fi
         done
