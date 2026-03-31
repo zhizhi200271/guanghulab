@@ -37,6 +37,75 @@ log_warn()  { echo -e "${YELLOW}[CN中转]${NC} ⚠️  $1"; }
 log_error() { echo -e "${RED}[CN中转]${NC} ❌ $1"; }
 log_step()  { echo -e "${BLUE}[CN中转]${NC} 📌 $1"; }
 
+# 查找ngx_stream_module.so文件路径
+find_stream_module_so() {
+    for mod_path in \
+        /usr/lib/nginx/modules/ngx_stream_module.so \
+        /usr/lib64/nginx/modules/ngx_stream_module.so \
+        /etc/nginx/modules/ngx_stream_module.so \
+        /usr/share/nginx/modules/ngx_stream_module.so; do
+        if [ -f "$mod_path" ]; then
+            echo "$mod_path"
+            return
+        fi
+    done
+    # 使用find作为最后回退手段 (限制深度避免扫描过慢)
+    find /usr/lib /usr/lib64 /usr/share /etc/nginx -maxdepth 3 -name "ngx_stream_module.so" -print -quit 2>/dev/null
+}
+
+# 尝试从modules-available启用stream模块
+enable_stream_from_modules_available() {
+    for avail in /usr/share/nginx/modules-available/mod-stream.conf \
+                 /etc/nginx/modules-available/mod-stream.conf; do
+        if [ -f "$avail" ]; then
+            ln -sf "$avail" /etc/nginx/modules-enabled/
+            log_info "✅ 已从modules-available启用stream模块"
+            return 0
+        fi
+    done
+    return 1
+}
+
+# 确保stream模块已加载到nginx配置中
+ensure_stream_module_loaded() {
+    local nginx_conf="$1"
+
+    # 检查modules-enabled是否已自动加载
+    if [ -d /etc/nginx/modules-enabled ]; then
+        if grep -q "ngx_stream_module" /etc/nginx/modules-enabled/* 2>/dev/null; then
+            log_info "✅ stream模块已通过modules-enabled自动加载"
+            return 0
+        fi
+    fi
+
+    # 检查nginx.conf是否已包含load_module指令
+    if grep -q "ngx_stream_module" "$nginx_conf" 2>/dev/null; then
+        log_info "✅ stream动态模块已在nginx.conf中加载"
+        return 0
+    fi
+
+    # 查找并加载.so文件
+    local module_path
+    module_path=$(find_stream_module_so)
+
+    if [ -n "$module_path" ]; then
+        log_info "加载stream动态模块: $module_path"
+        sed -i "1i load_module $module_path;" "$nginx_conf"
+        log_info "✅ stream动态模块已加载"
+        return 0
+    fi
+
+    # 尝试从modules-available启用
+    log_warn "未找到ngx_stream_module.so文件"
+    log_warn "尝试启用modules-available中的stream配置..."
+    if enable_stream_from_modules_available; then
+        return 0
+    fi
+
+    log_warn "stream模块可能为静态编译，继续配置..."
+    return 1
+}
+
 # ── 参数 ──────────────────────────────────────
 SG_HOST="${ZY_SG_SERVER_HOST:-${1:-}}"
 RELAY_PORT="${ZY_CN_RELAY_PORT:-2053}"
@@ -96,63 +165,7 @@ fi
 #   2. 手动load_module: 在nginx.conf顶部显式加载.so文件
 NGINX_MAIN="/etc/nginx/nginx.conf"
 
-# 检查modules-enabled是否已自动加载stream模块
-# (libnginx-mod-stream安装时通常会在modules-enabled/创建符号链接)
-STREAM_ALREADY_LOADED=false
-if [ -d /etc/nginx/modules-enabled ]; then
-    if grep -rq "ngx_stream_module" /etc/nginx/modules-enabled/ 2>/dev/null; then
-        log_info "✅ stream模块已通过modules-enabled自动加载"
-        STREAM_ALREADY_LOADED=true
-    fi
-fi
-
-# 如果modules-enabled没有自动加载，手动查找并加载.so文件
-if [ "$STREAM_ALREADY_LOADED" = false ]; then
-    # 检查nginx.conf是否已包含load_module指令
-    if grep -q "ngx_stream_module" "$NGINX_MAIN" 2>/dev/null; then
-        log_info "✅ stream动态模块已在nginx.conf中加载"
-        STREAM_ALREADY_LOADED=true
-    fi
-fi
-
-if [ "$STREAM_ALREADY_LOADED" = false ]; then
-    STREAM_MODULE_PATH=""
-    for mod_path in \
-        /usr/lib/nginx/modules/ngx_stream_module.so \
-        /usr/lib64/nginx/modules/ngx_stream_module.so \
-        /etc/nginx/modules/ngx_stream_module.so \
-        /usr/share/nginx/modules/ngx_stream_module.so; do
-        if [ -f "$mod_path" ]; then
-            STREAM_MODULE_PATH="$mod_path"
-            break
-        fi
-    done
-
-    # 使用find作为最后回退手段
-    if [ -z "$STREAM_MODULE_PATH" ]; then
-        STREAM_MODULE_PATH=$(find /usr/lib /usr/lib64 /usr/share /etc/nginx -name "ngx_stream_module.so" 2>/dev/null | head -1)
-    fi
-
-    if [ -n "$STREAM_MODULE_PATH" ]; then
-        log_info "加载stream动态模块: $STREAM_MODULE_PATH"
-        # load_module必须在nginx.conf最顶部(events块之前)
-        sed -i "1i load_module $STREAM_MODULE_PATH;" "$NGINX_MAIN"
-        log_info "✅ stream动态模块已加载"
-    else
-        log_warn "未找到ngx_stream_module.so文件"
-        log_warn "尝试启用modules-available中的stream配置..."
-        # 某些系统在modules-available但未启用
-        if [ -f /usr/share/nginx/modules-available/mod-stream.conf ]; then
-            ln -sf /usr/share/nginx/modules-available/mod-stream.conf /etc/nginx/modules-enabled/
-            log_info "✅ 已从modules-available启用stream模块"
-        elif [ -f /etc/nginx/modules-available/mod-stream.conf ]; then
-            ln -sf /etc/nginx/modules-available/mod-stream.conf /etc/nginx/modules-enabled/
-            log_info "✅ 已从modules-available启用stream模块"
-        else
-            log_warn "stream模块可能为静态编译，继续配置..."
-        fi
-    fi
-fi
+ensure_stream_module_loaded "$NGINX_MAIN"
 
 # ── §2 配置Nginx stream中转 ──────────────────
 log_step "§2 配置TCP中转 (端口$RELAY_PORT → $SG_HOST:443)"
@@ -280,27 +293,8 @@ else
         apt-get update -qq
         apt-get install -y -qq libnginx-mod-stream 2>/dev/null || true
 
-        # 再次搜索.so文件
-        RETRY_MODULE_PATH=$(find /usr/lib /usr/lib64 /usr/share /etc/nginx -name "ngx_stream_module.so" 2>/dev/null | head -1)
-
-        if [ -n "$RETRY_MODULE_PATH" ]; then
-            if ! grep -q "ngx_stream_module" "$NGINX_MAIN" 2>/dev/null; then
-                sed -i "1i load_module $RETRY_MODULE_PATH;" "$NGINX_MAIN"
-                log_info "已添加load_module: $RETRY_MODULE_PATH"
-            fi
-        fi
-
-        # 检查modules-enabled
-        if [ -d /etc/nginx/modules-enabled ]; then
-            for avail in /usr/share/nginx/modules-available/mod-stream.conf \
-                         /etc/nginx/modules-available/mod-stream.conf; do
-                if [ -f "$avail" ]; then
-                    ln -sf "$avail" /etc/nginx/modules-enabled/
-                    log_info "已启用: $avail"
-                    break
-                fi
-            done
-        fi
+        # 使用共享函数确保模块已加载
+        ensure_stream_module_loaded "$NGINX_MAIN"
     fi
 
     # 重新测试
