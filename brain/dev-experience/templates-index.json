@@ -1,0 +1,56 @@
+{
+  "_meta": {
+    "name": "铸渊代码模板库",
+    "version": "1.0",
+    "copyright": "国作登字-2026-A-00037559",
+    "description": "成功的代码模式 · 可复用 · 每次开发前搜索",
+    "created": "2026-03-31T03:34:00Z",
+    "last_updated": "2026-03-31T03:34:00Z"
+  },
+  "total_templates": 3,
+  "categories": {
+    "bash-scripting": 2,
+    "cryptography": 1
+  },
+  "templates": [
+    {
+      "id": "TPL-001",
+      "name": "健壮的bash脚本错误处理模式",
+      "category": "bash-scripting",
+      "description": "不使用set -e，改为手动错误处理。关键命令逐个检查退出码，非关键命令用|| true保护。",
+      "pattern": "set -uo pipefail (无-e) + 手动if/else + || true保护",
+      "source_file": "server/proxy/setup/generate-keys.sh",
+      "tags": ["error-handling", "set-e", "pipefail", "robustness"],
+      "code_snippet": "#!/bin/bash\nset -uo pipefail\n# 注意: 不使用 set -e，手动处理错误\n\n# 关键步骤: 手动检查\nif ! critical_command; then\n    echo \"❌ 关键步骤失败\"\n    exit 1\nfi\n\n# 非关键步骤: || true保护\noptional_command || true\n\n# Pipeline保护: grep可能无匹配\nRESULT=$(echo \"$DATA\" | grep \"pattern\" | awk '{print $NF}') || true",
+      "when_to_use": "当bash脚本中有多个步骤且某些步骤可能失败但不应中断整体流程时",
+      "created_from": "EXP-20260331-001",
+      "reuse_count": 0
+    },
+    {
+      "id": "TPL-002",
+      "name": "三层回退密钥/资源生成模式",
+      "category": "bash-scripting",
+      "description": "主方法 → 备用方法 → 占位符兜底。确保生成过程不会完全失败。",
+      "pattern": "Method1(专用工具) → Method2(通用工具) → Method3(随机占位符)",
+      "source_file": "server/proxy/setup/generate-keys.sh",
+      "tags": ["fallback", "key-generation", "resilience"],
+      "code_snippet": "RESULT=\"\"\n\n# 方法1: 专用工具\nif command -v tool &>/dev/null; then\n    RESULT=$(tool generate 2>/dev/null) || true\nfi\n\n# 方法2: 通用工具回退\nif [ -z \"$RESULT\" ] && command -v openssl &>/dev/null; then\n    RESULT=$(openssl rand -base64 32) || true\nfi\n\n# 方法3: 最终兜底\nif [ -z \"$RESULT\" ]; then\n    RESULT=\"PLACEHOLDER\"\n    echo \"⚠️ 使用占位符，请手动重新生成\"\nfi",
+      "when_to_use": "当资源生成依赖外部工具且工具可能不可用或行为可能变化时",
+      "created_from": "EXP-20260331-001",
+      "reuse_count": 0
+    },
+    {
+      "id": "TPL-003",
+      "name": "OpenSSL X25519密钥提取 (DER格式)",
+      "category": "cryptography",
+      "description": "使用DER二进制格式提取X25519密钥，转为base64url编码。比text格式解析更可靠。",
+      "pattern": "openssl genpkey → DER export → tail -c 32 → base64url",
+      "source_file": "server/proxy/setup/generate-keys.sh",
+      "tags": ["openssl", "x25519", "base64url", "DER"],
+      "code_snippet": "TMPKEY=$(mktemp)\nopenssl genpkey -algorithm X25519 -out \"$TMPKEY\" 2>/dev/null\n\n# 私钥: 32字节 → 43字符base64url\nPRIVATE_KEY=$(openssl pkey -in \"$TMPKEY\" -outform DER 2>/dev/null \\\n    | tail -c 32 | base64 | tr '+/' '-_' | tr -d '=')\n\n# 公钥: 32字节 → 43字符base64url\nPUBLIC_KEY=$(openssl pkey -in \"$TMPKEY\" -pubout -outform DER 2>/dev/null \\\n    | tail -c 32 | base64 | tr '+/' '-_' | tr -d '=')\n\nrm -f \"$TMPKEY\"",
+      "when_to_use": "需要生成X25519密钥对且xray不可用时",
+      "created_from": "EXP-20260331-001",
+      "reuse_count": 0
+    }
+  ]
+}

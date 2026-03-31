@@ -1,0 +1,95 @@
+{
+  "_meta": {
+    "name": "铸渊错题本",
+    "version": "1.0",
+    "copyright": "国作登字-2026-A-00037559",
+    "description": "记录反复出错的模式 · 自动预警 · 每次开发前必查",
+    "created": "2026-03-31T03:34:00Z",
+    "last_updated": "2026-03-31T03:34:00Z"
+  },
+  "alert_rules": {
+    "high_frequency_threshold": 3,
+    "high_frequency_message": "⚠️ 此错误已出现{count}次 · 每一步都要多验证",
+    "recent_threshold_days": 7,
+    "recent_message": "🔴 最近7天内刚犯过此错误 · 务必警惕"
+  },
+  "total_patterns": 3,
+  "patterns": [
+    {
+      "id": "ERR-001",
+      "pattern": "set -e + grep无匹配 = 静默退出",
+      "category": "bash-scripting",
+      "severity": "high",
+      "occurrence_count": 1,
+      "first_seen": "2026-03-31",
+      "last_seen": "2026-03-31",
+      "description": "在bash脚本中使用set -euo pipefail时，如果grep命令没有匹配到任何行，grep返回exit code 1。配合pipefail，整个pipeline的退出码变为1，导致set -e触发脚本静默退出——没有任何错误信息输出。",
+      "trigger_conditions": [
+        "脚本使用 set -e 或 set -euo pipefail",
+        "pipeline中使用grep但目标字符串可能不存在",
+        "awk/sed后面跟的grep可能无匹配"
+      ],
+      "prevention": [
+        "在grep命令后添加 || true",
+        "改用手动错误处理替代set -e",
+        "使用grep -c统计匹配数而非直接grep",
+        "将grep结果先存变量再判断是否为空"
+      ],
+      "code_example": {
+        "wrong": "RESULT=$(echo \"$DATA\" | grep \"pattern\" | awk '{print $3}')",
+        "right": "RESULT=$(echo \"$DATA\" | grep \"pattern\" | awk '{print $3}') || true"
+      },
+      "related_experiences": ["EXP-20260331-001"],
+      "risk_level": "⚠️ 高频陷阱 · 每次写bash脚本时检查"
+    },
+    {
+      "id": "ERR-002",
+      "pattern": "openssl text格式解析密钥 · 字符串长度不可靠",
+      "category": "cryptography",
+      "severity": "medium",
+      "occurrence_count": 1,
+      "first_seen": "2026-03-31",
+      "last_seen": "2026-03-31",
+      "description": "使用openssl pkey -text -noout输出密钥的十六进制文本，然后用grep+tr解析。不同openssl版本的输出格式可能不同（行数、缩进、冒号间距），导致解析结果长度不一致。",
+      "trigger_conditions": [
+        "使用openssl pkey -text -noout提取密钥",
+        "用grep -A和tail解析十六进制行",
+        "依赖固定行数(如tail -4)来截取数据"
+      ],
+      "prevention": [
+        "优先使用DER二进制格式: openssl pkey -outform DER | tail -c <字节数>",
+        "用base64编码后检查长度是否符合预期",
+        "避免依赖text格式的行数和缩进"
+      ],
+      "code_example": {
+        "wrong": "openssl pkey -text -noout | grep -A5 priv: | tail -4 | tr -d ' :\\n' | head -c 43",
+        "right": "openssl pkey -outform DER | tail -c 32 | base64 | tr '+/' '-_' | tr -d '='"
+      },
+      "related_experiences": ["EXP-20260331-001"],
+      "risk_level": "⚠️ 中频陷阱 · 处理密钥时优先用DER格式"
+    },
+    {
+      "id": "ERR-003",
+      "pattern": "命令行工具版本更新导致输出格式变化",
+      "category": "compatibility",
+      "severity": "medium",
+      "occurrence_count": 1,
+      "first_seen": "2026-03-31",
+      "last_seen": "2026-03-31",
+      "description": "CLI工具(如xray、openssl、node等)的新版本可能改变命令的输出格式、子命令名称或退出码行为。依赖特定输出格式的脚本在工具更新后可能静默失败。",
+      "trigger_conditions": [
+        "脚本依赖CLI工具的stdout输出格式(用grep/awk/sed解析)",
+        "CLI工具版本可能自动更新",
+        "安装脚本使用latest版本而非固定版本"
+      ],
+      "prevention": [
+        "解析输出时使用灵活匹配(如grep -i大小写不敏感)",
+        "提供多种解析方式作为回退",
+        "捕获stdout和stderr分别处理",
+        "增加解析结果的验证(检查长度、格式)"
+      ],
+      "related_experiences": ["EXP-20260331-001"],
+      "risk_level": "⚠️ 中频陷阱 · 解析CLI输出时要灵活"
+    }
+  ]
+}

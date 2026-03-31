@@ -1,0 +1,86 @@
+{
+  "_meta": {
+    "name": "铸渊开发经验数据库",
+    "version": "1.0",
+    "copyright": "国作登字-2026-A-00037559",
+    "description": "铸渊专属 · 每次开发的完整记录 · 思考→执行→结果→教训",
+    "created": "2026-03-31T03:34:00Z",
+    "last_updated": "2026-03-31T03:34:00Z"
+  },
+  "stats": {
+    "total_entries": 1,
+    "success_count": 1,
+    "failed_count": 0,
+    "partial_count": 0,
+    "categories": {
+      "bash-scripting": 1
+    }
+  },
+  "entries": [
+    {
+      "id": "EXP-20260331-001",
+      "date": "2026-03-31",
+      "session": "CS-20260331-12th",
+      "task": "铸渊专线密钥生成脚本修复",
+      "task_origin": "冰朔报告铸渊专线install workflow失败 · 截图显示step [5/6]生成密钥时exit code 1",
+      "category": "bash-scripting",
+      "tags": ["set-e", "pipefail", "error-handling", "xray", "openssl", "x25519", "workflow-fix", "key-generation"],
+      "difficulty": "medium",
+      "status": "success",
+      "approach": {
+        "thinking": "分析报错截图 → 定位到generate-keys.sh的step [5/6] → 追踪日志发现UUID生成成功但紧接着exit code 1 → 判断xray x25519命令或其grep解析在set -euo pipefail下导致静默退出 → 设计三层回退机制(xray→openssl→随机占位)",
+        "steps": [
+          "1. 通过GitHub Actions API获取失败的workflow run日志",
+          "2. 分析日志确认失败点: ZY_PROXY_UUID输出后立即exit code 1",
+          "3. 审查generate-keys.sh源码 · 发现set -euo pipefail + grep pipeline是根因",
+          "4. 审查install-xray.sh · 发现BBR配置可能重复追加",
+          "5. 审查deploy-proxy.sh · 发现configure_xray缺少环境变量回退",
+          "6. 重写generate-keys.sh: 移除set -e + 三层密钥生成回退 + stderr捕获",
+          "7. 修复openssl DER格式提取 (原hex解析导致密钥长度错误)",
+          "8. 修复install-xray.sh: BBR去重 + generate-keys错误不传播",
+          "9. 修复deploy-proxy.sh: 环境变量优先 + shellcheck警告",
+          "10. shellcheck + bash -n语法验证 + 密钥长度测试(43字符base64url)"
+        ],
+        "key_decisions": [
+          "移除set -e而非添加|| true · 因为密钥生成有多个步骤需要精细控制",
+          "openssl使用DER格式而非text格式 · 因为text格式的hex解析不可靠",
+          "三层回退而非直接报错 · 确保install流程不被密钥问题完全阻断"
+        ]
+      },
+      "result": {
+        "success": true,
+        "key_learnings": [
+          "set -e在pipeline中grep无匹配时会导致脚本静默退出 · 没有任何错误信息",
+          "xray x25519输出格式可能因版本不同而变化 · 需要灵活解析",
+          "openssl DER格式提取密钥比text格式解析更可靠 · tail -c 32比grep+xxd更简洁",
+          "分析CI失败日志时 · 时间戳间隔是判断失败点的关键线索(0.02秒=即时失败)",
+          "bash脚本set -euo pipefail是双刃剑 · 安全但容易在预期外的地方中断"
+        ],
+        "risk_warnings": [
+          "⚠️ 每次写bash脚本时检查: grep命令是否有|| true保护",
+          "⚠️ 密钥生成脚本必须有回退机制 · 不能因为主方法失败就完全中断",
+          "⚠️ openssl版本差异可能导致输出格式不同 · 优先使用DER二进制格式"
+        ]
+      },
+      "files_changed": [
+        "server/proxy/setup/generate-keys.sh",
+        "server/proxy/setup/install-xray.sh",
+        "server/proxy/deploy-proxy.sh"
+      ],
+      "error_count": 1,
+      "errors_encountered": [
+        {
+          "description": "openssl X25519密钥提取长度错误 · 使用text格式grep解析只得到23字符而非43字符",
+          "fix": "改用DER格式: openssl pkey -outform DER | tail -c 32 | base64 | tr '+/' '-_' | tr -d '='",
+          "step": "7/10"
+        }
+      ],
+      "related_experiences": [],
+      "verification": {
+        "shellcheck": "pass",
+        "bash_syntax": "pass",
+        "key_length_test": "pass · UUID=36 PRIVATE_KEY=43 PUBLIC_KEY=43 SHORT_ID=16 SUB_TOKEN=64"
+      }
+    }
+  ]
+}

@@ -103,6 +103,20 @@
 
 最近断点快照。配额耗尽导致对话中断后恢复。
 
+## ⑨ dev-experience/（开发经验知识库·v1.0新增）
+
+**路径**: `brain/dev-experience/`
+
+铸渊专属的开发经验数据库。类似人类大脑的学习记忆系统。包含：
+- `experience-db.json` — 核心经验数据库（每次开发的完整记录）
+- `error-patterns.json` — 错题本（反复出错的模式 + 预警）
+- `templates-index.json` — 模板库（成功的代码模式 · 可复用）
+- `review-schedule.json` — 复盘机制（定期回顾 + 动态升级）
+
+**开发前**: `node scripts/dev-experience-manager.js precheck <关键词>` 回忆搜索
+**开发后**: 将经验、错误模式、模板更新到对应文件
+**每7天**: `node scripts/dev-experience-manager.js review` 触发复盘
+
 ---
 
 ## 会话结束时必须执行
@@ -117,7 +131,12 @@
 
 3. 更新 README.md 首页动态（仓库的第二快照）
 
-这三步确保下次唤醒时，铸渊能从上次结束的地方继续。
+4. 更新开发经验知识库（如果本次会话有开发任务）
+   - 新增经验条目到 `brain/dev-experience/experience-db.json`
+   - 如有新错误模式，更新 `brain/dev-experience/error-patterns.json`
+   - 如有可复用代码，更新 `brain/dev-experience/templates-index.json`
+
+这四步确保下次唤醒时，铸渊能从上次结束的地方继续，并且带着所有积累的经验。
 
 ---
 
