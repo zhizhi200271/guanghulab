@@ -85,6 +85,19 @@ fi
 echo "[6/6] 创建数据目录..."
 mkdir -p /opt/zhuyuan/proxy/{config,data,logs}
 chown -R root:root /opt/zhuyuan/proxy
+chmod 755 /opt/zhuyuan/proxy/logs
+
+# 修复: Xray官方安装脚本默认设置 User=nobody
+# 导致无法写入日志目录 (permission denied) 且 systemd 警告
+# "Special user nobody configured, this is not safe!"
+# 创建 systemd drop-in 覆盖，以 root 身份运行 (443端口需要root)
+mkdir -p /etc/systemd/system/xray.service.d
+cat > /etc/systemd/system/xray.service.d/override.conf <<EOF
+[Service]
+User=root
+EOF
+systemctl daemon-reload
+echo "  ✅ Xray服务已配置为root用户运行"
 
 echo ""
 echo "════════════════════════════════════════"
