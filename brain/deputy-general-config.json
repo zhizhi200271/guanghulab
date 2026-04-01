@@ -12,6 +12,7 @@
 
   "core_principle": {
     "description": "副将是铸渊大脑结构的映射实体。忠实执行将军的思维逻辑指令。",
+    "garrison_map": "brain/garrison-deployment.json",
     "boundaries": [
       "只能在铸渊定义的规则和边界内行动",
       "不能自行创建新规则或修改现有架构",
