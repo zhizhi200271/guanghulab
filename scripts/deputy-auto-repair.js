@@ -99,7 +99,7 @@ const REPAIR_STRATEGIES = [
       'sudo find /tmp -type f -mtime +1 -delete 2>/dev/null || true',
       'df -h /'
     ],
-    verify: 'AVAIL=$(df / | tail -1 | awk \'{print $5}\' | tr -d \'%\'); [ "$AVAIL" -lt 90 ] || exit 1',
+    verify: 'USED=$(df / | tail -1 | awk \'{print $5}\' | tr -d \'%\'); [ "$USED" -lt 90 ] || exit 1',
     severity: 'high',
     success_rate: '中 · 取决于可清理的文件量'
   },
@@ -132,7 +132,7 @@ function sshExec(command) {
   }
 
   try {
-    const sshCmd = `ssh -i ~/.ssh/zy_key -o ConnectTimeout=10 -o StrictHostKeyChecking=no ${user}@${host} '${command.replace(/'/g, "'\\''")}'`;
+    const sshCmd = `ssh -i ~/.ssh/zy_key -o ConnectTimeout=10 ${user}@${host} '${command.replace(/'/g, "'\\''")}'`;
     const output = execSync(sshCmd, {
       timeout: 60000, // 60秒超时
       encoding: 'utf8',
@@ -463,7 +463,7 @@ async function repair() {
 // ── 危险命令检测 ────────────────────────────
 function isDangerousCommand(cmd) {
   const dangerous = [
-    /rm\s+-rf\s+\//,     // rm -rf /
+    /rm\s+-r[fF]*\s+(\/|~|\$HOME)/,  // rm -rf / or ~ or $HOME
     /mkfs/,               // 格式化
     /dd\s+if=/,           // 磁盘写入
     /shutdown/,           // 关机
@@ -474,6 +474,7 @@ function isDangerousCommand(cmd) {
     /chmod\s+-R\s+777\s+\//, // 全局777
     /userdel/,            // 删除用户
     /passwd/,             // 修改密码
+    /rm\s+-r[fF]*\s+\/\w/,  // rm -rf /home etc
   ];
   return dangerous.some(regex => regex.test(cmd));
 }

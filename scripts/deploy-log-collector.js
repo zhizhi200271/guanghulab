@@ -50,6 +50,16 @@ function ensureDir(dir) {
   }
 }
 
+// 智能截断日志：保留头部和尾部，确保错误信息不丢失
+function truncateLog(content, maxLen) {
+  if (!content || content.length <= maxLen) return content;
+  const headSize = Math.floor(maxLen * 0.3); // 30%给头部
+  const tailSize = maxLen - headSize - 100;   // 70%给尾部(错误通常在末尾)
+  const head = content.slice(0, headSize);
+  const tail = content.slice(-tailSize);
+  return `${head}\n\n... [截断 ${content.length - headSize - tailSize} 字符] ...\n\n${tail}`;
+}
+
 // ── GitHub API 请求 ────────────────────────────
 function githubApi(endpoint) {
   const token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN;
@@ -225,7 +235,7 @@ async function collectLogs() {
           conclusion: s.conclusion,
           number: s.number
         })),
-        log_content: logContent.slice(0, 10000) // 限制日志大小
+        log_content: truncateLog(logContent, 10000) // 智能截断：保留头部和尾部
       });
       console.log(`  ✅ 日志采集成功 (${logContent.length} 字符)`);
     } catch (err) {
@@ -330,6 +340,7 @@ async function collectLogs() {
 
 // ── 简单错误分析 (模式匹配) ────────────────────
 function simpleAnalysis(logContent) {
+  // 基础错误模式 + 动态加载经验库中的错误模式
   const patterns = [
     { regex: /EADDRINUSE/i, name: '端口被占用', fix: '重启PM2进程释放端口', severity: 'medium' },
     { regex: /ECONNREFUSED/i, name: '服务连接被拒绝', fix: '检查PM2进程是否运行', severity: 'high' },
@@ -348,6 +359,27 @@ function simpleAnalysis(logContent) {
     { regex: /HEALTH_FAIL/i, name: '健康检查失败', fix: '检查应用是否正常启动', severity: 'high' },
     { regex: /exit code [1-9]/i, name: '命令执行失败', fix: '查看上方具体错误信息', severity: 'medium' }
   ];
+
+  // 尝试从经验数据库动态加载错误模式
+  try {
+    const errPatternsDb = JSON.parse(fs.readFileSync(ERROR_PATTERNS_DB, 'utf8'));
+    if (errPatternsDb.patterns) {
+      for (const p of errPatternsDb.patterns) {
+        // 提取经验库中的关键词作为匹配模式
+        const keywords = p.pattern.split(/[·\s+]/g).filter(k => k.length > 3);
+        if (keywords.length > 0) {
+          patterns.push({
+            regex: new RegExp(keywords.join('|'), 'i'),
+            name: `[经验库] ${p.pattern}`,
+            fix: (p.prevention || []).join(' → ') || '参考经验库',
+            severity: p.severity || 'medium'
+          });
+        }
+      }
+    }
+  } catch {
+    // 经验库加载失败不影响基础分析
+  }
 
   const matched = [];
   for (const p of patterns) {
