@@ -30,7 +30,7 @@
 
 'use strict';
 
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
@@ -122,7 +122,7 @@ const REPAIR_STRATEGIES = [
   }
 ];
 
-// ── SSH命令执行 (安全化) ────────────────────────
+// ── SSH命令执行 (安全化·使用execFileSync避免shell注入) ────
 function sshExec(command) {
   const host = process.env.ZY_SERVER_HOST;
   const user = process.env.ZY_SERVER_USER;
@@ -136,19 +136,21 @@ function sshExec(command) {
     return { ok: false, output: '', error: '⛔ 命令被安全策略拦截' };
   }
 
-  // 对命令进行安全编码：单引号内的内容不会被shell二次解析
-  const safeCommand = command.replace(/'/g, "'\\''");
+  const sshKeyPath = path.join(process.env.HOME || '/root', '.ssh', 'zy_key');
 
   try {
-    // 使用execFileSync避免shell注入：通过ssh二进制文件直接传递参数
-    const output = execSync(
-      `ssh -i ~/.ssh/zy_key -o ConnectTimeout=10 ${escapeShellArg(user)}@${escapeShellArg(host)} '${safeCommand}'`,
-      {
-        timeout: 60000,
-        encoding: 'utf8',
-        stdio: ['pipe', 'pipe', 'pipe']
-      }
-    );
+    // 使用execFileSync直接调用ssh二进制文件，避免shell解析
+    // command作为ssh的远程执行参数，由ssh在远端服务器上执行
+    const output = execFileSync('ssh', [
+      '-i', sshKeyPath,
+      '-o', 'ConnectTimeout=10',
+      `${user}@${host}`,
+      command
+    ], {
+      timeout: 60000,
+      encoding: 'utf8',
+      stdio: ['pipe', 'pipe', 'pipe']
+    });
     return { ok: true, output: output.trim() };
   } catch (err) {
     return {
@@ -157,12 +159,6 @@ function sshExec(command) {
       error: err.stderr ? err.stderr.trim() : err.message
     };
   }
-}
-
-// 转义shell参数中的特殊字符
-function escapeShellArg(arg) {
-  // 只允许字母数字和基本字符(用户名/IP/域名)
-  return String(arg).replace(/[^a-zA-Z0-9._@:-]/g, '');
 }
 
 // ── LLM深度分析 ────────────────────────────
