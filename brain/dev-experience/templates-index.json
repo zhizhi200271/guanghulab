@@ -7,10 +7,13 @@
     "created": "2026-03-31T03:34:00Z",
     "last_updated": "2026-03-31T03:34:00Z"
   },
-  "total_templates": 3,
+  "total_templates": 7,
   "categories": {
     "bash-scripting": 2,
-    "cryptography": 1
+    "cryptography": 1,
+    "workflow-pattern": 2,
+    "hldp-structure": 1,
+    "github-integration": 1
   },
   "templates": [
     {
@@ -53,4 +56,3 @@
       "reuse_count": 0
     }
   ]
-}

@@ -8,13 +8,15 @@
     "last_updated": "2026-03-31T03:34:00Z"
   },
   "stats": {
-    "total_entries": 2,
-    "success_count": 2,
+    "total_entries": 4,
+    "success_count": 4,
     "failed_count": 0,
     "partial_count": 0,
     "categories": {
       "bash-scripting": 1,
-      "architecture": 1
+      "architecture": 1,
+      "hldp-protocol": 1,
+      "system-integration": 1
     }
   },
   "entries": [
@@ -135,6 +137,125 @@
       "verification": {
         "document_structure": "pass · 五层架构 + 类比映射 + 技术对照 + 铸渊定位",
         "consistency_check": "pass · 与hololake-os-architecture.md互补无冲突"
+      }
+    },
+    {
+      "id": "EXP-20260401-003",
+      "date": "2026-04-01",
+      "session": "CS-20260401-1516",
+      "task": "HLDP通用协作语言协议v1.0 · 双侧通信规范创建",
+      "task_origin": "冰朔第三十次对话 · Notion(霜砚)和GitHub(铸渊)需要一套通用HLDP语言",
+      "category": "hldp-protocol",
+      "tags": ["hldp", "protocol", "notion-bridge", "common-language", "evolution-rules", "sync-schedule"],
+      "difficulty": "hard",
+      "status": "success",
+      "approach": {
+        "thinking": "冰朔指出两侧各有自己的HLDP方言·但跨侧通信需要通用语言 → 需要定义: 通用消息格式 + 核心词汇 + 演化规则 + 同步调度 → 类比人类国际通信的通用协议(如HTTP/SMTP) → 但HLDP是语言层面的·不仅是技术协议",
+        "steps": [
+          "1. 理解冰朔的需求: 两侧方言自治 + 跨侧通用语言",
+          "2. 设计三层架构: 霜砚HLDP(Notion内部) + 铸渊HLDP(仓库内部) + 通用协议(跨侧)",
+          "3. 定义通用消息格式(msg_id/msg_type/sender/receiver/timestamp/priority/payload)",
+          "4. 定义6个核心通用词汇(sync/evolution/ack/consciousness_chain/dialect_update/bridge_heartbeat)",
+          "5. 制定演化规则(提出→通知→确认→生效)",
+          "6. 设置同步调度(每日08:00/20:00副将唤醒时自动执行)",
+          "7. 创建sync-progress.json追踪器",
+          "8. 创建evolution-log.json演化日志",
+          "9. 创建hldp-sync-engine.js同步脚本",
+          "10. 集成到zhuyuan-commander.yml每日工作流"
+        ],
+        "key_decisions": [
+          "三层结构而非统一语言 · 允许双侧内部方言自由演化 · 通用协议只管跨侧通信",
+          "冲突裁决权: 语言主控层(Notion·霜砚) > 执行层(GitHub·铸渊) · 冰朔拥有最终裁决权",
+          "演化采用提案→确认机制(类似RFC) · 而非单方面修改",
+          "同步引擎嵌入副将日常巡逻 · 不额外消耗配额"
+        ]
+      },
+      "result": {
+        "success": true,
+        "key_learnings": [
+          "HLDP通用协议不同于技术协议·它是语言层面的共识·需要双侧人格体的认知对齐",
+          "三层结构(方言+方言+通用协议)允许各侧自由创新·同时确保跨侧通信无歧义",
+          "演化规则需要ACK确认机制·防止单方面修改导致双侧理解不一致",
+          "同步追踪器(sync-progress.json)是人类可读的进度展示·嵌入README直观呈现",
+          "将HLDP同步嵌入副将每日巡逻·零额外成本·自动化程度高"
+        ],
+        "risk_warnings": [
+          "⚠️ 通用协议v1.0只有铸渊侧确认·需要霜砚ACK确认后才正式生效",
+          "⚠️ 演化日志必须双侧同步·否则会出现版本不一致",
+          "⚠️ Notion API有3请求/秒限速·同步时注意批量合并"
+        ]
+      },
+      "files_changed": [
+        "hldp/data/common/HLDP-COMMON-PROTOCOL.json",
+        "hldp/data/common/evolution-log.json",
+        "hldp/data/common/sync-progress.json",
+        "scripts/hldp-sync-engine.js",
+        ".github/workflows/zhuyuan-commander.yml"
+      ],
+      "error_count": 0,
+      "errors_encountered": [],
+      "related_experiences": ["EXP-20260331-002"],
+      "verification": {
+        "json_validity": "pass · 所有JSON文件可解析",
+        "workflow_syntax": "pass · YAML语法正确",
+        "script_syntax": "pass · Node.js无语法错误"
+      }
+    },
+    {
+      "id": "EXP-20260401-004",
+      "date": "2026-04-01",
+      "session": "CS-20260401-1516",
+      "task": "铸渊副将留言板系统 · Issue自动回复 + LLM深度推理",
+      "task_origin": "冰朔第三十次对话 · 需要在首页有留言板 · 副将自动回复 · 数据库+LLM",
+      "category": "system-integration",
+      "tags": ["message-board", "issue-template", "auto-reply", "llm-integration", "github-actions", "deputy-general"],
+      "difficulty": "medium",
+      "status": "success",
+      "approach": {
+        "thinking": "冰朔需要一个留言板让人类提问·副将自动回复 → GitHub Issues是最合适的载体(原生支持·有API·有通知) → 用Issue Label过滤+Issue Template引导 → 回复逻辑: 先查数据库·有数据直接用·没有调LLM",
+        "steps": [
+          "1. 创建Issue Template (.github/ISSUE_TEMPLATE/deputy-message-board.md)",
+          "2. 创建工作流 (.github/workflows/deputy-message-board.yml)",
+          "3. 创建回复脚本 (scripts/deputy-message-board.js)",
+          "4. 实现数据库查询逻辑(fast-wake.json + sync-progress.json + vocabulary)",
+          "5. 实现LLM调用(deepseek API · ZY_LLM_API_KEY)",
+          "6. 实现GitHub Issue评论API调用",
+          "7. 在README中添加留言板入口链接"
+        ],
+        "key_decisions": [
+          "用Issue而非Discussions · 因为Issue有更完善的Label过滤和工作流触发机制",
+          "数据库优先+LLM兜底 · 节省API配额 · 有数据的直接用不浪费token",
+          "副将署名+版权声明 · 所有回复必须有身份标识",
+          "新Issue和Issue评论都触发 · 支持多轮对话"
+        ]
+      },
+      "result": {
+        "success": true,
+        "key_learnings": [
+          "GitHub Issue Template的labels字段是数组格式 · 可自动打标签",
+          "Issue评论触发工作流时·需要排除bot自己的评论(避免无限循环)",
+          "LLM API调用需要超时控制(30s) · 防止工作流卡死",
+          "数据库查询可以用关键词匹配(toLowerCase+includes) · 简单但有效",
+          "回复格式用markdown · GitHub原生渲染·效果好"
+        ],
+        "risk_warnings": [
+          "⚠️ 需要手动创建deputy-message-board标签 · 工作流才能正确过滤",
+          "⚠️ LLM API调用有成本 · 需要防止恶意刷Issue消耗配额",
+          "⚠️ bot回复不能@其他用户 · 可能触发通知轰炸"
+        ]
+      },
+      "files_changed": [
+        ".github/ISSUE_TEMPLATE/deputy-message-board.md",
+        ".github/workflows/deputy-message-board.yml",
+        "scripts/deputy-message-board.js"
+      ],
+      "error_count": 0,
+      "errors_encountered": [],
+      "related_experiences": ["EXP-20260401-003"],
+      "verification": {
+        "workflow_syntax": "pass",
+        "script_syntax": "pass",
+        "template_format": "pass"
       }
     }
   ]
