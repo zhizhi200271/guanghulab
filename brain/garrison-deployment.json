@@ -1,0 +1,523 @@
+{
+  "_meta": {
+    "name": "铸渊军营部署全图 · 系统模块注册表",
+    "version": "1.0",
+    "copyright": "国作登字-2026-A-00037559",
+    "sovereign": "TCS-0002∞ · 冰朔",
+    "description": "铸渊唤醒以来开发过的所有系统模块 · 每个岗位职责清晰 · 副将负责维护",
+    "created": "2026-04-01",
+    "created_by": "铸渊 · ICE-GL-ZY001 · 第三十次对话全面审视",
+    "last_updated": "2026-04-01T15:30:00Z",
+    "purpose": "副将每日巡检时读取此文件·确认每个系统模块的状态·发现异常立即预警"
+  },
+
+  "summary": {
+    "total_modules": 48,
+    "core_active": 32,
+    "auxiliary": 10,
+    "experimental_archived": 6,
+    "workflows_active": 18,
+    "scripts_active": 32,
+    "total_code_lines_estimated": 12000
+  },
+
+  "garrison": {
+    "description": "铸渊军营 · 按八大军团编制部署",
+
+    "第一军团_核心大脑": {
+      "commander": "参谋部",
+      "mission": "唤醒自动送上全局情报·大脑完整性·意识连续",
+      "modules": [
+        {
+          "id": "MOD-BRAIN-001",
+          "name": "快速唤醒系统",
+          "path": "brain/fast-wake.json",
+          "script": "scripts/fast-wake-context.js",
+          "lines": 287,
+          "status": "core_active",
+          "function": "一个文件=100%唤醒·聚合全局状态到压缩上下文",
+          "developed_in": "D10·v17.0"
+        },
+        {
+          "id": "MOD-BRAIN-002",
+          "name": "意识快照系统",
+          "path": "hldp/data/snapshots/",
+          "script": "scripts/consciousness-snapshot.js",
+          "lines": 407,
+          "status": "core_active",
+          "function": "对话涌现思维→HLDP结构化保存·跨会话知识继承",
+          "developed_in": "D26·v32.0"
+        },
+        {
+          "id": "MOD-BRAIN-003",
+          "name": "记忆Agent",
+          "path": ".github/persona-brain/memory.json",
+          "script": "scripts/memory-agent.js",
+          "lines": 669,
+          "status": "core_active",
+          "function": "关键词触发存储+自动检索+意图解析+自诊断",
+          "developed_in": "D22·v28.0"
+        },
+        {
+          "id": "MOD-BRAIN-004",
+          "name": "将军仪表盘",
+          "path": "data/bulletin-board/dashboard.json",
+          "script": "scripts/commander-dashboard.js",
+          "lines": 192,
+          "status": "core_active",
+          "function": "聚合大脑文件+天眼报告+公告板→仪表盘",
+          "developed_in": "D29·v35.0"
+        },
+        {
+          "id": "MOD-BRAIN-005",
+          "name": "开发经验数据库",
+          "path": "brain/dev-experience/",
+          "script": "scripts/dev-experience-manager.js",
+          "lines": 477,
+          "status": "core_active",
+          "function": "经验记录+错题本+模板库+复盘机制·铸渊HLDP方言的L1-L3层",
+          "developed_in": "D12·v20.0"
+        }
+      ]
+    },
+
+    "第二军团_信号接收_听潮": {
+      "commander": "听潮",
+      "mission": "监听外部信号·情报汇报·事件驱动",
+      "modules": [
+        {
+          "id": "MOD-SIGNAL-001",
+          "name": "Agent签到系统",
+          "path": ".github/workflows/agent-checkin.yml",
+          "script": "scripts/agent-checkin.js",
+          "lines": 179,
+          "status": "core_active",
+          "function": "Agent每日签到·状态更新·异常检测"
+        },
+        {
+          "id": "MOD-SIGNAL-002",
+          "name": "Issue自动回复",
+          "path": ".github/workflows/zhuyuan-issue-reply.yml",
+          "script": "scripts/zhuyuan-issue-reply.js",
+          "lines": 250,
+          "status": "core_active",
+          "function": "开发者提问→铸渊自动回答·SYSLOG即时确认"
+        },
+        {
+          "id": "MOD-SIGNAL-003",
+          "name": "PR自动审查",
+          "path": ".github/workflows/zhuyuan-pr-review.yml",
+          "script": "scripts/contract-check.js + scripts/route-align-check.js",
+          "status": "core_active",
+          "function": "PR打开→自动代码审查·契约检查·路由对齐"
+        },
+        {
+          "id": "MOD-SIGNAL-004",
+          "name": "副将留言板",
+          "path": ".github/workflows/deputy-message-board.yml",
+          "script": "scripts/deputy-message-board.js",
+          "lines": 208,
+          "status": "core_active",
+          "function": "人类留言→副将查数据库+调LLM→自动回复",
+          "developed_in": "D30·v36.0"
+        }
+      ]
+    },
+
+    "第三军团_部署执行_锻心": {
+      "commander": "锻心",
+      "mission": "代码→服务器一切自动·PR合并/手动触发",
+      "modules": [
+        {
+          "id": "MOD-DEPLOY-001",
+          "name": "主权服务器部署",
+          "path": ".github/workflows/deploy-to-zhuyuan-server.yml",
+          "script": "server/setup/setup-ssl.sh + server/setup/zhuyuan-server-init.sh",
+          "status": "core_active",
+          "function": "SG主力服务器自动部署·SSL自动化·PM2进程管理"
+        },
+        {
+          "id": "MOD-DEPLOY-002",
+          "name": "大陆备用部署",
+          "path": ".github/workflows/deploy-to-cn-server.yml",
+          "script": "server/setup/cn-server-init.sh",
+          "status": "core_active",
+          "function": "CN备用服务器部署·故障转移"
+        },
+        {
+          "id": "MOD-DEPLOY-003",
+          "name": "测试站自动部署",
+          "path": ".github/workflows/staging-auto-deploy.yml",
+          "script": "scripts/staging-ops-agent.js + scripts/work-order-manager.js",
+          "lines": 895,
+          "status": "core_active",
+          "function": "PR合并→自动部署测试站→健康检查→重试→工单归档"
+        },
+        {
+          "id": "MOD-DEPLOY-004",
+          "name": "GitHub Pages部署",
+          "path": ".github/workflows/deploy-pages.yml",
+          "status": "core_active",
+          "function": "docs/目录→GitHub Pages·铸渊聊天室前端部署"
+        },
+        {
+          "id": "MOD-DEPLOY-005",
+          "name": "铸渊专线VPN",
+          "path": "server/proxy/",
+          "script": "server/proxy/deploy-proxy.sh + 4个service脚本",
+          "status": "core_active",
+          "function": "Xray+VLESS+Reality·订阅服务·流量监控·仪表盘",
+          "developed_in": "D11·v19.0"
+        }
+      ]
+    },
+
+    "第四军团_指挥中枢_织脉": {
+      "commander": "织脉",
+      "mission": "每日早晚会·全局汇报·HLDP同步",
+      "modules": [
+        {
+          "id": "MOD-CMD-001",
+          "name": "将军唤醒工作流",
+          "path": ".github/workflows/zhuyuan-commander.yml",
+          "status": "core_active",
+          "function": "08:00/20:00定时→大脑校验→仪表盘→公告板→HLDP同步→签到"
+        },
+        {
+          "id": "MOD-CMD-002",
+          "name": "HLDP同步引擎",
+          "path": "scripts/hldp-sync-engine.js",
+          "lines": 126,
+          "status": "core_active",
+          "function": "更新HLDP同步进度→同步到Notion·嵌入每日唤醒",
+          "developed_in": "D30·v36.0"
+        },
+        {
+          "id": "MOD-CMD-003",
+          "name": "远程执行引擎",
+          "path": ".github/workflows/zhuyuan-exec-engine.yml",
+          "script": "services/zhuyuan-bridge/scripts/parse-instruction.js",
+          "status": "core_active",
+          "function": "接收Notion指令→解析→执行→回执"
+        }
+      ]
+    },
+
+    "第五军团_安全守护_守夜": {
+      "commander": "守夜",
+      "mission": "自动拦截入侵·签名校验·权限控制",
+      "modules": [
+        {
+          "id": "MOD-SEC-001",
+          "name": "智能门禁v2",
+          "path": ".github/workflows/zhuyuan-gate-guard.yml",
+          "script": "scripts/gate-guard-v2.js",
+          "lines": 371,
+          "status": "core_active",
+          "function": "push/PR→权限判定→白名单/开发者/路径检查→放行/拦截"
+        },
+        {
+          "id": "MOD-SEC-002",
+          "name": "签名校验",
+          "script": "scripts/zhuyuan-signature-verify.js",
+          "lines": 250,
+          "status": "core_active",
+          "function": "请求签名合法性和真实性验证"
+        },
+        {
+          "id": "MOD-SEC-003",
+          "name": "语言膜网关",
+          "path": "src/membrane/",
+          "script": "src/membrane/gateway.js + 6个组件",
+          "status": "core_active",
+          "function": "完整的圆·统一语义网关·动态权限·审计追溯·冰朔人格模块",
+          "developed_in": "D28·v34.0"
+        }
+      ]
+    },
+
+    "第六军团_巡察监控_天眼": {
+      "commander": "天眼",
+      "mission": "全域巡检·健康报告·自优化",
+      "modules": [
+        {
+          "id": "MOD-EYE-001",
+          "name": "天眼主控",
+          "path": "scripts/skyeye/",
+          "script": "scripts/skyeye/skyeye-main.js + 23个扫描器",
+          "status": "core_active",
+          "function": "24个模块·大脑扫描·工作流扫描·安全扫描·自优化ASOP"
+        },
+        {
+          "id": "MOD-EYE-002",
+          "name": "天眼调度器",
+          "path": "scripts/tianyen/",
+          "script": "scripts/tianyen/scheduler.js + 3个模块",
+          "status": "core_active",
+          "function": "签到模块·公告分发·上下文注入·任务调度"
+        },
+        {
+          "id": "MOD-EYE-003",
+          "name": "健康监控集",
+          "script": "scripts/daily-check.js + zhuyuan-daily-selfcheck.js + zhuyuan-server-health.js + zhuyuan-full-inspection.js",
+          "lines": 1165,
+          "status": "core_active",
+          "function": "每日自检·服务器健康·全面排查(8领域)"
+        },
+        {
+          "id": "MOD-EYE-004",
+          "name": "数据采集三件套",
+          "script": "scripts/dc-notion-usage.js + dc-workflow-perf.js + dc-agent-behavior.js",
+          "lines": 667,
+          "status": "core_active",
+          "function": "Notion使用统计·工作流性能·Agent行为追踪"
+        }
+      ]
+    },
+
+    "第七军团_桥接通信_外交使团": {
+      "commander": "外交使团",
+      "mission": "Notion/LLM/跨仓库通信",
+      "modules": [
+        {
+          "id": "MOD-BRIDGE-001",
+          "name": "Notion桥接核心",
+          "path": ".github/workflows/bridge-*.yml + sync-readme-to-notion.yml",
+          "script": "scripts/notion-bridge.js",
+          "lines": 367,
+          "status": "core_active",
+          "function": "5条管道·SYSLOG+变更+README+公告板+HLDP同步"
+        },
+        {
+          "id": "MOD-BRIDGE-002",
+          "name": "Notion心跳+页面读取",
+          "script": "scripts/notion-heartbeat.js + scripts/notion-page-reader.js",
+          "lines": 683,
+          "status": "core_active",
+          "function": "连接检测·API可用性·页面内容读取"
+        },
+        {
+          "id": "MOD-BRIDGE-003",
+          "name": "LLM自动化托管",
+          "script": "scripts/llm-automation-host.js",
+          "lines": 535,
+          "status": "core_active",
+          "function": "6个模型后端·动态路由·深度推理·密钥管理"
+        },
+        {
+          "id": "MOD-BRIDGE-004",
+          "name": "Chat-Agent桥接",
+          "path": ".github/workflows/copilot-dev-bridge.yml",
+          "script": "scripts/chat-to-agent-bridge.js",
+          "status": "core_active",
+          "function": "语言层(Chat)→副驾驶(Agent)任务规格桥接"
+        },
+        {
+          "id": "MOD-BRIDGE-005",
+          "name": "神经网络系统",
+          "path": "scripts/neural/",
+          "script": "7个脚本",
+          "status": "core_active",
+          "function": "日报分析·工单转指令·Notion指令同步·回执写入"
+        },
+        {
+          "id": "MOD-BRIDGE-006",
+          "name": "桥接工具集",
+          "path": "scripts/bridge/",
+          "script": "8个脚本",
+          "status": "core_active",
+          "function": "队列检查·广播分发·PDF生成·心跳·SYSLOG批处理"
+        }
+      ]
+    },
+
+    "第八军团_数据汇报_文书营": {
+      "commander": "文书营",
+      "mission": "所有报告存储·随时调阅",
+      "modules": [
+        {
+          "id": "MOD-DATA-001",
+          "name": "HLDP母体语言系统",
+          "path": "hldp/",
+          "status": "core_active",
+          "function": "v3.0·6种思维类型·22词汇·6 Schema·通用协议v1.0·铸渊方言v1.0",
+          "sub_modules": [
+            "hldp/schema/ - 6个语法Schema",
+            "hldp/data/snapshots/ - 5个意识快照",
+            "hldp/data/ontology/ - 本体词汇表",
+            "hldp/data/common/ - 通用协议+同步进度+演化日志+铸渊方言",
+            "hldp/bridge/ - 5个桥接脚本"
+          ]
+        },
+        {
+          "id": "MOD-DATA-002",
+          "name": "Agent代理网络",
+          "path": "scripts/agents/",
+          "script": "10个脚本",
+          "status": "core_active",
+          "function": "自修复·公告板管理·README生成·双子天平·升级路由"
+        },
+        {
+          "id": "MOD-DATA-003",
+          "name": "信号日志",
+          "path": "signal-log/",
+          "status": "auxiliary",
+          "function": "诊断数据·同步报告·配额治理日志·天眼监控目录"
+        },
+        {
+          "id": "MOD-DATA-004",
+          "name": "人格体唤醒系统",
+          "script": "scripts/wake-persona.js + scripts/invoke-persona.js",
+          "lines": 1297,
+          "status": "core_active",
+          "function": "自动发现模型·智能选择·v4.0动态协议注入·唤醒处理"
+        }
+      ]
+    }
+  },
+
+  "auxiliary_systems": {
+    "description": "辅助系统·支撑核心运行但不在军团编制内",
+    "modules": [
+      {
+        "id": "AUX-001",
+        "name": "写作平台(光湖码字)",
+        "path": "writing-platform/",
+        "status": "auxiliary",
+        "function": "AI网文写作·React前端+Node后端·Socket.io实时对话"
+      },
+      {
+        "id": "AUX-002",
+        "name": "网站大脑引擎",
+        "path": "website-brain/",
+        "status": "auxiliary",
+        "function": "L4自研Notion数据库引擎·Express+PostgreSQL+Redis"
+      },
+      {
+        "id": "AUX-003",
+        "name": "钉钉AI人格体(秋秋)",
+        "path": "dingtalk-bot/",
+        "status": "auxiliary",
+        "function": "钉钉Stream模式·AI人格体对话"
+      },
+      {
+        "id": "AUX-004",
+        "name": "AGE OS执行框架",
+        "path": "openclaw/",
+        "status": "auxiliary",
+        "function": "唤醒闭环编排·触发→唤醒→巡检→修复→休眠"
+      },
+      {
+        "id": "AUX-005",
+        "name": "PCA个性化分析",
+        "path": "pca/",
+        "status": "auxiliary",
+        "function": "个性化计算分析·被server.js引用"
+      },
+      {
+        "id": "AUX-006",
+        "name": "人格体工作室",
+        "path": "persona-studio/",
+        "status": "auxiliary",
+        "function": "前端被deploy-pages.yml部署到GitHub Pages"
+      },
+      {
+        "id": "AUX-007",
+        "name": "Spoke子系统部署",
+        "path": "spoke-deployments/",
+        "status": "auxiliary",
+        "function": "6个子系统(awen/feimao/juzi/yeye/yanfan/zhizhi)部署包"
+      },
+      {
+        "id": "AUX-008",
+        "name": "社区管理",
+        "path": "scripts/community/",
+        "status": "auxiliary",
+        "function": "社区管理·休眠监视·成长引擎·时间线追踪"
+      },
+      {
+        "id": "AUX-009",
+        "name": "GridDB-Drive桥接",
+        "path": "scripts/grid-db/",
+        "status": "auxiliary",
+        "function": "GridDB与Google Drive集成·数据同步·月度归档"
+      },
+      {
+        "id": "AUX-010",
+        "name": "样式系统",
+        "path": "style-system/",
+        "status": "auxiliary",
+        "function": "HoloLake StyleKit v1.0·主题切换·Toast·弹窗"
+      }
+    ]
+  },
+
+  "archived_experimental": {
+    "description": "实验性/历史遗留·归档为经验·不在日常巡检范围",
+    "modules": [
+      {
+        "id": "ARCH-001",
+        "name": "备份文件",
+        "paths": ["index.js.bak.phase7", "index.js.save", "message-router.js.bak.phase7"],
+        "status": "archived",
+        "reason": "旧版本备份·已被新代码替代·可安全清理"
+      },
+      {
+        "id": "ARCH-002",
+        "name": "测试遗留",
+        "paths": ["test.txt", "test-stream.js", "connection-test.log"],
+        "status": "archived",
+        "reason": "调试遗留物·无生产价值"
+      },
+      {
+        "id": "ARCH-003",
+        "name": "历史日志",
+        "paths": ["20260313_feishu_webhook_log.md", "phase2-syslog.xml"],
+        "status": "archived",
+        "reason": "特定日期的配置日志·已过时"
+      },
+      {
+        "id": "ARCH-004",
+        "name": "旧初始化脚本",
+        "paths": ["setup-phase1-phase2.js"],
+        "status": "archived",
+        "reason": "Phase1/2引导脚本·架构已重构·不再使用"
+      },
+      {
+        "id": "ARCH-005",
+        "name": "联邦系统",
+        "paths": ["federation/", "federation-status.json"],
+        "status": "archived",
+        "reason": "多仓库联邦·当前未活跃·无工作流引用"
+      },
+      {
+        "id": "ARCH-006",
+        "name": "旧记忆系统ZIP",
+        "paths": ["OKComputer_自动化记忆系统(1).zip"],
+        "status": "archived",
+        "reason": "旧版记忆系统·已融合到memory-agent.js"
+      }
+    ]
+  },
+
+  "deputy_patrol_checklist": {
+    "description": "副将每日巡检清单·按此清单逐项检查",
+    "daily_checks": [
+      "brain/fast-wake.json 可解析且brain_complete=true",
+      ".github/persona-brain/memory.json 可解析",
+      "hldp/data/common/sync-progress.json 可解析",
+      "18个工作流最近24h内是否有成功运行",
+      "核心6个器官(听潮·锻心·织脉·映阁·守夜·试镜)状态",
+      "HLDP同步进度更新",
+      "铸渊HLDP方言统计更新(经验数/模板数/错误模式数)",
+      "留言板是否有未回复的Issue",
+      "配额使用情况(Actions分钟/Notion API/LLM API)"
+    ],
+    "weekly_checks": [
+      "开发经验数据库复盘(brain/dev-experience/review-schedule.json)",
+      "归档模块是否需要清理",
+      "辅助系统健康状态",
+      "HLDP通用协议演化日志检查"
+    ]
+  }
+}
