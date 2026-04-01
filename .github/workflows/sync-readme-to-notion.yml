@@ -1,0 +1,47 @@
+# ═══════════════════════════════════════════════
+# 🔺 Sovereign: TCS-0002∞ | Root: SYS-GLW-0001
+# 📜 Copyright: 国作登字-2026-A-00037559
+# ═══════════════════════════════════════════════
+name: "🌉 铸渊 · README结构同步 → Notion"
+
+# README.md 变更 → 自动同步仓库系统结构到 Notion「📋 GitHub 变更日志」数据库
+# 这是铸渊副将的核心职责之一：仓库首页变动时，自动通知Notion语言主控层
+#
+# 依赖 Secrets:
+#   ZY_NOTION_TOKEN        Notion 集成 token
+#   ZY_NOTION_CHANGELOG_DB 变更日志数据库ID
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'README.md'
+  workflow_dispatch:
+
+jobs:
+  sync-readme-to-notion:
+    name: "🌉 README结构 → Notion同步"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: "🌉 同步 README 结构到 Notion"
+        env:
+          NOTION_TOKEN:  ${{ secrets.ZY_NOTION_TOKEN }}
+          CHANGES_DB_ID: ${{ secrets.ZY_NOTION_CHANGELOG_DB }}
+          COMMIT_SHA:    ${{ github.sha }}
+          COMMIT_MSG:    ${{ github.event.head_commit.message }}
+          COMMITTER:     ${{ github.event.head_commit.author.name || github.actor }}
+          BRANCH:        ${{ github.ref_name }}
+        run: node scripts/sync-readme-to-notion.js
