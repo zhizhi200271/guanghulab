@@ -47,10 +47,15 @@ function generateSyncReport() {
   const snapshotCount = countFiles(SNAPSHOTS_DIR, '.json');
   const evolutionCount = evolutionLog?.payload?.entries?.length || 0;
 
+  const evolutionEntries = evolutionLog?.payload?.entries || [];
+  const evolutionCount = evolutionEntries.length;
+
   progress.payload.github_side_status.vocabulary_count = vocabCount;
   progress.payload.github_side_status.schema_count = schemaCount;
   progress.payload.github_side_status.snapshots = snapshotCount;
-  progress.payload.github_side_status.last_evolution = evolutionLog?.payload?.entries?.[evolutionLog.payload.entries.length - 1]?.evolution_id || 'N/A';
+  progress.payload.github_side_status.last_evolution = evolutionCount > 0
+    ? evolutionEntries[evolutionCount - 1].evolution_id
+    : 'N/A';
 
   // Update common protocol status
   progress.payload.common_protocol_status.evolution_entries = evolutionCount;

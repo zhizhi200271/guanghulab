@@ -33,7 +33,8 @@ jobs:
           node-version: '20'
 
       - name: "📦 安装依赖"
-        run: npm install --omit=dev --ignore-scripts 2>/dev/null || true
+        run: |
+          npm install --omit=dev --ignore-scripts || echo "⚠️ 依赖安装异常·部分功能可能受限"
 
       - name: "🎖️ 副将处理留言"
         env:
