@@ -2573,35 +2573,25 @@ async function loadSysStatus(){
   var sEl=document.getElementById('sysStatus');
   var lEl=document.getElementById('sysLatency');
   var uEl=document.getElementById('sysUptime');
-  var wfEl=document.getElementById('sysWorkflows');
-  var modEl=document.getElementById('sysModules');
-  var cosEl=document.getElementById('sysCos');
+  var chEl=document.getElementById('sysChannel');
   try{
     var t=performance.now();
     var r=await fetch('/api/health',{signal:AbortSignal.timeout(5000)});
     var ms=Math.round(performance.now()-t);
     var data=await r.json();
-    if(sEl){sEl.textContent='🟢 在线';sEl.className='panel-value ok'}
-    if(lEl){lEl.textContent=ms+'ms';lEl.className='panel-value '+(ms<500?'ok':'warn')}
+    if(sEl){sEl.textContent='ONLINE';sEl.style.color='var(--ok)'}
+    if(lEl){lEl.textContent=ms+'ms';lEl.style.color=ms<500?'var(--ok)':'var(--warn)'}
     if(uEl){
       var um=Math.floor(data.uptime/60);
       var uh=Math.floor(um/60);
-      uEl.textContent=uh>0?uh+'h '+um%60+'m':um+'分钟';
+      uEl.textContent=uh>0?uh+'h '+um%60+'m':um+'m';
     }
-    // Real data from server if available
-    if(wfEl){wfEl.textContent=data.workflows?data.workflows:'无法获取';wfEl.className='panel-value '+(data.workflows?'ok':'')}
-    if(modEl){modEl.textContent=data.modules?data.modules:'无法获取';modEl.className='panel-value '+(data.modules?'ok':'')}
-    if(cosEl){
-      if(data.cos){cosEl.textContent=data.cos;cosEl.className='panel-value ok'}
-      else{cosEl.textContent='无法确认';cosEl.className='panel-value warn'}
-    }
+    if(chEl){chEl.textContent='BACKEND+BROWSER';chEl.style.color='var(--ok)'}
   }catch(e){
-    if(sEl){sEl.textContent='🔴 离线';sEl.className='panel-value err'}
-    if(lEl){lEl.textContent='—';lEl.className='panel-value err'}
-    if(uEl){uEl.textContent='—';uEl.className='panel-value'}
-    if(wfEl){wfEl.textContent='无法连接';wfEl.className='panel-value err'}
-    if(modEl){modEl.textContent='无法连接';modEl.className='panel-value err'}
-    if(cosEl){cosEl.textContent='无法连接';cosEl.className='panel-value err'}
+    if(sEl){sEl.textContent='OFFLINE';sEl.style.color='var(--err)'}
+    if(lEl){lEl.textContent='TIMEOUT';lEl.style.color='var(--err)'}
+    if(uEl){uEl.textContent='—';uEl.style.color='var(--dim)'}
+    if(chEl){chEl.textContent='BROWSER ONLY';chEl.style.color='var(--warn)'}
   }
 }
 loadSysStatus();
@@ -2627,11 +2617,11 @@ async function loadBulletin(){
       var vEl=document.getElementById('homeVer');
       if(vEl)vEl.textContent='AGE OS '+data.system.version;
     }
-    // Left panel updates
+    // Left panel updates (OS log format)
     if(data.updates){
       var uEl=document.getElementById('sysUpdates');
       if(uEl)uEl.innerHTML=data.updates.slice(0,3).map(function(u){
-        return '<div class="panel-item"><div class="panel-label">'+esc(u.version)+' · '+esc(u.date)+'</div><div style="font-size:11px">'+esc(u.title)+'</div></div>';
+        return '<div class="os-log-item"><span class="os-log-v">'+esc(u.version)+'</span><span class="os-log-t">'+esc(u.title)+'</span></div>';
       }).join('');
     }
   }catch(e){/* Use hardcoded ticker content */}
