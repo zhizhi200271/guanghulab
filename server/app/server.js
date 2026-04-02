@@ -628,8 +628,8 @@ app.get('/', (_req, res) => {
       preview: process.env.ZY_DOMAIN_PREVIEW || '待配置'
     },
     cos: {
-      core_bucket: 'zy-core-bucket',
-      corpus_bucket: 'zy-corpus-bucket',
+      core_bucket: 'zy-core-bucket-1317346199',
+      corpus_bucket: 'zy-corpus-bucket-1317346199',
       configured: !!(process.env.ZY_OSS_KEY && process.env.ZY_OSS_SECRET)
     },
     api: {

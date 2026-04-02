@@ -28,7 +28,7 @@ const COS_CONFIG = {
   region: process.env.ZY_COS_REGION || 'ap-guangzhou',
   buckets: {
     core: {
-      name: 'zy-core-bucket',
+      name: 'zy-core-bucket-1317346199',
       purpose: '核心人格体大脑',
       structure: {
         'zhuyuan/': '铸渊大脑 — GitHub侧人格体记忆',
@@ -39,7 +39,7 @@ const COS_CONFIG = {
       }
     },
     corpus: {
-      name: 'zy-corpus-bucket',
+      name: 'zy-corpus-bucket-1317346199',
       purpose: '语料库',
       structure: {
         'gpt4o-exports/': 'GPT-4o聊天记录导出',
