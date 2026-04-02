@@ -425,6 +425,65 @@ app.get('/api/system/bulletin', (_req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════
+// 留言板 · Feedback API
+// ═══════════════════════════════════════════════════════════
+
+const FEEDBACK_FILE = path.join(DATA_DIR, 'feedback.json');
+
+app.get('/api/feedback', (_req, res) => {
+  try {
+    if (fs.existsSync(FEEDBACK_FILE)) {
+      const data = JSON.parse(fs.readFileSync(FEEDBACK_FILE, 'utf8'));
+      res.json({ success: true, feedback: data.items || [] });
+    } else {
+      res.json({ success: true, feedback: [] });
+    }
+  } catch (err) {
+    console.error(`留言板读取失败: ${err.message}`);
+    res.status(500).json({ error: true, message: '服务器错误，请稍后重试' });
+  }
+});
+
+app.post('/api/feedback', (req, res) => {
+  try {
+    const { name, message, userId } = req.body;
+    if (!message || typeof message !== 'string') {
+      return res.status(400).json({ error: true, message: '留言内容不能为空' });
+    }
+
+    let data = { items: [] };
+    if (fs.existsSync(FEEDBACK_FILE)) {
+      data = JSON.parse(fs.readFileSync(FEEDBACK_FILE, 'utf8'));
+    }
+
+    const item = {
+      id: `FB-${Date.now().toString(36)}`,
+      name: (typeof name === 'string' ? name.substring(0, 50) : '') || '匿名来客',
+      message: message.substring(0, 500),
+      userId: typeof userId === 'string' ? userId.substring(0, 50) : null,
+      status: 'pending',
+      timestamp: new Date().toISOString(),
+      reply: null
+    };
+
+    data.items.unshift(item);
+
+    // Keep only latest 100
+    if (data.items.length > 100) {
+      data.items = data.items.slice(0, 100);
+    }
+
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+    fs.writeFileSync(FEEDBACK_FILE, JSON.stringify(data, null, 2));
+
+    res.json({ success: true, feedback: item });
+  } catch (err) {
+    console.error(`留言提交失败: ${err.message}`);
+    res.status(500).json({ error: true, message: '服务器错误，请稍后重试' });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
 // 双域名架构 · 预览→主站 一键推送
 // ═══════════════════════════════════════════════════════════
 
@@ -643,6 +702,8 @@ app.get('/', (_req, res) => {
       model_pricing: '/api/model/pricing',
       model_predict: 'POST /api/model/predict',
       bulletin: '/api/system/bulletin',
+      feedback: '/api/feedback',
+      feedback_submit: 'POST /api/feedback',
       sites: '/api/sites',
       promote: 'POST /api/sites/promote',
       rollback: 'POST /api/sites/rollback',
