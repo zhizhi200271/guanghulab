@@ -12,10 +12,10 @@ on:
     branches: [main]
     paths:
       - 'server/**'
-      - 'docs/**'
-      - 'frontend/**'
-      - 'src/**'
-      - 'backend/**'
+      - 'docs/index.html'
+      - 'docs/css/**'
+      - 'docs/js/**'
+      - 'docs/zh/**'
   workflow_dispatch:
     inputs:
       action:
