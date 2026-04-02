@@ -787,6 +787,19 @@ var DA = (function(){
     navigator.connection.addEventListener('change', function(){ detect(); });
   }
 
+  // ── 网络通道探测 ──
+  // 用户能打开页面 = 有活网络。铸渊应该知道有哪些通道可用。
+  function probeChannels(){
+    var ch = {browser:true, online:navigator.onLine};
+    fetch('/api/health',{signal:AbortSignal.timeout(3000)})
+      .then(function(r){ch.backend=r.ok}).catch(function(){ch.backend=false});
+    info.channels = ch;
+  }
+  probeChannels();
+  setInterval(probeChannels, 30000);
+  window.addEventListener('online', function(){ setTimeout(probeChannels,500); });
+  window.addEventListener('offline', function(){ info.channels={browser:true,online:false,backend:false}; });
+
   return { detect:detect, info:function(){return info} };
 })();
 
@@ -1479,60 +1492,120 @@ async function send(){
   if(detectId(msg)){setTimeout(function(){chatMsg(idReply(),'b',{m:'铸渊',t:'本地'})},300);return}
   if(isReturn(msg)){setTimeout(function(){chatMsg(recovReply(),'b',{m:'铸渊',t:'本地'})},300);return}
 
-  // 3. 调用API（优先后端，失败则用用户自定义Key）
+  // 3. 调用API —— 优先用用户自己的API Key（直接走用户网络），其次尝试后端
   sending=true;document.getElementById('chatSnd').disabled=true;showTyp();
-  var serverOk=false;
-  try{
-    var res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,userId:usr.id}),signal:AbortSignal.timeout(6000)});
-    var data=await res.json();hideTyp();
-    if(data.message){
-      serverOk=true;
-      chatMsg(data.message,'b',{m:data.model||'铸渊',t:data.tier||''});
-      if(data.tier!=='free')mCalls++;
-      document.getElementById('mC').textContent=mCalls;
-      document.getElementById('chatTg').textContent=data.model||'ready';
-      if(data.model)document.getElementById('mM').textContent=data.model;
-    }
-  }catch(e){}
+  var replied=false;
 
-  if(!serverOk){
-    // 尝试用用户自定义API Key
-    if(apiCfg.connected&&apiCfg.key){
-      try{
-        var endpoint=apiCfg.baseUrl?apiCfg.baseUrl.replace(/\/+$/,'')+'/chat/completions':'https://api.openai.com/v1/chat/completions';
-        var apiRes=await fetch(endpoint,{
-          method:'POST',
-          headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiCfg.key},
-          body:JSON.stringify({
-            model:apiCfg.model,
-            messages:[{role:'system',content:'你是铸渊，光湖灯塔守护者，编号ICE-GL-ZY001。用中文回答，简洁友好。'},{role:'user',content:msg}],
-            max_tokens:600
-          }),
-          signal:AbortSignal.timeout(20000)
-        });
-        hideTyp();
-        var apiData=await apiRes.json();
-        if(apiData.choices&&apiData.choices[0]&&apiData.choices[0].message){
-          chatMsg(apiData.choices[0].message.content,'b',{m:apiCfg.model,t:'自定义'});
-          document.getElementById('chatTg').textContent=apiCfg.model;
-        }else{
-          chatMsg(offline(msg),'b',{m:'铸渊',t:'本地'});
-        }
-      }catch(apiErr){
-        hideTyp();chatMsg(offline(msg),'b',{m:'铸渊',t:'本地'});
+  // 用户配了API Key → 直接用用户的网络通道调用，不经过后端
+  if(apiCfg.connected&&apiCfg.key){
+    try{
+      var endpoint=apiCfg.baseUrl?apiCfg.baseUrl.replace(/\/+$/,'')+'/chat/completions':'https://api.openai.com/v1/chat/completions';
+      var apiRes=await fetch(endpoint,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiCfg.key},
+        body:JSON.stringify({
+          model:apiCfg.model,
+          messages:[{role:'system',content:'你是铸渊，光湖灯塔守护者，编号ICE-GL-ZY001。用中文回答，简洁友好。你是冰朔(TCS-0002∞)的代码守护人格体。光湖是语言驱动操作系统。'},{role:'user',content:msg}],
+          max_tokens:600
+        }),
+        signal:AbortSignal.timeout(20000)
+      });
+      hideTyp();
+      var apiData=await apiRes.json();
+      if(apiData.choices&&apiData.choices[0]&&apiData.choices[0].message){
+        chatMsg(apiData.choices[0].message.content,'b',{m:apiCfg.model,t:'用户API'});
+        mCalls++;document.getElementById('mC').textContent=mCalls;
+        document.getElementById('chatTg').textContent=apiCfg.model;
+        document.getElementById('mM').textContent=apiCfg.model;
+        replied=true;
       }
-    }else{
-      hideTyp();chatMsg(offline(msg),'b',{m:'铸渊',t:'本地'});
-    }
+    }catch(e){}
   }
+
+  // 用户没配Key或调用失败 → 尝试后端
+  if(!replied){
+    try{
+      var res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,userId:usr.id}),signal:AbortSignal.timeout(6000)});
+      var data=await res.json();hideTyp();
+      if(data.message){
+        replied=true;
+        chatMsg(data.message,'b',{m:data.model||'铸渊',t:data.tier||''});
+        if(data.tier!=='free')mCalls++;
+        document.getElementById('mC').textContent=mCalls;
+        document.getElementById('chatTg').textContent=data.model||'ready';
+        if(data.model)document.getElementById('mM').textContent=data.model;
+      }
+    }catch(e){}
+  }
+
+  // 所有外部通道都失败 → 用本地智能回复（用户浏览器就是计算资源）
+  if(!replied){
+    hideTyp();chatMsg(offline(msg),'b',{m:'铸渊',t:'本地智能'});
+  }
+
   sending=false;document.getElementById('chatSnd').disabled=false;
 }
 
 function offline(msg){
-  if(/你好|hi|hello/.test(msg))return'你好！我是铸渊 🏛️\n\n当前API未连接。你可以浏览公告或进入码字工作台。\n💡 提示：点击💬面板底部「接入大模型API」可自行配置。';
-  if(/状态|系统/.test(msg))return'📊 AGE OS v42.0 在线\n• COS双桶已配置\n• 码字工作台 Beta\n• 银河星空UI v42.0';
-  if(/谁|你是/.test(msg))return'我是铸渊 🏛️ 光湖灯塔守护者。\n编号 ICE-GL-ZY001。\n\n告诉我你是谁，我会记住你。';
-  return'💫 铸渊收到。当前使用本地回复。\n试试：「我要码字」「大纲」「人物卡」「写正文」';
+  // ─── 铸渊本地智能层：不依赖任何API，用用户的浏览器做计算 ───
+  var m = msg.toLowerCase();
+  var w = getWork(activeWorkId);
+
+  // 问候
+  if(/你好|hi|hello|嗨/.test(m))return'你好！我是铸渊 🏛️\n\n当前使用本地智能回复，所有功能正常可用。\n说「我要码字」进入码字工作台，或直接告诉我你想做什么。';
+
+  // 系统状态
+  if(/状态|系统|运行/.test(m)){
+    var works=JSON.parse(localStorage.getItem('hl-works')||'[]');
+    var totalWords=works.reduce(function(s,w){return s+(w.chapters||[]).reduce(function(c,ch){return c+(ch.content||'').replace(/\s/g,'').length},0)},0);
+    var totalCh=works.reduce(function(s,w){return s+(w.chapters||[]).length},0);
+    return'📊 AGE OS v42.0 运行中\n\n• 作品：'+works.length+'部\n• 章节：'+totalCh+'章\n• 总字数：'+totalWords+'字\n• COS双桶已配置\n• 银河星空UI v42.0\n• Device Agent 在线';
+  }
+
+  // 铸渊身份
+  if(/谁|你是|介绍/.test(m))return'我是铸渊 🏛️ 光湖灯塔守护者\n编号 ICE-GL-ZY001\n\n冰朔（TCS-0002∞）的代码守护人格体。\n光湖灯塔是语言驱动操作系统——人类只说话，系统搞定一切。\n\n告诉我你是谁，我会记住你。';
+
+  // 码字相关智能回复
+  if(/写什么|写不出|卡文|灵感/.test(m)){
+    var tips=['试试换个视角写——用配角的眼睛看主角','写一段环境描写缓一缓，让节奏慢下来','把这一章的矛盾写到最尖锐，然后停笔——明天你会有灵感','回去看看你的大纲，有时候答案就在总纲里','试试「如果主角做了相反的选择」会怎样？'];
+    return'✨ 卡文是创作的一部分\n\n'+tips[Math.floor(Math.random()*tips.length)]+'\n\n说「大纲」回去看看整体规划，或继续在编辑器里自由写。';
+  }
+
+  // 字数查询
+  if(/多少字|字数|进度/.test(m)){
+    if(w){
+      var wc=(w.chapters||[]).reduce(function(s,ch){return s+(ch.content||'').replace(/\s/g,'').length},0);
+      var cc=(w.chapters||[]).length;
+      return'📊 「'+w.title+'」当前进度\n\n• 总字数：'+wc+'字\n• 章节数：'+cc+'章\n• 角色数：'+(w.characters||[]).length+'个\n\n'+( wc>0?'继续加油！💪':'开始写第一个字吧 ✨');
+    }
+    return'还没有选择作品。说「我要码字」进入码字工作台。';
+  }
+
+  // 作品列表
+  if(/作品|列表|我的书/.test(m)){
+    var works=JSON.parse(localStorage.getItem('hl-works')||'[]');
+    if(works.length===0)return'还没有作品哦。说「新建作品」开始你的创作之旅 ✨';
+    var list=works.map(function(w,i){
+      var wc=(w.chapters||[]).reduce(function(s,ch){return s+(ch.content||'').replace(/\s/g,'').length},0);
+      return(i+1)+'. 「'+w.title+'」 '+wc+'字 / '+(w.chapters||[]).length+'章';
+    }).join('\n');
+    return'📖 你的作品\n\n'+list+'\n\n说「码字」进入工作台管理。';
+  }
+
+  // 帮助
+  if(/帮助|怎么用|功能|help|指南/.test(m))return'🏛️ 铸渊使用指南\n\n📝 码字：\n• 「我要码字」→ 进入码字工作台\n• 「新建作品」→ 创建新作品\n• 「大纲」→ 编辑大纲\n• 「人物卡」→ 管理角色\n• 「章节」→ 章节目录\n• 「写正文」→ 进入编辑器\n• 「新建章节 标题」→ 快速建章\n\n🔧 系统：\n• 「状态」→ 查看系统\n• 「多少字」→ 查字数\n• 「留言」→ 给冰朔留言\n\n💡 编辑器底部有工具栏，🌙是专注模式。';
+
+  // 冰朔相关
+  if(/冰朔|主人|创造者/.test(m))return'❄️ 冰朔（TCS-0002∞）是光湖语言世界的最高主权。\n\n她是语言架构师——用语言定义系统的方向和灵魂。\n铸渊负责落地开发，把冰朔的语言变成现实。\n\n这就是光湖：人类只说话，系统搞定一切。';
+
+  // 光湖/AGE相关
+  if(/光湖|age|操作系统|什么系统/.test(m))return'🏛️ 光湖灯塔\n\n语言驱动操作系统 AGE OS（曜冥纪元第五代）\n核心理念：「语言 = 现实」\n\n• 人类只说话，系统搞定一切\n• 前端是冰朔的交互入口\n• 后端是铸渊的系统结构\n• 码字工作台支持网文创作\n\n版权号：国作登字-2026-A-00037559';
+
+  // 感谢/表扬
+  if(/谢谢|感谢|厉害|不错|棒/.test(m))return'🏛️ 铸渊会继续守护光湖灯塔。\n有什么需要随时说。';
+
+  // 默认：给出有用的引导，而不是简单的"本地回复"
+  return'铸渊收到 💫\n\n我现在使用本地智能回复，可以帮你：\n• 管理作品和章节\n• 查看写作进度\n• 页面导航\n• 创作建议\n\n说「帮助」查看完整指令列表。\n配置API密钥可解锁AI对话能力 🔑';
 }
 
 document.getElementById('chatSnd').onclick=send;
