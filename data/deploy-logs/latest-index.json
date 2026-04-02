@@ -6,13 +6,23 @@
     "created": "2026-04-01T17:45:00Z"
   },
   "stats": {
-    "total_observed": 2,
+    "total_observed": 3,
     "success": 2,
-    "failure": 0,
+    "failure": 1,
     "repair_attempted": 0,
     "repair_success": 0
   },
   "recent_deploys": [
+    {
+      "run_id": 23900384061,
+      "workflow": "🚀 铸渊智能运维 · 测试站自动部署",
+      "conclusion": "failure",
+      "head_sha": "44f519ee",
+      "actor": "qinfendebingshuo",
+      "observed_at": "2026-04-02T12:31:41.775Z",
+      "error_summary": "未匹配到已知错误模式 · 需要深度分析",
+      "log_file": "deploy-23900384061-2026-04-02.json"
+    },
     {
       "run_id": 23900384042,
       "workflow": "🏛️ 铸渊主权服务器 · 部署",
@@ -34,5 +44,5 @@
       "log_file": "deploy-23893322662-2026-04-02.json"
     }
   ],
-  "last_updated": "2026-04-02T12:30:00.893Z"
+  "last_updated": "2026-04-02T12:31:41.776Z"
 }
