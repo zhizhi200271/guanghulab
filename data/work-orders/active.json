@@ -112,6 +112,45 @@
       ],
       "created_at": "2026-03-31T09:27:54.827Z",
       "updated_at": "2026-03-31T09:28:30.067Z"
+    },
+    {
+      "id": "WO-20260402-1457",
+      "title": "Merge pull request #258 from qinfendebingshuo/copilot/update-homepage-three-column-layout",
+      "status": "failed",
+      "commit_sha": "b3f38e263f6f6aa6e03a516445cbea8b63bd9c09",
+      "branch": "main",
+      "created_by": "qinfendebingshuo",
+      "responsible": "Agent",
+      "retry_count": 0,
+      "max_retries": 3,
+      "timeline": [
+        {
+          "timestamp": "2026-04-02T14:57:46.729Z",
+          "status": "pending",
+          "actor": "system",
+          "message": "工单创建 · Merge pull request #258 from qinfendebingshuo/copilot/update-homepage-three-column-layout"
+        },
+        {
+          "timestamp": "2026-04-02T14:57:46.772Z",
+          "status": "deploying",
+          "actor": "Agent",
+          "message": "开始部署到测试站"
+        },
+        {
+          "timestamp": "2026-04-02T14:58:27.523Z",
+          "status": "failed",
+          "actor": "Agent",
+          "message": "部署失败"
+        }
+      ],
+      "deploy_logs": [
+        {
+          "timestamp": "2026-04-02T14:58:27.523Z",
+          "content": "服务器健康检查失败"
+        }
+      ],
+      "created_at": "2026-04-02T14:57:46.729Z",
+      "updated_at": "2026-04-02T14:58:27.523Z"
     }
   ]
 }
