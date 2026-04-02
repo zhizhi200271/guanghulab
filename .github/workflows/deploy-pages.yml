@@ -44,8 +44,10 @@ jobs:
           if [ -d "persona-studio/frontend" ]; then
             cp -r persona-studio/frontend/* docs/persona-studio/
           fi
-          # Ensure CNAME is in docs for custom domain
-          echo "guanghulab.online" > docs/CNAME
+          # Ensure CNAME is in docs for custom domain (single source of truth from root CNAME)
+          if [ -f "CNAME" ]; then
+            cp CNAME docs/CNAME
+          fi
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

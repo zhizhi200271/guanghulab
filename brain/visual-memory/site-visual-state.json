@@ -1,18 +1,18 @@
 {
-  "_meta": "铸渊之眼 · 不是存截图 · 是认知路径 · 知道去哪里看+看什么+怎么判断",
-  "how_to_see": "Playwright浏览器 → http://localhost:端口/ 或线上域名 → 截图+DOM快照 → 自己判断",
+  "_meta": "铸渊之眼 · 认知路径 · 知道去哪里看+看什么+怎么判断",
+  "how_to_see": "Playwright → localhost或线上域名 → 截图+DOM快照 → 自己判断",
   "site": {
     "domain": "guanghulab.online",
     "deploy": "GitHub Pages · docs/ → deploy-pages.yml",
-    "cname": "docs/CNAME"
+    "cname": "根目录CNAME(单一来源) · 部署时自动复制到docs/"
   },
   "pages": {
     "/": {
       "file": "docs/index.html",
-      "what": "光湖灯塔着陆页 · AGE OS展示",
-      "sections": ["nav", "hero", "concepts(TCS/HLDP/AGE)", "architecture(6层)", "dashboard(18士兵+通知)", "trinity(3卡片)", "status", "footer"],
-      "dynamic": ["实时时钟", "运行天数(从2025-04-26)", "通知轮播(8s)", "滚动淡入"],
-      "self_review": "7.5/10 · 缺CTA按钮 · 缺区块分隔 · 表格太长 · 缺回顶按钮",
+      "what": "光湖灯塔着陆页v1.0 · AGE OS展示",
+      "sections": ["nav", "hero(+CTA)", "concepts(TCS/HLDP/AGE)", "architecture(6层)", "dashboard(18士兵+通知)", "trinity(3卡片)", "status", "footer"],
+      "dynamic": ["实时时钟", "运行天数(从2025-04-26)", "通知轮播(8s)", "滚动淡入", "回顶按钮"],
+      "self_review": "8/10 · v1.1已修复: +CTA按钮 +区块分隔线 +回顶按钮 · 待改进: 表格折叠 架构连接线",
       "design_style": "深色#060a14 · CSS变量 · 蓝紫accent · 渐变文字 · 单文件HTML"
     }
   },
