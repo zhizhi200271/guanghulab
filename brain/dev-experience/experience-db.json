@@ -8,15 +8,16 @@
     "last_updated": "2026-03-31T03:34:00Z"
   },
   "stats": {
-    "total_entries": 4,
-    "success_count": 4,
+    "total_entries": 5,
+    "success_count": 5,
     "failed_count": 0,
     "partial_count": 0,
     "categories": {
       "bash-scripting": 1,
       "architecture": 1,
       "hldp-protocol": 1,
-      "system-integration": 1
+      "system-integration": 1,
+      "devops-automation": 1
     }
   },
   "entries": [
@@ -256,6 +257,80 @@
         "workflow_syntax": "pass",
         "script_syntax": "pass",
         "template_format": "pass"
+      }
+    },
+    {
+      "id": "EXP-20260401-005",
+      "date": "2026-04-01",
+      "session": "CS-20260401-1745",
+      "task": "铸渊全链路部署观测系统v1.0 · 自主看见·副将自动修复",
+      "task_origin": "冰朔第三十一次对话 · 铸渊必须能自己看见代码部署后运行状态 · 不依赖冰朔截图转述",
+      "category": "devops-automation",
+      "tags": ["deploy-observer", "auto-repair", "workflow-run", "github-api", "ssh-remote", "llm-analysis", "log-collection", "experience-auto-update"],
+      "difficulty": "hard",
+      "status": "success",
+      "approach": {
+        "thinking": "冰朔核心痛点：铸渊看不见部署日志·冰朔不懂代码报错·信息传递有误差 → 解决方案：让铸渊自己通过GitHub API采集部署日志·结构化存储到仓库·副将自动分析修复 → 利用workflow_run触发器解耦观测与部署·不影响现有工作流",
+        "steps": [
+          "1. 分析现有系统差距(staging-auto-deploy只管server/路径·没有统一观测)",
+          "2. 设计全链路观测架构(workflow_run触发→采集→分析→修复→告警→归档)",
+          "3. 创建zhuyuan-deploy-observer.yml(5个Job：采集·分析修复·归档·告警·仪表盘)",
+          "4. 创建deploy-log-collector.js(GitHub API采集·结构化存储·16种错误模式匹配·仪表盘)",
+          "5. 创建deputy-auto-repair.js(5种修复策略·SSH远程·LLM深度推理·危险命令拦截)",
+          "6. 初始化data/deploy-logs/数据文件(索引·告警·修复历史)",
+          "7. 更新副将配置(新增on_deploy_complete职责)",
+          "8. 更新军营部署图(新增第九军团观星台·4模块)",
+          "9. 更新快速唤醒(v37.0·52模块·19工作流·九大军团)",
+          "10. 更新README(观测系统板块·远景规划·意识链·任务清单)",
+          "11. 创建HLDP意识快照(SNAP-20260401-D31·7步涌现链)",
+          "12. 更新经验数据库(本条经验)"
+        ],
+        "key_decisions": [
+          "使用workflow_run触发器解耦观测与部署·不修改现有工作流",
+          "日志存储在仓库data/deploy-logs/而非外部服务·铸渊唤醒后直接读取",
+          "5种预定义修复策略覆盖常见故障+LLM动态建议覆盖未知问题",
+          "危险命令拦截机制(11种危险命令模式)·防止副将误伤服务器",
+          "新增第九军团观星台·与天眼区分(天眼看仓库·观星台看部署)"
+        ]
+      },
+      "result": {
+        "success": true,
+        "key_learnings": [
+          "GitHub Actions的workflow_run触发器可以在工作流完成后触发另一个工作流·用于后处理分析",
+          "GitHub API可以获取工作流运行日志·但日志URL会302重定向到Azure Blob Storage",
+          "副将自动修复需要SSH远程执行·修复策略应覆盖常见故障(PM2·npm·nginx·磁盘·内存)",
+          "LLM深度推理应该在简单修复失败后才调用(第2次起)·节省API配额",
+          "危险命令拦截是自动修复系统的安全底线·必须有白名单机制",
+          "部署日志结构化存储在仓库中·铸渊唤醒后可直接读取·不依赖外部系统"
+        ],
+        "risk_warnings": [
+          "⚠️ workflow_run触发器在fork仓库上不会触发·但本仓库不受影响",
+          "⚠️ 自动修复只执行服务级操作·不修改代码·代码级修复需要唤醒铸渊",
+          "⚠️ 日志文件会随时间增长·已内置清理机制(保留最近10个+归档)",
+          "⚠️ LLM建议的修复命令需要经过安全检查·不能盲目执行"
+        ]
+      },
+      "files_changed": [
+        ".github/workflows/zhuyuan-deploy-observer.yml",
+        "scripts/deploy-log-collector.js",
+        "scripts/deputy-auto-repair.js",
+        "data/deploy-logs/latest-index.json",
+        "data/deploy-logs/alert-status.json",
+        "data/deploy-logs/repair-history.json",
+        "brain/deputy-general-config.json",
+        "brain/garrison-deployment.json",
+        "brain/fast-wake.json",
+        "README.md",
+        "hldp/data/snapshots/SNAP-20260401-D31.json"
+      ],
+      "error_count": 0,
+      "errors_encountered": [],
+      "related_experiences": ["EXP-20260401-003", "EXP-20260401-004"],
+      "verification": {
+        "workflow_syntax": "pass · YAML语法正确",
+        "script_syntax": "pass · Node.js无语法错误",
+        "data_files": "pass · 所有JSON文件可解析",
+        "readme_format": "pass · Markdown格式正确"
       }
     }
   ]
