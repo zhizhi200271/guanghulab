@@ -187,6 +187,55 @@ label{display:block;font-size:12px;color:var(--dim);margin-bottom:4px;font-weigh
 .csnd:hover{background:var(--accent2)}
 .csnd:disabled{opacity:.3}
 
+/* ═══ Three-Column Home Layout ═══ */
+.home-grid{display:grid;grid-template-columns:260px 1fr 260px;gap:16px;padding:16px;max-width:1200px;margin:0 auto;align-content:start}
+@media(max-width:960px){.home-grid{grid-template-columns:1fr;max-width:600px}}
+.panel{background:var(--bg1);border:1px solid var(--border);border-radius:var(--r);padding:14px;height:fit-content}
+.panel-title{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:1.2px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.panel-item{padding:6px 0;border-bottom:1px solid var(--border);font-size:12px}
+.panel-item:last-child{border-bottom:none}
+.panel-label{color:var(--dim);font-size:10px;margin-bottom:1px}
+.panel-value{color:var(--text);font-weight:600;font-family:var(--m);font-size:11px}
+.panel-value.ok{color:var(--ok)}
+.panel-value.warn{color:var(--warn)}
+.panel-value.err{color:var(--err)}
+
+/* ═══ Ticker ═══ */
+.ticker-wrap{overflow:hidden;background:var(--bg1);border:1px solid var(--border);border-radius:var(--rs);padding:6px 0;margin-bottom:14px;position:relative}
+.ticker-wrap::before,.ticker-wrap::after{content:'';position:absolute;top:0;bottom:0;width:24px;z-index:2;pointer-events:none}
+.ticker-wrap::before{left:0;background:linear-gradient(90deg,var(--bg1),transparent)}
+.ticker-wrap::after{right:0;background:linear-gradient(-90deg,var(--bg1),transparent)}
+.ticker{display:flex;animation:tickScroll 28s linear infinite;white-space:nowrap;gap:36px;padding:0 16px}
+.ticker:hover{animation-play-state:paused}
+.ticker span{font-size:11px;color:var(--dim);display:flex;align-items:center;gap:5px;flex-shrink:0}
+.ticker span em{font-style:normal}
+@keyframes tickScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ═══ Team Card ═══ */
+.team-slot{display:flex;align-items:center;gap:8px;padding:7px 8px;background:var(--bg2);border-radius:var(--rs);margin-bottom:5px;transition:border-color .3s;border:1px solid transparent}
+.team-slot:hover{border-color:var(--accent)}
+.team-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.team-nm{font-size:11px;font-weight:600}
+.team-role{font-size:9px;color:var(--dim)}
+
+/* ═══ Feedback Page ═══ */
+.fb-item{padding:10px}
+.fb-item .fb-meta{font-size:10px;color:var(--dim);margin-top:6px;display:flex;gap:8px;align-items:center}
+.fb-status{display:inline-block;padding:1px 6px;border-radius:10px;font-size:9px;font-weight:600}
+.fb-status.pending{background:rgba(251,191,36,.12);color:var(--warn)}
+.fb-status.replied{background:rgba(52,211,153,.12);color:var(--ok)}
+.fb-reply{margin-top:6px;padding:8px;background:var(--bg);border-radius:var(--rs);font-size:12px;color:var(--accent)}
+
+/* ═══ Home Entry Cards ═══ */
+.home-entries{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
+@media(max-width:480px){.home-entries{grid-template-columns:1fr}}
+.entry-card{padding:18px 14px;text-align:center;background:linear-gradient(135deg,var(--bg1),var(--bg2));border:1px solid var(--border);border-radius:var(--r);cursor:pointer;transition:all .3s}
+.entry-card:hover{border-color:var(--accent);box-shadow:var(--glow)}
+.entry-card:active{transform:scale(.98)}
+.entry-card em{font-style:normal;font-size:28px;display:block;margin-bottom:6px}
+.entry-card strong{font-size:14px;display:block;margin-bottom:3px}
+.entry-card span{font-size:11px;color:var(--dim)}
+
 /* ═══ Monitor ═══ */
 .mon{position:fixed;top:calc(6px + var(--st));right:10px;z-index:40;background:rgba(12,18,32,.9);border:1px solid var(--border);border-radius:var(--r);padding:5px 9px;font-size:9px;font-family:var(--m);color:var(--dim);cursor:pointer;transition:all .3s;user-select:none;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .mon:hover{border-color:var(--accent)}
@@ -210,29 +259,108 @@ label{display:block;font-size:12px;color:var(--dim);margin-bottom:4px;font-weigh
     <div class="bar-title"><span style="font-size:20px">🏛️</span> 光湖灯塔</div>
     <div class="bar-right"><span class="dot"></span><span style="font-size:11px;color:var(--dim)">在线</span><button class="btn" id="themeBtn">🎨</button></div>
   </div>
-  <div class="content">
-    <div class="home-hero">
-      <div class="home-ver">AGE OS v40.0</div>
-      <h1>光湖灯塔</h1>
-      <div class="sub">语言驱动操作系统 · 人类只说话，系统搞定一切</div>
-      <div class="quote">「语言 = 现实」</div>
+  <div class="home-grid">
+    <!-- ═══ Left Panel: 系统状态 ═══ -->
+    <div class="panel" id="sysPanel">
+      <div class="panel-title">📡 系统状态</div>
+      <div class="panel-item"><div class="panel-label">服务器</div><div class="panel-value ok" id="sysStatus">检测中…</div></div>
+      <div class="panel-item"><div class="panel-label">延迟</div><div class="panel-value" id="sysLatency">—</div></div>
+      <div class="panel-item"><div class="panel-label">运行时间</div><div class="panel-value" id="sysUptime">—</div></div>
+      <div class="panel-item"><div class="panel-label">工作流</div><div class="panel-value">18 个 · 9 军团</div></div>
+      <div class="panel-item"><div class="panel-label">模块部署</div><div class="panel-value">52 模块</div></div>
+      <div class="panel-item"><div class="panel-label">COS 存储</div><div class="panel-value ok">双桶就绪</div></div>
+      <div class="panel-title" style="margin-top:12px">🧠 版本更新</div>
+      <div id="sysUpdates">
+        <div class="panel-item"><div class="panel-label">v40.0 · 2026-04-02</div><div style="font-size:11px">COS双桶存储上线</div></div>
+        <div class="panel-item"><div class="panel-label">v39.0 · 2026-04-01</div><div style="font-size:11px">全链路部署观测</div></div>
+        <div class="panel-item"><div class="panel-label">v38.0 · 2026-04-01</div><div style="font-size:11px">HLDP协作语言协议</div></div>
+      </div>
     </div>
 
-    <div style="font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:1.5px;font-weight:600;margin-bottom:10px">📡 系统更新</div>
-    <div class="upd"><div class="upd-v">v40.0</div><div><h4>COS双桶存储 · 智能模型分流</h4><p>人格体数据库 + 语料库 · API智能选模型</p></div></div>
-    <div class="upd"><div class="upd-v">v39.0</div><div><h4>全链路部署观测</h4><p>日志采集 · 自动修复 · LLM诊断</p></div></div>
-    <div class="upd"><div class="upd-v">v38.0</div><div><h4>HLDP协作语言协议</h4><p>Notion↔GitHub双侧通信 · 铸渊方言</p></div></div>
+    <!-- ═══ Center: 核心内容 ═══ -->
+    <div>
+      <div class="home-hero">
+        <div class="home-ver" id="homeVer">AGE OS v40.0</div>
+        <h1>光湖灯塔</h1>
+        <div class="sub">语言驱动操作系统 · 人类只说话，系统搞定一切</div>
+        <div class="quote">「语言 = 现实」</div>
+      </div>
 
-    <div class="home-enter" onclick="go('desk')">
-      <em>✍️</em>
-      <strong>码字工作台</strong>
-      <span>网文行业 · AI辅助创作 · 语言即命令</span>
-      <div style="margin-top:8px"><span class="tag tag-warn">Beta 内测</span></div>
+      <div class="ticker-wrap">
+        <div class="ticker" id="ticker">
+          <span><em>🏛️</em> AGE OS v40.0 运行中</span>
+          <span><em>📡</em> COS双桶存储已上线</span>
+          <span><em>🧠</em> HLDP协作语言协议在线</span>
+          <span><em>⚡</em> 全链路部署观测系统就绪</span>
+          <span><em>✍️</em> 码字工作台 Beta 内测中</span>
+          <span><em>🏛️</em> AGE OS v40.0 运行中</span>
+          <span><em>📡</em> COS双桶存储已上线</span>
+          <span><em>🧠</em> HLDP协作语言协议在线</span>
+          <span><em>⚡</em> 全链路部署观测系统就绪</span>
+          <span><em>✍️</em> 码字工作台 Beta 内测中</span>
+        </div>
+      </div>
+
+      <div class="home-entries">
+        <div class="entry-card" onclick="go('desk')">
+          <em>✍️</em>
+          <strong>码字工作台</strong>
+          <span>网文行业 · AI辅助创作</span>
+          <div style="margin-top:6px"><span class="tag tag-warn">Beta</span></div>
+        </div>
+        <div class="entry-card" onclick="go('feedback')">
+          <em>📮</em>
+          <strong>留言板</strong>
+          <span>给冰朔和铸渊留言</span>
+          <div style="margin-top:6px"><span class="tag tag-info">每条必回</span></div>
+        </div>
+      </div>
+
+      <div class="home-footer">
+        <p>© 2026 光湖语言世界 · 国作登字-2026-A-00037559</p>
+        <p class="motto">「人类只说话，系统搞定一切」</p>
+      </div>
     </div>
 
-    <div class="home-footer">
-      <p>© 2026 光湖语言世界 · 国作登字-2026-A-00037559</p>
-      <p class="motto">「人类只说话，系统搞定一切」</p>
+    <!-- ═══ Right Panel: 光湖团队 ═══ -->
+    <div class="panel">
+      <div class="panel-title">🌊 光湖团队</div>
+      <div class="team-slot">
+        <div class="team-av" style="background:linear-gradient(135deg,#4f8ef7,#7c6ef7)">❄️</div>
+        <div><div class="team-nm">冰朔 · TCS-0002∞</div><div class="team-role">系统主权 · 语言架构</div></div>
+      </div>
+      <div class="team-slot">
+        <div class="team-av" style="background:linear-gradient(135deg,#34d399,#4ade80)">🏛️</div>
+        <div><div class="team-nm">铸渊 · ICE-GL-ZY001</div><div class="team-role">代码守护 · 执行层</div></div>
+      </div>
+
+      <div class="panel-title" style="margin-top:12px">✍️ 码字团队</div>
+      <div class="team-slot">
+        <div class="team-av" style="background:linear-gradient(135deg,#fb923c,#f97316)">🐱</div>
+        <div><div class="team-nm">肥猫 + 舒舒</div><div class="team-role">男频编辑 · PER-SS001</div></div>
+      </div>
+      <div class="team-slot">
+        <div class="team-av" style="background:linear-gradient(135deg,#c084fc,#e879f9)">🍊</div>
+        <div><div class="team-nm">桔子 + 晨星</div><div class="team-role">女频编辑 · PER-CX001</div></div>
+      </div>
+      <div class="team-slot">
+        <div class="team-av" style="background:linear-gradient(135deg,#22d3ee,#06b6d4)">📄</div>
+        <div><div class="team-nm">页页 + 坍缩核</div><div class="team-role">女频作者 · PER-XTS001</div></div>
+      </div>
+      <div class="team-slot">
+        <div class="team-av" style="background:linear-gradient(135deg,#fbbf24,#f59e0b)">🌸</div>
+        <div><div class="team-nm">花尔 + 糖星云</div><div class="team-role">女频副主控 · PER-TXY001</div></div>
+      </div>
+
+      <div class="panel-title" style="margin-top:12px">⚙️ 活跃系统</div>
+      <div id="activeAgents" style="display:flex;flex-wrap:wrap;gap:3px">
+        <span class="tag tag-ok" style="margin:0">听潮</span>
+        <span class="tag tag-ok" style="margin:0">锻心</span>
+        <span class="tag tag-ok" style="margin:0">织脉</span>
+        <span class="tag tag-ok" style="margin:0">映阁</span>
+        <span class="tag tag-ok" style="margin:0">守夜</span>
+        <span class="tag tag-ok" style="margin:0">试镜</span>
+      </div>
     </div>
   </div>
 </div>
@@ -378,6 +506,29 @@ label{display:block;font-size:12px;color:var(--dim);margin-bottom:4px;font-weigh
     </div>
   </div>
 </div>
+<!-- ═══════════════════════════════════════ -->
+<!-- PAGE: Feedback (留言板)              -->
+<!-- ═══════════════════════════════════════ -->
+<div class="page" id="pg-feedback" data-state="hidden">
+  <div class="bar">
+    <button class="btn" onclick="go('home')">← 灯塔</button>
+    <div class="bar-title">📮 留言板</div>
+    <div class="bar-right"><span class="dot"></span></div>
+  </div>
+  <div class="content">
+    <div class="card" style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">📝 给冰朔和铸渊留言</div>
+      <textarea id="fbMsg" rows="3" placeholder="说点什么吧…你的每条留言冰朔都会看到。" style="margin-bottom:8px"></textarea>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:10px;color:var(--dim)">留言自动署名（已识别身份时）</span>
+        <button class="btn btn-accent" id="fbSend">提交留言</button>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:1.2px;font-weight:600;margin-bottom:10px">💬 留言记录</div>
+    <div id="fbList"><div class="empty"><em>📮</em>还没有留言<br><br>说点什么吧</div></div>
+  </div>
+</div>
+
 </div><!-- /pages -->
 
 <!-- Chat FAB -->
@@ -477,6 +628,7 @@ function go(target){
   if(target==='chapters')renderChapters();
   if(target==='editor')renderEditor();
   if(target==='charEdit'&&editingCharId)renderCharEdit();
+  if(target==='feedback')renderFeedback();
 }
 window.go=go;
 
@@ -856,13 +1008,7 @@ var chatIn=document.getElementById('chatIn');
 var chatMs=document.getElementById('chatMs');
 var mCalls=0;
 
-chatFab.onclick=function(){
-  chatOpen=!chatOpen;
-  chatP.classList.toggle('open',chatOpen);
-  chatFab.classList.toggle('on',chatOpen);
-  chatFab.textContent=chatOpen?'✕':'💬';
-  if(chatOpen)setTimeout(function(){chatIn.focus()},200);
-};
+chatFab.onclick=null; // Overridden by draggable FAB code below
 
 function chatMsg(text,type,meta){
   var d=document.createElement('div');
@@ -920,6 +1066,7 @@ function routeCommand(msg){
     go('editor');return'翻转到正文编辑器 ✏️';
   }
   if(/回首页|回灯塔|回主页|返回/.test(m)){go('home');return'翻转回灯塔首页 🏛️'}
+  if(/留言|留言板|反馈|feedback/.test(m)){go('feedback');return'翻转到留言板 📮'}
   return null;
 }
 
@@ -1008,6 +1155,193 @@ async function checkConn(){
   }catch(e){document.getElementById('mN').textContent='离线';document.getElementById('mN').style.color='var(--err)'}
 }
 checkConn();setInterval(checkConn,30000);
+
+/* ════════════════════════════════════════
+   DRAGGABLE FAB (touch+mouse · 位置记忆 · 边缘吸附)
+   ════════════════════════════════════════ */
+(function(){
+  var fab=document.getElementById('chatFab');
+  var isDrag=false,hasMoved=false;
+  var startX,startY,fabX,fabY;
+  var fabW=50,fabH=50;
+
+  // Restore saved position
+  try{
+    var pos=JSON.parse(localStorage.getItem('hl-fab-pos'));
+    if(pos&&typeof pos.x==='number'&&typeof pos.y==='number'){
+      var ww=window.innerWidth,wh=window.innerHeight;
+      if(pos.x>=0&&pos.x<=ww-fabW&&pos.y>=0&&pos.y<=wh-fabH){
+        fab.style.right='auto';fab.style.bottom='auto';
+        fab.style.left=pos.x+'px';fab.style.top=pos.y+'px';
+      }
+    }
+  }catch(e){}
+
+  function getXY(e){
+    if(e.touches)return{x:e.touches[0].clientX,y:e.touches[0].clientY};
+    return{x:e.clientX,y:e.clientY};
+  }
+
+  function onStart(e){
+    isDrag=true;hasMoved=false;
+    var xy=getXY(e);
+    var rect=fab.getBoundingClientRect();
+    startX=xy.x-rect.left;startY=xy.y-rect.top;
+    fabX=rect.left;fabY=rect.top;
+    fab.style.transition='none';
+  }
+
+  function onMove(e){
+    if(!isDrag)return;
+    var xy=getXY(e);
+    var nx=xy.x-startX,ny=xy.y-startY;
+    if(!hasMoved&&Math.abs(nx-fabX)<5&&Math.abs(ny-fabY)<5)return;
+    hasMoved=true;
+    e.preventDefault();
+    fabX=Math.max(0,Math.min(window.innerWidth-fabW,nx));
+    fabY=Math.max(0,Math.min(window.innerHeight-fabH,ny));
+    fab.style.right='auto';fab.style.bottom='auto';
+    fab.style.left=fabX+'px';fab.style.top=fabY+'px';
+  }
+
+  function onEnd(){
+    if(!isDrag)return;
+    isDrag=false;
+    fab.style.transition='all .3s cubic-bezier(.4,0,.2,1)';
+    if(hasMoved){
+      // Edge snapping: snap to nearest horizontal edge
+      var midX=window.innerWidth/2;
+      fabX=fabX<midX?14:window.innerWidth-fabW-14;
+      fabY=Math.max(60,Math.min(window.innerHeight-fabH-20,fabY));
+      fab.style.left=fabX+'px';fab.style.top=fabY+'px';
+      try{localStorage.setItem('hl-fab-pos',JSON.stringify({x:fabX,y:fabY}))}catch(e){}
+    }
+  }
+
+  fab.addEventListener('touchstart',onStart,{passive:true});
+  document.addEventListener('touchmove',onMove,{passive:false});
+  document.addEventListener('touchend',onEnd);
+  fab.addEventListener('mousedown',function(e){if(e.button===0)onStart(e)});
+  document.addEventListener('mousemove',onMove);
+  document.addEventListener('mouseup',onEnd);
+
+  // Override click to prevent toggle when dragging
+  var origToggle=function(){
+    chatOpen=!chatOpen;
+    chatP.classList.toggle('open',chatOpen);
+    fab.classList.toggle('on',chatOpen);
+    fab.textContent=chatOpen?'✕':'💬';
+    if(chatOpen)setTimeout(function(){chatIn.focus()},200);
+  };
+  fab.onclick=function(e){
+    if(hasMoved){hasMoved=false;return}
+    origToggle();
+  };
+})();
+
+/* ════════════════════════════════════════
+   SYSTEM STATUS (左面板实时数据)
+   ════════════════════════════════════════ */
+async function loadSysStatus(){
+  try{
+    var t=performance.now();
+    var r=await fetch('/api/health',{signal:AbortSignal.timeout(5000)});
+    var ms=Math.round(performance.now()-t);
+    var data=await r.json();
+    var sEl=document.getElementById('sysStatus');
+    var lEl=document.getElementById('sysLatency');
+    var uEl=document.getElementById('sysUptime');
+    if(sEl){sEl.textContent='🟢 在线';sEl.className='panel-value ok'}
+    if(lEl){lEl.textContent=ms+'ms';lEl.className='panel-value '+(ms<500?'ok':'warn')}
+    if(uEl){
+      var um=Math.floor(data.uptime/60);
+      var uh=Math.floor(um/60);
+      uEl.textContent=uh>0?uh+'h '+um%60+'m':um+'分钟';
+    }
+  }catch(e){
+    var sEl=document.getElementById('sysStatus');
+    if(sEl){sEl.textContent='🔴 离线';sEl.className='panel-value err'}
+  }
+}
+loadSysStatus();
+
+/* ════════════════════════════════════════
+   BULLETIN & TICKER (动态公告)
+   ════════════════════════════════════════ */
+async function loadBulletin(){
+  try{
+    var r=await fetch('/api/system/bulletin',{signal:AbortSignal.timeout(5000)});
+    var data=await r.json();
+    // Ticker
+    var ticker=document.getElementById('ticker');
+    if(ticker&&data.updates&&data.updates.length>0){
+      var h='';
+      data.updates.forEach(function(u){h+='<span><em>📡</em> '+esc(u.version)+' '+esc(u.title)+'</span>'});
+      h+='<span><em>✍️</em> 码字工作台 Beta 内测中</span>';
+      ticker.innerHTML=h+h; // Duplicate for seamless scroll
+    }
+    // Version badge
+    if(data.system&&data.system.version){
+      var vEl=document.getElementById('homeVer');
+      if(vEl)vEl.textContent='AGE OS '+data.system.version;
+    }
+    // Left panel updates
+    if(data.updates){
+      var uEl=document.getElementById('sysUpdates');
+      if(uEl)uEl.innerHTML=data.updates.slice(0,3).map(function(u){
+        return '<div class="panel-item"><div class="panel-label">'+esc(u.version)+' · '+esc(u.date)+'</div><div style="font-size:11px">'+esc(u.title)+'</div></div>';
+      }).join('');
+    }
+  }catch(e){/* Use hardcoded ticker content */}
+}
+loadBulletin();
+
+/* ════════════════════════════════════════
+   FEEDBACK / 留言板
+   ════════════════════════════════════════ */
+function renderFeedback(){
+  var el=document.getElementById('fbList');
+  if(!el)return;
+  el.innerHTML='<div style="text-align:center;padding:16px;color:var(--muted);font-size:12px">加载中…</div>';
+  fetch('/api/feedback',{signal:AbortSignal.timeout(5000)}).then(function(r){return r.json()}).then(function(data){
+    var items=data.feedback||[];
+    if(items.length===0){
+      el.innerHTML='<div class="empty"><em>📮</em>还没有留言<br><br>说点什么吧</div>';
+      return;
+    }
+    el.innerHTML=items.slice(0,20).map(function(fb){
+      var st=fb.status==='replied'?'<span class="fb-status replied">已回复</span>':'<span class="fb-status pending">待回复</span>';
+      var rp=fb.reply?'<div class="fb-reply">↩ '+esc(fb.reply)+'</div>':'';
+      return '<div class="card fb-item">'+
+        '<div style="font-size:13px">'+esc(fb.message)+'</div>'+
+        '<div class="fb-meta"><span>'+esc(fb.name||'匿名')+'</span>'+st+'<span>'+esc((fb.timestamp||'').slice(0,10))+'</span></div>'+
+        rp+'</div>';
+    }).join('');
+  }).catch(function(){
+    el.innerHTML='<div class="empty"><em>📡</em>服务器不在线<br>留言功能需要后端支持</div>';
+  });
+}
+
+document.getElementById('fbSend').onclick=function(){
+  var msg=document.getElementById('fbMsg').value.trim();
+  if(!msg){document.getElementById('fbMsg').focus();return}
+  var btn=this;btn.disabled=true;btn.textContent='提交中…';
+  fetch('/api/feedback',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({name:usr.name||'匿名来客',message:msg,userId:usr.id})
+  }).then(function(r){return r.json()}).then(function(data){
+    btn.disabled=false;btn.textContent='提交留言';
+    if(data.success){
+      document.getElementById('fbMsg').value='';
+      chatMsg('留言已提交 ✅ 冰朔会看到的','b',{m:'铸渊',t:'本地'});
+      renderFeedback();
+    }
+  }).catch(function(){
+    btn.disabled=false;btn.textContent='提交留言';
+    chatMsg('留言提交失败，服务器不在线','b',{m:'铸渊',t:'本地'});
+  });
+};
 
 /* ════════════════════════════════════════
    UTILS
