@@ -212,12 +212,13 @@ async function checkConnection() {
 }
 
 /**
- * 保存用户记忆到核心桶
+ * 保存用户记忆到核心桶（团队内测用户 → COS）
  */
 async function saveUserMemory(userId, memoryData) {
   const key = `users/${userId}/memory.json`;
   const wrapped = {
     user_id: userId,
+    user_tier: 'team', // team = 内测团队 / public = 普通用户（后期单独存储）
     updated_at: new Date().toISOString(),
     version: 1,
     memories: memoryData
@@ -233,7 +234,32 @@ async function loadUserMemory(userId) {
     const key = `users/${userId}/memory.json`;
     return await readCore(key);
   } catch {
-    return { user_id: userId, memories: [], version: 0 };
+    return { user_id: userId, user_tier: 'team', memories: [], version: 0 };
+  }
+}
+
+/**
+ * 保存用户作品到核心桶（团队用户）
+ */
+async function saveUserWorks(userId, worksData) {
+  const key = `users/${userId}/works.json`;
+  return writeCore(key, {
+    user_id: userId,
+    user_tier: 'team',
+    updated_at: new Date().toISOString(),
+    works: worksData
+  });
+}
+
+/**
+ * 读取用户作品
+ */
+async function loadUserWorks(userId) {
+  try {
+    const key = `users/${userId}/works.json`;
+    return await readCore(key);
+  } catch {
+    return { user_id: userId, works: [] };
   }
 }
 
@@ -267,6 +293,8 @@ module.exports = {
   checkConnection,
   saveUserMemory,
   loadUserMemory,
+  saveUserWorks,
+  loadUserWorks,
   getConfig,
   COS_CONFIG
 };

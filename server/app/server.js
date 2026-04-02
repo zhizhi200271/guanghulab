@@ -323,6 +323,32 @@ app.get('/api/cos/config', (_req, res) => {
   }
 });
 
+// ─── 用户作品同步（团队内测用户 → COS） ───
+app.post('/api/cos/sync-works', async (req, res) => {
+  if (!cosBridge) return res.status(503).json({ error: true, message: 'COS模块未加载' });
+  try {
+    const { userId, works } = req.body;
+    if (!userId || !works) return res.status(400).json({ error: true, message: '缺少userId或works' });
+    await cosBridge.saveUserWorks(userId, works);
+    res.json({ success: true, message: '作品已同步到COS', userId });
+  } catch (err) {
+    res.status(500).json({ error: true, message: err.message });
+  }
+});
+
+// ─── 用户作品加载（团队内测用户 ← COS） ───
+app.get('/api/cos/load-works', async (req, res) => {
+  if (!cosBridge) return res.status(503).json({ error: true, message: 'COS模块未加载' });
+  try {
+    const userId = req.query.userId;
+    if (!userId) return res.status(400).json({ error: true, message: '缺少userId' });
+    const data = await cosBridge.loadUserWorks(userId);
+    res.json({ success: true, ...data });
+  } catch (err) {
+    res.json({ success: true, user_id: req.query.userId, works: [] });
+  }
+});
+
 // ═══════════════════════════════════════════════════════════
 // 智能模型分流 · Smart Model Router API
 // ═══════════════════════════════════════════════════════════
