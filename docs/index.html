@@ -63,7 +63,8 @@ a{color:var(--accent);text-decoration:none}
 .page[data-state="hidden"]{transform:rotateY(92deg) scale(.88);opacity:0;z-index:0;pointer-events:none;transition:none}
 
 /* ═══ Common UI ═══ */
-.bar{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:rgba(5,8,22,.72);backdrop-filter:blur(24px) saturate(1.3);-webkit-backdrop-filter:blur(24px) saturate(1.3);border-bottom:1px solid rgba(110,168,254,.08);min-height:48px;padding-top:calc(10px + var(--st))}
+.bar{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:10px var(--da-pad, 16px);background:rgba(5,8,22,.72);backdrop-filter:blur(24px) saturate(1.3);-webkit-backdrop-filter:blur(24px) saturate(1.3);border-bottom:1px solid rgba(110,168,254,.08);min-height:var(--da-bar-h, 48px);padding-top:calc(10px + var(--st));gap:8px}
+.bar-right{display:flex;gap:6px;align-items:center;flex-shrink:0}
 .bar-title{font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px}
 .bar-right{display:flex;align-items:center;gap:8px}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 6px var(--ok);animation:pls 2s infinite;flex-shrink:0}
@@ -76,7 +77,7 @@ a{color:var(--accent);text-decoration:none}
 .btn-accent{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff;box-shadow:0 2px 12px rgba(110,168,254,.2)}
 .btn-accent:hover{opacity:.88;color:#fff;box-shadow:0 4px 20px rgba(110,168,254,.35)}
 .btn-accent::before{background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.15) 50%,transparent 70%)}
-.content{padding:16px;max-width:700px;margin:0 auto}
+.content{padding:var(--da-pad, 16px);max-width:var(--da-content-max, 700px);margin:0 auto}
 .card{background:rgba(8,14,30,.55);border:1px solid rgba(110,168,254,.08);border-radius:var(--r);padding:16px;margin-bottom:12px;transition:all .35s cubic-bezier(.4,0,.2,1);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
 .card:hover{border-color:rgba(110,168,254,.25);box-shadow:0 0 24px rgba(110,168,254,.08)}
 .tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600}
@@ -126,8 +127,7 @@ label{display:block;font-size:12px;color:var(--dim);margin-bottom:4px;font-weigh
 .hub-title{text-align:center;padding:20px 0 12px}
 .hub-title h2{font-size:20px;font-weight:700}
 .hub-title p{font-size:12px;color:var(--dim);margin-top:2px}
-.hub-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-@media(max-width:360px){.hub-grid{grid-template-columns:1fr}}
+.hub-grid{display:grid;grid-template-columns:var(--da-hub, 1fr 1fr);gap:10px}
 .hub-card{text-align:center;padding:28px 14px;background:rgba(8,14,30,.45);border:1px solid rgba(110,168,254,.1);border-radius:var(--r);cursor:pointer;transition:all .4s cubic-bezier(.4,0,.2,1);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);position:relative;overflow:hidden}
 .hub-card::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(110,168,254,.08),transparent 70%);opacity:0;transition:opacity .4s}
 .hub-card:hover{border-color:rgba(110,168,254,.3);box-shadow:0 0 30px rgba(110,168,254,.1);transform:translateY(-3px)}
@@ -156,7 +156,7 @@ label{display:block;font-size:12px;color:var(--dim);margin-bottom:4px;font-weigh
 
 /* ═══ PAGE: Editor ═══ */
 .editor-info{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:12px;color:var(--dim);border-bottom:1px solid var(--border);margin-bottom:12px}
-.editor-textarea{min-height:calc(100vh - 260px);min-height:calc(100dvh - 260px);resize:none;line-height:2;font-size:15px;border:none;background:transparent;padding:0}
+.editor-textarea{min-height:calc(100vh - 260px);min-height:calc(100dvh - 260px);resize:none;line-height:var(--da-ed-lh, 2);font-size:var(--da-ed-font, 16px);border:none;background:transparent;padding:0}
 .editor-textarea:focus{border:none}
 .editor-bottom{position:sticky;bottom:0;padding:10px 0;background:rgba(5,8,22,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(110,168,254,.08);font-size:11px;color:var(--dim);font-family:var(--m)}
 /* ═══ Editor Toolbar ═══ */
@@ -225,19 +225,13 @@ label{display:block;font-size:12px;color:var(--dim);margin-bottom:4px;font-weigh
 .csnd:hover{background:var(--accent2)}
 .csnd:disabled{opacity:.3}
 
-/* ═══ Three-Column Home Layout ═══ */
-.home-grid{display:grid;grid-template-columns:260px 1fr 260px;gap:16px;padding:16px;max-width:1200px;margin:0 auto;align-content:start}
+/* ═══ Three-Column Home Layout (Device Agent driven) ═══ */
+.home-grid{display:grid;grid-template-columns:var(--da-grid, 1fr);gap:var(--da-gap, 12px);padding:var(--da-pad, 12px);max-width:1200px;margin:0 auto;align-content:start}
 .home-grid>*{min-width:0;overflow:hidden}
 .home-center{min-width:0;overflow:hidden}
-@media(max-width:960px){
-  .home-grid{grid-template-columns:1fr;max-width:100%;padding:12px;gap:12px}
-  .home-grid>.panel:first-child{order:2}
-  .home-center{order:1}
-  .home-grid>.panel:last-child{order:3}
-}
-@media(max-width:480px){
-  .home-grid{padding:8px;gap:8px}
-}
+[data-single-col="true"] .home-grid>.panel:first-child{order:2}
+[data-single-col="true"] .home-center{order:1}
+[data-single-col="true"] .home-grid>.panel:last-child{order:3}
 .panel{background:rgba(8,14,30,.55);border:1px solid rgba(110,168,254,.08);border-radius:var(--r);padding:14px;height:fit-content;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
 .panel-title{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:1.2px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
 .panel-item{padding:6px 0;border-bottom:1px solid var(--border);font-size:12px}
@@ -275,8 +269,7 @@ label{display:block;font-size:12px;color:var(--dim);margin-bottom:4px;font-weigh
 .fb-reply{margin-top:6px;padding:8px;background:var(--bg);border-radius:var(--rs);font-size:12px;color:var(--accent)}
 
 /* ═══ Home Entry Cards ═══ */
-.home-entries{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
-@media(max-width:480px){.home-entries{grid-template-columns:1fr}}
+.home-entries{display:grid;grid-template-columns:var(--da-entries, 1fr 1fr);gap:10px;margin:16px 0}
 .entry-card{padding:24px 16px;text-align:center;background:rgba(8,14,30,.45);border:1px solid rgba(110,168,254,.1);border-radius:var(--r);cursor:pointer;transition:all .4s cubic-bezier(.4,0,.2,1);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);position:relative;overflow:hidden}
 .entry-card::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(110,168,254,.08),transparent 70%);opacity:0;transition:opacity .4s}
 .entry-card:hover{border-color:rgba(110,168,254,.3);box-shadow:0 0 30px rgba(110,168,254,.1),0 0 60px rgba(167,139,250,.06);transform:translateY(-3px)}
@@ -303,38 +296,13 @@ label{display:block;font-size:12px;color:var(--dim);margin-bottom:4px;font-weigh
   .home-grid>.panel,.home-grid>.home-center{overflow-y:auto;min-height:0;height:auto}
 }
 
-/* ═══ Mobile Optimizations ═══ */
-@media(max-width:480px){
-  .bar{padding:8px 12px;min-height:44px}
-  .bar-title{font-size:13px}
-  .btn{padding:6px 14px;font-size:12px;min-height:36px;display:inline-flex;align-items:center}
-  .btn-accent{min-height:36px}
-  .content{padding:12px}
-  .home-hero{padding:28px 12px 20px}
-  .home-hero h1{font-size:clamp(24px,7vw,36px)}
-  .home-entries{grid-template-columns:1fr;gap:10px;margin:12px 0}
-  .entry-card{padding:20px 16px}
-  .entry-card em{font-size:32px;margin-bottom:8px}
-  .hub-grid{grid-template-columns:1fr 1fr;gap:8px}
-  .hub-card{padding:20px 10px}
-  .hub-card em{font-size:28px}
-  .form-row{margin-bottom:12px}
-  .create-actions{flex-direction:column}
-  .create-actions .btn{width:100%;justify-content:center}
-  /* Editor mobile: full screen writing */
-  #pg-editor .content{padding:8px 12px}
-  .editor-textarea{min-height:calc(100vh - 200px);min-height:calc(100dvh - 200px);font-size:16px;line-height:1.9;padding:4px 0}
-  .editor-bottom{padding:8px 4px}
-  .ed-toolbar .tb-btn{width:36px;height:34px;font-size:15px}
-  .ed-toolbar .tb-sep{height:20px}
-  /* Touch-friendly chat */
-  .chat-fab{width:48px;height:48px;font-size:20px}
-  .chat-fab.editor-mode{width:36px;height:36px;font-size:15px}
-  .csnd{width:40px;height:40px}
-  .cin{font-size:16px;padding:10px 12px}
-  /* Monitor smaller on mobile */
-  .mon{font-size:8px;padding:4px 8px;border-radius:var(--rs)}
-}
+/* ═══ Touch-Driven Sizing (Device Agent 适配) ═══ */
+.btn{min-height:var(--da-touch-min, 32px)}
+.btn-accent{min-height:var(--da-touch-min, 32px)}
+[data-touch="true"] .csnd{width:40px;height:40px}
+[data-touch="true"] .cin{font-size:16px;padding:10px 12px}
+.home-hero h1{font-size:var(--da-title, 32px)}
+.home-entries{display:grid;grid-template-columns:var(--da-entries, 1fr 1fr);gap:10px;margin:16px 0}
 
 /* ═══ API Key Section ═══ */
 .chat-api{border-top:1px solid var(--border);flex-shrink:0}
@@ -726,6 +694,103 @@ label{display:block;font-size:12px;color:var(--dim);margin-bottom:4px;font-weigh
 'use strict';
 
 /* ════════════════════════════════════════
+   DEVICE AGENT (直接问设备 · 用真实数据适配)
+   不猜、不分类。问设备拿真实参数，算出布局。
+   ════════════════════════════════════════ */
+var DA = (function(){
+  var root = document.documentElement;
+  var info = {};
+
+  function detect(){
+    // ── 直接问设备：你是谁？ ──
+    var vw = window.innerWidth;
+    var vh = window.innerHeight;
+    var sw = screen.width;
+    var sh = screen.height;
+    var dpr = window.devicePixelRatio || 1;
+    var touch = navigator.maxTouchPoints > 0;
+    var portrait = vh > vw;
+    var physicalW = vw * dpr;  // 真实物理像素宽度
+    var conn = navigator.connection || navigator.mozConnection || null;
+    var memGB = navigator.deviceMemory || 4;
+    var cores = navigator.hardwareConcurrency || 4;
+    var lowPerf = memGB <= 2 || cores <= 2;
+
+    info = {vw:vw,vh:vh,sw:sw,sh:sh,dpr:dpr,touch:touch,portrait:portrait,physW:physicalW,
+            conn:conn?{type:conn.effectiveType,downlink:conn.downlink}:null,mem:memGB,cores:cores};
+
+    // ── 用真实数据直接计算布局参数（不猜、不分类）──
+    var s = root.style;
+    s.setProperty('--vw', vw + 'px');
+    s.setProperty('--vh', vh + 'px');
+
+    // 间距 = 屏幕宽度的比例，最小8最大20
+    var pad = Math.max(8, Math.min(20, Math.round(vw * 0.028)));
+    var gap = Math.max(6, Math.min(16, Math.round(vw * 0.02)));
+    s.setProperty('--da-pad', pad + 'px');
+    s.setProperty('--da-gap', gap + 'px');
+
+    // 圆角 = 按比例
+    s.setProperty('--da-r', Math.max(10, Math.min(16, Math.round(vw * 0.012))) + 'px');
+
+    // 首页网格：能放三栏就三栏，否则一栏
+    var sideW = 260;
+    var canThreeCol = vw >= (sideW * 2 + 400 + gap * 2); // 至少400给中间
+    s.setProperty('--da-grid', canThreeCol ? sideW + 'px 1fr ' + sideW + 'px' : '1fr');
+
+    // 入口卡片：宽度够就双列
+    s.setProperty('--da-entries', vw >= 500 ? '1fr 1fr' : '1fr');
+
+    // Hub网格
+    s.setProperty('--da-hub', vw >= 340 ? '1fr 1fr' : '1fr');
+
+    // 内容区最大宽度
+    s.setProperty('--da-content-max', vw >= 800 ? '700px' : '100%');
+
+    // 标题字号 = 按屏宽比例
+    s.setProperty('--da-title', Math.max(22, Math.min(44, Math.round(vw * 0.055))) + 'px');
+
+    // 编辑器字号：触控设备至少16px（防iOS自动缩放）
+    var edFont = touch ? Math.max(16, Math.round(vw * 0.042)) : Math.max(15, Math.min(18, Math.round(vw * 0.013)));
+    s.setProperty('--da-ed-font', edFont + 'px');
+    s.setProperty('--da-ed-lh', touch ? '1.9' : '2.1');
+
+    // 顶栏高度
+    s.setProperty('--da-bar-h', (touch ? 44 : 48) + 'px');
+
+    // 触控最小点击区域
+    s.setProperty('--da-touch-min', (touch ? 44 : 32) + 'px');
+
+    // 星星数量 = 按性能和屏幕面积
+    var area = vw * vh;
+    var starBase = lowPerf ? 80 : Math.max(100, Math.min(300, Math.round(area / 4000)));
+    s.setProperty('--da-stars', starBase);
+
+    // body属性标记（用于极少数需要针对性处理的CSS）
+    document.body.setAttribute('data-touch', touch);
+    document.body.setAttribute('data-portrait', portrait);
+    // 是否单列布局
+    document.body.setAttribute('data-single-col', canThreeCol ? 'false' : 'true');
+
+    return info;
+  }
+
+  detect();
+
+  // 屏幕变化时重新问设备
+  var timer;
+  window.addEventListener('resize', function(){ clearTimeout(timer); timer = setTimeout(detect, 100); });
+  window.addEventListener('orientationchange', function(){ setTimeout(detect, 250); });
+
+  // 网络变化时更新
+  if(navigator.connection){
+    navigator.connection.addEventListener('change', function(){ detect(); });
+  }
+
+  return { detect:detect, info:function(){return info} };
+})();
+
+/* ════════════════════════════════════════
    STAR FIELD PARTICLE SYSTEM (Galaxy Breathing)
    ════════════════════════════════════════ */
 (function initStarField(){
@@ -734,7 +799,7 @@ label{display:block;font-size:12px;color:var(--dim);margin-bottom:4px;font-weigh
   var ctx=canvas.getContext('2d');
   var stars=[];
   var shootingStars=[];
-  var STAR_COUNT=260;
+  var STAR_COUNT = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--da-stars')) || 200;
   var w,h;
 
   function resize(){
