@@ -223,7 +223,8 @@ configure_nginx() {
     fi
 }
 
-# ── 启动PM2服务 ───────────────────────────────
+# ── 启动/重启PM2服务 ──────────────────────────
+# 使用 pm2 startOrRestart 统一处理（已注册→重启，未注册→启动）
 start_pm2_services() {
     cd "$PROXY_DIR" || { echo "❌ 无法进入 $PROXY_DIR"; return 1; }
 
@@ -235,9 +236,9 @@ start_pm2_services() {
         set +a
     fi
 
-    pm2 start ecosystem.proxy.config.js
+    pm2 startOrRestart ecosystem.proxy.config.js --update-env
     pm2 save
-    echo "✅ PM2代理服务已启动"
+    echo "✅ PM2代理服务已就绪"
     pm2 list
 }
 
@@ -316,18 +317,8 @@ update() {
 
     systemctl restart xray
 
-    # PM2代理服务: 使用 startOrRestart 统一处理（已注册→重启，未注册→启动）
-    cd "$PROXY_DIR" || { echo "❌ 无法进入 $PROXY_DIR"; return 1; }
-    if [ -f "$PROXY_DIR/.env.keys" ]; then
-        set -a
-        # shellcheck source=/dev/null
-        source "$PROXY_DIR/.env.keys"
-        set +a
-    fi
-    pm2 startOrRestart ecosystem.proxy.config.js --update-env
-    pm2 save
-    echo "✅ PM2代理服务已更新"
-    pm2 list
+    # PM2代理服务
+    start_pm2_services
 
     health_check
     echo "✅ 更新完成"
@@ -342,17 +333,8 @@ status() {
 restart() {
     echo "重启所有代理服务..."
     systemctl restart xray
-    # PM2代理服务: 使用 startOrRestart 统一处理
-    cd "$PROXY_DIR" || { echo "❌ 无法进入 $PROXY_DIR"; return 1; }
-    if [ -f "$PROXY_DIR/.env.keys" ]; then
-        set -a
-        # shellcheck source=/dev/null
-        source "$PROXY_DIR/.env.keys"
-        set +a
-    fi
-    pm2 startOrRestart ecosystem.proxy.config.js --update-env
-    pm2 save
-    echo "✅ PM2代理服务已重启"
+    # PM2代理服务
+    start_pm2_services
     sleep 3
     health_check
 }
