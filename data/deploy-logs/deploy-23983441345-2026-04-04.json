@@ -1,0 +1,76 @@
+{
+  "_meta": {
+    "observer": "铸渊全链路部署观测系统 v1.0",
+    "copyright": "国作登字-2026-A-00037559",
+    "collected_at": "2026-04-04T17:01:35.179Z"
+  },
+  "run": {
+    "id": 23983441345,
+    "workflow_name": "🏛️ 铸渊主权服务器 · 部署",
+    "conclusion": "success",
+    "status": "completed",
+    "html_url": "https://github.com/qinfendebingshuo/guanghulab/actions/runs/23983441345",
+    "head_sha": "da11d8ccfba6e4f41c786cdc20936fef03d139f1",
+    "head_branch": "main",
+    "actor": "qinfendebingshuo",
+    "created_at": "2026-04-04T17:00:33Z",
+    "updated_at": "2026-04-04T17:01:25Z",
+    "run_started_at": "2026-04-04T17:00:33Z"
+  },
+  "jobs_summary": {
+    "total": 5,
+    "success": 1,
+    "failure": 0,
+    "skipped": 4,
+    "cancelled": 0
+  },
+  "failed_jobs": [],
+  "all_jobs": [
+    {
+      "id": 69951413543,
+      "name": "🚀 部署应用代码",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-04-04T17:00:36Z",
+      "completed_at": "2026-04-04T17:01:25Z"
+    },
+    {
+      "id": 69951413609,
+      "name": "🚀 预览站→主站 一键推送",
+      "status": "completed",
+      "conclusion": "skipped",
+      "started_at": "2026-04-04T17:00:34Z",
+      "completed_at": "2026-04-04T17:00:33Z"
+    },
+    {
+      "id": 69951413617,
+      "name": "💚 健康检查",
+      "status": "completed",
+      "conclusion": "skipped",
+      "started_at": "2026-04-04T17:00:34Z",
+      "completed_at": "2026-04-04T17:00:33Z"
+    },
+    {
+      "id": 69951413629,
+      "name": "🔧 服务器初始化",
+      "status": "completed",
+      "conclusion": "skipped",
+      "started_at": "2026-04-04T17:00:34Z",
+      "completed_at": "2026-04-04T17:00:33Z"
+    },
+    {
+      "id": 69951413692,
+      "name": "🔒 SSL证书配置",
+      "status": "completed",
+      "conclusion": "skipped",
+      "started_at": "2026-04-04T17:00:34Z",
+      "completed_at": "2026-04-04T17:00:33Z"
+    }
+  ],
+  "analysis": {
+    "needs_repair": false,
+    "error_summary": "",
+    "matched_patterns": [],
+    "recommendation": ""
+  }
+}
