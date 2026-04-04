@@ -33,15 +33,15 @@
     ]
   },
   "destination": {
-    "description": "铸渊写入你的桶的路径",
-    "bucket": "你的行业主控桶（industry-core-xxx）",
-    "key_pattern": "inbox/zhuyuan-receipt/{date}/receipt.json",
-    "example": "inbox/zhuyuan-receipt/2026-04-04/receipt.json"
+    "description": "铸渊写入共享桶中你的回执目录",
+    "bucket": "zy-team-hub-1317346199",
+    "key_pattern": "{persona_id}/receipts/{date}/receipt.json",
+    "example": "PER-SS001/receipts/2026-04-04/receipt.json"
   },
   "trigger": {
-    "description": "COS事件通知触发流程",
+    "description": "COS事件通知触发流程（由铸渊侧统一配置，团队成员无需操作）",
     "event": "cos:ObjectCreated:Put",
-    "prefix_filter": "inbox/zhuyuan-receipt/",
-    "action": "触发SCF云函数 → 调用GitHub Actions API → 运行接收工作流 → 更新仓库首页"
+    "prefix_filter": "{persona_id}/receipts/",
+    "action": "COS事件 → 铸渊侧SCF云函数 → 调用团队成员GitHub Actions API → 运行回执接收工作流 → 更新仓库首页"
   }
 }

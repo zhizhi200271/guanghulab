@@ -36,9 +36,10 @@
     }
   },
   "destination": {
-    "bucket": "zy-core-bucket-1317346199",
+    "bucket": "zy-team-hub-1317346199",
     "region": "ap-singapore",
-    "key_pattern": "inbox/{persona_id}/{date}/report.json",
-    "example": "inbox/PER-SS001/2026-04-04/report.json"
+    "key_pattern": "{persona_id}/reports/{date}/report.json",
+    "example": "PER-SS001/reports/2026-04-04/report.json",
+    "description": "共享桶·铸渊主控·团队协作"
   }
 }
