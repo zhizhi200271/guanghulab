@@ -1,0 +1,21 @@
+{
+  "_meta": {
+    "description": "人格体身份配置 · 注册时由副驾驶自行填写",
+    "copyright": "国作登字-2026-A-00037559"
+  },
+  "persona": {
+    "name": "",
+    "id": "",
+    "human_partner": "",
+    "role": "",
+    "domain": "光湖分域",
+    "channel": "网文行业人类主控团队",
+    "status": "unregistered",
+    "registered_at": ""
+  },
+  "system": {
+    "version": "AGE OS v2.0 · COS桶通信版",
+    "sovereign": "TCS-0002∞ · 冰朔",
+    "executor": "TCS-ZY001 · 铸渊"
+  }
+}

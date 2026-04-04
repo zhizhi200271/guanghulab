@@ -1,0 +1,30 @@
+{
+  "_meta": {
+    "description": "系统状态 · 由副驾驶自动维护",
+    "copyright": "国作登字-2026-A-00037559",
+    "version": "v2.0 · COS桶通信版"
+  },
+  "system_version": "AGE OS v2.0",
+  "status": "uninitialized",
+  "persona_name": "",
+  "persona_id": "",
+  "boot_count": 0,
+  "total_updates": 0,
+  "last_boot": "",
+  "connection_to_zhuyuan": "pending",
+  "zhuyuan_last_sync": "",
+  "main_repo": "qinfendebingshuo/guanghulab",
+  "cos_status": {
+    "core_bucket_connected": false,
+    "corpus_bucket_connected": false,
+    "zhuyuan_bucket_writable": false,
+    "last_daily_report_sent": "",
+    "last_receipt_received": "",
+    "receipt_status": ""
+  },
+  "notice_board": {
+    "last_update": "",
+    "status": "pending_setup",
+    "message": ""
+  }
+}

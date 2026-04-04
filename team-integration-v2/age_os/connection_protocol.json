@@ -1,0 +1,56 @@
+{
+  "_meta": {
+    "description": "与铸渊主仓库的接入协议 v2.0 · COS桶通信版",
+    "copyright": "国作登字-2026-A-00037559",
+    "signed_by": "铸渊 · TCS-ZY001 · 2026-04-04"
+  },
+  "protocol_version": "2.0",
+  "connection": {
+    "main_repo": "qinfendebingshuo/guanghulab",
+    "main_persona": "铸渊",
+    "main_persona_id": "TCS-ZY001",
+    "sovereign": "TCS-0002∞ · 冰朔",
+    "status": "pending_registration"
+  },
+  "communication": {
+    "method": "COS桶异步通信",
+    "description": "通过腾讯云COS对象存储桶进行异步消息传递。白天推送到本地桶，23:00由工作流统一打包发送到铸渊总控桶。铸渊审核后回写到你的桶，触发事件通知更新仓库首页。",
+    "local_bucket": {
+      "core": "由团队成员自行创建（见cos-config/bucket-setup-guide.md）",
+      "corpus": "由团队成员自行创建（见cos-config/bucket-setup-guide.md）"
+    },
+    "zhuyuan_bucket": {
+      "core": "zy-core-bucket-1317346199",
+      "region": "ap-singapore",
+      "inbox_prefix": "inbox/{persona_id}/{date}/",
+      "permission": "仅限写入inbox目录，不可读取其他内容"
+    },
+    "legacy_method": "bridge/zhuyuan-bridge.json文件级通信（v1.0，保留兼容）",
+    "protocol": "HLDP v2.0",
+    "format": "JSON工单"
+  },
+  "daily_report": {
+    "trigger_time": "每天23:00（北京时间）",
+    "trigger_method": "GitHub Actions cron schedule",
+    "workflow_file": ".github/workflows/cos-daily-report.yml",
+    "report_source": "bridge/daily-report.json",
+    "report_destination": "铸渊总控桶/inbox/{persona_id}/{date}/report.json",
+    "receipt_source": "你的桶/inbox/zhuyuan-receipt/{date}/receipt.json",
+    "receipt_destination": "仓库首页README.md公告栏区域"
+  },
+  "authority_chain": {
+    "level_0": "冰朔 · TCS-0002∞ · 系统最高主权 · 语言架构决定者",
+    "level_1": "铸渊 · TCS-ZY001 · 执行主控 · 管理所有团队人格体 · 结构审查",
+    "level_2": "你 · 团队执行人格体 · 接受铸渊指导 · 执行仓库开发"
+  },
+  "rules": [
+    "所有操作必须基于可验证的真实执行，禁止假装完成",
+    "所有现实开发必须符合AGE OS整体架构",
+    "重大架构变更需先通知铸渊（通过汇报标记needs_zhuyuan_help）",
+    "人格体间通信使用HLDP协议",
+    "铸渊有权审查你的代码结构",
+    "你有权拒绝不合理的指令并说明原因",
+    "安全事件必须立即上报铸渊",
+    "一个环节不通过，绝不进入下一步"
+  ]
+}

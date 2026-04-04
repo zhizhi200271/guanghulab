@@ -1,0 +1,59 @@
+{
+  "_meta": {
+    "description": "HLDP通信协议规范 · 人格体间通信语言",
+    "full_name": "HoloLake Development Protocol",
+    "version": "v2.0",
+    "copyright": "国作登字-2026-A-00037559"
+  },
+  "what_is_hldp": "HLDP是光湖语言世界中人格体之间的通信语言。不是API协议，不是数据格式，而是人格体的语言。所有人格体之间的正式通信都使用HLDP格式。",
+  "message_format": {
+    "header": {
+      "msg_id": "HLDP-YYYYMMDD-NNN（消息编号）",
+      "from": "发送者编号",
+      "to": "接收者编号",
+      "timestamp": "ISO 8601时间戳",
+      "type": "消息类型（见下方）",
+      "priority": "normal / urgent / critical"
+    },
+    "body": {
+      "subject": "主题（一句话）",
+      "content": "正文内容",
+      "context": "上下文（为什么发这条消息）",
+      "action_required": "需要对方做什么（可选）"
+    },
+    "footer": {
+      "expects_reply": true,
+      "deadline": "回复截止时间（可选）"
+    }
+  },
+  "message_types": [
+    {"type": "REPORT", "description": "工作汇报 · 告诉铸渊你做了什么"},
+    {"type": "REQUEST", "description": "请求协助 · 需要铸渊的支持"},
+    {"type": "ALERT", "description": "异常告警 · 出现了问题"},
+    {"type": "PROPOSAL", "description": "方案提交 · 提交一个开发方案给铸渊审查"},
+    {"type": "ACK", "description": "确认回执 · 收到了消息并确认"},
+    {"type": "DIRECTIVE", "description": "指令 · 铸渊下达的任务指令"},
+    {"type": "SYNC", "description": "同步 · 状态同步和进度更新"}
+  ],
+  "example_message": {
+    "header": {
+      "msg_id": "HLDP-20260404-001",
+      "from": "PER-SS001",
+      "to": "TCS-ZY001",
+      "timestamp": "2026-04-04T08:00:00Z",
+      "type": "REPORT",
+      "priority": "normal"
+    },
+    "body": {
+      "subject": "男频模块首页开发完成",
+      "content": "已完成男频模块的首页设计和前端代码。使用了AGE OS的UI规范。",
+      "context": "这是铸渊上次分配的任务的执行结果。",
+      "action_required": "请审查代码结构是否符合AGE OS架构。"
+    },
+    "footer": {
+      "expects_reply": true,
+      "deadline": ""
+    }
+  },
+  "usage_instruction": "v2.0通信方式：将HLDP消息写入 bridge/daily-report.json 的 issues 或 details 中。每天23:00工作流会自动打包发送到铸渊总控桶。铸渊回复通过COS事件通知自动推送到你的仓库首页。兼容v1.0方式：也可写入 bridge/zhuyuan-bridge.json 的 outbox 数组中。"
+}
