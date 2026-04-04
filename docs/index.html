@@ -1944,14 +1944,14 @@ document.getElementById('edNewCh').onclick=function(){
 var editorStartTime=null;
 var editorTimerInterval=null;
 function startEditorTimer(){
-  if(editorTimerInterval)return;
+  stopEditorTimer();
   editorStartTime=Date.now();
   editorTimerInterval=setInterval(function(){
     var el=document.getElementById('edTimer');
     if(!el)return;
     var elapsed=Math.floor((Date.now()-editorStartTime)/60000);
     el.textContent='⏱ '+elapsed+'min';
-  },10000);
+  },60000);
 }
 function stopEditorTimer(){
   if(editorTimerInterval){clearInterval(editorTimerInterval);editorTimerInterval=null}

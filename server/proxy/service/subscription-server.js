@@ -570,11 +570,12 @@ server.listen(PORT, '127.0.0.1', () => {
 // Graceful shutdown
 function gracefulShutdown(signal) {
   console.log(`\n${signal} received. Shutting down gracefully...`);
+  const forceExit = setTimeout(() => { process.exit(1); }, 5000);
   server.close(() => {
+    clearTimeout(forceExit);
     console.log('Server closed.');
     process.exit(0);
   });
-  setTimeout(() => { process.exit(1); }, 5000);
 }
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
