@@ -6,13 +6,23 @@
     "created": "2026-04-01T17:45:00Z"
   },
   "stats": {
-    "total_observed": 15,
-    "success": 12,
+    "total_observed": 16,
+    "success": 13,
     "failure": 3,
     "repair_attempted": 0,
     "repair_success": 0
   },
   "recent_deploys": [
+    {
+      "run_id": 23975336484,
+      "workflow": "🏛️ 铸渊主权服务器 · 部署",
+      "conclusion": "success",
+      "head_sha": "29c04f3b",
+      "actor": "qinfendebingshuo",
+      "observed_at": "2026-04-04T08:38:08.687Z",
+      "error_summary": "",
+      "log_file": "deploy-23975336484-2026-04-04.json"
+    },
     {
       "run_id": 23974662158,
       "workflow": "🏛️ 铸渊主权服务器 · 部署",
@@ -164,5 +174,5 @@
       "log_file": "deploy-23893322662-2026-04-02.json"
     }
   ],
-  "last_updated": "2026-04-04T07:56:17.410Z"
+  "last_updated": "2026-04-04T08:38:08.688Z"
 }
