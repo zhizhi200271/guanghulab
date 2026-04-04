@@ -51,7 +51,7 @@ ensure_log_permissions() {
     chmod 755 "$PROXY_DIR/logs"
 }
 
-# ── 共用: 保存ZY_SERVER_HOST到.env.keys ──
+# ── 共用: 保存环境变量到.env.keys ──
 save_server_host() {
     KEYS_FILE="$PROXY_DIR/.env.keys"
     if [ -n "${ZY_SERVER_HOST:-}" ] && [ -f "$KEYS_FILE" ]; then
@@ -83,6 +83,26 @@ save_server_host() {
             echo "ZY_CN_RELAY_HOST=${ZY_CN_RELAY_HOST}" >> "$KEYS_FILE"
         fi
         echo "  ✅ ZY_CN_RELAY_HOST 已保存到 .env.keys"
+    fi
+
+    # 保存SMTP凭据 (如果有) — 使守护Agent和流量监控可发送告警邮件
+    if [ -n "${ZY_SMTP_USER:-}" ] && [ -f "$KEYS_FILE" ]; then
+        if grep -q "^ZY_SMTP_USER=" "$KEYS_FILE" 2>/dev/null; then
+            sed -i "s|^ZY_SMTP_USER=.*|ZY_SMTP_USER=${ZY_SMTP_USER}|" "$KEYS_FILE"
+        else
+            echo "" >> "$KEYS_FILE"
+            echo "# SMTP凭据 (部署时自动写入·守护Agent告警用)" >> "$KEYS_FILE"
+            echo "ZY_SMTP_USER=${ZY_SMTP_USER}" >> "$KEYS_FILE"
+        fi
+        echo "  ✅ ZY_SMTP_USER 已保存到 .env.keys"
+    fi
+    if [ -n "${ZY_SMTP_PASS:-}" ] && [ -f "$KEYS_FILE" ]; then
+        if grep -q "^ZY_SMTP_PASS=" "$KEYS_FILE" 2>/dev/null; then
+            sed -i "s|^ZY_SMTP_PASS=.*|ZY_SMTP_PASS=${ZY_SMTP_PASS}|" "$KEYS_FILE"
+        else
+            echo "ZY_SMTP_PASS=${ZY_SMTP_PASS}" >> "$KEYS_FILE"
+        fi
+        echo "  ✅ ZY_SMTP_PASS 已保存到 .env.keys"
     fi
 }
 
