@@ -252,6 +252,18 @@ configure_nginx() {
         echo "  Nginx proxy-sub配置已存在"
     fi
 
+    # 确保主服务器块是default_server (修复localhost/127.0.0.1健康检查匹配问题)
+    if ! grep -q "default_server" "$NGINX_CONF" 2>/dev/null; then
+        sed -i '0,/listen 80;/{s/listen 80;/listen 80 default_server;/}' "$NGINX_CONF" || true
+        echo "  ✅ 已设置为默认服务器 (default_server)"
+    fi
+
+    # 确保server_name包含localhost (使内部健康检查可匹配)
+    if ! grep -q "localhost" "$NGINX_CONF" 2>/dev/null; then
+        sed -i '0,/server_name /{s/server_name /server_name localhost 127.0.0.1 /}' "$NGINX_CONF" || true
+        echo "  ✅ 已添加localhost到server_name"
+    fi
+
     if nginx -t 2>/dev/null; then
         nginx -s reload || true
         echo "  ✅ Nginx配置验证通过并已重载"
@@ -315,10 +327,17 @@ health_check() {
     fi
 
     # 订阅服务 (通过Nginx反代)
-    if curl -sf http://127.0.0.1/api/proxy-sub/health >/dev/null 2>&1; then
+    # 使用ZY_SERVER_HOST作为Host头，确保Nginx server_name匹配
+    HEALTH_HOST="${ZY_SERVER_HOST:-}"
+    if [ -z "$HEALTH_HOST" ] && [ -f "$PROXY_DIR/.env.keys" ]; then
+        HEALTH_HOST=$(grep "^ZY_SERVER_HOST=" "$PROXY_DIR/.env.keys" 2>/dev/null | cut -d= -f2-)
+    fi
+    if curl -sf -H "Host: ${HEALTH_HOST:-localhost}" http://127.0.0.1/api/proxy-sub/health >/dev/null 2>&1; then
         echo "  ✅ Nginx反代: 正常 (/api/proxy-sub/ → 3802)"
     else
         echo "  ⚠️ Nginx反代: /api/proxy-sub/ 未响应 (Nginx配置可能缺失)"
+        echo "     → 检查: /etc/nginx/sites-enabled/zhuyuan.conf 是否包含 proxy-sub location"
+        echo "     → 检查: Nginx是否有default_server指令或server_name包含localhost"
     fi
 
     # PM2
