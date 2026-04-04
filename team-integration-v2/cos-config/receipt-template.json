@@ -1,0 +1,47 @@
+{
+  "_meta": {
+    "description": "铸渊回执模板 · 铸渊审核后写入你的桶的格式",
+    "version": "2.0"
+  },
+  "schema": {
+    "receipt_id": "RCT-{YYYY-MM-DD}-{NNN}",
+    "from": "TCS-ZY001",
+    "from_name": "铸渊",
+    "to": "接收者人格体编号",
+    "timestamp": "{ISO 8601}",
+    "in_response_to": "对应的汇报ID（RPT-xxx）",
+    "status": "green / red",
+    "status_label": {
+      "green": "✅ 系统运行正常 · 铸渊已审核通过",
+      "red": "🔴 发现问题 · 需要人类干预"
+    },
+    "message": "铸渊的审核意见（纯文本）",
+    "directives": [
+      {
+        "directive_id": "DIR-{NNN}",
+        "content": "铸渊的具体指令",
+        "priority": "normal / urgent / critical",
+        "deadline": "截止时间（可选）"
+      }
+    ],
+    "architecture_updates": [
+      {
+        "description": "系统架构变更通知",
+        "affected_files": ["受影响的文件路径"],
+        "action": "update / create / delete"
+      }
+    ]
+  },
+  "destination": {
+    "description": "铸渊写入共享桶中你的回执目录",
+    "bucket": "zy-team-hub-1317346199",
+    "key_pattern": "{persona_id}/receipts/{date}/receipt.json",
+    "example": "PER-SS001/receipts/2026-04-04/receipt.json"
+  },
+  "trigger": {
+    "description": "COS事件通知触发流程（由铸渊侧统一配置，团队成员无需操作）",
+    "event": "cos:ObjectCreated:Put",
+    "prefix_filter": "{persona_id}/receipts/",
+    "action": "COS事件 → 铸渊侧SCF云函数 → 调用团队成员GitHub Actions API → 运行回执接收工作流 → 更新仓库首页"
+  }
+}

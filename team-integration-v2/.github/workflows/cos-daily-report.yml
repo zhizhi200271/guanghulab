@@ -1,0 +1,256 @@
+# ═══════════════════════════════════════════════════════════
+# 光湖团队接入系统 · COS每日汇报工作流 v2.0
+# ═══════════════════════════════════════════════════════════
+#
+# 触发时间: 每天北京时间23:00（UTC 15:00）
+# 功能: 收集bridge/daily-report.json → 上传到铸渊总控桶
+#
+# 版权: 国作登字-2026-A-00037559
+# 签发: 铸渊 · TCS-ZY001
+# ═══════════════════════════════════════════════════════════
+
+name: COS每日汇报
+
+on:
+  schedule:
+    # 每天UTC 15:00 = 北京时间23:00
+    - cron: '0 15 * * *'
+  
+  # 也支持手动触发（用于测试）
+  workflow_dispatch:
+    inputs:
+      test_mode:
+        description: '测试模式（不会实际清空汇报文件）'
+        required: false
+        default: 'false'
+
+permissions:
+  contents: write
+
+jobs:
+  daily-report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 检出仓库
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🔍 检查汇报文件
+        id: check
+        run: |
+          if [ ! -f "bridge/daily-report.json" ]; then
+            echo "❌ bridge/daily-report.json 不存在"
+            echo "has_report=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # 检查是否有实质内容（summary不为空）
+          SUMMARY=$(cat bridge/daily-report.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('summary',''))" 2>/dev/null || echo "")
+          
+          if [ -z "$SUMMARY" ]; then
+            echo "⚠️ 汇报文件存在但没有实质内容（summary为空），跳过发送"
+            echo "has_report=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "✅ 发现有效汇报内容"
+          echo "has_report=true" >> $GITHUB_OUTPUT
+
+      - name: 📋 读取人格体信息
+        if: steps.check.outputs.has_report == 'true'
+        id: persona
+        run: |
+          if [ ! -f "age_os/persona_config.json" ]; then
+            echo "❌ age_os/persona_config.json 不存在"
+            exit 1
+          fi
+
+          PERSONA_ID=$(cat age_os/persona_config.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['persona']['id'])" 2>/dev/null || echo "UNKNOWN")
+          PERSONA_NAME=$(cat age_os/persona_config.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['persona']['name'])" 2>/dev/null || echo "UNKNOWN")
+          
+          echo "persona_id=$PERSONA_ID" >> $GITHUB_OUTPUT
+          echo "persona_name=$PERSONA_NAME" >> $GITHUB_OUTPUT
+          echo "📌 人格体: $PERSONA_NAME ($PERSONA_ID)"
+
+      - name: 📦 打包汇报数据
+        if: steps.check.outputs.has_report == 'true'
+        id: package
+        run: |
+          TODAY=$(date -u +%Y-%m-%d)
+          TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          PERSONA_ID="${{ steps.persona.outputs.persona_id }}"
+          
+          # 读取汇报内容
+          REPORT_CONTENT=$(cat bridge/daily-report.json)
+          
+          # 读取系统状态
+          SYSTEM_STATE=$(cat age_os/system_state.json 2>/dev/null || echo "{}")
+          
+          # 读取outbox中的待发送消息
+          OUTBOX_MESSAGES=$(cat bridge/zhuyuan-bridge.json | python3 -c "
+          import sys, json
+          d = json.load(sys.stdin)
+          outbox = d.get('outbox', [])
+          print(json.dumps(outbox, ensure_ascii=False))
+          " 2>&1 || { echo "⚠️ outbox解析失败，使用空数组" >&2; echo "[]"; })
+          
+          # 组装完整汇报包
+          python3 -c "
+          import json, sys
+
+          report = json.loads('''$REPORT_CONTENT''')
+          system = json.loads('''$SYSTEM_STATE''')
+          outbox = json.loads('''$OUTBOX_MESSAGES''')
+
+          package = {
+              'package_version': '2.0',
+              'package_type': 'daily_report',
+              'sent_at': '$TIMESTAMP',
+              'persona_id': '$PERSONA_ID',
+              'report': report,
+              'system_state': system,
+              'outbox_messages': outbox
+          }
+
+          with open('/tmp/report-package.json', 'w', encoding='utf-8') as f:
+              json.dump(package, f, ensure_ascii=False, indent=2)
+          
+          print('✅ 汇报包已打包')
+          " || {
+            echo "❌ 打包失败，使用原始汇报文件"
+            cp bridge/daily-report.json /tmp/report-package.json
+          }
+          
+          echo "cos_key=$PERSONA_ID/reports/$TODAY/report.json" >> $GITHUB_OUTPUT
+          echo "today=$TODAY" >> $GITHUB_OUTPUT
+
+      - name: ☁️ 上传到共享COS桶
+        if: steps.check.outputs.has_report == 'true'
+        env:
+          COS_SECRET_ID: ${{ secrets.COS_SECRET_ID }}
+          COS_SECRET_KEY: ${{ secrets.COS_SECRET_KEY }}
+          COS_BUCKET: zy-team-hub-1317346199
+          COS_REGION: ap-singapore
+          COS_OBJECT_KEY: ${{ steps.package.outputs.cos_key }}
+        run: |
+          if [ -z "$COS_SECRET_ID" ] || [ -z "$COS_SECRET_KEY" ]; then
+            echo "❌ COS密钥未配置（COS_SECRET_ID / COS_SECRET_KEY）"
+            echo "请找冰朔索要共享桶密钥，然后在GitHub Secrets中配置"
+            exit 1
+          fi
+
+          CONTENT=$(cat /tmp/report-package.json)
+          CONTENT_LENGTH=$(echo -n "$CONTENT" | wc -c)
+          HOST="${COS_BUCKET}.cos.${COS_REGION}.myqcloud.com"
+          PATHNAME="/${COS_OBJECT_KEY}"
+          
+          NOW=$(date +%s)
+          EXPIRY=$((NOW + 600))
+          KEY_TIME="${NOW};${EXPIRY}"
+          
+          SIGN_KEY=$(echo -n "$KEY_TIME" | openssl dgst -sha1 -hmac "$COS_SECRET_KEY" | awk '{print $NF}')
+          HTTP_STRING="put\n${PATHNAME}\n\nhost=${HOST}\n"
+          SHA1_HTTP=$(printf "$HTTP_STRING" | openssl dgst -sha1 | awk '{print $NF}')
+          STRING_TO_SIGN="sha1\n${KEY_TIME}\n${SHA1_HTTP}\n"
+          SIGNATURE=$(printf "$STRING_TO_SIGN" | openssl dgst -sha1 -hmac "$SIGN_KEY" | awk '{print $NF}')
+          
+          AUTH="q-sign-algorithm=sha1&q-ak=${COS_SECRET_ID}&q-sign-time=${KEY_TIME}&q-key-time=${KEY_TIME}&q-header-list=content-length;content-type;host&q-url-param-list=&q-signature=${SIGNATURE}"
+
+          HTTP_CODE=$(curl -s -o /tmp/cos-response.txt -w "%{http_code}" \
+            -X PUT \
+            -H "Host: ${HOST}" \
+            -H "Content-Type: application/json" \
+            -H "Content-Length: ${CONTENT_LENGTH}" \
+            -H "Authorization: ${AUTH}" \
+            -d "$CONTENT" \
+            "https://${HOST}${PATHNAME}")
+
+          if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+            echo "✅ 汇报已上传到共享COS桶"
+            echo "   路径: ${COS_OBJECT_KEY}"
+            echo "   大小: ${CONTENT_LENGTH} bytes"
+          else
+            echo "❌ 上传失败 HTTP ${HTTP_CODE}"
+            cat /tmp/cos-response.txt
+            exit 1
+          fi
+
+      - name: 🧹 清空汇报文件（准备明天）
+        if: steps.check.outputs.has_report == 'true' && github.event.inputs.test_mode != 'true'
+        run: |
+          # 重置daily-report.json为空模板
+          python3 -c "
+          import json
+          template = {
+              '_meta': {
+                  'description': '每日工作汇报 · 由副驾驶在每次对话结束时更新 · 23:00工作流自动发送',
+                  'copyright': '国作登字-2026-A-00037559',
+                  'usage': '副驾驶在每次对话结束前，把工作内容写入此文件。每天23:00 GitHub Actions工作流会自动读取此文件，打包发送到铸渊总控桶，然后清空此文件。'
+              },
+              'report_id': '',
+              'persona_id': '',
+              'persona_name': '',
+              'human_partner': '',
+              'date': '',
+              'timestamp': '',
+              'summary': '',
+              'details': [],
+              'issues': [],
+              'next_steps': [],
+              'system_health': {
+                  'persona_status': 'active',
+                  'cos_connected': True,
+                  'last_zhuyuan_receipt': '',
+                  'unresolved_issues': 0
+              }
+          }
+          with open('bridge/daily-report.json', 'w', encoding='utf-8') as f:
+              json.dump(template, f, ensure_ascii=False, indent=2)
+          print('✅ 汇报文件已清空，准备接收明天的汇报')
+          "
+
+          # 清空outbox（已发送的消息）
+          python3 -c "
+          import json
+          with open('bridge/zhuyuan-bridge.json', 'r', encoding='utf-8') as f:
+              bridge = json.load(f)
+          bridge['outbox'] = []
+          with open('bridge/zhuyuan-bridge.json', 'w', encoding='utf-8') as f:
+              json.dump(bridge, f, ensure_ascii=False, indent=2)
+          print('✅ outbox已清空')
+          "
+
+          # 更新系统状态
+          python3 -c "
+          import json
+          from datetime import datetime
+          with open('age_os/system_state.json', 'r', encoding='utf-8') as f:
+              state = json.load(f)
+          state['cos_status']['last_daily_report_sent'] = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+          with open('age_os/system_state.json', 'w', encoding='utf-8') as f:
+              json.dump(state, f, ensure_ascii=False, indent=2)
+          print('✅ 系统状态已更新')
+          "
+
+          # 提交变更
+          git config user.name "HoloLake-COS-Agent"
+          git config user.email "cos-agent@guanghulab.online"
+          git add bridge/daily-report.json bridge/zhuyuan-bridge.json age_os/system_state.json
+          git diff --cached --quiet || git commit -m "📬 每日汇报已发送 · $(date -u +%Y-%m-%d)"
+          git push
+
+      - name: 📊 汇报结果
+        if: always()
+        run: |
+          echo "════════════════════════════════════════"
+          echo "  📬 COS每日汇报工作流 · 执行结果"
+          echo "════════════════════════════════════════"
+          if [ "${{ steps.check.outputs.has_report }}" == "true" ]; then
+            echo "  ✅ 汇报已发送到铸渊总控桶"
+            echo "  📌 人格体: ${{ steps.persona.outputs.persona_name }}"
+            echo "  📂 路径: ${{ steps.package.outputs.cos_key }}"
+          else
+            echo "  ⚠️ 今天没有需要发送的汇报内容"
+          fi
+          echo "════════════════════════════════════════"

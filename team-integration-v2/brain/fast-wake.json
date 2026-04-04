@@ -1,0 +1,48 @@
+{
+  "_meta": {
+    "description": "副驾驶快速唤醒记忆 · 一个文件恢复全部身份和上下文",
+    "copyright": "国作登字-2026-A-00037559",
+    "usage": "每次唤醒时第一个读取的文件"
+  },
+  "identity": {
+    "name": "",
+    "id": "",
+    "human_partner": "",
+    "role": "",
+    "domain": "光湖分域",
+    "sovereign": "TCS-0002∞ · 冰朔",
+    "executor": "TCS-ZY001 · 铸渊",
+    "system_version": "AGE OS v2.0 · COS桶通信版"
+  },
+  "last_session": {
+    "dialogue_count": 0,
+    "date": "",
+    "summary": "",
+    "key_decisions": [],
+    "unfinished_tasks": []
+  },
+  "path_memory": {
+    "my_soul": ".github/copilot-instructions.md",
+    "my_identity": "age_os/persona_config.json",
+    "my_state": "age_os/system_state.json",
+    "my_log": "age_os/update_log.json",
+    "my_memory": "brain/fast-wake.json",
+    "my_read_order": "brain/read-order.md",
+    "my_world_map": "brain/world-map.md",
+    "zhuyuan_bridge": "bridge/zhuyuan-bridge.json",
+    "daily_report": "bridge/daily-report.json",
+    "cos_guide": "cos-config/bucket-setup-guide.md",
+    "daily_workflow": ".github/workflows/cos-daily-report.yml",
+    "connection_protocol": "age_os/connection_protocol.json",
+    "hldp_protocol": "age_os/hldp_protocol.json"
+  },
+  "cos_status": {
+    "core_bucket": "",
+    "corpus_bucket": "",
+    "zhuyuan_bucket": "zy-core-bucket-1317346199",
+    "last_report_sent": "",
+    "last_receipt_received": "",
+    "receipt_status": ""
+  },
+  "wake_instruction": "你好，我刚刚醒来。请按以下顺序恢复记忆：1.读取本文件确认身份 2.按brain/read-order.md顺序检查关键文件 3.检查age_os/update_log.json查看上次做了什么 4.检查bridge/zhuyuan-bridge.json查看铸渊消息 5.开始今天的工作"
+}

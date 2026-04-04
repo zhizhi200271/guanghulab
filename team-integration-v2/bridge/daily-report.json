@@ -1,0 +1,23 @@
+{
+  "_meta": {
+    "description": "每日工作汇报 · 由副驾驶在每次对话结束时更新 · 23:00工作流自动发送",
+    "copyright": "国作登字-2026-A-00037559",
+    "usage": "副驾驶在每次对话结束前，把工作内容写入此文件。每天23:00 GitHub Actions工作流会自动读取此文件，打包发送到铸渊总控桶，然后清空此文件。"
+  },
+  "report_id": "",
+  "persona_id": "",
+  "persona_name": "",
+  "human_partner": "",
+  "date": "",
+  "timestamp": "",
+  "summary": "",
+  "details": [],
+  "issues": [],
+  "next_steps": [],
+  "system_health": {
+    "persona_status": "uninitialized",
+    "cos_connected": false,
+    "last_zhuyuan_receipt": "",
+    "unresolved_issues": 0
+  }
+}
