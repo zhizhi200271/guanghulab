@@ -87,6 +87,13 @@ function githubRequest(method, path, body) {
 // ═══════════════════════════════════════════════════════════
 
 /**
+ * 安全编码文件路径（保留斜杠，编码各段）
+ */
+function encodeFilePath(filePath) {
+  return filePath.split('/').map(segment => encodeURIComponent(segment)).join('/');
+}
+
+/**
  * 读取文件内容
  * @param {string} filePath - 文件路径（相对仓库根目录）
  * @param {string} [ref] - 分支/标签/SHA（默认 main）
@@ -94,7 +101,7 @@ function githubRequest(method, path, body) {
  */
 async function readFile(filePath, ref) {
   const { owner, repo } = GITHUB_CONFIG;
-  let apiPath = `/repos/${owner}/${repo}/contents/${encodeURIComponent(filePath)}`;
+  let apiPath = `/repos/${owner}/${repo}/contents/${encodeFilePath(filePath)}`;
   if (ref) apiPath += `?ref=${encodeURIComponent(ref)}`;
 
   const { data } = await githubRequest('GET', apiPath);
@@ -120,7 +127,7 @@ async function readFile(filePath, ref) {
  */
 async function listDirectory(dirPath, ref) {
   const { owner, repo } = GITHUB_CONFIG;
-  const encodedPath = dirPath ? encodeURIComponent(dirPath) : '';
+  const encodedPath = dirPath ? encodeFilePath(dirPath) : '';
   let apiPath = `/repos/${owner}/${repo}/contents/${encodedPath}`;
   if (ref) apiPath += `?ref=${encodeURIComponent(ref)}`;
 
@@ -153,7 +160,7 @@ async function listDirectory(dirPath, ref) {
  */
 async function writeFile(filePath, content, message, sha, branch) {
   const { owner, repo } = GITHUB_CONFIG;
-  const apiPath = `/repos/${owner}/${repo}/contents/${encodeURIComponent(filePath)}`;
+  const apiPath = `/repos/${owner}/${repo}/contents/${encodeFilePath(filePath)}`;
 
   const body = {
     message: message || `[铸渊] 更新 ${filePath}`,

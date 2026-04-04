@@ -413,11 +413,29 @@ app.get('/api/mcp/health', async (_req, res) => {
 });
 
 // ─── MCP 统一工具调用（网关入口） ───
+// 安全: 写操作工具需要 caller 身份标识
+const MCP_WRITE_TOOLS = new Set([
+  'createNode', 'updateNode', 'deleteNode',
+  'linkNodes', 'unlinkNodes',
+  'cosWrite', 'cosDelete', 'cosArchive',
+  'notionWritePage', 'notionUpdatePage', 'notionWriteSyslog',
+  'githubWriteFile', 'githubTriggerDeploy'
+]);
+
 app.post('/api/mcp/call', async (req, res) => {
   const { tool, input, caller } = req.body;
 
   if (!tool) {
     return res.status(400).json({ error: true, code: 'MISSING_TOOL', message: '缺少 tool 参数' });
+  }
+
+  // 写操作工具需要 caller 身份标识
+  if (MCP_WRITE_TOOLS.has(tool) && !caller) {
+    return res.status(403).json({
+      error: true,
+      code: 'WRITE_REQUIRES_CALLER',
+      message: '写操作工具需要提供 caller 身份标识'
+    });
   }
 
   try {

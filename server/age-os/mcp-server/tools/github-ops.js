@@ -19,6 +19,8 @@
 
 const github = require('../github-client');
 
+const CONTENT_PREVIEW_LENGTH = 500;
+
 /**
  * githubReadFile — 读取仓库文件内容
  *
@@ -36,7 +38,7 @@ async function githubReadFile(input) {
     size: file.size,
     sha: file.sha,
     content: file.content,
-    content_preview: file.content.substring(0, 500) + (file.content.length > 500 ? '...' : '')
+    content_preview: file.content.substring(0, CONTENT_PREVIEW_LENGTH) + (file.content.length > CONTENT_PREVIEW_LENGTH ? '...' : '')
   };
 }
 
