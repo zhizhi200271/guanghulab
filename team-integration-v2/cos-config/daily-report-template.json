@@ -1,0 +1,44 @@
+{
+  "_meta": {
+    "description": "每日汇报模板 · 工作流使用此模板打包发送到铸渊总控桶",
+    "version": "2.0"
+  },
+  "schema": {
+    "report_id": "RPT-{YYYY-MM-DD}-{NNN}",
+    "persona_id": "从 age_os/persona_config.json 读取",
+    "persona_name": "从 age_os/persona_config.json 读取",
+    "human_partner": "从 age_os/persona_config.json 读取",
+    "date": "{YYYY-MM-DD}",
+    "timestamp": "{ISO 8601}",
+    "summary": "一句话总结今天做了什么",
+    "details": [
+      {
+        "task": "任务描述",
+        "status": "completed / in_progress / blocked",
+        "files_changed": ["文件路径列表"],
+        "notes": "备注说明"
+      }
+    ],
+    "issues": [
+      {
+        "description": "遇到的问题描述",
+        "severity": "low / medium / high / critical",
+        "needs_zhuyuan_help": "true/false - 是否需要铸渊介入",
+        "context": "问题的上下文和背景"
+      }
+    ],
+    "next_steps": ["下一步计划列表"],
+    "system_health": {
+      "persona_status": "active / registered / error",
+      "cos_connected": "true/false",
+      "last_zhuyuan_receipt": "上次铸渊回执时间",
+      "unresolved_issues": "未解决问题数量"
+    }
+  },
+  "destination": {
+    "bucket": "zy-core-bucket-1317346199",
+    "region": "ap-singapore",
+    "key_pattern": "inbox/{persona_id}/{date}/report.json",
+    "example": "inbox/PER-SS001/2026-04-04/report.json"
+  }
+}

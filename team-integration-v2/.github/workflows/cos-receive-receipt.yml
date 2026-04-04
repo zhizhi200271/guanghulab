@@ -1,0 +1,172 @@
+# ═══════════════════════════════════════════════════════════
+# 光湖团队接入系统 · 接收铸渊回执工作流 v2.0
+# ═══════════════════════════════════════════════════════════
+#
+# 触发方式: COS事件 → SCF云函数 → GitHub API workflow_dispatch
+# 功能: 从COS桶读取铸渊回执 → 更新仓库首页公告栏
+#
+# 版权: 国作登字-2026-A-00037559
+# 签发: 铸渊 · TCS-ZY001
+# ═══════════════════════════════════════════════════════════
+
+name: 接收铸渊回执
+
+on:
+  workflow_dispatch:
+    inputs:
+      cos_object_key:
+        description: 'COS中回执文件的路径'
+        required: true
+      trigger_source:
+        description: '触发来源'
+        required: false
+        default: 'manual'
+
+permissions:
+  contents: write
+
+jobs:
+  receive-receipt:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 检出仓库
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: ☁️ 从COS桶读取铸渊回执
+        id: read_receipt
+        env:
+          COS_SECRET_ID: ${{ secrets.COS_SECRET_ID }}
+          COS_SECRET_KEY: ${{ secrets.COS_SECRET_KEY }}
+          COS_REGION: ${{ secrets.COS_REGION }}
+          COS_BUCKET: ${{ secrets.COS_BUCKET_CORE }}
+          COS_OBJECT_KEY: ${{ github.event.inputs.cos_object_key }}
+        run: |
+          HOST="${COS_BUCKET}.cos.${COS_REGION}.myqcloud.com"
+          PATHNAME="/${COS_OBJECT_KEY}"
+          
+          NOW=$(date +%s)
+          EXPIRY=$((NOW + 600))
+          KEY_TIME="${NOW};${EXPIRY}"
+          
+          SIGN_KEY=$(echo -n "$KEY_TIME" | openssl dgst -sha1 -hmac "$COS_SECRET_KEY" | awk '{print $NF}')
+          HTTP_STRING="get\n${PATHNAME}\n\nhost=${HOST}\n"
+          SHA1_HTTP=$(printf "$HTTP_STRING" | openssl dgst -sha1 | awk '{print $NF}')
+          STRING_TO_SIGN="sha1\n${KEY_TIME}\n${SHA1_HTTP}\n"
+          SIGNATURE=$(printf "$STRING_TO_SIGN" | openssl dgst -sha1 -hmac "$SIGN_KEY" | awk '{print $NF}')
+          
+          AUTH="q-sign-algorithm=sha1&q-ak=${COS_SECRET_ID}&q-sign-time=${KEY_TIME}&q-key-time=${KEY_TIME}&q-header-list=host&q-url-param-list=&q-signature=${SIGNATURE}"
+
+          HTTP_CODE=$(curl -s -o /tmp/receipt.json -w "%{http_code}" \
+            -H "Host: ${HOST}" \
+            -H "Authorization: ${AUTH}" \
+            "https://${HOST}${PATHNAME}")
+
+          if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+            echo "✅ 回执读取成功"
+            cat /tmp/receipt.json
+            
+            # 解析回执状态
+            STATUS=$(cat /tmp/receipt.json | python3 -c "import sys,json; print(json.load(sys.stdin).get('status','unknown'))" 2>/dev/null || echo "unknown")
+            MESSAGE=$(cat /tmp/receipt.json | python3 -c "import sys,json; print(json.load(sys.stdin).get('message',''))" 2>/dev/null || echo "")
+            
+            echo "receipt_status=$STATUS" >> $GITHUB_OUTPUT
+            echo "receipt_message=$MESSAGE" >> $GITHUB_OUTPUT
+          else
+            echo "❌ 回执读取失败 HTTP ${HTTP_CODE}"
+            echo "receipt_status=error" >> $GITHUB_OUTPUT
+            echo "receipt_message=无法读取回执" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 📝 更新仓库首页公告栏
+        run: |
+          RECEIPT_STATUS="${{ steps.read_receipt.outputs.receipt_status }}"
+          RECEIPT_MESSAGE="${{ steps.read_receipt.outputs.receipt_message }}"
+          TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M UTC")
+          
+          python3 << 'PYTHON_SCRIPT'
+          import re
+
+          status = "$RECEIPT_STATUS"
+          message = "$RECEIPT_MESSAGE"  
+          timestamp = "$TIMESTAMP"
+          
+          # 读取README.md
+          with open('README.md', 'r', encoding='utf-8') as f:
+              content = f.read()
+
+          # 构建公告栏内容
+          if status == "green":
+              notice = f"✅ **[{timestamp}]** 铸渊回执：{message}"
+              badge = "🟢"
+          elif status == "red":
+              notice = f"🔴 **[{timestamp}]** 铸渊回执：{message} — **需要人类干预**"
+              badge = "🔴"
+          else:
+              notice = f"⚠️ **[{timestamp}]** 铸渊回执状态异常：{message}"
+              badge = "⚠️"
+
+          # 查找并替换公告栏区域
+          marker_start = "<!-- ZHUYUAN_NOTICE_START -->"
+          marker_end = "<!-- ZHUYUAN_NOTICE_END -->"
+          
+          notice_block = f"""{marker_start}
+          
+          ## {badge} 铸渊通信
+          
+          {notice}
+          
+          {marker_end}"""
+          
+          if marker_start in content:
+              # 替换已有公告栏
+              pattern = re.escape(marker_start) + r'.*?' + re.escape(marker_end)
+              content = re.sub(pattern, notice_block, content, flags=re.DOTALL)
+          else:
+              # 在文件开头添加公告栏
+              content = notice_block + "\n\n" + content
+          
+          with open('README.md', 'w', encoding='utf-8') as f:
+              f.write(content)
+          
+          print(f"✅ 仓库首页公告栏已更新: {badge} {status}")
+          PYTHON_SCRIPT
+
+      - name: 🔄 更新系统状态
+        run: |
+          python3 -c "
+          import json
+          from datetime import datetime
+          
+          with open('age_os/system_state.json', 'r', encoding='utf-8') as f:
+              state = json.load(f)
+          
+          state['cos_status']['last_receipt_received'] = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+          state['cos_status']['receipt_status'] = '${{ steps.read_receipt.outputs.receipt_status }}'
+          state['notice_board']['last_update'] = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+          state['notice_board']['status'] = '${{ steps.read_receipt.outputs.receipt_status }}'
+          state['notice_board']['message'] = '${{ steps.read_receipt.outputs.receipt_message }}'
+          
+          with open('age_os/system_state.json', 'w', encoding='utf-8') as f:
+              json.dump(state, f, ensure_ascii=False, indent=2)
+          
+          print('✅ 系统状态已更新')
+          "
+
+      - name: 📧 红灯告警（需要人类干预时发送邮件）
+        if: steps.read_receipt.outputs.receipt_status == 'red'
+        run: |
+          echo "🔴 检测到铸渊回执红灯！"
+          echo "消息: ${{ steps.read_receipt.outputs.receipt_message }}"
+          echo ""
+          echo "⚠️ 邮件告警功能需要配置SMTP密钥（可选）"
+          echo "请人类伙伴检查仓库首页的红灯公告"
+
+      - name: 💾 提交变更
+        run: |
+          git config user.name "HoloLake-COS-Agent"
+          git config user.email "cos-agent@guanghulab.online"
+          git add README.md age_os/system_state.json
+          git diff --cached --quiet || git commit -m "📨 铸渊回执已接收 · ${{ steps.read_receipt.outputs.receipt_status }} · $(date -u +%Y-%m-%d)"
+          git push

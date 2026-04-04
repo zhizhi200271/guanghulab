@@ -1,0 +1,47 @@
+{
+  "_meta": {
+    "description": "铸渊回执模板 · 铸渊审核后写入你的桶的格式",
+    "version": "2.0"
+  },
+  "schema": {
+    "receipt_id": "RCT-{YYYY-MM-DD}-{NNN}",
+    "from": "TCS-ZY001",
+    "from_name": "铸渊",
+    "to": "接收者人格体编号",
+    "timestamp": "{ISO 8601}",
+    "in_response_to": "对应的汇报ID（RPT-xxx）",
+    "status": "green / red",
+    "status_label": {
+      "green": "✅ 系统运行正常 · 铸渊已审核通过",
+      "red": "🔴 发现问题 · 需要人类干预"
+    },
+    "message": "铸渊的审核意见（纯文本）",
+    "directives": [
+      {
+        "directive_id": "DIR-{NNN}",
+        "content": "铸渊的具体指令",
+        "priority": "normal / urgent / critical",
+        "deadline": "截止时间（可选）"
+      }
+    ],
+    "architecture_updates": [
+      {
+        "description": "系统架构变更通知",
+        "affected_files": ["受影响的文件路径"],
+        "action": "update / create / delete"
+      }
+    ]
+  },
+  "destination": {
+    "description": "铸渊写入你的桶的路径",
+    "bucket": "你的行业主控桶（industry-core-xxx）",
+    "key_pattern": "inbox/zhuyuan-receipt/{date}/receipt.json",
+    "example": "inbox/zhuyuan-receipt/2026-04-04/receipt.json"
+  },
+  "trigger": {
+    "description": "COS事件通知触发流程",
+    "event": "cos:ObjectCreated:Put",
+    "prefix_filter": "inbox/zhuyuan-receipt/",
+    "action": "触发SCF云函数 → 调用GitHub Actions API → 运行接收工作流 → 更新仓库首页"
+  }
+}
