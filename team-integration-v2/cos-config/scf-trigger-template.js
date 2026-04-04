@@ -56,7 +56,12 @@ exports.main_handler = async (event, context) => {
     return { statusCode: 500, body: 'Missing environment variables' };
   }
 
-  const [owner, repo] = githubRepo.split('/');
+  const parts = githubRepo.split('/');
+  if (parts.length !== 2 || !parts[0] || !parts[1]) {
+    console.error('GITHUB_REPO格式错误，应为 owner/repo，当前值:', githubRepo);
+    return { statusCode: 500, body: 'Invalid GITHUB_REPO format' };
+  }
+  const [owner, repo] = parts;
 
   try {
     const result = await triggerGitHubWorkflow(owner, repo, githubToken, objectKey);
@@ -88,7 +93,7 @@ function triggerGitHubWorkflow(owner, repo, token, cosObjectKey) {
       method: 'POST',
       headers: {
         'User-Agent': 'HoloLake-SCF-Trigger/2.0',
-        'Authorization': `Bearer ${token}`,
+        'Authorization': `token ${token}`,
         'Accept': 'application/vnd.github.v3+json',
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(postData)

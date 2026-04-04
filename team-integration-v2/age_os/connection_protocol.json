@@ -22,8 +22,9 @@
     "zhuyuan_bucket": {
       "core": "zy-core-bucket-1317346199",
       "region": "ap-singapore",
-      "inbox_prefix": "inbox/{persona_id}/{date}/",
-      "permission": "仅限写入inbox目录，不可读取其他内容"
+      "inbox_prefix": "inbox/{persona_id}/",
+      "permission": "仅限写入 inbox/{persona_id}/ 前缀目录。铸渊通过Bucket Policy精确限定你的写入范围，你无法读取、删除或访问桶内其他任何内容。这是安全设计：每个团队成员只能往自己的收件箱写入。",
+      "bucket_policy_rule": "Action=cos:PutObject, Resource=inbox/{persona_id}/* only"
     },
     "legacy_method": "bridge/zhuyuan-bridge.json文件级通信（v1.0，保留兼容）",
     "protocol": "HLDP v2.0",

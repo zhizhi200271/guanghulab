@@ -93,7 +93,7 @@ jobs:
           d = json.load(sys.stdin)
           outbox = d.get('outbox', [])
           print(json.dumps(outbox, ensure_ascii=False))
-          " 2>/dev/null || echo "[]")
+          " 2>&1 || { echo "⚠️ outbox解析失败，使用空数组" >&2; echo "[]"; })
           
           # 组装完整汇报包
           python3 -c "

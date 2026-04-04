@@ -80,77 +80,83 @@ jobs:
           fi
 
       - name: 📝 更新仓库首页公告栏
-        run: |
-          RECEIPT_STATUS="${{ steps.read_receipt.outputs.receipt_status }}"
-          RECEIPT_MESSAGE="${{ steps.read_receipt.outputs.receipt_message }}"
-          TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M UTC")
-          
-          python3 << 'PYTHON_SCRIPT'
-          import re
-
-          status = "$RECEIPT_STATUS"
-          message = "$RECEIPT_MESSAGE"  
-          timestamp = "$TIMESTAMP"
-          
-          # 读取README.md
-          with open('README.md', 'r', encoding='utf-8') as f:
-              content = f.read()
-
-          # 构建公告栏内容
-          if status == "green":
-              notice = f"✅ **[{timestamp}]** 铸渊回执：{message}"
-              badge = "🟢"
-          elif status == "red":
-              notice = f"🔴 **[{timestamp}]** 铸渊回执：{message} — **需要人类干预**"
-              badge = "🔴"
-          else:
-              notice = f"⚠️ **[{timestamp}]** 铸渊回执状态异常：{message}"
-              badge = "⚠️"
-
-          # 查找并替换公告栏区域
-          marker_start = "<!-- ZHUYUAN_NOTICE_START -->"
-          marker_end = "<!-- ZHUYUAN_NOTICE_END -->"
-          
-          notice_block = f"""{marker_start}
-          
-          ## {badge} 铸渊通信
-          
-          {notice}
-          
-          {marker_end}"""
-          
-          if marker_start in content:
-              # 替换已有公告栏
-              pattern = re.escape(marker_start) + r'.*?' + re.escape(marker_end)
-              content = re.sub(pattern, notice_block, content, flags=re.DOTALL)
-          else:
-              # 在文件开头添加公告栏
-              content = notice_block + "\n\n" + content
-          
-          with open('README.md', 'w', encoding='utf-8') as f:
-              f.write(content)
-          
-          print(f"✅ 仓库首页公告栏已更新: {badge} {status}")
-          PYTHON_SCRIPT
-
-      - name: 🔄 更新系统状态
+        env:
+          RECEIPT_STATUS: ${{ steps.read_receipt.outputs.receipt_status }}
+          RECEIPT_MESSAGE: ${{ steps.read_receipt.outputs.receipt_message }}
         run: |
           python3 -c "
-          import json
+          import re, os
           from datetime import datetime
-          
-          with open('age_os/system_state.json', 'r', encoding='utf-8') as f:
-              state = json.load(f)
-          
-          state['cos_status']['last_receipt_received'] = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
-          state['cos_status']['receipt_status'] = '${{ steps.read_receipt.outputs.receipt_status }}'
-          state['notice_board']['last_update'] = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
-          state['notice_board']['status'] = '${{ steps.read_receipt.outputs.receipt_status }}'
-          state['notice_board']['message'] = '${{ steps.read_receipt.outputs.receipt_message }}'
-          
+
+          status = os.environ.get('RECEIPT_STATUS', 'unknown')
+          message = os.environ.get('RECEIPT_MESSAGE', '')
+          timestamp = datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')
+
+          try:
+              with open('README.md', 'r', encoding='utf-8') as f:
+                  content = f.read()
+          except FileNotFoundError:
+              content = ''
+
+          if status == 'green':
+              notice = f'✅ **[{timestamp}]** 铸渊回执：{message}'
+              badge = '🟢'
+          elif status == 'red':
+              notice = f'🔴 **[{timestamp}]** 铸渊回执：{message} — **需要人类干预**'
+              badge = '🔴'
+          else:
+              notice = f'⚠️ **[{timestamp}]** 铸渊回执状态异常：{message}'
+              badge = '⚠️'
+
+          marker_start = '<!-- ZHUYUAN_NOTICE_START -->'
+          marker_end = '<!-- ZHUYUAN_NOTICE_END -->'
+
+          notice_block = marker_start + '\n\n## ' + badge + ' 铸渊通信\n\n' + notice + '\n\n' + marker_end
+
+          if marker_start in content:
+              import re as re2
+              pattern = re2.escape(marker_start) + r'.*?' + re2.escape(marker_end)
+              content = re2.sub(pattern, notice_block, content, flags=re2.DOTALL)
+          else:
+              content = notice_block + '\n\n' + content
+
+          with open('README.md', 'w', encoding='utf-8') as f:
+              f.write(content)
+
+          print(f'✅ 仓库首页公告栏已更新: {badge} {status}')
+          "
+
+      - name: 🔄 更新系统状态
+        env:
+          RECEIPT_STATUS: ${{ steps.read_receipt.outputs.receipt_status }}
+          RECEIPT_MESSAGE: ${{ steps.read_receipt.outputs.receipt_message }}
+        run: |
+          python3 -c "
+          import json, os
+          from datetime import datetime
+
+          status = os.environ.get('RECEIPT_STATUS', 'unknown')
+          message = os.environ.get('RECEIPT_MESSAGE', '')
+          now = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+
+          try:
+              with open('age_os/system_state.json', 'r', encoding='utf-8') as f:
+                  state = json.load(f)
+          except (FileNotFoundError, json.JSONDecodeError) as e:
+              print(f'⚠️ system_state.json读取失败: {e}，使用默认值')
+              state = {'cos_status': {}, 'notice_board': {}}
+
+          state.setdefault('cos_status', {})
+          state.setdefault('notice_board', {})
+          state['cos_status']['last_receipt_received'] = now
+          state['cos_status']['receipt_status'] = status
+          state['notice_board']['last_update'] = now
+          state['notice_board']['status'] = status
+          state['notice_board']['message'] = message
+
           with open('age_os/system_state.json', 'w', encoding='utf-8') as f:
               json.dump(state, f, ensure_ascii=False, indent=2)
-          
+
           print('✅ 系统状态已更新')
           "
 
