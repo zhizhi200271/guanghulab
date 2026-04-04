@@ -560,9 +560,21 @@ const server = http.createServer((req, res) => {
   res.end('Not Found');
 });
 
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`🌐 铸渊专线订阅服务已启动: http://0.0.0.0:${PORT}`);
+server.listen(PORT, '127.0.0.1', () => {
+  console.log(`🌐 铸渊专线订阅服务已启动: http://127.0.0.1:${PORT}`);
   console.log(`  订阅端点: /sub/{token}`);
   console.log(`  配额查询: /quota`);
   console.log(`  健康检查: /health`);
 });
+
+// Graceful shutdown
+function gracefulShutdown(signal) {
+  console.log(`\n${signal} received. Shutting down gracefully...`);
+  server.close(() => {
+    console.log('Server closed.');
+    process.exit(0);
+  });
+  setTimeout(() => { process.exit(1); }, 5000);
+}
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
