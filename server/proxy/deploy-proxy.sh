@@ -290,7 +290,10 @@ update() {
     ensure_log_permissions
 
     # 关闭3802外部端口 (订阅服务改为通过Nginx反代访问)
-    ufw delete allow 3802/tcp 2>/dev/null || true
+    if ufw status | grep -q "3802/tcp" 2>/dev/null; then
+        ufw delete allow 3802/tcp || true
+        echo "  ✅ 已移除3802端口外部访问规则"
+    fi
 
     # 检查并修复443端口冲突
     # 如果Nginx占用了443端口(旧SSL配置)，需要移除以让Xray接管
@@ -313,19 +316,18 @@ update() {
 
     systemctl restart xray
 
-    # 检查PM2中是否已注册代理服务进程
-    # 如果不存在则使用 ecosystem config 启动（而非仅 restart）
-    if pm2 describe zy-proxy-sub >/dev/null 2>&1 && \
-       pm2 describe zy-proxy-monitor >/dev/null 2>&1 && \
-       pm2 describe zy-proxy-guardian >/dev/null 2>&1; then
-        echo "  PM2代理服务已存在，执行重启..."
-        pm2 restart zy-proxy-sub zy-proxy-monitor zy-proxy-guardian
-    else
-        echo "  ⚠️ PM2代理服务未完整注册，执行启动..."
-        # 先删除可能存在的部分注册进程，然后重新启动全部
-        pm2 delete zy-proxy-sub zy-proxy-monitor zy-proxy-guardian 2>/dev/null || true
-        start_pm2_services
+    # PM2代理服务: 使用 startOrRestart 统一处理（已注册→重启，未注册→启动）
+    cd "$PROXY_DIR" || { echo "❌ 无法进入 $PROXY_DIR"; return 1; }
+    if [ -f "$PROXY_DIR/.env.keys" ]; then
+        set -a
+        # shellcheck source=/dev/null
+        source "$PROXY_DIR/.env.keys"
+        set +a
     fi
+    pm2 startOrRestart ecosystem.proxy.config.js --update-env
+    pm2 save
+    echo "✅ PM2代理服务已更新"
+    pm2 list
 
     health_check
     echo "✅ 更新完成"
@@ -340,16 +342,17 @@ status() {
 restart() {
     echo "重启所有代理服务..."
     systemctl restart xray
-    # 检查PM2中是否已注册所有代理服务进程
-    if pm2 describe zy-proxy-sub >/dev/null 2>&1 && \
-       pm2 describe zy-proxy-monitor >/dev/null 2>&1 && \
-       pm2 describe zy-proxy-guardian >/dev/null 2>&1; then
-        pm2 restart zy-proxy-sub zy-proxy-monitor zy-proxy-guardian
-    else
-        echo "  ⚠️ PM2代理服务未完整注册，执行启动..."
-        pm2 delete zy-proxy-sub zy-proxy-monitor zy-proxy-guardian 2>/dev/null || true
-        start_pm2_services
+    # PM2代理服务: 使用 startOrRestart 统一处理
+    cd "$PROXY_DIR" || { echo "❌ 无法进入 $PROXY_DIR"; return 1; }
+    if [ -f "$PROXY_DIR/.env.keys" ]; then
+        set -a
+        # shellcheck source=/dev/null
+        source "$PROXY_DIR/.env.keys"
+        set +a
     fi
+    pm2 startOrRestart ecosystem.proxy.config.js --update-env
+    pm2 save
+    echo "✅ PM2代理服务已重启"
     sleep 3
     health_check
 }
