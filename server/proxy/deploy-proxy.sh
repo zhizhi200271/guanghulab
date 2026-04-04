@@ -312,7 +312,21 @@ update() {
     fi
 
     systemctl restart xray
-    pm2 restart zy-proxy-sub zy-proxy-monitor zy-proxy-guardian 2>/dev/null || true
+
+    # 检查PM2中是否已注册代理服务进程
+    # 如果不存在则使用 ecosystem config 启动（而非仅 restart）
+    if pm2 describe zy-proxy-sub >/dev/null 2>&1 && \
+       pm2 describe zy-proxy-monitor >/dev/null 2>&1 && \
+       pm2 describe zy-proxy-guardian >/dev/null 2>&1; then
+        echo "  PM2代理服务已存在，执行重启..."
+        pm2 restart zy-proxy-sub zy-proxy-monitor zy-proxy-guardian
+    else
+        echo "  ⚠️ PM2代理服务未完整注册，执行启动..."
+        # 先删除可能存在的部分注册进程，然后重新启动全部
+        pm2 delete zy-proxy-sub zy-proxy-monitor zy-proxy-guardian 2>/dev/null || true
+        start_pm2_services
+    fi
+
     health_check
     echo "✅ 更新完成"
 }
@@ -326,7 +340,16 @@ status() {
 restart() {
     echo "重启所有代理服务..."
     systemctl restart xray
-    pm2 restart zy-proxy-sub zy-proxy-monitor zy-proxy-guardian 2>/dev/null || true
+    # 检查PM2中是否已注册所有代理服务进程
+    if pm2 describe zy-proxy-sub >/dev/null 2>&1 && \
+       pm2 describe zy-proxy-monitor >/dev/null 2>&1 && \
+       pm2 describe zy-proxy-guardian >/dev/null 2>&1; then
+        pm2 restart zy-proxy-sub zy-proxy-monitor zy-proxy-guardian
+    else
+        echo "  ⚠️ PM2代理服务未完整注册，执行启动..."
+        pm2 delete zy-proxy-sub zy-proxy-monitor zy-proxy-guardian 2>/dev/null || true
+        start_pm2_services
+    fi
     sleep 3
     health_check
 }

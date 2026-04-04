@@ -11,7 +11,7 @@
 //   - Clash YAML (Clash Verge / ClashMi)
 //   - Base64 URI (Shadowrocket)
 //
-// 端口: 3802 (绑定0.0.0.0，支持外部直连 + Nginx反代)
+// 端口: 3802 (绑定127.0.0.1，仅通过Nginx反代访问)
 // 认证: URL中的token参数
 //
 // 环境变量 (从 /opt/zhuyuan/proxy/.env.keys 加载):
