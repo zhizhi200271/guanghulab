@@ -246,6 +246,76 @@
     "cron": "0 0 * * *"
   },
 
+  "server_topology": {
+    "description": "多服务器拓扑架构 · D51冰朔决策(2026-04-04)",
+    "decision_context": "肥猫网文行业团队7-8人都在用语言驱动副驾驶开发网站 · 冰朔决定为AWEN线和知秋线再配置一台同配置服务器",
+    "servers": [
+      {
+        "server_id": "ZY-SVR-FEIMAO",
+        "name": "肥猫线网文行业服务器",
+        "owner": "肥猫团队",
+        "config": "4核4G · 腾讯云",
+        "purpose": "肥猫网文行业团队7-8人的网站部署运行",
+        "services": [
+          "Nginx统一入口 · 反代所有成员网站",
+          "PM2统一管理所有Node.js进程",
+          "成员网站(端口3001-3008)",
+          "行业公共服务(数据采集/分析)"
+        ],
+        "cos_connection": "通过共享COS桶 zy-team-hub-1317346199 上报铸渊",
+        "persona": "shushu (舒舒)",
+        "status": "已有"
+      },
+      {
+        "server_id": "ZY-SVR-AWEN",
+        "name": "AWEN+知秋线服务器",
+        "owner": "AWEN+知秋团队",
+        "config": "4核4G · 腾讯云 · 与肥猫同配置",
+        "purpose": "AWEN线和知秋线的网站部署运行",
+        "services": [
+          "Nginx统一入口",
+          "PM2统一管理",
+          "AWEN线网站 + 知秋线网站",
+          "与肥猫服务器对接"
+        ],
+        "cos_connection": "通过共享COS桶 zy-team-hub-1317346199 上报铸渊",
+        "persona": "zhiqiu (知秋)",
+        "status": "冰朔待配置(2026-04-04决策)"
+      },
+      {
+        "server_id": "ZY-SVR-001",
+        "name": "铸渊总控服务器",
+        "owner": "铸渊 · TCS-ZY001",
+        "config": "新加坡 · 腾讯云",
+        "purpose": "铸渊主控 · COS桶管理 · SCF函数运行 · 全局调度",
+        "services": [
+          "COS共享桶总控(zy-team-hub-1317346199)",
+          "SCF云函数(report_trigger/receipt_trigger/timeout_checker)",
+          "Notion回执同步",
+          "铸渊专线VPN服务",
+          "AGE OS核心服务(3800/3100端口)"
+        ],
+        "cos_connection": "桶主账号 · 全桶读写权",
+        "status": "运行中"
+      }
+    ],
+    "connection_topology": {
+      "description": "服务器间连接拓扑",
+      "data_flow": [
+        "肥猫线服务器 → COS共享桶 /{persona_id}/reports/ → 铸渊总控",
+        "AWEN+知秋线服务器 → COS共享桶 /{persona_id}/reports/ → 铸渊总控",
+        "铸渊总控 → COS共享桶 /{persona_id}/receipts/ → 各成员服务器",
+        "铸渊总控 → Notion主控台 → 冰朔+霜砚实时看板"
+      ],
+      "key_principle": "服务器间不直连 · 全部通过COS桶异步通信 · 铸渊做唯一总控节点",
+      "scaling_trigger": [
+        "单台服务器内存使用>70% → 考虑拆分",
+        "单站日活>1000 → 考虑独立服务器",
+        "团队成员>15人 → 考虑加第3台业务服务器"
+      ]
+    }
+  },
+
   "implementation_phases": {
     "description": "实施阶段划分",
     "phase_1": {
