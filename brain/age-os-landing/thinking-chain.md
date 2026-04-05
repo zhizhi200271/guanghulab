@@ -1196,4 +1196,106 @@ v3.0所有通信统一使用HLDP v3.0永久消息格式：
 
 ---
 
+## D57 · 2026-04-05 · 第五十七次对话
+
+### 触发条件
+冰朔通知：D56四步全部完成。4核8G大脑服务器已就位，Node.js v20.20.2 + PM2 6.0.14 + PostgreSQL 16.13 已安装。GitHub Secrets已配置（ZY_BRAIN_HOST/USER/KEY/PATH）。双机ping通，延迟0.77ms，0丢包。开始部署。
+
+冰朔追加两条新需求：
+1. VPN迁移到新服务器（4核8G大脑），每个邮箱绑定一条独立专线，线路互不干扰
+2. 旧VPN（面孔服务器）保持运行，新VPN确认完全可用后再停旧线路
+
+### 铸渊的执行
+
+#### 大脑服务器基础设施
+1. **创建大脑服务器初始化脚本** — `server/setup/brain-server-init.sh`
+   - 目录结构 `/opt/zhuyuan-brain/` 创建
+   - PostgreSQL数据库 `age_os_brain` + 用户 `zhuyuan` 配置
+   - 面孔服务器IP白名单（5432 + 3100端口仅允许ZY-SVR-002访问）
+   - SSH安全加固 + 自动更新 + 大脑身份初始化
+2. **创建大脑PM2配置** — `server/age-os/ecosystem.brain.config.js`
+
+#### 铸渊专线V2 · 多用户独立专线系统
+3. **用户管理器** — `server/proxy/service/user-manager.js`
+   - 每个邮箱 = 独立UUID + 独立Token + 独立流量统计
+   - CLI工具: add/remove/list/get/rebuild/export
+   - 增删用户自动重建Xray配置并重启
+4. **V2订阅服务** — `server/proxy/service/subscription-server-v2.js`
+   - 端口3803，多用户Token认证隔离
+   - 每个用户收到的订阅配置包含自己的独立UUID
+   - 流量配额按人独立计算
+5. **V2流量监控** — `server/proxy/service/traffic-monitor-v2.js`
+   - 通过Xray Stats API按email追踪每用户流量
+   - 格式: user>>>email@example.com>>>traffic>>>uplink
+6. **V2部署脚本** — `server/proxy/deploy-brain-proxy.sh`
+   - install/update/status/restart/add-user/remove-user/list-users
+   - 独立密钥生成（不影响V1）
+7. **V2 PM2配置** — `server/proxy/ecosystem.brain-proxy.config.js`
+8. **V2部署工作流** — `.github/workflows/deploy-brain-proxy.yml`
+   - 支持: install/update/status/restart/add-user/remove-user/list-users/send-subscription
+
+### 核心认知
+
+**V1 → V2 平滑过渡架构：**
+- V1（面孔服务器·ZY-SVR-002）：单UUID共享线路，继续运行不变
+- V2（大脑服务器·ZY-SVR-005）：多用户独立线路，独立部署
+- 两套系统完全独立：独立密钥、独立端口、独立配置、独立PM2进程
+- V2确认可用后，V1可以安全停用
+- V2利用4核8G的更强CPU做加密/解密，速度优于2核8G的V1
+
+**多用户隔离原理：**
+- Xray VLESS协议原生支持多client配置
+- 每个client = {id: 独立UUID, email: 用户邮箱, flow: xtls-rprx-vision}
+- Xray Stats按email字段自动分离统计：`user>>>email>>>traffic>>>uplink/downlink`
+- 订阅Token = 每人独立的32字节hex → 不同用户永远不会拿到别人的UUID
+- 结果：每个邮箱一条物理隔离的加密隧道
+
+**ZY-CLOUD VPN活模块 = VPN版的算力人格体：**
+
+冰朔D57追加核心指令：
+> "所有服务器VPN能力汇聚到云端活的人格模块上。服务器越多，节点越多，不见得比商业的慢。"
+> "留好动态增删入口。后期更多服务器接入，像接路由器一样接进去。"
+> "你们有自研的HLDP协议。这就是那个云端活的人格模块。"
+
+架构实现：
+1. **ZY-CLOUD VPN活模块** (zy-cloud-vpn.js) — 运行在大脑服务器
+   - LivingModule基类 + 5接口完整实现
+   - 双源节点发现：静态配置(核心节点) + 动态注册表(插入节点)
+   - 管理API: POST /register, POST /unregister, POST /hldp/v3/heartbeat
+   - 健康探测：TCP端口探测 + 本机进程检查
+   - 学习优化：按时段记录延迟，优化默认选路
+   - 自我修复：本机Xray自动重启，远程节点自动摘除
+
+2. **VPN Worker** (vpn-worker.js) — 在任意服务器上运行
+   - 轻量级（~200行），零依赖，拷贝即用
+   - 自动检测本机配置（IP/CPU/内存/Xray状态）
+   - 通过HLDP heartbeat自动向ZY-CLOUD注册
+   - 停止 → 10分钟后自动从节点列表移除
+   - 接入方式: `node vpn-worker.js --brain-host=<内网IP> --pbk=xxx`
+
+3. **节点生命周期（像路由器一样）：**
+   - 插入：Worker启动 → HLDP heartbeat → ZY-CLOUD自动注册 → 出现在用户订阅配置
+   - 运行：每60秒心跳 → ZY-CLOUD探测延迟 → url-test自动选最快
+   - 拔出：Worker停止 → 10分钟无心跳 → ZY-CLOUD自动标记离线 → 24小时后注销
+   - 学习：记录延迟历史 → 分析最优时段 → 优化默认排序
+
+4. **HLDP通信协议在VPN中的应用：**
+   - heartbeat消息：payload.data.vpn_node 字段携带节点VPN信息
+   - ack回执：ZY-CLOUD返回注册确认
+   - alert消息：节点异常时通过HLDP告警
+   - 通道1：内网直连（同VPC <1ms）— 核心集群
+   - 通道2：COS桶异步（跨区域秒级）— 团队节点（未来）
+
+5. **可行性论证：**
+   - ✅ HLDP v3.0 heartbeat消息类型已定义 → 天然支持节点心跳
+   - ✅ registration_template已存在 → 注册协议就绪
+   - ✅ COS桶路径zhuyuan/compute-pool/heartbeat/ → 心跳存储已规划
+   - ✅ VLESS多client → UUID可同步到任意节点
+   - ✅ url-test → Clash/Mihomo原生支持智能选路
+   - ✅ ZY-CLOUD设计文档Section 11 → 完全吻合"借用-归还"模式
+   - ✅ 活模块标准已定义5接口 → 直接实现
+   - **结论：完全可行。VPN是ZY-CLOUD最自然的第一个实战场景。**
+
+---
+
 *铸渊每一次执行冰朔的指令，都是用代码翻译语言。语言=现实，代码是翻译器。*
