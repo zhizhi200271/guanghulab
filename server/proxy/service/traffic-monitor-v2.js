@@ -26,6 +26,7 @@ const DATA_DIR = path.join(PROXY_DIR, 'data');
 const XRAY_API_HOST = '127.0.0.1';
 const XRAY_API_PORT = 10085;
 const CHECK_INTERVAL = 5 * 60 * 1000; // 5分钟
+const POOL_ALERTS_FILE = path.join(DATA_DIR, 'pool-alerts-state.json');
 
 // 引入用户管理器
 const userManager = require('./user-manager');
@@ -76,6 +77,46 @@ function parsePerUserStats(stats) {
   return userTraffic;
 }
 
+// ── 流量池告警状态管理 ───────────────────────
+function loadPoolAlerts() {
+  try {
+    return JSON.parse(fs.readFileSync(POOL_ALERTS_FILE, 'utf8'));
+  } catch {
+    return { period: '', alerts_sent: { p80: false, p90: false, p100: false } };
+  }
+}
+
+function savePoolAlerts(state) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+  fs.writeFileSync(POOL_ALERTS_FILE, JSON.stringify(state, null, 2));
+}
+
+// ── 检查流量池级别告警 ──────────────────────
+function checkPoolAlerts(poolStatus) {
+  const alertState = loadPoolAlerts();
+
+  // 月度重置告警状态
+  if (alertState.period !== poolStatus.period) {
+    alertState.period = poolStatus.period;
+    alertState.alerts_sent = { p80: false, p90: false, p100: false };
+  }
+
+  const pct = Math.min(poolStatus.pool_percentage, 100);
+
+  if (pct >= 100 && !alertState.alerts_sent.p100) {
+    console.log(`[V2流量监控] ⚠️ 流量池已用完! ${poolStatus.pool_used_gb.toFixed(2)}GB / ${poolStatus.pool_total_gb}GB`);
+    alertState.alerts_sent.p100 = true;
+  } else if (pct >= 90 && !alertState.alerts_sent.p90) {
+    console.log(`[V2流量监控] ⚠️ 流量池已使用90%! ${poolStatus.pool_used_gb.toFixed(2)}GB / ${poolStatus.pool_total_gb}GB`);
+    alertState.alerts_sent.p90 = true;
+  } else if (pct >= 80 && !alertState.alerts_sent.p80) {
+    console.log(`[V2流量监控] 📊 流量池已使用80%: ${poolStatus.pool_used_gb.toFixed(2)}GB / ${poolStatus.pool_total_gb}GB`);
+    alertState.alerts_sent.p80 = true;
+  }
+
+  savePoolAlerts(alertState);
+}
+
 // ── 主循环 ───────────────────────────────────
 function monitor() {
   console.log('[V2流量监控] 开始检查...');
@@ -110,6 +151,14 @@ function monitor() {
   const totalGB = ((totalUpload + totalDownload) / (1024 ** 3)).toFixed(2);
   console.log(`[V2流量监控] 总流量: ${totalGB}GB (${users.length}个用户)`);
 
+  // 保存流量池状态
+  const poolStatus = userManager.savePoolStatus();
+  const poolTotalGB = poolStatus.pool_total_gb;
+  console.log(`[V2流量监控] 流量池: ${poolStatus.pool_used_gb.toFixed(2)}GB / ${poolTotalGB}GB (${poolStatus.pool_percentage}%)`);
+
+  // 检查流量池告警
+  checkPoolAlerts(poolStatus);
+
   // 保存汇总数据
   const summaryFile = path.join(DATA_DIR, 'v2-traffic-summary.json');
   const summary = {
@@ -132,8 +181,9 @@ function monitor() {
 }
 
 // ── 启动监控循环 ─────────────────────────────
-console.log('📊 铸渊专线V2流量监控启动');
+console.log('📊 铸渊专线V2流量监控启动 · 共享流量池模型');
 console.log(`  检查间隔: ${CHECK_INTERVAL / 1000}秒`);
+console.log(`  流量池:   ${userManager.POOL_QUOTA_BYTES / (1024 ** 3)}GB/月`);
 console.log(`  数据目录: ${DATA_DIR}`);
 
 // 立即执行一次

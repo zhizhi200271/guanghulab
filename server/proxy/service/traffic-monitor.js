@@ -6,6 +6,11 @@
 // server/proxy/service/traffic-monitor.js
 // 📊 铸渊专线 · 流量监控Agent
 //
+// ⚠️ [DEPRECATED · D58] V1节点已停用
+// 铸渊专线2.0已测试通过并正式启用，V1节点不再使用。
+// V2流量监控: traffic-monitor-v2.js (共享流量池2000GB/月)
+// 此文件保留作为V1历史参考，不再部署运行。
+//
 // 定期查询Xray Stats API获取流量数据
 // 更新quota-status.json供订阅服务和仪表盘使用
 //

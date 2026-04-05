@@ -151,13 +151,29 @@ function buildStaticNodes() {
 }
 
 // ── 生成subscription-userinfo头 ──────────────
+// 共享流量池模型: total=池配额(2000GB)，upload+download=池总用量
+// 使用缓存的池状态文件(traffic-monitor-v2每5分钟更新)以减少计算开销
 function generateUserInfoHeader(user) {
   const nextMonth = new Date();
   nextMonth.setMonth(nextMonth.getMonth() + 1);
   nextMonth.setDate(1);
   nextMonth.setHours(0, 0, 0, 0);
 
-  return `upload=${user.traffic.upload_bytes}; download=${user.traffic.download_bytes}; total=${user.quota_bytes}; expire=${Math.floor(nextMonth.getTime() / 1000)}`;
+  // 优先从缓存文件读取池状态 (traffic-monitor-v2每5分钟写入)
+  let poolUpload = 0;
+  let poolDownload = 0;
+  try {
+    const cached = JSON.parse(fs.readFileSync(path.join(DATA_DIR, 'pool-quota-status.json'), 'utf8'));
+    poolUpload = cached.pool_upload_bytes || 0;
+    poolDownload = cached.pool_download_bytes || 0;
+  } catch {
+    // 缓存不可用时实时计算
+    const poolStatus = userManager.getPoolStatus();
+    poolUpload = poolStatus.pool_upload_bytes;
+    poolDownload = poolStatus.pool_download_bytes;
+  }
+
+  return `upload=${poolUpload}; download=${poolDownload}; total=${userManager.POOL_QUOTA_BYTES}; expire=${Math.floor(nextMonth.getTime() / 1000)}`;
 }
 
 // ── 生成VLESS URI (Shadowrocket · 多节点) ─────
@@ -508,18 +524,26 @@ const server = http.createServer((req, res) => {
         return;
       }
 
-      const totalGB = user.quota_bytes / (1024 ** 3);
-      const usedGB = (user.traffic.upload_bytes + user.traffic.download_bytes) / (1024 ** 3);
+      const poolStatus = userManager.getPoolStatus();
+      const userUsedGB = (user.traffic.upload_bytes + user.traffic.download_bytes) / (1024 ** 3);
 
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
         email: user.email,
         label: user.label,
-        total_gb: parseFloat(totalGB.toFixed(1)),
-        used_gb: parseFloat(usedGB.toFixed(2)),
-        remaining_gb: parseFloat((totalGB - usedGB).toFixed(2)),
-        percentage_used: parseFloat(((usedGB / totalGB) * 100).toFixed(1)),
-        period: user.traffic.period,
+        pool: {
+          total_gb: poolStatus.pool_total_gb,
+          used_gb: parseFloat(poolStatus.pool_used_gb.toFixed(2)),
+          remaining_gb: poolStatus.pool_remaining_gb,
+          percentage_used: poolStatus.pool_percentage,
+          users_count: poolStatus.users_count,
+          period: poolStatus.period,
+          reset_day: 1
+        },
+        personal: {
+          used_gb: parseFloat(userUsedGB.toFixed(2)),
+          period: user.traffic.period
+        },
         updated_at: new Date().toISOString()
       }));
       return;
@@ -537,8 +561,8 @@ const server = http.createServer((req, res) => {
         return;
       }
 
-      const totalGB = user.quota_bytes / (1024 ** 3);
-      const usedGB = (user.traffic.upload_bytes + user.traffic.download_bytes) / (1024 ** 3);
+      const poolStatus = userManager.getPoolStatus();
+      const userUsedGB = (user.traffic.upload_bytes + user.traffic.download_bytes) / (1024 ** 3);
       const nodes = buildVpnNodes();
 
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
@@ -563,11 +587,17 @@ const server = http.createServer((req, res) => {
           port: n.port
         })),
         smart_routing: nodes.length > 1 ? 'url-test (自动选最快)' : 'single-node',
-        quota: {
-          total_gb: parseFloat(totalGB.toFixed(1)),
-          used_gb: parseFloat(usedGB.toFixed(2)),
-          remaining_gb: parseFloat((totalGB - usedGB).toFixed(2)),
-          percentage_used: parseFloat(((usedGB / totalGB) * 100).toFixed(1)),
+        pool: {
+          total_gb: poolStatus.pool_total_gb,
+          used_gb: parseFloat(poolStatus.pool_used_gb.toFixed(2)),
+          remaining_gb: poolStatus.pool_remaining_gb,
+          percentage_used: poolStatus.pool_percentage,
+          users_count: poolStatus.users_count,
+          period: poolStatus.period,
+          reset_day: 1
+        },
+        personal: {
+          used_gb: parseFloat(userUsedGB.toFixed(2)),
           period: user.traffic.period
         },
         updated_at: new Date().toISOString()
@@ -608,9 +638,11 @@ server.on('clientError', (err, socket) => {
 
 server.listen(PORT, '127.0.0.1', () => {
   const users = userManager.getEnabledUsers();
+  const poolGB = userManager.POOL_QUOTA_BYTES / (1024 ** 3);
   console.log(`🌐 铸渊专线V2订阅服务已启动: http://127.0.0.1:${PORT}`);
-  console.log(`  版本:    V2.0 (多用户独立专线)`);
+  console.log(`  版本:    V2.0 (多用户独立专线·共享流量池)`);
   console.log(`  用户数:  ${users.length}`);
+  console.log(`  流量池:  ${poolGB}GB/月 (全用户共享·每月1号重置)`);
   console.log(`  服务器:  ZY-SVR-005 · Brain`);
   console.log(`  ──────────────────────────`);
   console.log(`  订阅端点: /sub/{user_token}`);

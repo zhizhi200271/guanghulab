@@ -10,7 +10,12 @@
 //   - 独立UUID (Xray VLESS用户ID)
 //   - 独立订阅Token (订阅URL认证)
 //   - 独立流量统计 (Xray Stats按email追踪)
-//   - 独立配额 (每人500GB/月)
+//   - 共享流量池 (2000GB/月·全用户共享·每月1号重置)
+//
+// 流量池模型:
+//   - 所有用户共享2000GB/月流量池
+//   - 无论多少用户，总量一致
+//   - 每月1号自动重置
 //
 // 用户数据存储: /opt/zhuyuan-brain/proxy/data/users.json
 // Xray配置自动重建: 增删用户后自动更新config并重启Xray
@@ -22,6 +27,7 @@
 //   node user-manager.js get <email>       — 查看用户详情
 //   node user-manager.js rebuild           — 重建Xray配置
 //   node user-manager.js export            — 导出用户数据(无密钥)
+//   node user-manager.js pool              — 查看流量池状态
 // ═══════════════════════════════════════════════
 
 'use strict';
@@ -35,9 +41,14 @@ const { execSync } = require('child_process');
 const PROXY_DIR = process.env.ZY_BRAIN_PROXY_DIR || '/opt/zhuyuan-brain/proxy';
 const DATA_DIR = path.join(PROXY_DIR, 'data');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
+const POOL_STATUS_FILE = path.join(DATA_DIR, 'pool-quota-status.json');
 const XRAY_CONFIG_OUTPUT = '/usr/local/etc/xray/config.json';
 const XRAY_TEMPLATE = path.join(PROXY_DIR, 'config', 'xray-brain-template.json');
 const KEYS_FILE = path.join(PROXY_DIR, '.env.keys');
+
+// ── 共享流量池配额 ──────────────────────────
+// 冰朔指令D58: 2000GB/月共享流量池·无论多少用户总量一致·每月1号重置
+const POOL_QUOTA_BYTES = 2000 * 1024 * 1024 * 1024; // 2000GB = 2TB
 
 // ── 工具函数 ────────────────────────────────
 
@@ -126,7 +137,7 @@ function addUser(email, options = {}) {
     uuid: generateUUID(),
     token: generateToken(),
     label: options.label || email.split('@')[0],
-    quota_bytes: (options.quota_gb || 500) * 1024 * 1024 * 1024,
+    quota_bytes: POOL_QUOTA_BYTES, // 存储池配额引用·实际配额由池级别统一控制(getPoolStatus)·非独立限额
     enabled: true,
     created_at: now.toISOString(),
     traffic: {
@@ -140,10 +151,11 @@ function addUser(email, options = {}) {
   db.users.push(user);
   saveUsers(db);
 
+  const poolGB = (POOL_QUOTA_BYTES / (1024 ** 3)).toFixed(0);
   console.log(`✅ 用户已添加: ${email}`);
   console.log(`   UUID:  ${user.uuid}`);
   console.log(`   Token: ${user.token}`);
-  console.log(`   配额:  ${options.quota_gb || 500}GB/月`);
+  console.log(`   流量池: ${poolGB}GB/月 (全用户共享)`);
 
   return user;
 }
@@ -179,16 +191,16 @@ function listUsers() {
     return [];
   }
 
-  console.log(`📋 用户列表 (${db.users.length}人):`);
+  const pool = getPoolStatus();
+  console.log(`📋 用户列表 (${db.users.length}人) · 流量池: ${pool.pool_used_gb.toFixed(2)}GB / ${pool.pool_total_gb}GB (${pool.pool_percentage.toFixed(1)}%)`);
   console.log('─'.repeat(80));
 
   for (const user of db.users) {
     const usedGB = ((user.traffic.upload_bytes + user.traffic.download_bytes) / (1024 ** 3)).toFixed(2);
-    const quotaGB = (user.quota_bytes / (1024 ** 3)).toFixed(0);
     const status = user.enabled ? '✅' : '⛔';
 
     console.log(`  ${status} ${user.email}`);
-    console.log(`     UUID: ${user.uuid.substring(0, 8)}...  流量: ${usedGB}GB/${quotaGB}GB  标签: ${user.label}`);
+    console.log(`     UUID: ${user.uuid.substring(0, 8)}...  个人用量: ${usedGB}GB  标签: ${user.label}`);
   }
 
   console.log('─'.repeat(80));
@@ -208,15 +220,15 @@ function getUser(email) {
   }
 
   const usedGB = ((user.traffic.upload_bytes + user.traffic.download_bytes) / (1024 ** 3)).toFixed(2);
-  const quotaGB = (user.quota_bytes / (1024 ** 3)).toFixed(0);
+  const pool = getPoolStatus();
 
   console.log(`👤 用户详情: ${email}`);
   console.log(`   UUID:    ${user.uuid}`);
   console.log(`   Token:   ${user.token}`);
   console.log(`   标签:    ${user.label}`);
   console.log(`   状态:    ${user.enabled ? '启用' : '禁用'}`);
-  console.log(`   配额:    ${quotaGB}GB/月`);
-  console.log(`   已用:    ${usedGB}GB`);
+  console.log(`   个人用量: ${usedGB}GB`);
+  console.log(`   流量池:  ${pool.pool_used_gb.toFixed(2)}GB / ${pool.pool_total_gb}GB (${pool.pool_percentage.toFixed(1)}%)`);
   console.log(`   周期:    ${user.traffic.period}`);
   console.log(`   创建于:  ${user.created_at}`);
 
@@ -266,6 +278,60 @@ function updateTraffic(email, upload, download) {
   user.traffic.upload_bytes = upload;
   user.traffic.download_bytes = download;
   saveUsers(db);
+}
+
+/**
+ * 获取共享流量池状态
+ * 汇总所有启用用户的流量 · 对比2000GB池配额
+ * @returns {object} 流量池状态
+ */
+function getPoolStatus() {
+  const db = loadUsers();
+  const now = new Date();
+  const currentPeriod = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+  let totalUpload = 0;
+  let totalDownload = 0;
+
+  for (const user of db.users) {
+    if (!user.enabled) continue;
+    // 只统计当前周期的流量
+    if (user.traffic.period === currentPeriod) {
+      totalUpload += user.traffic.upload_bytes;
+      totalDownload += user.traffic.download_bytes;
+    }
+  }
+
+  const totalUsed = totalUpload + totalDownload;
+  const poolTotalGB = POOL_QUOTA_BYTES / (1024 ** 3);
+  const poolUsedGB = totalUsed / (1024 ** 3);
+  const percentage = (totalUsed / POOL_QUOTA_BYTES) * 100;
+
+  return {
+    pool_quota_bytes: POOL_QUOTA_BYTES,
+    pool_total_gb: poolTotalGB,
+    pool_upload_bytes: totalUpload,
+    pool_download_bytes: totalDownload,
+    pool_used_bytes: totalUsed,
+    pool_used_gb: poolUsedGB,
+    pool_remaining_bytes: Math.max(0, POOL_QUOTA_BYTES - totalUsed),
+    pool_remaining_gb: parseFloat(Math.max(0, poolTotalGB - poolUsedGB).toFixed(2)),
+    pool_percentage: parseFloat(percentage.toFixed(1)),
+    users_count: db.users.filter(u => u.enabled).length,
+    period: currentPeriod,
+    reset_day: 1,
+    updated_at: now.toISOString()
+  };
+}
+
+/**
+ * 保存流量池状态到文件 (供监控和订阅服务使用)
+ */
+function savePoolStatus() {
+  const status = getPoolStatus();
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+  fs.writeFileSync(POOL_STATUS_FILE, JSON.stringify(status, null, 2));
+  return status;
 }
 
 // ── Xray配置重建 ────────────────────────────
@@ -444,6 +510,8 @@ module.exports = {
   findUserByToken,
   getEnabledUsers,
   updateTraffic,
+  getPoolStatus,
+  savePoolStatus,
   rebuildXrayConfig,
   restartXray,
   addUserFull,
@@ -452,7 +520,9 @@ module.exports = {
   generateToken,
   USERS_FILE,
   DATA_DIR,
-  KEYS_FILE
+  KEYS_FILE,
+  POOL_QUOTA_BYTES,
+  POOL_STATUS_FILE
 };
 
 // ── CLI入口 ────────────────────────────────
@@ -464,8 +534,8 @@ if (require.main === module) {
   try {
     switch (command) {
       case 'add':
-        if (!param) { console.error('用法: node user-manager.js add <email> [quota_gb]'); process.exit(1); }
-        addUserFull(param, { quota_gb: parseInt(args[2] || '500', 10) });
+        if (!param) { console.error('用法: node user-manager.js add <email>'); process.exit(1); }
+        addUserFull(param);
         break;
 
       case 'remove':
@@ -487,32 +557,56 @@ if (require.main === module) {
         restartXray();
         break;
 
-      case 'export':
+      case 'pool': {
+        const pool = getPoolStatus();
+        console.log('🏊 铸渊专线V2 · 共享流量池状态');
+        console.log('─'.repeat(50));
+        console.log(`  总配额:   ${pool.pool_total_gb}GB/月`);
+        console.log(`  已使用:   ${pool.pool_used_gb.toFixed(2)}GB`);
+        console.log(`  剩余:     ${pool.pool_remaining_gb}GB`);
+        console.log(`  使用率:   ${pool.pool_percentage}%`);
+        console.log(`  用户数:   ${pool.users_count}人`);
+        console.log(`  周期:     ${pool.period}`);
+        console.log(`  重置日:   每月${pool.reset_day}号`);
+        console.log('─'.repeat(50));
+        break;
+      }
+
+      case 'export': {
         const db = loadUsers();
+        const pool = getPoolStatus();
         const safe = {
-          total: db.users.length,
+          pool: {
+            total_gb: pool.pool_total_gb,
+            used_gb: parseFloat(pool.pool_used_gb.toFixed(2)),
+            remaining_gb: pool.pool_remaining_gb,
+            percentage: pool.pool_percentage,
+            period: pool.period
+          },
+          total_users: db.users.length,
           users: db.users.map(u => ({
             email: u.email,
             label: u.label,
             enabled: u.enabled,
-            quota_gb: (u.quota_bytes / (1024 ** 3)).toFixed(0),
             used_gb: ((u.traffic.upload_bytes + u.traffic.download_bytes) / (1024 ** 3)).toFixed(2),
             created_at: u.created_at
           }))
         };
         console.log(JSON.stringify(safe, null, 2));
         break;
+      }
 
       default:
-        console.log('铸渊专线V2 · 多用户管理器');
+        console.log('铸渊专线V2 · 多用户管理器 · 共享流量池2000GB/月');
         console.log('');
         console.log('用法:');
-        console.log('  node user-manager.js add <email> [quota_gb]  — 添加用户 (默认500GB/月)');
-        console.log('  node user-manager.js remove <email>          — 移除用户');
-        console.log('  node user-manager.js list                    — 列出所有用户');
-        console.log('  node user-manager.js get <email>             — 查看用户详情');
-        console.log('  node user-manager.js rebuild                 — 重建Xray配置');
-        console.log('  node user-manager.js export                  — 导出用户数据(无密钥)');
+        console.log('  node user-manager.js add <email>     — 添加用户');
+        console.log('  node user-manager.js remove <email>  — 移除用户');
+        console.log('  node user-manager.js list            — 列出所有用户');
+        console.log('  node user-manager.js get <email>     — 查看用户详情');
+        console.log('  node user-manager.js pool            — 查看流量池状态');
+        console.log('  node user-manager.js rebuild         — 重建Xray配置');
+        console.log('  node user-manager.js export          — 导出用户数据(无密钥)');
         break;
     }
   } catch (err) {
