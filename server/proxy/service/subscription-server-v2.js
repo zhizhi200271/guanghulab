@@ -73,8 +73,26 @@ function getServerHost() {
 }
 
 // ── 构建所有可用VPN节点 ──────────────────────
-// 三台服务器智能选路：大脑SG1 + 面孔SG2 + CN中转
+// 优先从ZY-CLOUD活模块获取（动态·实时健康检查后的活节点）
+// 回退到静态配置（ZY-CLOUD未运行时）
 function buildVpnNodes() {
+  // 优先: 从ZY-CLOUD活模块的动态节点列表读取
+  const liveNodesFile = path.join(DATA_DIR, 'nodes-live.json');
+  try {
+    const liveData = JSON.parse(fs.readFileSync(liveNodesFile, 'utf8'));
+    // 检查数据是否新鲜（5分钟内）
+    const age = Date.now() - new Date(liveData.updated_at).getTime();
+    if (age < 10 * 60 * 1000 && liveData.nodes && liveData.nodes.length > 0) {
+      return liveData.nodes;
+    }
+  } catch { /* ZY-CLOUD未运行，回退到静态配置 */ }
+
+  // 回退: 从环境变量/密钥文件静态构建
+  return buildStaticNodes();
+}
+
+// ── 静态节点构建（回退用）────────────────────
+function buildStaticNodes() {
   const nodes = [];
 
   // 节点1: 大脑服务器 (ZY-SVR-005 · 新加坡一区 · 4核8G · 主力)
