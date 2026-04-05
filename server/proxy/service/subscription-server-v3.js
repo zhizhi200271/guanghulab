@@ -694,7 +694,8 @@ mode: direct
       const poolStatus = userManager.getPoolStatus();
       const userUsedGB = ((user.traffic.upload_bytes + user.traffic.download_bytes) / (1024 ** 3)).toFixed(2);
       const nodes = buildVpnNodes();
-      const poolPct = Math.min(poolStatus.pool_percentage, 100).toFixed(1);
+      const poolUsedGB = (typeof poolStatus.pool_used_gb === 'number' ? poolStatus.pool_used_gb : 0).toFixed(1);
+      const poolPct = Math.min(typeof poolStatus.pool_percentage === 'number' ? poolStatus.pool_percentage : 0, 100).toFixed(1);
 
       // 读取反向加速状态
       let boostStatus = '未检测';
@@ -715,12 +716,15 @@ mode: direct
 
       const poolBarColor = poolPct > 90 ? '#e74c3c' : poolPct > 70 ? '#f39c12' : '#2ecc71';
 
+      // HTML转义防止XSS
+      const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
       const html = `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>光湖语言世界 · ${user.label}</title>
+<title>光湖语言世界 · ${esc(user.label)}</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: -apple-system, "PingFang SC", sans-serif; background: #0a0e27; color: #e0e0e0; padding: 20px; min-height: 100vh; }
@@ -743,14 +747,14 @@ mode: direct
 <body>
 <div class="header">
   <h1>🌐 光湖语言世界</h1>
-  <p>${user.label} 的专属仪表盘 — 冰朔开发维护</p>
+  <p>${esc(user.label)} 的专属仪表盘 — 冰朔开发维护</p>
 </div>
 
 <div class="card">
   <h3>📊 流量概览</h3>
   <div class="stat-row"><span class="stat-label">今日用量</span><span class="stat-value">${todayGB} GB</span></div>
   <div class="stat-row"><span class="stat-label">个人本月</span><span class="stat-value">${userUsedGB} GB</span></div>
-  <div class="stat-row"><span class="stat-label">流量池</span><span class="stat-value">${poolStatus.pool_used_gb.toFixed(1)} / ${poolStatus.pool_total_gb} GB</span></div>
+  <div class="stat-row"><span class="stat-label">流量池</span><span class="stat-value">${poolUsedGB} / ${poolStatus.pool_total_gb} GB</span></div>
   <div class="pool-bar">
     <div class="pool-fill" style="width: ${poolPct}%; background: ${poolBarColor};">${poolPct}%</div>
   </div>
@@ -759,7 +763,7 @@ mode: direct
 
 <div class="card">
   <h3>🔌 节点状态 (${nodes.length}个)</h3>
-  ${nodes.map(n => `<div class="node"><span>${n.name}</span><span class="online">${n.latency_ms ? n.latency_ms + 'ms' : '在线'}</span></div>`).join('\n  ')}
+  ${nodes.map(n => `<div class="node"><span>${esc(n.name)}</span><span class="online">${n.latency_ms ? n.latency_ms + 'ms' : '在线'}</span></div>`).join('\n  ')}
 </div>
 
 <div class="card">

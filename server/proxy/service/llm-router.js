@@ -132,12 +132,13 @@ function _callSingleModel(baseUrl, apiKey, model, prompt, systemPrompt, maxToken
       temperature: 0.3
     });
 
-    // 构建路径：如果baseUrl包含路径则使用，否则追加 /v1/chat/completions
+    // 构建路径：如果baseUrl已包含chat/completions路径则使用
+    // 否则追加 /v1/chat/completions
     let apiPath = urlObj.pathname;
-    if (apiPath === '/' || apiPath === '') {
+    if (!apiPath || apiPath === '/') {
       apiPath = '/v1/chat/completions';
-    } else if (!apiPath.endsWith('/chat/completions')) {
-      apiPath = apiPath.replace(/\/$/, '') + '/v1/chat/completions';
+    } else if (!apiPath.includes('/chat/completions')) {
+      apiPath = apiPath.replace(/\/+$/, '') + '/chat/completions';
     }
 
     const options = {
@@ -161,7 +162,7 @@ function _callSingleModel(baseUrl, apiKey, model, prompt, systemPrompt, maxToken
       res.on('end', () => {
         try {
           if (res.statusCode >= 400) {
-            reject(new Error(`HTTP ${res.statusCode}: ${data.slice(0, 200)}`));
+            reject(new Error(`HTTP ${res.statusCode}: 请求失败`));
             return;
           }
           const json = JSON.parse(data);

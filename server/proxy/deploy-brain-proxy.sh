@@ -598,8 +598,8 @@ switch_v3() {
     echo "  ✅ 已备份Nginx配置到 ${NGINX_CONF}.v2-backup"
 
     # 将 /api/proxy-v2/ 的 proxy_pass 从 3803 改为 3805
-    if grep -q "proxy_pass.*127\.0\.0\.1:3803" "$NGINX_CONF" 2>/dev/null; then
-        sed -i 's|proxy_pass[[:space:]]*http://127\.0\.0\.1:3803|proxy_pass http://127.0.0.1:3805|g' "$NGINX_CONF"
+    if grep -q "127\.0\.0\.1:3803" "$NGINX_CONF" 2>/dev/null; then
+        sed -i 's|127\.0\.0\.1:3803|127.0.0.1:3805|g' "$NGINX_CONF"
         echo "  ✅ /api/proxy-v2/ 已切换到V3 (3803→3805)"
     else
         echo "  ⚠️ 未找到3803端口配置，可能已切换"

@@ -752,7 +752,7 @@ class ZyCloudVpn extends LivingModule {
 - 连续错误: ${this._consecutiveErrors}
 
 问题上下文:
-${JSON.stringify(context, null, 2)}
+${JSON.stringify(context, null, 2).slice(0, 2000)}
 
 请分析问题原因并给出具体的修复建议。要求:
 1. 判断是网络层面还是服务层面的问题
