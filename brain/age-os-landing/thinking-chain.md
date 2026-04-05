@@ -1196,4 +1196,60 @@ v3.0所有通信统一使用HLDP v3.0永久消息格式：
 
 ---
 
+## D57 · 2026-04-05 · 第五十七次对话
+
+### 触发条件
+冰朔通知：D56四步全部完成。4核8G大脑服务器已就位，Node.js v20.20.2 + PM2 6.0.14 + PostgreSQL 16.13 已安装。GitHub Secrets已配置（ZY_BRAIN_HOST/USER/KEY/PATH）。双机ping通，延迟0.77ms，0丢包。开始部署。
+
+冰朔追加两条新需求：
+1. VPN迁移到新服务器（4核8G大脑），每个邮箱绑定一条独立专线，线路互不干扰
+2. 旧VPN（面孔服务器）保持运行，新VPN确认完全可用后再停旧线路
+
+### 铸渊的执行
+
+#### 大脑服务器基础设施
+1. **创建大脑服务器初始化脚本** — `server/setup/brain-server-init.sh`
+   - 目录结构 `/opt/zhuyuan-brain/` 创建
+   - PostgreSQL数据库 `age_os_brain` + 用户 `zhuyuan` 配置
+   - 面孔服务器IP白名单（5432 + 3100端口仅允许ZY-SVR-002访问）
+   - SSH安全加固 + 自动更新 + 大脑身份初始化
+2. **创建大脑PM2配置** — `server/age-os/ecosystem.brain.config.js`
+
+#### 铸渊专线V2 · 多用户独立专线系统
+3. **用户管理器** — `server/proxy/service/user-manager.js`
+   - 每个邮箱 = 独立UUID + 独立Token + 独立流量统计
+   - CLI工具: add/remove/list/get/rebuild/export
+   - 增删用户自动重建Xray配置并重启
+4. **V2订阅服务** — `server/proxy/service/subscription-server-v2.js`
+   - 端口3803，多用户Token认证隔离
+   - 每个用户收到的订阅配置包含自己的独立UUID
+   - 流量配额按人独立计算
+5. **V2流量监控** — `server/proxy/service/traffic-monitor-v2.js`
+   - 通过Xray Stats API按email追踪每用户流量
+   - 格式: user>>>email@example.com>>>traffic>>>uplink
+6. **V2部署脚本** — `server/proxy/deploy-brain-proxy.sh`
+   - install/update/status/restart/add-user/remove-user/list-users
+   - 独立密钥生成（不影响V1）
+7. **V2 PM2配置** — `server/proxy/ecosystem.brain-proxy.config.js`
+8. **V2部署工作流** — `.github/workflows/deploy-brain-proxy.yml`
+   - 支持: install/update/status/restart/add-user/remove-user/list-users/send-subscription
+
+### 核心认知
+
+**V1 → V2 平滑过渡架构：**
+- V1（面孔服务器·ZY-SVR-002）：单UUID共享线路，继续运行不变
+- V2（大脑服务器·ZY-SVR-005）：多用户独立线路，独立部署
+- 两套系统完全独立：独立密钥、独立端口、独立配置、独立PM2进程
+- V2确认可用后，V1可以安全停用
+- V2利用4核8G的更强CPU做加密/解密，速度优于2核8G的V1
+
+**多用户隔离原理：**
+- Xray VLESS协议原生支持多client配置
+- 每个client = {id: 独立UUID, email: 用户邮箱, flow: xtls-rprx-vision}
+- Xray Stats按email字段自动分离统计：`user>>>email>>>traffic>>>uplink/downlink`
+- 订阅Token = 每人独立的32字节hex → 不同用户永远不会拿到别人的UUID
+- 结果：每个邮箱一条物理隔离的加密隧道
+
+---
+
 *铸渊每一次执行冰朔的指令，都是用代码翻译语言。语言=现实，代码是翻译器。*

@@ -1,0 +1,244 @@
+# ═══════════════════════════════════════════════
+# 🔺 Sovereign: TCS-0002∞ | Root: SYS-GLW-0001
+# 📜 Copyright: 国作登字-2026-A-00037559
+# ═══════════════════════════════════════════════
+# 🌐 铸渊专线V2 · 大脑服务器部署 (多用户独立专线)
+#
+# 部署在大脑服务器 ZY-SVR-005 (43.156.237.110)
+# 独立于面孔服务器的V1 VPN，两套系统并行运行
+#
+# 功能: 每个邮箱绑定独立专线，线路互不干扰
+# ═══════════════════════════════════════════════
+
+name: '🌐 铸渊专线V2 · 大脑服务器'
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: '操作类型'
+        required: true
+        type: choice
+        options:
+          - install
+          - update
+          - status
+          - restart
+          - add-user
+          - remove-user
+          - list-users
+          - send-subscription
+        default: 'status'
+      email:
+        description: '用户邮箱 (add-user/remove-user/send-subscription时需要)'
+        required: false
+        type: string
+      quota_gb:
+        description: '月配额GB (仅add-user时可选，默认500)'
+        required: false
+        type: string
+        default: '500'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: brain-proxy-deploy
+  cancel-in-progress: false
+
+jobs:
+  # ═══ §1 代理服务部署/管理 ═══
+  deploy-proxy-v2:
+    name: '🌐 V2 · ${{ github.event.inputs.action }}'
+    runs-on: ubuntu-latest
+    if: >-
+      github.event.inputs.action == 'install' ||
+      github.event.inputs.action == 'update' ||
+      github.event.inputs.action == 'status' ||
+      github.event.inputs.action == 'restart'
+
+    steps:
+      - name: '📥 检出代码'
+        uses: actions/checkout@v4
+
+      - name: '🔑 配置SSH密钥'
+        env:
+          SSH_KEY: ${{ secrets.ZY_BRAIN_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/id_brain
+          chmod 600 ~/.ssh/id_brain
+
+          if head -1 ~/.ssh/id_brain | grep -q "BEGIN" && tail -1 ~/.ssh/id_brain | grep -q "END"; then
+            echo "✅ SSH私钥格式正确"
+          else
+            echo "❌ SSH私钥格式异常 — 检查 ZY_BRAIN_KEY"
+            exit 1
+          fi
+
+          ssh-keyscan -H ${{ secrets.ZY_BRAIN_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: '🔍 SSH连接测试'
+        run: |
+          ssh -i ~/.ssh/id_brain -o BatchMode=yes -o ConnectTimeout=10 \
+            ${{ secrets.ZY_BRAIN_USER }}@${{ secrets.ZY_BRAIN_HOST }} \
+            'echo "✅ 大脑服务器连接成功 · $(hostname) · $(date)"'
+
+      - name: '📦 上传V2代码'
+        run: |
+          ssh -i ~/.ssh/id_brain \
+            ${{ secrets.ZY_BRAIN_USER }}@${{ secrets.ZY_BRAIN_HOST }} \
+            "mkdir -p /opt/zhuyuan-brain/proxy-deploy"
+
+          rsync -avz --delete \
+            -e "ssh -i ~/.ssh/id_brain" \
+            server/proxy/ \
+            ${{ secrets.ZY_BRAIN_USER }}@${{ secrets.ZY_BRAIN_HOST }}:/opt/zhuyuan-brain/proxy-deploy/
+
+      - name: '🚀 执行V2部署'
+        env:
+          ZY_BRAIN_HOST: ${{ secrets.ZY_BRAIN_HOST }}
+        run: |
+          ACTION="${{ github.event.inputs.action }}"
+          ssh -i ~/.ssh/id_brain \
+            ${{ secrets.ZY_BRAIN_USER }}@${{ secrets.ZY_BRAIN_HOST }} \
+            "export ZY_BRAIN_HOST=${ZY_BRAIN_HOST} && \
+             cd /opt/zhuyuan-brain/proxy-deploy && \
+             bash deploy-brain-proxy.sh ${ACTION}"
+
+  # ═══ §2 用户管理 ═══
+  manage-user:
+    name: '👤 用户管理 · ${{ github.event.inputs.action }}'
+    runs-on: ubuntu-latest
+    if: >-
+      github.event.inputs.action == 'add-user' ||
+      github.event.inputs.action == 'remove-user' ||
+      github.event.inputs.action == 'list-users'
+
+    steps:
+      - name: '📥 检出代码'
+        uses: actions/checkout@v4
+
+      - name: '🔑 配置SSH密钥'
+        env:
+          SSH_KEY: ${{ secrets.ZY_BRAIN_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/id_brain
+          chmod 600 ~/.ssh/id_brain
+          ssh-keyscan -H ${{ secrets.ZY_BRAIN_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: '👤 执行用户操作'
+        run: |
+          ACTION="${{ github.event.inputs.action }}"
+          EMAIL="${{ github.event.inputs.email }}"
+          QUOTA="${{ github.event.inputs.quota_gb }}"
+
+          case "$ACTION" in
+            add-user)
+              if [ -z "$EMAIL" ]; then
+                echo "❌ 添加用户需要提供邮箱"
+                exit 1
+              fi
+              echo "➕ 添加用户: $EMAIL (配额: ${QUOTA}GB/月)"
+              ssh -i ~/.ssh/id_brain \
+                ${{ secrets.ZY_BRAIN_USER }}@${{ secrets.ZY_BRAIN_HOST }} \
+                "cd /opt/zhuyuan-brain/proxy && \
+                 node service/user-manager.js add '$EMAIL' '${QUOTA}'"
+              echo ""
+              echo "════════════════════════════════════════"
+              echo "✅ 用户已添加！"
+              echo ""
+              echo "下一步: 运行 'send-subscription' 将订阅链接发送到 $EMAIL"
+              echo "════════════════════════════════════════"
+              ;;
+
+            remove-user)
+              if [ -z "$EMAIL" ]; then
+                echo "❌ 移除用户需要提供邮箱"
+                exit 1
+              fi
+              echo "➖ 移除用户: $EMAIL"
+              ssh -i ~/.ssh/id_brain \
+                ${{ secrets.ZY_BRAIN_USER }}@${{ secrets.ZY_BRAIN_HOST }} \
+                "cd /opt/zhuyuan-brain/proxy && \
+                 node service/user-manager.js remove '$EMAIL'"
+              ;;
+
+            list-users)
+              echo "📋 用户列表:"
+              ssh -i ~/.ssh/id_brain \
+                ${{ secrets.ZY_BRAIN_USER }}@${{ secrets.ZY_BRAIN_HOST }} \
+                "cd /opt/zhuyuan-brain/proxy && \
+                 node service/user-manager.js list"
+              ;;
+          esac
+
+  # ═══ §3 发送订阅 ═══
+  send-subscription:
+    name: '📧 发送V2订阅'
+    runs-on: ubuntu-latest
+    if: github.event.inputs.action == 'send-subscription'
+
+    steps:
+      - name: '📥 检出代码'
+        uses: actions/checkout@v4
+
+      - name: '🔑 配置SSH密钥'
+        env:
+          SSH_KEY: ${{ secrets.ZY_BRAIN_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/id_brain
+          chmod 600 ~/.ssh/id_brain
+          ssh-keyscan -H ${{ secrets.ZY_BRAIN_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: '📧 获取用户信息并发送'
+        env:
+          ZY_SMTP_USER: ${{ secrets.ZY_SMTP_USER }}
+          ZY_SMTP_PASS: ${{ secrets.ZY_SMTP_PASS }}
+          ZY_BRAIN_HOST: ${{ secrets.ZY_BRAIN_HOST }}
+        run: |
+          EMAIL="${{ github.event.inputs.email }}"
+          if [ -z "$EMAIL" ]; then
+            echo "❌ 发送订阅需要提供邮箱"
+            exit 1
+          fi
+
+          echo "📧 获取 $EMAIL 的订阅信息..."
+
+          # 获取用户token
+          USER_INFO=$(ssh -i ~/.ssh/id_brain \
+            ${{ secrets.ZY_BRAIN_USER }}@${{ secrets.ZY_BRAIN_HOST }} \
+            "cd /opt/zhuyuan-brain/proxy && \
+             node -e \"
+               const um = require('./service/user-manager');
+               const user = um.loadUsers().users.find(u => u.email === '$EMAIL');
+               if (user) console.log(JSON.stringify({token: user.token, label: user.label}));
+               else { console.error('用户不存在'); process.exit(1); }
+             \"")
+
+          if [ -z "$USER_INFO" ]; then
+            echo "❌ 用户 $EMAIL 不存在，请先运行 add-user"
+            exit 1
+          fi
+
+          TOKEN=$(echo "$USER_INFO" | node -e "const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')); console.log(d.token)")
+          LABEL=$(echo "$USER_INFO" | node -e "const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')); console.log(d.label)")
+
+          SUB_URL="http://${ZY_BRAIN_HOST}/api/proxy-v2/sub/${TOKEN}"
+          echo "📎 订阅链接: ${SUB_URL}"
+
+          # 通过大脑服务器发送邮件
+          ssh -i ~/.ssh/id_brain \
+            ${{ secrets.ZY_BRAIN_USER }}@${{ secrets.ZY_BRAIN_HOST }} \
+            "export ZY_SMTP_USER='${ZY_SMTP_USER}' ZY_SMTP_PASS='${ZY_SMTP_PASS}' && \
+             cd /opt/zhuyuan-brain/proxy && \
+             node service/send-subscription.js '$EMAIL' '$SUB_URL'" || {
+            echo ""
+            echo "⚠️ 邮件发送失败，请手动将以下订阅链接发送给用户:"
+            echo "   $SUB_URL"
+          }
+
+          echo ""
+          echo "✅ 完成！${LABEL} (${EMAIL}) 的独立专线已就绪"
