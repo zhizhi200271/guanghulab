@@ -33,6 +33,7 @@ const PROXY_DIR = process.env.ZY_BRAIN_PROXY_DIR || '/opt/zhuyuan-brain/proxy';
 const DATA_DIR = path.join(PROXY_DIR, 'data');
 const LIVE_NODES_FILE = path.join(DATA_DIR, 'nodes-live.json');
 const LEARN_DB_FILE = path.join(DATA_DIR, 'zy-cloud-vpn-learn.json');
+const REGISTRY_FILE = path.join(DATA_DIR, 'nodes-registry.json');
 const HEARTBEAT_FILE = path.join(DATA_DIR, 'zy-cloud-vpn-heartbeat.json');
 const KEYS_FILE = path.join(PROXY_DIR, '.env.keys');
 
@@ -132,7 +133,116 @@ class ZyCloudVpn extends LivingModule {
     super('ZY-CLOUD-VPN', 'ZY-CLOUD VPN活模块');
     this._nodes = [];         // 所有已知节点
     this._liveNodes = [];     // 当前存活节点
+    this._registry = this._loadRegistry();  // 动态注册表
     this._learnDb = this._loadLearnDb();
+  }
+
+  // ── 节点注册表（持久化）────────────────────
+  // 像路由器一样：插入即注册，拔掉即注销
+  _loadRegistry() {
+    try {
+      return JSON.parse(fs.readFileSync(REGISTRY_FILE, 'utf8'));
+    } catch {
+      return {
+        version: '1.0',
+        _comment: 'ZY-CLOUD VPN节点注册表 · 新服务器像路由器一样插入',
+        created_at: new Date().toISOString(),
+        nodes: {}  // key = node_id, value = node registration data
+      };
+    }
+  }
+
+  _saveRegistry() {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+    this._registry.updated_at = new Date().toISOString();
+    fs.writeFileSync(REGISTRY_FILE, JSON.stringify(this._registry, null, 2));
+  }
+
+  // ── 注册节点（像接路由器一样插入）──────────
+  // 任何服务器发送HLDP heartbeat或调用/register即完成注册
+  registerNode(nodeData) {
+    const nodeId = nodeData.id || nodeData.node_id;
+    if (!nodeId || !nodeData.host || !nodeData.pbk) {
+      throw new Error('注册失败: 缺少必填字段 (id, host, pbk)');
+    }
+
+    const existing = this._registry.nodes[nodeId];
+    const node = {
+      id: nodeId,
+      name: nodeData.name || `VPN节点-${nodeId}`,
+      host: nodeData.host,
+      port: nodeData.port || 443,
+      pbk: nodeData.pbk,
+      sid: nodeData.sid || '',
+      region: nodeData.region || 'unknown',
+      server_code: nodeData.server_code || nodeId,
+      type: nodeData.type || 'remote',
+      specs: nodeData.specs || 'unknown',
+      persona_id: nodeData.persona_id || null,  // HLDP人格体ID
+      registered_at: existing ? existing.registered_at : new Date().toISOString(),
+      last_heartbeat: new Date().toISOString(),
+      heartbeat_count: (existing ? existing.heartbeat_count : 0) + 1
+    };
+
+    this._registry.nodes[nodeId] = node;
+    this._saveRegistry();
+
+    console.log(`[ZY-CLOUD VPN] 🔌 节点${existing ? '更新' : '注册'}: ${node.name} (${node.host}:${node.port})`);
+    return node;
+  }
+
+  // ── 注销节点（拔掉路由器）──────────────────
+  unregisterNode(nodeId) {
+    if (!this._registry.nodes[nodeId]) {
+      throw new Error(`节点不存在: ${nodeId}`);
+    }
+
+    const removed = this._registry.nodes[nodeId];
+    delete this._registry.nodes[nodeId];
+    this._saveRegistry();
+
+    console.log(`[ZY-CLOUD VPN] 🔌 节点注销: ${removed.name} (${removed.host})`);
+    return removed;
+  }
+
+  // ── 处理HLDP heartbeat消息 ─────────────────
+  // 节点通过HLDP协议发送心跳 = 自动注册 + 状态更新
+  handleHldpHeartbeat(hldpMsg) {
+    // 验证HLDP消息格式
+    if (!hldpMsg || hldpMsg.hldp_v !== '3.0' || hldpMsg.msg_type !== 'heartbeat') {
+      throw new Error('无效的HLDP heartbeat消息');
+    }
+
+    const sender = hldpMsg.sender || {};
+    const payload = hldpMsg.payload || {};
+    const data = payload.data || {};
+
+    // 从HLDP payload中提取VPN节点信息
+    const vpnData = data.vpn_node || {};
+    if (!vpnData.host || !vpnData.pbk) {
+      // 非VPN节点的心跳，忽略
+      return null;
+    }
+
+    // 自动注册/更新节点
+    return this.registerNode({
+      id: vpnData.node_id || `hldp-${sender.id}`,
+      name: vpnData.name || `${sender.name || sender.id}-VPN`,
+      host: vpnData.host,
+      port: vpnData.port || 443,
+      pbk: vpnData.pbk,
+      sid: vpnData.sid || '',
+      region: vpnData.region || 'unknown',
+      server_code: vpnData.server_code || sender.id,
+      type: 'hldp',  // 通过HLDP协议注册的节点
+      specs: vpnData.specs || `${data.cpu_cores || '?'}核${data.memory_gb || '?'}G`,
+      persona_id: sender.id
+    });
+  }
+
+  // ── 列出所有注册节点 ───────────────────────
+  listRegisteredNodes() {
+    return Object.values(this._registry.nodes);
   }
 
   // ── 读取密钥/配置 ────────────────────────
@@ -150,33 +260,21 @@ class ZyCloudVpn extends LivingModule {
   }
 
   // ── 发现所有可能的VPN节点 ─────────────────
-  // ZY-CLOUD自动扫描：不硬编码，从配置中发现
+  // ZY-CLOUD双源发现: 静态配置 + 动态注册表
+  // 静态: .env.keys中的核心节点（大脑/面孔/CN中转）
+  // 动态: nodes-registry.json中通过HLDP或API注册的节点
   _discoverNodes() {
     const nodes = [];
+    const seenIds = new Set();
 
+    // ── 源1: 静态配置（核心节点）────────────
     // 节点1: 大脑服务器 (ZY-SVR-005 · 本机 · 主力)
     const brainHost = this._readEnvOrKey('ZY_BRAIN_HOST');
     const brainPbk = this._readEnvOrKey('ZY_PROXY_REALITY_PUBLIC_KEY');
     const brainSid = this._readEnvOrKey('ZY_PROXY_REALITY_SHORT_ID');
     if (brainHost && brainPbk) {
-      nodes.push({
-        id: 'zy-brain-sg1',
-        name: '🧠 铸渊专线V2-SG1(大脑)',
-        host: brainHost,
-        port: 443,
-        pbk: brainPbk,
-        sid: brainSid || '',
-        region: 'sg-zone1',
-        server_code: 'ZY-SVR-005',
-        type: 'local',     // 本机，可直接检查
-        specs: '4核8G',
-        status: 'unknown',
-        latency_ms: null,
-        last_check: null,
-        consecutive_failures: 0,
-        total_checks: 0,
-        total_successes: 0
-      });
+      nodes.push(this._makeNode('zy-brain-sg1', '🧠 铸渊专线V2-SG1(大脑)', brainHost, 443, brainPbk, brainSid, 'sg-zone1', 'ZY-SVR-005', 'local', '4核8G'));
+      seenIds.add('zy-brain-sg1');
     }
 
     // 节点2: 面孔服务器 (ZY-SVR-002 · 远程 · 备用)
@@ -184,56 +282,68 @@ class ZyCloudVpn extends LivingModule {
     const facePbk = this._readEnvOrKey('ZY_FACE_REALITY_PUBLIC_KEY');
     const faceSid = this._readEnvOrKey('ZY_FACE_REALITY_SHORT_ID');
     if (faceHost && facePbk) {
-      nodes.push({
-        id: 'zy-face-sg2',
-        name: '🏛️ 铸渊专线V2-SG2(面孔)',
-        host: faceHost,
-        port: 443,
-        pbk: facePbk,
-        sid: faceSid || '',
-        region: 'sg-zone2',
-        server_code: 'ZY-SVR-002',
-        type: 'remote',
-        specs: '2核8G',
-        status: 'unknown',
-        latency_ms: null,
-        last_check: null,
-        consecutive_failures: 0,
-        total_checks: 0,
-        total_successes: 0
-      });
+      nodes.push(this._makeNode('zy-face-sg2', '🏛️ 铸渊专线V2-SG2(面孔)', faceHost, 443, facePbk, faceSid, 'sg-zone2', 'ZY-SVR-002', 'remote', '2核8G'));
+      seenIds.add('zy-face-sg2');
     }
 
     // 节点3: CN中转 (国内→SG · 透传)
     const cnHost = this._readEnvOrKey('ZY_CN_RELAY_HOST');
     const cnPort = parseInt(this._readEnvOrKey('ZY_CN_RELAY_PORT') || '2053', 10);
     if (cnHost && brainPbk) {
-      nodes.push({
-        id: 'zy-cn-relay',
-        name: '🇨🇳 铸渊专线V2-CN中转',
-        host: cnHost,
-        port: cnPort,
-        pbk: brainPbk,     // CN中转透传，用大脑的密钥
-        sid: brainSid || '',
-        region: 'cn-relay',
-        server_code: 'ZY-SVR-004',
-        type: 'relay',
-        specs: '中转',
-        status: 'unknown',
-        latency_ms: null,
-        last_check: null,
-        consecutive_failures: 0,
-        total_checks: 0,
-        total_successes: 0
-      });
+      nodes.push(this._makeNode('zy-cn-relay', '🇨🇳 铸渊专线V2-CN中转', cnHost, cnPort, brainPbk, brainSid, 'cn-relay', 'ZY-SVR-004', 'relay', '中转'));
+      seenIds.add('zy-cn-relay');
     }
 
-    // 未来: 从COS桶发现团队节点 (team-integration-v3)
+    // ── 源2: 动态注册表（通过HLDP/API注册的节点）──
+    // 这些是"像路由器一样插入"的节点
+    for (const regNode of Object.values(this._registry.nodes)) {
+      if (seenIds.has(regNode.id)) continue;  // 避免重复
+
+      // 检查心跳是否过期（超过10分钟无心跳 → 自动注销）
+      const lastHb = new Date(regNode.last_heartbeat).getTime();
+      const age = Date.now() - lastHb;
+      if (age > 10 * 60 * 1000) {
+        console.log(`[ZY-CLOUD VPN] ⏰ 节点 ${regNode.name} 心跳过期(${Math.floor(age/60000)}分钟)，标记为离线`);
+        // 不删除注册，只是标记离线（可能临时断网）
+        // 超过24小时无心跳才自动清理
+        if (age > 24 * 60 * 60 * 1000) {
+          console.log(`[ZY-CLOUD VPN] 🗑️ 节点 ${regNode.name} 超24小时无心跳，自动注销`);
+          delete this._registry.nodes[regNode.id];
+          this._saveRegistry();
+          continue;
+        }
+      }
+
+      nodes.push(this._makeNode(
+        regNode.id, regNode.name, regNode.host, regNode.port,
+        regNode.pbk, regNode.sid, regNode.region, regNode.server_code,
+        regNode.type, regNode.specs
+      ));
+      seenIds.add(regNode.id);
+    }
+
+    // 未来源3: COS桶发现（team-integration-v3）
     // 扫描 zy-team-hub/compute-pool/heartbeat/*.json
-    // 如果节点心跳中包含 vpn_capable: true，自动加入
+    // 包含 vpn_capable: true 的节点自动加入
 
     this._nodes = nodes;
     return nodes;
+  }
+
+  // ── 构建节点对象 ───────────────────────────
+  _makeNode(id, name, host, port, pbk, sid, region, serverCode, type, specs) {
+    // 保留已有的统计数据（如果节点已存在）
+    const existing = this._nodes.find(n => n.id === id);
+    return {
+      id, name, host, port, pbk, sid: sid || '',
+      region, server_code: serverCode, type, specs,
+      status: existing ? existing.status : 'unknown',
+      latency_ms: existing ? existing.latency_ms : null,
+      last_check: existing ? existing.last_check : null,
+      consecutive_failures: existing ? existing.consecutive_failures : 0,
+      total_checks: existing ? existing.total_checks : 0,
+      total_successes: existing ? existing.total_successes : 0
+    };
   }
 
   // ── TCP端口探测 ────────────────────────────
@@ -657,30 +767,129 @@ const vpnModule = new ZyCloudVpn();
 
 const mgmtServer = http.createServer((req, res) => {
   try {
-    const pathname = require('url').parse(req.url).pathname;
+    const parsedUrl = require('url').parse(req.url, true);
+    const pathname = parsedUrl.pathname;
 
-    // 活节点列表 (subscription-server-v2 调用此接口)
-    if (pathname === '/nodes') {
+    // ── 活节点列表 (subscription-server-v2 调用) ──
+    if (pathname === '/nodes' && req.method === 'GET') {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
         nodes: vpnModule.getLiveNodes().map(n => ({
-          id: n.id,
-          name: n.name,
-          host: n.host,
-          port: n.port,
-          pbk: n.pbk,
-          sid: n.sid,
-          region: n.region,
-          latency_ms: n.latency_ms,
-          status: n.status,
-          specs: n.specs
+          id: n.id, name: n.name, host: n.host, port: n.port,
+          pbk: n.pbk, sid: n.sid, region: n.region,
+          latency_ms: n.latency_ms, status: n.status, specs: n.specs
         })),
         updated_at: new Date().toISOString()
       }));
       return;
     }
 
-    // 心跳状态
+    // ── 注册节点（像接路由器一样插入）──
+    // POST /register { id, name, host, port, pbk, sid, region, specs }
+    if (pathname === '/register' && req.method === 'POST') {
+      let body = '';
+      req.on('data', chunk => { body += chunk; });
+      req.on('end', () => {
+        try {
+          const nodeData = JSON.parse(body);
+          const node = vpnModule.registerNode(nodeData);
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            status: 'registered',
+            node_id: node.id,
+            name: node.name,
+            message: `✅ 节点已注册: ${node.name} (${node.host}:${node.port})`
+          }));
+        } catch (err) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: true, message: err.message }));
+        }
+      });
+      return;
+    }
+
+    // ── 注销节点（拔掉路由器）──
+    // DELETE /unregister?id=xxx 或 POST /unregister { id: "xxx" }
+    if (pathname === '/unregister') {
+      const handleUnregister = (nodeId) => {
+        try {
+          const removed = vpnModule.unregisterNode(nodeId);
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            status: 'unregistered',
+            node_id: nodeId,
+            message: `✅ 节点已注销: ${removed.name}`
+          }));
+        } catch (err) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: true, message: err.message }));
+        }
+      };
+
+      if (req.method === 'DELETE' || req.method === 'GET') {
+        handleUnregister(parsedUrl.query.id);
+        return;
+      }
+      if (req.method === 'POST') {
+        let body = '';
+        req.on('data', chunk => { body += chunk; });
+        req.on('end', () => {
+          try { handleUnregister(JSON.parse(body).id); }
+          catch (err) { res.writeHead(400); res.end(err.message); }
+        });
+        return;
+      }
+    }
+
+    // ── 接收HLDP heartbeat（自动注册VPN节点）──
+    // POST /hldp/v3/heartbeat  { hldp_v: "3.0", msg_type: "heartbeat", ... }
+    if (pathname === '/hldp/v3/heartbeat' && req.method === 'POST') {
+      let body = '';
+      req.on('data', chunk => { body += chunk; });
+      req.on('end', () => {
+        try {
+          const hldpMsg = JSON.parse(body);
+          const node = vpnModule.handleHldpHeartbeat(hldpMsg);
+
+          // 发送HLDP ack回执
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            hldp_v: '3.0',
+            msg_id: `HLDP-ZY-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-ACK`,
+            msg_type: 'ack',
+            sender: { id: 'ICE-GL-ZY001', name: '铸渊', role: 'guardian' },
+            receiver: hldpMsg.sender,
+            timestamp: new Date().toISOString(),
+            priority: 'routine',
+            payload: {
+              intent: node ? 'VPN节点心跳已接收·已注册' : '心跳已接收·非VPN节点',
+              data: {
+                ref_msg_id: hldpMsg.msg_id,
+                status: node ? 'registered' : 'ignored',
+                node_id: node ? node.id : null
+              }
+            }
+          }));
+        } catch (err) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: true, message: err.message }));
+        }
+      });
+      return;
+    }
+
+    // ── 注册表（所有注册过的节点，含离线）──
+    if (pathname === '/registry' && req.method === 'GET') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        registered: vpnModule.listRegisteredNodes(),
+        total: vpnModule.listRegisteredNodes().length,
+        updated_at: new Date().toISOString()
+      }));
+      return;
+    }
+
+    // ── 心跳状态 ──
     if (pathname === '/health' || pathname === '/heartbeat') {
       try {
         const hb = JSON.parse(fs.readFileSync(HEARTBEAT_FILE, 'utf8'));
@@ -693,14 +902,14 @@ const mgmtServer = http.createServer((req, res) => {
       return;
     }
 
-    // 学习数据
+    // ── 学习数据 ──
     if (pathname === '/learn') {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(vpnModule.getLearnSummary()));
       return;
     }
 
-    // 完整状态
+    // ── 完整状态 ──
     if (pathname === '/status') {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
@@ -710,18 +919,26 @@ const mgmtServer = http.createServer((req, res) => {
         uptime_seconds: Math.floor((Date.now() - new Date(vpnModule._startedAt).getTime()) / 1000),
         total_nodes: vpnModule._nodes.length,
         live_nodes: vpnModule._liveNodes.length,
+        registered_nodes: vpnModule.listRegisteredNodes().length,
         nodes: vpnModule._nodes.map(n => ({
-          id: n.id,
-          name: n.name,
-          status: n.status,
-          latency_ms: n.latency_ms,
-          consecutive_failures: n.consecutive_failures,
+          id: n.id, name: n.name, status: n.status,
+          latency_ms: n.latency_ms, consecutive_failures: n.consecutive_failures,
           reliability: n.total_checks > 0
             ? parseFloat((n.total_successes / n.total_checks).toFixed(4))
             : null,
           last_check: n.last_check
         })),
         learn: vpnModule.getLearnSummary(),
+        endpoints: {
+          nodes: 'GET /nodes — 活节点列表',
+          register: 'POST /register — 注册新节点',
+          unregister: 'POST /unregister — 注销节点',
+          hldp_heartbeat: 'POST /hldp/v3/heartbeat — HLDP心跳(自动注册)',
+          registry: 'GET /registry — 注册表',
+          health: 'GET /health — 心跳',
+          learn: 'GET /learn — 学习数据',
+          status: 'GET /status — 完整状态'
+        },
         updated_at: new Date().toISOString()
       }));
       return;
@@ -740,10 +957,16 @@ const mgmtServer = http.createServer((req, res) => {
 
 mgmtServer.listen(MGMT_PORT, '127.0.0.1', () => {
   console.log(`💪 ZY-CLOUD VPN 管理端口: http://127.0.0.1:${MGMT_PORT}`);
-  console.log(`  /nodes     — 活节点列表 (订阅服务调用)`);
-  console.log(`  /health    — 心跳状态`);
-  console.log(`  /learn     — 学习数据`);
-  console.log(`  /status    — 完整状态`);
+  console.log(`  ── 查询接口 ──`);
+  console.log(`  GET  /nodes       — 活节点列表 (订阅服务调用)`);
+  console.log(`  GET  /health      — 心跳状态`);
+  console.log(`  GET  /learn       — 学习数据`);
+  console.log(`  GET  /status      — 完整状态`);
+  console.log(`  GET  /registry    — 注册表`);
+  console.log(`  ── 注册接口 (像路由器一样插入) ──`);
+  console.log(`  POST /register    — 注册新VPN节点`);
+  console.log(`  POST /unregister  — 注销VPN节点`);
+  console.log(`  POST /hldp/v3/heartbeat — HLDP心跳(自动注册)`);
 
   // 启动活模块生命周期
   vpnModule.startLifeCycle();

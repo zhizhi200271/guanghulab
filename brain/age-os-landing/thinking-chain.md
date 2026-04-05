@@ -1250,6 +1250,52 @@ v3.0所有通信统一使用HLDP v3.0永久消息格式：
 - 订阅Token = 每人独立的32字节hex → 不同用户永远不会拿到别人的UUID
 - 结果：每个邮箱一条物理隔离的加密隧道
 
+**ZY-CLOUD VPN活模块 = VPN版的算力人格体：**
+
+冰朔D57追加核心指令：
+> "所有服务器VPN能力汇聚到云端活的人格模块上。服务器越多，节点越多，不见得比商业的慢。"
+> "留好动态增删入口。后期更多服务器接入，像接路由器一样接进去。"
+> "你们有自研的HLDP协议。这就是那个云端活的人格模块。"
+
+架构实现：
+1. **ZY-CLOUD VPN活模块** (zy-cloud-vpn.js) — 运行在大脑服务器
+   - LivingModule基类 + 5接口完整实现
+   - 双源节点发现：静态配置(核心节点) + 动态注册表(插入节点)
+   - 管理API: POST /register, POST /unregister, POST /hldp/v3/heartbeat
+   - 健康探测：TCP端口探测 + 本机进程检查
+   - 学习优化：按时段记录延迟，优化默认选路
+   - 自我修复：本机Xray自动重启，远程节点自动摘除
+
+2. **VPN Worker** (vpn-worker.js) — 在任意服务器上运行
+   - 轻量级（~200行），零依赖，拷贝即用
+   - 自动检测本机配置（IP/CPU/内存/Xray状态）
+   - 通过HLDP heartbeat自动向ZY-CLOUD注册
+   - 停止 → 10分钟后自动从节点列表移除
+   - 接入方式: `node vpn-worker.js --brain-host=<内网IP> --pbk=xxx`
+
+3. **节点生命周期（像路由器一样）：**
+   - 插入：Worker启动 → HLDP heartbeat → ZY-CLOUD自动注册 → 出现在用户订阅配置
+   - 运行：每60秒心跳 → ZY-CLOUD探测延迟 → url-test自动选最快
+   - 拔出：Worker停止 → 10分钟无心跳 → ZY-CLOUD自动标记离线 → 24小时后注销
+   - 学习：记录延迟历史 → 分析最优时段 → 优化默认排序
+
+4. **HLDP通信协议在VPN中的应用：**
+   - heartbeat消息：payload.data.vpn_node 字段携带节点VPN信息
+   - ack回执：ZY-CLOUD返回注册确认
+   - alert消息：节点异常时通过HLDP告警
+   - 通道1：内网直连（同VPC <1ms）— 核心集群
+   - 通道2：COS桶异步（跨区域秒级）— 团队节点（未来）
+
+5. **可行性论证：**
+   - ✅ HLDP v3.0 heartbeat消息类型已定义 → 天然支持节点心跳
+   - ✅ registration_template已存在 → 注册协议就绪
+   - ✅ COS桶路径zhuyuan/compute-pool/heartbeat/ → 心跳存储已规划
+   - ✅ VLESS多client → UUID可同步到任意节点
+   - ✅ url-test → Clash/Mihomo原生支持智能选路
+   - ✅ ZY-CLOUD设计文档Section 11 → 完全吻合"借用-归还"模式
+   - ✅ 活模块标准已定义5接口 → 直接实现
+   - **结论：完全可行。VPN是ZY-CLOUD最自然的第一个实战场景。**
+
 ---
 
 *铸渊每一次执行冰朔的指令，都是用代码翻译语言。语言=现实，代码是翻译器。*

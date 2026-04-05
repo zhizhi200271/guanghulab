@@ -188,6 +188,8 @@ deploy_services() {
     cp "$REPO_PROXY_DIR"/service/user-manager.js "$PROXY_DIR/service/"
     cp "$REPO_PROXY_DIR"/service/subscription-server-v2.js "$PROXY_DIR/service/"
     cp "$REPO_PROXY_DIR"/service/traffic-monitor-v2.js "$PROXY_DIR/service/"
+    cp "$REPO_PROXY_DIR"/service/zy-cloud-vpn.js "$PROXY_DIR/service/"
+    cp "$REPO_PROXY_DIR"/service/vpn-worker.js "$PROXY_DIR/service/"
     cp "$REPO_PROXY_DIR"/ecosystem.brain-proxy.config.js "$PROXY_DIR/"
 
     # 复制共用文件(发邮件等)
