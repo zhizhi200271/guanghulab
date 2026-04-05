@@ -543,8 +543,8 @@ remove_v3_nginx_blocks() {
     local conf="$1"
     # 删除从V3注释行到该location块闭合}的所有内容
     sed -i '/# ─── 光湖语言世界V3/,/^[[:space:]]*}/d' "$conf"
-    # 清理多余空行
-    sed -i '/^$/N;/^\n$/d' "$conf"
+    # 清理连续空行（保留最多一个空行）
+    sed -i '/^$/N;/^\n$/D' "$conf"
 }
 
 # 验证nginx配置并返回错误信息
