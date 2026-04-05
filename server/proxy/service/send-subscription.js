@@ -10,8 +10,9 @@
 // 确保敏感信息不经过公开仓库
 //
 // 用法:
-//   node send-subscription.js send <email>  — 发送订阅链接
-//   node send-subscription.js alert <msg>   — 发送告警邮件
+//   node send-subscription.js send <email>           — 发送V2订阅链接
+//   node send-subscription.js send-v3 <email> <url> <dashboard>  — 发送V3订阅链接
+//   node send-subscription.js alert <msg>            — 发送告警邮件
 //
 // 环境变量:
 //   ZY_SMTP_USER, ZY_SMTP_PASS — SMTP认证
@@ -206,6 +207,99 @@ function generateSubscriptionEmail(config, urlOverride) {
 </html>`;
 }
 
+// ── 生成V3订阅邮件HTML (光湖语言世界) ─────────
+function generateV3SubscriptionEmail(subUrl, dashboardUrl) {
+  const now = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
+
+  return `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f8f9fa;">
+  <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+    <h1 style="color: #1a1a2e; margin-bottom: 5px;">🌐 光湖语言世界</h1>
+    <p style="color: #666; margin-top: 0;">铸渊专线 V3 测试版 · 私有订阅链接</p>
+
+    <div style="background: #e8f5e9; border: 1px solid #a5d6a7; border-radius: 8px; padding: 12px; margin: 15px 0;">
+      <strong style="color: #2e7d32;">🧪 V3 测试版</strong>
+      <span style="color: #555;"> — 请测试后反馈体验，V2 继续可用</span>
+    </div>
+
+    <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+
+    <h3 style="color: #333;">📱 V3 订阅链接</h3>
+    <div style="background: #f0f4ff; border: 1px solid #d0d8ff; border-radius: 8px; padding: 15px; word-break: break-all; font-family: monospace; font-size: 13px;">
+      ${subUrl}
+    </div>
+
+    <p style="color: #999; font-size: 12px; margin-top: 8px;">
+      ⚠️ 请勿分享此链接 · 所有订阅共享 2000GB 月流量池
+    </p>
+
+    <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+
+    <h3 style="color: #333;">📊 V3 流量仪表盘</h3>
+    <div style="background: #fff8e1; border: 1px solid #ffe082; border-radius: 8px; padding: 15px; word-break: break-all; font-family: monospace; font-size: 13px;">
+      ${dashboardUrl}
+    </div>
+    <p style="color: #999; font-size: 12px; margin-top: 8px;">
+      💡 V3新功能：在浏览器中查看实时流量统计和节点状态
+    </p>
+
+    <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+
+    <h3 style="color: #333;">📋 使用方法</h3>
+
+    <h4 style="color: #555;">🍎 iPhone (Shadowrocket)</h4>
+    <ol style="color: #666; line-height: 1.8;">
+      <li>打开 Shadowrocket</li>
+      <li>点击右上角 <strong>+</strong></li>
+      <li>选择 <strong>Subscribe</strong> (订阅)</li>
+      <li>粘贴上方 V3 订阅链接</li>
+      <li>点击完成 → 选择节点 → 开启连接</li>
+    </ol>
+
+    <h4 style="color: #555;">💻 Mac / Windows (Clash Verge)</h4>
+    <ol style="color: #666; line-height: 1.8;">
+      <li>打开 Clash Verge</li>
+      <li>点击 <strong>Profiles</strong> (配置)</li>
+      <li>粘贴上方 V3 订阅链接到输入框</li>
+      <li>点击 <strong>Import</strong> (导入)</li>
+      <li>选中新配置 → 开启系统代理</li>
+    </ol>
+
+    <h4 style="color: #555;">🤖 Android (ClashMi / Clash Meta)</h4>
+    <ol style="color: #666; line-height: 1.8;">
+      <li>打开 ClashMi</li>
+      <li>点击 <strong>Profile</strong> → <strong>New Profile</strong></li>
+      <li>选择 <strong>URL</strong></li>
+      <li>粘贴上方 V3 订阅链接</li>
+      <li>保存 → 选中配置 → 启动</li>
+    </ol>
+
+    <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+
+    <h3 style="color: #333;">🆕 V3 升级亮点</h3>
+    <table style="width: 100%; border-collapse: collapse;">
+      <tr><td style="padding: 8px; color: #666;">品牌</td><td style="padding: 8px; font-weight: bold;">光湖语言世界</td></tr>
+      <tr><td style="padding: 8px; color: #666;">流量池</td><td style="padding: 8px; font-weight: bold;">2000 GB / 月 (硬切 · 到量即停)</td></tr>
+      <tr><td style="padding: 8px; color: #666;">重置日期</td><td style="padding: 8px;">每月1日</td></tr>
+      <tr><td style="padding: 8px; color: #666;">协议</td><td style="padding: 8px;">VLESS + Reality (最高安全级别)</td></tr>
+      <tr><td style="padding: 8px; color: #666;">节点位置</td><td style="padding: 8px;">🇸🇬 新加坡 (多节点)</td></tr>
+      <tr><td style="padding: 8px; color: #666;">新增</td><td style="padding: 8px;">📊 流量仪表盘 · 增强分流 · 反向加速</td></tr>
+    </table>
+
+    <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+
+    <p style="color: #aaa; font-size: 11px; text-align: center;">
+      光湖语言世界 · 铸渊专线 V3 测试版 · ${now}<br>
+      国作登字-2026-A-00037559
+    </p>
+  </div>
+</body>
+</html>`;
+}
+
 // ── 生成告警邮件HTML ─────────────────────────
 function generateAlertEmail(message) {
   const now = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
@@ -226,12 +320,13 @@ function generateAlertEmail(message) {
 
 // ── 主入口 ───────────────────────────────────
 async function main() {
-  const [,, action, target, urlOverride] = process.argv;
+  const [,, action, target, urlOverride, dashboardUrl] = process.argv;
 
   if (!action) {
     console.log('用法:');
-    console.log('  node send-subscription.js send <email>  — 发送订阅链接');
-    console.log('  node send-subscription.js alert <msg>   — 发送告警邮件');
+    console.log('  node send-subscription.js send <email>           — 发送V2订阅链接');
+    console.log('  node send-subscription.js send-v3 <email> <url> <dashboard>  — 发送V3订阅链接');
+    console.log('  node send-subscription.js alert <msg>            — 发送告警邮件');
     process.exit(0);
   }
 
@@ -250,6 +345,37 @@ async function main() {
     try {
       await sendEmail(email, '🏛️ 铸渊专线 · 订阅链接', html);
       console.log('✅ 订阅链接已发送');
+    } catch (err) {
+      console.error('❌ 发送失败:', err.message);
+      process.exit(1);
+    }
+
+  } else if (action === 'send-v3') {
+    const email = target;
+    if (!email) {
+      console.error('❌ 请指定目标邮箱');
+      process.exit(1);
+    }
+    if (!urlOverride) {
+      console.error('❌ 请提供V3订阅URL');
+      process.exit(1);
+    }
+
+    let dashboard = dashboardUrl;
+    if (!dashboard) {
+      if (urlOverride.includes('/sub/')) {
+        dashboard = urlOverride.replace('/sub/', '/dashboard/');
+      } else {
+        console.error('❌ 订阅URL中未包含/sub/路径，请手动提供仪表盘URL');
+        process.exit(1);
+      }
+    }
+    console.log(`📧 发送V3订阅链接到: ${email}`);
+    const html = generateV3SubscriptionEmail(urlOverride, dashboard);
+
+    try {
+      await sendEmail(email, '🌐 光湖语言世界 · V3测试订阅链接', html);
+      console.log('✅ V3订阅链接已发送');
     } catch (err) {
       console.error('❌ 发送失败:', err.message);
       process.exit(1);
