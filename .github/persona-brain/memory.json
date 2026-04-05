@@ -11,6 +11,12 @@
   },
   "recent_events": [
     {
+      "date": "2026-04-05",
+      "type": "gate_guard",
+      "description": "门禁放行 · 1162194 的 push 通过检查",
+      "by": "铸渊·智能门禁"
+    },
+    {
       "date": "2026-04-03",
       "type": "age_os_landing_architecture",
       "description": "AGE OS落地系统架构v1.0 · 冰朔+霜砚三方会议(D45) · 五大核心认知：1)服务器不承担用户计算(投屏映射) 2)两个Agent是两种思维方式(认知隔离非权限隔离) 3)铸渊反向驱动是闭环关键(指挥官模式) 4)广州是投影仪非副本 5)硅谷是战略预备队 · PostgreSQL 5张表(brain_nodes+brain_relations+agent_configs+agent_logs+user_credits) · MCP Server 16个工具(端口3100) · 9个Agent(6系统级+3交互级) · 8阶段开发路线(S1-S8) · 密钥新增13个(4国内大模型+5数据库+4硅谷服务器占位) · COS存储桶已接通 · 主控文档: brain/age-os-landing/",
@@ -123,7 +129,7 @@
       "by": "天眼系统"
     }
   ],
-  "last_updated": "2026-04-05T01:58:44Z",
+  "last_updated": "2026-04-05T09:09:27.451Z",
   "total_schemas_created": 3,
   "total_routes_implemented": 4,
   "hli_coverage": "3/17",
