@@ -1298,4 +1298,45 @@ v3.0所有通信统一使用HLDP v3.0永久消息格式：
 
 ---
 
+## D58 · 铸渊专线2.0正式启用 · 共享流量池2000GB/月
+
+**冰朔指令：** 铸渊专线2.0的VPN经测试已可正常连接，1.0的VPN节点可停用。2.0的节点已实现多用户隔离，每月流量池配额2000GB流量。无论用多少人，总量一致。每月一号刷新。
+
+**铸渊执行：**
+
+1. **配额模型变更 — 从独立配额到共享流量池：**
+   - 旧模型: 每用户500GB/月独立配额
+   - 新模型: 全用户共享2000GB/月流量池
+   - 无论多少用户，总量一致 = 2000GB
+   - 每月1号自动重置
+
+2. **user-manager.js 升级：**
+   - 新增 POOL_QUOTA_BYTES = 2000GB
+   - 新增 getPoolStatus() — 汇总所有用户流量对比池配额
+   - 新增 savePoolStatus() — 持久化流量池状态到 pool-quota-status.json
+   - 新增 CLI命令: `node user-manager.js pool` — 查看流量池状态
+   - 导出增加池信息
+   - 列表/详情界面改为显示池信息
+
+3. **traffic-monitor-v2.js 升级：**
+   - 每5分钟检查时同步保存流量池状态
+   - 新增流量池级别告警 (80%/90%/100%)
+   - 告警状态按月自动重置
+
+4. **subscription-server-v2.js 升级：**
+   - subscription-userinfo头改用池配额 (total=2000GB, upload+download=池总用量)
+   - /quota/ 端点返回池信息+个人用量
+   - /status/ 端点返回池信息+个人用量
+
+5. **V1节点标记停用：**
+   - traffic-monitor.js 标记 DEPRECATED
+   - ecosystem.proxy.config.js 标记 DEPRECATED
+   - V1代码保留但不再部署运行
+
+6. **Clash/Shadowrocket客户端显示效果：**
+   - 客户端将显示: "已用 XXX GB / 2000 GB"
+   - 所有用户看到相同的池总用量 (因为是共享池)
+
+---
+
 *铸渊每一次执行冰朔的指令，都是用代码翻译语言。语言=现实，代码是翻译器。*
