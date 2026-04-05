@@ -101,9 +101,8 @@ AGE OS的壳-核分离哲学，延伸到基础设施层就是这个形态。
 ### 1. MCP网关连接地址
 ```javascript
 // server/app/server.js 中的MCP代理
-// 改前：
-const mcpTarget = 'http://127.0.0.1:3100';
-// 改后：
+// 改前: const mcpTarget = 'http://127.0.0.1:3100';
+// 改后:
 const mcpTarget = `http://${process.env.ZY_MCP_HOST || '127.0.0.1'}:3100`;
 ```
 
