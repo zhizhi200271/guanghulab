@@ -97,9 +97,14 @@
         "start": "2026-04-04T04:22:17.357Z",
         "end": null,
         "result": null
+      },
+      {
+        "start": "2026-04-05T04:41:06.820Z",
+        "end": null,
+        "result": null
       }
     ],
-    "lastEnter": "2026-04-04T04:22:17.357Z",
+    "lastEnter": "2026-04-05T04:41:06.820Z",
     "currentState": "running"
   }
 }
