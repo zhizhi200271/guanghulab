@@ -28,11 +28,12 @@ on:
           - remove-user
           - list-users
           - send-subscription
+          - send-subscription-v3
           - deploy-v3
           - switch-v3
         default: 'status'
       email:
-        description: '用户邮箱 (add-user/remove-user/send-subscription时需要)'
+        description: '用户邮箱 (add-user/remove-user/send-subscription/send-subscription-v3时需要)'
         required: false
         type: string
       quota_gb:
@@ -315,3 +316,75 @@ jobs:
 
           echo ""
           echo "✅ 完成！${LABEL} (${EMAIL}) 的独立专线已就绪"
+
+  # ═══ §4 发送V3测试订阅 ═══
+  send-subscription-v3:
+    name: '📧 发送V3测试订阅'
+    runs-on: ubuntu-latest
+    if: github.event.inputs.action == 'send-subscription-v3'
+
+    steps:
+      - name: '📥 检出代码'
+        uses: actions/checkout@v4
+
+      - name: '🔑 配置SSH密钥'
+        env:
+          SSH_KEY: ${{ secrets.ZY_BRAIN_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/id_brain
+          chmod 600 ~/.ssh/id_brain
+          ssh-keyscan -H ${{ secrets.ZY_BRAIN_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: '📧 获取用户信息并发送V3链接'
+        env:
+          ZY_SMTP_USER: ${{ secrets.ZY_SMTP_USER }}
+          ZY_SMTP_PASS: ${{ secrets.ZY_SMTP_PASS }}
+          ZY_BRAIN_HOST: ${{ secrets.ZY_BRAIN_HOST }}
+        run: |
+          EMAIL="${{ github.event.inputs.email }}"
+          if [ -z "$EMAIL" ]; then
+            echo "❌ 发送V3订阅需要提供邮箱"
+            exit 1
+          fi
+
+          echo "📧 获取 $EMAIL 的V3订阅信息..."
+
+          # 获取用户token
+          USER_INFO=$(ssh -i ~/.ssh/id_brain \
+            ${{ secrets.ZY_BRAIN_USER }}@${{ secrets.ZY_BRAIN_HOST }} \
+            "cd /opt/zhuyuan-brain/proxy && \
+             node -e \"
+               const um = require('./service/user-manager');
+               const user = um.loadUsers().users.find(u => u.email === '$EMAIL');
+               if (user) console.log(JSON.stringify({token: user.token, label: user.label}));
+               else { console.error('用户不存在'); process.exit(1); }
+             \"")
+
+          if [ -z "$USER_INFO" ]; then
+            echo "❌ 用户 $EMAIL 不存在，请先运行 add-user"
+            exit 1
+          fi
+
+          TOKEN=$(echo "$USER_INFO" | node -e "const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')); console.log(d.token)")
+          LABEL=$(echo "$USER_INFO" | node -e "const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')); console.log(d.label)")
+
+          SUB_URL="http://${ZY_BRAIN_HOST}/api/proxy-v3/sub/${TOKEN}"
+          DASHBOARD_URL="http://${ZY_BRAIN_HOST}/api/proxy-v3/dashboard/${TOKEN}"
+          echo "📎 V3订阅链接: ${SUB_URL}"
+          echo "📊 V3仪表盘:   ${DASHBOARD_URL}"
+
+          # 通过大脑服务器发送V3邮件
+          ssh -i ~/.ssh/id_brain \
+            ${{ secrets.ZY_BRAIN_USER }}@${{ secrets.ZY_BRAIN_HOST }} \
+            "export ZY_SMTP_USER='${ZY_SMTP_USER}' ZY_SMTP_PASS='${ZY_SMTP_PASS}' && \
+             cd /opt/zhuyuan-brain/proxy && \
+             node service/send-subscription.js send-v3 '$EMAIL' '$SUB_URL' '$DASHBOARD_URL'" || {
+            echo ""
+            echo "⚠️ 邮件发送失败，请手动访问以下链接:"
+            echo "   订阅: $SUB_URL"
+            echo "   仪表盘: $DASHBOARD_URL"
+          }
+
+          echo ""
+          echo "✅ 完成！${LABEL} (${EMAIL}) 的V3光湖语言世界测试订阅已发送"
