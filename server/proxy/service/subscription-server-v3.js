@@ -1088,6 +1088,8 @@ mode: direct
 </div>
 
 <script>
+var RESEND_COOLDOWN_MS = 60000; // 验证码重发冷却时间(毫秒)
+
 async function requestCode() {
   const btn = document.getElementById('requestCodeBtn');
   const codeResult = document.getElementById('codeResult');
@@ -1109,7 +1111,7 @@ async function requestCode() {
       codeResult.className = 'result success';
       codeResult.textContent = '✅ ' + data.message;
       btn.textContent = '✅ 验证码已发送';
-      setTimeout(() => { btn.disabled = false; btn.textContent = '📧 重新发送验证码'; }, 60000);
+      setTimeout(() => { btn.disabled = false; btn.textContent = '📧 重新发送验证码'; }, RESEND_COOLDOWN_MS);
     } else {
       codeResult.className = 'result error';
       codeResult.textContent = '❌ ' + data.message;
