@@ -213,16 +213,16 @@ function logEmail(type, recipients, success, error) {
 function getFeedbackFooter(config) {
   const host = config.server_host || 'guanghulab.com';
   return `
-    <hr style="border: none; border-top: 1px solid #eee; margin: 25px 0 15px;">
-    <div style="text-align: center; padding: 10px;">
-      <p style="color: #888; font-size: 12px; margin: 0 0 8px;">
+    <hr style="border: none; border-top: 1px solid #e8eaed; margin: 32px 0 24px;">
+    <div style="text-align: center; padding: 16px 0;">
+      <p style="color: #8c8c8c; font-size: 13px; margin: 0 0 12px; line-height: 1.6;">
         有建议或问题？欢迎反馈 👇
       </p>
       <a href="https://${host}/api/proxy-v3/feedback"
-         style="display: inline-block; background: #4a90d9; color: white; padding: 8px 20px; border-radius: 6px; text-decoration: none; font-size: 13px;">
+         style="display: inline-block; background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 500; letter-spacing: 0.5px;">
         📝 提交意见反馈
       </a>
-      <p style="color: #aaa; font-size: 11px; margin: 10px 0 0;">
+      <p style="color: #b0b0b0; font-size: 12px; margin: 14px 0 0; line-height: 1.5;">
         每周五 20:00 铸渊集中处理 · 每周一推送处理结果
       </p>
     </div>`;
@@ -235,25 +235,95 @@ function wrapEmailTemplate(title, content, config) {
 
   return `
 <!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"></head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f8f9fa;">
-  <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-    <h1 style="color: #1a1a2e; margin-bottom: 5px;">🌐 光湖语言世界</h1>
-    <p style="color: #666; margin-top: 0; font-size: 13px;">${title}</p>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>光湖语言世界</title>
+  <!--[if mso]>
+  <style type="text/css">
+    body, table, td { font-family: 'Microsoft YaHei', SimSun, sans-serif !important; }
+  </style>
+  <![endif]-->
+  <style type="text/css">
+    /* 响应式断点 — 移动端优化 */
+    @media only screen and (max-width: 620px) {
+      .email-outer { width: 100% !important; padding: 8px !important; }
+      .email-container { padding: 20px 16px !important; border-radius: 8px !important; }
+      .email-title { font-size: 20px !important; }
+      .email-subtitle { font-size: 12px !important; }
+      .section-heading { font-size: 15px !important; }
+      .alert-box { padding: 12px 14px !important; }
+      .data-table td { padding: 10px 8px !important; font-size: 13px !important; }
+      .action-btn { padding: 14px 24px !important; font-size: 14px !important; }
+      .info-card { padding: 14px !important; }
+      .footer-text { font-size: 11px !important; }
+    }
+    /* 超小屏幕 (< 400px) */
+    @media only screen and (max-width: 400px) {
+      .email-container { padding: 16px 12px !important; }
+      .email-title { font-size: 18px !important; }
+      .code-display { font-size: 28px !important; letter-spacing: 5px !important; }
+    }
+    /* 暗色模式支持 */
+    @media (prefers-color-scheme: dark) {
+      .email-outer { background: #1a1a2e !important; }
+    }
+  </style>
+</head>
+<body style="margin: 0; padding: 0; background: #f0f2f5; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #f0f2f5;">
+    <tr>
+      <td align="center" class="email-outer" style="padding: 24px 16px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="max-width: 600px; width: 100%;">
+          <!-- 主卡片 -->
+          <tr>
+            <td class="email-container" style="background: #ffffff; border-radius: 16px; padding: 36px 32px; box-shadow: 0 4px 24px rgba(0,0,0,0.08);">
 
-    <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+              <!-- 品牌头部 -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td style="padding-bottom: 8px;">
+                    <h1 class="email-title" style="color: #1a1a2e; font-size: 22px; font-weight: 700; margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Roboto, sans-serif;">🌐 光湖语言世界</h1>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <p class="email-subtitle" style="color: #8c8c8c; margin: 0; font-size: 13px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Roboto, sans-serif;">${title}</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding-top: 20px;">
+                    <div style="border-top: 2px solid #f0f2f5; width: 100%;"></div>
+                  </td>
+                </tr>
+              </table>
 
-    ${content}
+              <!-- 正文内容 -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Roboto, sans-serif; color: #333333;">
+                <tr>
+                  <td style="padding-top: 24px;">
+                    ${content}
+                  </td>
+                </tr>
+              </table>
 
-    ${feedbackFooter}
+              ${feedbackFooter}
 
-    <hr style="border: none; border-top: 1px solid #eee; margin: 15px 0;">
-    <p style="color: #aaa; font-size: 11px; text-align: center;">
-      光湖语言世界 · ∞版本 · ${now}<br>
-      国作登字-2026-A-00037559
-    </p>
-  </div>
+              <!-- 底部版权 -->
+              <hr style="border: none; border-top: 1px solid #e8eaed; margin: 20px 0;">
+              <p class="footer-text" style="color: #b0b0b0; font-size: 12px; text-align: center; margin: 0; line-height: 1.8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Roboto, sans-serif;">
+                光湖语言世界 · ∞版本 · ${now}<br>
+                国作登字-2026-A-00037559
+              </p>
+
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>`;
 }
@@ -266,22 +336,36 @@ function generateMonthlyResetEmail(config) {
   const month = `${now.getFullYear()}年${now.getMonth() + 1}月`;
 
   const content = `
-    <div style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 8px; padding: 15px; margin: 15px 0;">
-      <strong style="color: #155724;">✅ ${month} 流量节点已重置</strong>
+    <div class="alert-box" style="background: #f0faf3; border: 1px solid #c3e6cb; border-radius: 10px; padding: 16px 20px; margin: 0 0 24px;">
+      <strong style="color: #155724; font-size: 15px;">✅ ${month} 流量节点已重置</strong>
     </div>
 
-    <h3 style="color: #333;">📊 本月配额</h3>
-    <table style="width: 100%; border-collapse: collapse;">
-      <tr><td style="padding: 8px; color: #666;">流量池</td><td style="padding: 8px; font-weight: bold;">2000 GB</td></tr>
-      <tr><td style="padding: 8px; color: #666;">已使用</td><td style="padding: 8px; color: #28a745; font-weight: bold;">0 GB (已重置)</td></tr>
-      <tr><td style="padding: 8px; color: #666;">重置日期</td><td style="padding: 8px;">每月1日</td></tr>
-      <tr><td style="padding: 8px; color: #666;">协议</td><td style="padding: 8px;">VLESS + Reality</td></tr>
+    <h3 class="section-heading" style="color: #1a1a2e; font-size: 16px; margin: 0 0 16px; font-weight: 600;">📊 本月配额</h3>
+    <table class="data-table" role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse: collapse;">
+      <tr style="border-bottom: 1px solid #f0f2f5;">
+        <td style="padding: 12px 16px; color: #666; font-size: 14px; width: 40%;">流量池</td>
+        <td style="padding: 12px 16px; font-weight: 600; color: #1a1a2e; font-size: 14px;">2000 GB</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #f0f2f5; background: #fafbfc;">
+        <td style="padding: 12px 16px; color: #666; font-size: 14px;">已使用</td>
+        <td style="padding: 12px 16px; font-weight: 600; color: #28a745; font-size: 14px;">0 GB (已重置)</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #f0f2f5;">
+        <td style="padding: 12px 16px; color: #666; font-size: 14px;">重置日期</td>
+        <td style="padding: 12px 16px; color: #1a1a2e; font-size: 14px;">每月1日</td>
+      </tr>
+      <tr>
+        <td style="padding: 12px 16px; color: #666; font-size: 14px;">协议</td>
+        <td style="padding: 12px 16px; color: #1a1a2e; font-size: 14px;">VLESS + Reality</td>
+      </tr>
     </table>
 
-    <p style="color: #666; font-size: 13px; margin-top: 15px;">
-      💡 您无需任何操作，刷新订阅即可继续使用。<br>
-      流量池为所有用户共享，请合理使用。
-    </p>`;
+    <div class="info-card" style="background: #f8f9fa; border-radius: 10px; padding: 16px 20px; margin: 24px 0 0; border-left: 4px solid #667eea;">
+      <p style="color: #555; font-size: 14px; margin: 0; line-height: 1.8;">
+        💡 您无需任何操作，刷新订阅即可继续使用。<br>
+        流量池为所有用户共享，请合理使用。
+      </p>
+    </div>`;
 
   return wrapEmailTemplate(`${month} · 流量重置通知`, content, config);
 }
@@ -297,27 +381,29 @@ function generateUpdateNotifyEmail(description, config) {
   let detailHtml;
   if (items.length > 1) {
     detailHtml = `
-    <ul style="margin: 0; padding-left: 20px; color: #333; line-height: 2;">
-      ${items.map(item => `<li>${escapeHtml(item)}</li>`).join('\n      ')}
+    <ul style="margin: 0; padding-left: 20px; color: #333; line-height: 2.2;">
+      ${items.map(item => `<li style="color: #444; font-size: 14px; padding: 2px 0;">${escapeHtml(item)}</li>`).join('\n      ')}
     </ul>`;
   } else {
-    detailHtml = `<p style="margin: 0; color: #333; line-height: 1.8;">${escapeHtml(description).replace(/\n/g, '<br>')}</p>`;
+    detailHtml = `<p style="margin: 0; color: #444; line-height: 1.9; font-size: 14px;">${escapeHtml(description).replace(/\n/g, '<br>')}</p>`;
   }
 
   const content = `
-    <div style="background: #cce5ff; border: 1px solid #b8daff; border-radius: 8px; padding: 15px; margin: 15px 0;">
-      <strong style="color: #004085;">🔄 系统已完成升级</strong>
+    <div class="alert-box" style="background: #e8f4fd; border: 1px solid #b8daff; border-radius: 10px; padding: 16px 20px; margin: 0 0 24px;">
+      <strong style="color: #004085; font-size: 15px;">🔄 系统已完成升级</strong>
     </div>
 
-    <h3 style="color: #333;">📋 本次更新内容</h3>
-    <div style="background: #f8f9fa; border-radius: 8px; padding: 15px; line-height: 1.8;">
+    <h3 class="section-heading" style="color: #1a1a2e; font-size: 16px; margin: 0 0 16px; font-weight: 600;">📋 本次更新内容</h3>
+    <div class="info-card" style="background: #fafbfc; border-radius: 10px; padding: 20px; line-height: 1.8; border: 1px solid #e8eaed;">
       ${detailHtml}
     </div>
 
-    <p style="color: #666; font-size: 13px; margin-top: 15px;">
-      ⏰ 更新时间: ${now}<br>
-      💡 大部分更新只需刷新订阅即可生效。如需重新下载订阅链接，会另行通知。
-    </p>`;
+    <div class="info-card" style="background: #f8f9fa; border-radius: 10px; padding: 16px 20px; margin: 24px 0 0; border-left: 4px solid #667eea;">
+      <p style="color: #555; font-size: 14px; margin: 0; line-height: 1.8;">
+        ⏰ 更新时间: ${now}<br>
+        💡 大部分更新只需刷新订阅即可生效。如需重新下载订阅链接，会另行通知。
+      </p>
+    </div>`;
 
   return wrapEmailTemplate('系统升级通知', content, config);
 }
@@ -332,34 +418,49 @@ function generateTrafficWarnEmail(percentage, poolStatus, config) {
 
   let urgencyColor, urgencyBg, urgencyBorder, urgencyText;
   if (percentage >= 100) {
-    urgencyColor = '#721c24'; urgencyBg = '#f8d7da'; urgencyBorder = '#f5c6cb';
+    urgencyColor = '#721c24'; urgencyBg = '#fdf0f1'; urgencyBorder = '#f5c6cb';
     urgencyText = '⛔ 流量池已耗尽！所有连接已暂停。';
   } else if (percentage >= 90) {
-    urgencyColor = '#856404'; urgencyBg = '#fff3cd'; urgencyBorder = '#ffeaa7';
+    urgencyColor = '#856404'; urgencyBg = '#fffbeb'; urgencyBorder = '#ffeaa7';
     urgencyText = `⚠️ 流量池仅剩 ${remainGB}GB，请节约使用！`;
   } else {
-    urgencyColor = '#0c5460'; urgencyBg = '#d1ecf1'; urgencyBorder = '#bee5eb';
+    urgencyColor = '#0c5460'; urgencyBg = '#e8f7fc'; urgencyBorder = '#bee5eb';
     urgencyText = `📊 流量池已使用 ${percentage}%，剩余 ${remainGB}GB`;
   }
 
+  const barColor = percentage >= 90 ? '#dc3545' : percentage >= 70 ? '#ffc107' : '#28a745';
+
   const content = `
-    <div style="background: ${urgencyBg}; border: 1px solid ${urgencyBorder}; border-radius: 8px; padding: 15px; margin: 15px 0;">
-      <strong style="color: ${urgencyColor};">${urgencyText}</strong>
+    <div class="alert-box" style="background: ${urgencyBg}; border: 1px solid ${urgencyBorder}; border-radius: 10px; padding: 16px 20px; margin: 0 0 24px;">
+      <strong style="color: ${urgencyColor}; font-size: 15px;">${urgencyText}</strong>
     </div>
 
-    <h3 style="color: #333;">📊 流量池状态</h3>
-    <table style="width: 100%; border-collapse: collapse;">
-      <tr><td style="padding: 8px; color: #666;">已使用</td><td style="padding: 8px; font-weight: bold;">${usedGB} GB</td></tr>
-      <tr><td style="padding: 8px; color: #666;">总配额</td><td style="padding: 8px;">${totalGB} GB</td></tr>
-      <tr><td style="padding: 8px; color: #666;">使用率</td><td style="padding: 8px; font-weight: bold; color: ${urgencyColor};">${percentage}%</td></tr>
-      <tr><td style="padding: 8px; color: #666;">剩余</td><td style="padding: 8px;">${remainGB} GB</td></tr>
+    <h3 class="section-heading" style="color: #1a1a2e; font-size: 16px; margin: 0 0 16px; font-weight: 600;">📊 流量池状态</h3>
+    <table class="data-table" role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse: collapse;">
+      <tr style="border-bottom: 1px solid #f0f2f5;">
+        <td style="padding: 12px 16px; color: #666; font-size: 14px; width: 40%;">已使用</td>
+        <td style="padding: 12px 16px; font-weight: 600; color: #1a1a2e; font-size: 14px;">${usedGB} GB</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #f0f2f5; background: #fafbfc;">
+        <td style="padding: 12px 16px; color: #666; font-size: 14px;">总配额</td>
+        <td style="padding: 12px 16px; color: #1a1a2e; font-size: 14px;">${totalGB} GB</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #f0f2f5;">
+        <td style="padding: 12px 16px; color: #666; font-size: 14px;">使用率</td>
+        <td style="padding: 12px 16px; font-weight: 600; color: ${urgencyColor}; font-size: 14px;">${percentage}%</td>
+      </tr>
+      <tr>
+        <td style="padding: 12px 16px; color: #666; font-size: 14px;">剩余</td>
+        <td style="padding: 12px 16px; color: #1a1a2e; font-size: 14px;">${remainGB} GB</td>
+      </tr>
     </table>
 
-    <div style="background: #f0f0f0; border-radius: 8px; height: 20px; margin: 15px 0; overflow: hidden;">
-      <div style="background: ${percentage >= 90 ? '#dc3545' : percentage >= 70 ? '#ffc107' : '#28a745'}; height: 100%; width: ${Math.min(percentage, 100)}%; border-radius: 8px;"></div>
+    <!-- 进度条 -->
+    <div style="background: #e9ecef; border-radius: 10px; height: 24px; margin: 20px 0; overflow: hidden;">
+      <div style="background: ${barColor}; height: 100%; width: ${Math.min(percentage, 100)}%; border-radius: 10px; transition: width 0.3s;"></div>
     </div>
 
-    <p style="color: #888; font-size: 12px;">
+    <p style="color: #8c8c8c; font-size: 13px; margin: 0; line-height: 1.6;">
       流量池每月1日重置。所有用户共享 ${totalGB}GB 月配额。
     </p>`;
 
@@ -371,20 +472,20 @@ function generateTrafficWarnEmail(percentage, poolStatus, config) {
 // ═══════════════════════════════════════════════
 function generateSecurityWarnEmail(message, config) {
   const content = `
-    <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 15px; margin: 15px 0;">
-      <strong style="color: #856404;">🛡️ 安全提醒</strong>
+    <div class="alert-box" style="background: #fffbeb; border: 1px solid #ffc107; border-radius: 10px; padding: 16px 20px; margin: 0 0 24px;">
+      <strong style="color: #856404; font-size: 15px;">🛡️ 安全提醒</strong>
     </div>
 
-    <div style="background: #f8f9fa; border-radius: 8px; padding: 15px; color: #333; line-height: 1.8;">
+    <div class="info-card" style="background: #fafbfc; border-radius: 10px; padding: 20px; color: #444; line-height: 1.9; font-size: 14px; border: 1px solid #e8eaed; margin: 0 0 24px;">
       ${escapeHtml(message).replace(/\n/g, '<br>')}
     </div>
 
-    <h3 style="color: #333;">💡 安全建议</h3>
-    <ul style="color: #666; line-height: 2;">
-      <li>避免同时使用多个VPN客户端</li>
-      <li>关闭不使用的VPN连接</li>
-      <li>确保订阅链接仅个人使用</li>
-      <li>如有异常，请及时反馈</li>
+    <h3 class="section-heading" style="color: #1a1a2e; font-size: 16px; margin: 0 0 16px; font-weight: 600;">💡 安全建议</h3>
+    <ul style="color: #555; line-height: 2.2; padding-left: 20px; margin: 0; font-size: 14px;">
+      <li style="padding: 2px 0;">避免同时使用多个VPN客户端</li>
+      <li style="padding: 2px 0;">关闭不使用的VPN连接</li>
+      <li style="padding: 2px 0;">确保订阅链接仅个人使用</li>
+      <li style="padding: 2px 0;">如有异常，请及时反馈</li>
     </ul>`;
 
   return wrapEmailTemplate('安全使用提醒', content, config);
@@ -395,23 +496,34 @@ function generateSecurityWarnEmail(message, config) {
 // ═══════════════════════════════════════════════
 function generateFeedbackAckEmail(config) {
   const content = `
-    <div style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 8px; padding: 15px; margin: 15px 0;">
-      <strong style="color: #155724;">✅ 您的反馈已收到</strong>
+    <div class="alert-box" style="background: #f0faf3; border: 1px solid #c3e6cb; border-radius: 10px; padding: 16px 20px; margin: 0 0 24px;">
+      <strong style="color: #155724; font-size: 15px;">✅ 您的反馈已收到</strong>
     </div>
 
-    <p style="color: #666; line-height: 1.8;">
+    <p style="color: #555; line-height: 1.9; font-size: 14px; margin: 0 0 20px;">
       感谢您的宝贵意见！铸渊将在以下时间处理：
     </p>
 
-    <table style="width: 100%; border-collapse: collapse;">
-      <tr><td style="padding: 8px; color: #666;">📥 收集截止</td><td style="padding: 8px;">每周五 20:00</td></tr>
-      <tr><td style="padding: 8px; color: #666;">🔍 深度分析</td><td style="padding: 8px;">周五晚间 (AI辅助评估)</td></tr>
-      <tr><td style="padding: 8px; color: #666;">📤 结果推送</td><td style="padding: 8px;">每周一 09:00</td></tr>
+    <table class="data-table" role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse: collapse;">
+      <tr style="border-bottom: 1px solid #f0f2f5;">
+        <td style="padding: 12px 16px; color: #666; font-size: 14px; width: 40%;">📥 收集截止</td>
+        <td style="padding: 12px 16px; color: #1a1a2e; font-size: 14px;">每周五 20:00</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #f0f2f5; background: #fafbfc;">
+        <td style="padding: 12px 16px; color: #666; font-size: 14px;">🔍 深度分析</td>
+        <td style="padding: 12px 16px; color: #1a1a2e; font-size: 14px;">周五晚间 (AI辅助评估)</td>
+      </tr>
+      <tr>
+        <td style="padding: 12px 16px; color: #666; font-size: 14px;">📤 结果推送</td>
+        <td style="padding: 12px 16px; color: #1a1a2e; font-size: 14px;">每周一 09:00</td>
+      </tr>
     </table>
 
-    <p style="color: #888; font-size: 12px; margin-top: 15px;">
-      注: 并非所有需求都会被采纳。铸渊会基于系统安全性、架构完整性和整体规划进行评估。
-    </p>`;
+    <div class="info-card" style="background: #f8f9fa; border-radius: 10px; padding: 16px 20px; margin: 24px 0 0; border-left: 4px solid #667eea;">
+      <p style="color: #8c8c8c; font-size: 13px; margin: 0; line-height: 1.8;">
+        注: 并非所有需求都会被采纳。铸渊会基于系统安全性、架构完整性和整体规划进行评估。
+      </p>
+    </div>`;
 
   return wrapEmailTemplate('反馈已收到', content, config);
 }
@@ -421,45 +533,50 @@ function generateFeedbackAckEmail(config) {
 // ═══════════════════════════════════════════════
 function generateBandwidthAuthEmail(code, authPageUrl, config) {
   const content = `
-    <div style="background: #e8f4fd; border: 1px solid #b8daff; border-radius: 8px; padding: 15px; margin: 15px 0;">
-      <strong style="color: #004085;">🌊 带宽共享加速 · 授权验证</strong>
+    <div class="alert-box" style="background: #e8f4fd; border: 1px solid #b8daff; border-radius: 10px; padding: 16px 20px; margin: 0 0 24px;">
+      <strong style="color: #004085; font-size: 15px;">🌊 带宽共享加速 · 授权验证</strong>
     </div>
 
-    <p style="color: #333; line-height: 1.8;">
+    <p style="color: #444; line-height: 1.9; font-size: 14px; margin: 0 0 24px;">
       您正在参与<strong>光湖语言世界</strong>的带宽共享加速计划。<br>
       如果您<strong>同意授权</strong>，请复制以下验证码并提交：
     </p>
 
-    <div style="background: #f0f7ff; border: 2px dashed #4a90d9; border-radius: 12px; padding: 20px; margin: 20px 0; text-align: center;">
-      <p style="color: #666; font-size: 12px; margin: 0 0 8px;">您的验证码 (15分钟内有效)</p>
-      <p style="font-size: 36px; font-weight: bold; color: #1a1a2e; letter-spacing: 8px; margin: 0;">${code}</p>
+    <!-- 验证码展示区 -->
+    <div class="info-card" style="background: #f0f7ff; border: 2px dashed #667eea; border-radius: 14px; padding: 28px 20px; margin: 0 0 24px; text-align: center;">
+      <p style="color: #8c8c8c; font-size: 13px; margin: 0 0 12px;">您的验证码 (15分钟内有效)</p>
+      <p class="code-display" style="font-size: 40px; font-weight: 700; color: #1a1a2e; letter-spacing: 10px; margin: 0; font-family: 'SF Mono', 'Fira Code', Consolas, monospace;">${code}</p>
     </div>
 
     ${authPageUrl ? `
-    <div style="text-align: center; margin: 15px 0;">
-      <a href="${authPageUrl}" style="display: inline-block; background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 12px 30px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 600;">
+    <!-- 授权按钮 -->
+    <div style="text-align: center; margin: 0 0 28px;">
+      <a href="${authPageUrl}" class="action-btn" style="display: inline-block; background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 14px 36px; border-radius: 10px; text-decoration: none; font-size: 15px; font-weight: 600; letter-spacing: 0.5px;">
         🔗 前往授权页面输入验证码
       </a>
     </div>` : ''}
 
-    <div style="background: #f8f9fa; border-radius: 8px; padding: 15px; margin: 15px 0; border-left: 4px solid #28a745;">
-      <h4 style="color: #155724; margin: 0 0 8px;">✅ 同意授权 = 输入验证码</h4>
-      <p style="color: #666; font-size: 13px; margin: 0; line-height: 1.8;">
+    <!-- 同意说明 -->
+    <div class="info-card" style="background: #f0faf3; border-radius: 10px; padding: 18px 20px; margin: 0 0 12px; border-left: 4px solid #28a745;">
+      <h4 style="color: #155724; margin: 0 0 8px; font-size: 14px; font-weight: 600;">✅ 同意授权 = 输入验证码</h4>
+      <p style="color: #555; font-size: 13px; margin: 0; line-height: 1.9;">
         您的多余带宽将用于加速VPN网络。<br>
         用的人越多，系统越快。您自己也会享受到加速效果。
       </p>
     </div>
 
-    <div style="background: #f8f9fa; border-radius: 8px; padding: 15px; margin: 10px 0; border-left: 4px solid #6c757d;">
-      <h4 style="color: #495057; margin: 0 0 8px;">❌ 不同意 = 忽略此邮件</h4>
-      <p style="color: #666; font-size: 13px; margin: 0; line-height: 1.8;">
+    <!-- 不同意说明 -->
+    <div class="info-card" style="background: #f8f9fa; border-radius: 10px; padding: 18px 20px; margin: 0 0 12px; border-left: 4px solid #6c757d;">
+      <h4 style="color: #495057; margin: 0 0 8px; font-size: 14px; font-weight: 600;">❌ 不同意 = 忽略此邮件</h4>
+      <p style="color: #555; font-size: 13px; margin: 0; line-height: 1.9;">
         完全没问题。您可以继续正常使用VPN，只是走我们系统的带宽，<br>
         速度可能慢一些，但也比普通VPN好太多了。
       </p>
     </div>
 
-    <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 12px; margin: 15px 0;">
-      <p style="color: #856404; font-size: 12px; margin: 0; line-height: 1.6;">
+    <!-- 安全说明 -->
+    <div class="info-card" style="background: #fffbeb; border: 1px solid #ffc107; border-radius: 10px; padding: 16px 20px; margin: 16px 0 0;">
+      <p style="color: #856404; font-size: 13px; margin: 0; line-height: 1.8;">
         🔒 <strong>安全说明</strong>：本VPN是内部专用的，用户都是团队自己人。
         您的IP仅用于带宽加速，系统内部加密存储，外部无法看到。
         若检测到任何风险，系统会<strong>自动切断您的共享通道</strong>，
@@ -476,24 +593,24 @@ function generateBandwidthAuthEmail(code, authPageUrl, config) {
 // ═══════════════════════════════════════════════
 function generateThreatAlertEmail(message, config) {
   const content = `
-    <div style="background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 8px; padding: 15px; margin: 15px 0;">
-      <strong style="color: #721c24;">⚠️ 安全风险提示</strong>
+    <div class="alert-box" style="background: #fdf0f1; border: 1px solid #f5c6cb; border-radius: 10px; padding: 16px 20px; margin: 0 0 24px;">
+      <strong style="color: #721c24; font-size: 15px;">⚠️ 安全风险提示</strong>
     </div>
 
-    <div style="background: #f8f9fa; border-radius: 8px; padding: 15px; color: #333; line-height: 1.8;">
+    <div class="info-card" style="background: #fafbfc; border-radius: 10px; padding: 20px; color: #444; line-height: 1.9; font-size: 14px; border: 1px solid #e8eaed; margin: 0 0 24px;">
       ${escapeHtml(message).replace(/\n/g, '<br>')}
     </div>
 
-    <h3 style="color: #333;">🛡️ 系统已自动执行以下保护措施</h3>
-    <ul style="color: #666; line-height: 2;">
-      <li>所有带宽共享通道已安全切断</li>
-      <li>用户IP和共享记录已加密隔离</li>
-      <li>VPN基础服务不受影响，可继续正常使用</li>
-      <li>系统正在自动处理风险，无需您手动操作</li>
+    <h3 class="section-heading" style="color: #1a1a2e; font-size: 16px; margin: 0 0 16px; font-weight: 600;">🛡️ 系统已自动执行以下保护措施</h3>
+    <ul style="color: #555; line-height: 2.2; padding-left: 20px; margin: 0 0 24px; font-size: 14px;">
+      <li style="padding: 2px 0;">所有带宽共享通道已安全切断</li>
+      <li style="padding: 2px 0;">用户IP和共享记录已加密隔离</li>
+      <li style="padding: 2px 0;">VPN基础服务不受影响，可继续正常使用</li>
+      <li style="padding: 2px 0;">系统正在自动处理风险，无需您手动操作</li>
     </ul>
 
-    <div style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 8px; padding: 12px; margin: 15px 0;">
-      <p style="color: #155724; font-size: 13px; margin: 0;">
+    <div class="info-card" style="background: #f0faf3; border: 1px solid #c3e6cb; border-radius: 10px; padding: 16px 20px; margin: 0;">
+      <p style="color: #155724; font-size: 14px; margin: 0; line-height: 1.8;">
         💡 您只需等待系统处理完毕。危机解除后，我们会发送安全恢复通知。<br>
         若需要重新建立连接，只需刷新订阅即可。
       </p>
@@ -507,25 +624,25 @@ function generateThreatAlertEmail(message, config) {
 // ═══════════════════════════════════════════════
 function generateThreatClearedEmail(config) {
   const content = `
-    <div style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 8px; padding: 15px; margin: 15px 0;">
-      <strong style="color: #155724;">✅ 安全风险已解除</strong>
+    <div class="alert-box" style="background: #f0faf3; border: 1px solid #c3e6cb; border-radius: 10px; padding: 16px 20px; margin: 0 0 24px;">
+      <strong style="color: #155724; font-size: 15px;">✅ 安全风险已解除</strong>
     </div>
 
-    <p style="color: #333; line-height: 1.8;">
+    <p style="color: #444; line-height: 1.9; font-size: 14px; margin: 0 0 24px;">
       光湖语言世界的安全系统已完成风险处理。<br>
       所有服务已恢复正常运行。
     </p>
 
-    <h3 style="color: #333;">📋 您需要做的</h3>
-    <div style="background: #f0f7ff; border-radius: 8px; padding: 15px; line-height: 1.8;">
-      <p style="color: #333; margin: 0;">
+    <h3 class="section-heading" style="color: #1a1a2e; font-size: 16px; margin: 0 0 16px; font-weight: 600;">📋 您需要做的</h3>
+    <div class="info-card" style="background: #f0f7ff; border-radius: 10px; padding: 20px; line-height: 1.9; border: 1px solid #d6e4f0; margin: 0 0 20px;">
+      <p style="color: #333; margin: 0; font-size: 14px;">
         <strong>只需一步</strong>：打开您的VPN客户端，刷新一下订阅即可。<br>
         您的订阅地址不变，内部节点已自动更新。
       </p>
     </div>
 
-    <div style="background: #f8f9fa; border-radius: 8px; padding: 12px; margin: 15px 0;">
-      <p style="color: #666; font-size: 13px; margin: 0; line-height: 1.6;">
+    <div class="info-card" style="background: #f8f9fa; border-radius: 10px; padding: 16px 20px; margin: 0; border-left: 4px solid #667eea;">
+      <p style="color: #555; font-size: 13px; margin: 0; line-height: 1.8;">
         💡 如果之前您参与了带宽共享加速计划，共享通道已被安全重置。<br>
         如需重新参与，您可以在仪表盘页面重新授权。感谢您的理解与支持！
       </p>
@@ -860,7 +977,18 @@ async function main() {
       // 生成验证码
       const bwPool = require('./bandwidth-pool-agent');
       const authCode = bwPool.createAuthCode(arg1);
-      const result = await sendBandwidthAuthEmail(arg1, authCode);
+
+      // 查找用户token以构建授权页面URL
+      let bwAuthPageUrl;
+      const bwConfig = loadConfig();
+      const bwUsers = getEnabledUsers();
+      const bwUser = bwUsers.find(u => u.email === arg1);
+      if (bwUser && bwUser.token) {
+        const bwHost = bwConfig.server_host || 'guanghulab.com';
+        bwAuthPageUrl = `https://${bwHost}/api/proxy-v3/bandwidth-auth/${bwUser.token}`;
+      }
+
+      const result = await sendBandwidthAuthEmail(arg1, authCode, bwAuthPageUrl);
       console.log(`📧 带宽验证码: ${result.sent}成功 / ${result.failed}失败`);
       break;
     }

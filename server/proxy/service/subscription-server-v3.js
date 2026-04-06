@@ -900,37 +900,133 @@ mode: direct
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
 <title>光湖语言世界 · 带宽共享授权</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: -apple-system, "PingFang SC", sans-serif; background: #0a0e27; color: #e0e0e0; padding: 20px; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-  .container { max-width: 440px; width: 100%; }
-  .header { text-align: center; padding: 20px 0; }
-  .header h1 { font-size: 1.4em; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  .header p { color: #888; font-size: 0.85em; margin-top: 5px; }
-  .card { background: #141832; border-radius: 12px; padding: 20px; margin: 12px 0; border: 1px solid #1e2448; }
-  .card h3 { font-size: 0.95em; color: #667eea; margin-bottom: 12px; }
-  .input-group { margin: 15px 0; }
-  .input-group input { width: 100%; padding: 14px 16px; background: #1e2448; border: 2px solid #2d3566; border-radius: 10px; color: #fff; font-size: 1.2em; text-align: center; letter-spacing: 6px; outline: none; transition: border-color 0.3s; }
-  .input-group input:focus { border-color: #667eea; }
-  .input-group input::placeholder { letter-spacing: 0; font-size: 0.7em; color: #555; }
-  .submit-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 10px; font-size: 1em; font-weight: 600; cursor: pointer; transition: opacity 0.3s; }
-  .submit-btn:hover { opacity: 0.9; }
-  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .info-box { background: #1a1f3d; border-radius: 8px; padding: 12px; margin: 10px 0; font-size: 0.85em; line-height: 1.8; color: #aaa; }
-  .info-box.green { border-left: 3px solid #2ecc71; }
-  .info-box.gray { border-left: 3px solid #6c757d; }
-  .info-box.yellow { border-left: 3px solid #f39c12; }
-  .info-box strong { color: #e0e0e0; }
-  .result { text-align: center; padding: 15px; border-radius: 8px; margin-top: 12px; display: none; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", Roboto, sans-serif;
+    background: #0a0e27;
+    color: #e0e0e0;
+    padding: 20px;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.6;
+    -webkit-text-size-adjust: 100%;
+  }
+  .container { max-width: 480px; width: 100%; }
+  .header { text-align: center; padding: 28px 0 20px; }
+  .header h1 {
+    font-size: 1.5em;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 6px;
+  }
+  .header p { color: #888; font-size: 0.9em; margin-top: 6px; }
+  .card {
+    background: #141832;
+    border-radius: 14px;
+    padding: 24px 20px;
+    margin: 14px 0;
+    border: 1px solid #1e2448;
+  }
+  .card h3 {
+    font-size: 1em;
+    color: #667eea;
+    margin-bottom: 16px;
+  }
+  .input-group { margin: 18px 0; }
+  .input-group input {
+    width: 100%;
+    padding: 16px 18px;
+    background: #1e2448;
+    border: 2px solid #2d3566;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 1.3em;
+    text-align: center;
+    letter-spacing: 8px;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+  .input-group input:focus { border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15); }
+  .input-group input::placeholder { letter-spacing: 0; font-size: 0.6em; color: #555; }
+  .submit-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.05em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.3s, transform 0.15s;
+    margin-top: 6px;
+  }
+  .submit-btn:hover { opacity: 0.92; }
+  .submit-btn:active { transform: scale(0.98); }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .info-box {
+    background: #1a1f3d;
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin: 12px 0;
+    font-size: 0.88em;
+    line-height: 1.9;
+    color: #aaa;
+  }
+  .info-box.green { border-left: 4px solid #2ecc71; }
+  .info-box.gray { border-left: 4px solid #6c757d; }
+  .info-box.yellow { border-left: 4px solid #f39c12; }
+  .info-box strong { color: #e0e0e0; display: block; margin-bottom: 6px; }
+  .result {
+    text-align: center;
+    padding: 16px;
+    border-radius: 10px;
+    margin-top: 14px;
+    display: none;
+    font-size: 0.95em;
+    line-height: 1.6;
+  }
   .result.success { background: #1a3a2a; color: #2ecc71; }
   .result.error { background: #3a1a1a; color: #e74c3c; }
-  .stats { display: flex; justify-content: space-around; margin: 10px 0; }
-  .stat { text-align: center; }
-  .stat .num { font-size: 1.3em; font-weight: 700; color: #667eea; }
-  .stat .label { font-size: 0.75em; color: #888; margin-top: 2px; }
-  .footer { text-align: center; padding: 15px 0; color: #555; font-size: 0.75em; }
+  .stats { display: flex; justify-content: space-around; margin: 12px 0; gap: 12px; }
+  .stat { text-align: center; flex: 1; }
+  .stat .num { font-size: 1.4em; font-weight: 700; color: #667eea; }
+  .stat .label { font-size: 0.78em; color: #888; margin-top: 4px; }
+  .footer {
+    text-align: center;
+    padding: 20px 0 8px;
+    color: #555;
+    font-size: 0.78em;
+    line-height: 1.8;
+  }
+
+  /* ── 响应式适配 ── */
+  @media (max-width: 520px) {
+    body { padding: 12px; }
+    .container { max-width: 100%; }
+    .header { padding: 20px 0 14px; }
+    .header h1 { font-size: 1.3em; }
+    .card { padding: 20px 16px; margin: 10px 0; border-radius: 12px; }
+    .input-group input { padding: 14px 12px; font-size: 1.15em; letter-spacing: 6px; }
+    .submit-btn { padding: 14px; font-size: 1em; }
+    .info-box { padding: 14px 16px; font-size: 0.84em; }
+  }
+  @media (max-width: 380px) {
+    body { padding: 8px; }
+    .header h1 { font-size: 1.15em; }
+    .card { padding: 16px 14px; }
+    .card h3 { font-size: 0.92em; }
+    .input-group input { padding: 12px 10px; font-size: 1.05em; letter-spacing: 4px; }
+    .stat .num { font-size: 1.2em; }
+    .info-box { padding: 12px 14px; font-size: 0.82em; line-height: 1.8; }
+  }
 </style>
 </head>
 <body>
@@ -950,7 +1046,7 @@ mode: direct
 
   <div class="card">
     <h3>🔑 输入验证码</h3>
-    <p style="font-size: 0.85em; color: #888; margin-bottom: 10px;">请查看您的QQ邮箱，将收到的6位验证码输入以下框中</p>
+    <p style="font-size: 0.88em; color: #888; margin-bottom: 12px; line-height: 1.7;">请查看您的QQ邮箱，将收到的6位验证码输入以下框中</p>
 
     <form id="authForm" onsubmit="submitCode(event)">
       <div class="input-group">
@@ -963,17 +1059,17 @@ mode: direct
   </div>
 
   <div class="info-box green">
-    <strong>✅ 同意授权 = 输入验证码</strong><br>
+    <strong>✅ 同意授权 = 输入验证码</strong>
     您的多余带宽将用于加速VPN网络。用的人越多，系统越快。您自己也会享受到加速效果。
   </div>
 
   <div class="info-box gray">
-    <strong>❌ 不同意 = 关闭此页面</strong><br>
+    <strong>❌ 不同意 = 关闭此页面</strong>
     完全没问题。您可以继续正常使用VPN，只是走我们系统的带宽，速度可能慢一些，但也比普通VPN好太多了。无论您选择什么，都不影响正常使用。
   </div>
 
   <div class="info-box yellow">
-    <strong>🔒 安全保障</strong><br>
+    <strong>🔒 安全保障</strong>
     本VPN是内部专用的，用户都是团队自己人，已经相对安全。您的IP仅用于带宽加速，系统内部加密存储。若检测到任何风险，系统会自动切断您的共享通道并格式化所有共享记录——就像这条路从未出现过。危机解除后会重新推送新的订阅链接。您的隐私安全，铸渊守护。
   </div>
 
