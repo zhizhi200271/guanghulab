@@ -49,10 +49,9 @@ function saveAuthSnapshot(snapshot) {
   try {
     let snapshots = [];
     try {
-      snapshots = JSON.parse(fs.readFileSync(AUTH_SNAPSHOT_FILE, 'utf8'));
-    } catch { /* 文件不存在或格式错误 */ }
-
-    if (!Array.isArray(snapshots)) snapshots = [];
+      const raw = JSON.parse(fs.readFileSync(AUTH_SNAPSHOT_FILE, 'utf8'));
+      if (Array.isArray(raw)) snapshots = raw;
+    } catch { /* 文件不存在或格式错误，使用空数组 */ }
 
     snapshots.push({
       ...snapshot,
@@ -881,6 +880,12 @@ mode: direct
               return;
             }
 
+            // 采集用户IP
+            const userIP = req.headers['x-forwarded-for']?.split(',')[0]?.trim()
+              || req.headers['x-real-ip']
+              || req.socket.remoteAddress
+              || '0.0.0.0';
+
             // 验证码校验 (邮箱+验证码交叉验证)
             const bwPool = require('./bandwidth-pool-agent');
             const verifyResult = bwPool.verifyAuthCode(code, email);
@@ -892,7 +897,7 @@ mode: direct
                 action: 'bandwidth-auth-consent',
                 result: 'failed',
                 error: verifyResult.error,
-                ip: req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.headers['x-real-ip'] || req.socket.remoteAddress || '0.0.0.0',
+                ip: userIP,
                 user_agent: req.headers['user-agent'] || 'unknown',
                 auth_type: 'public-open'
               });
@@ -900,12 +905,6 @@ mode: direct
               res.end(JSON.stringify({ success: false, message: verifyResult.error }));
               return;
             }
-
-            // 采集用户IP (加密存储)
-            const userIP = req.headers['x-forwarded-for']?.split(',')[0]?.trim()
-              || req.headers['x-real-ip']
-              || req.socket.remoteAddress
-              || '0.0.0.0';
 
             // 注册为带宽贡献者
             const regResult = bwPool.registerContributor(email, userIP);
