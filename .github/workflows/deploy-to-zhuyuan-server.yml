@@ -201,6 +201,14 @@ jobs:
             # Nginx中 _ 是标准的catch-all server_name，不匹配任何实际域名
             sed -i "s/ZY_DOMAIN_PREVIEW_PLACEHOLDER/_/g" /tmp/zhuyuan-sovereign.conf
           fi
+          ZY_BRAIN_HOST="${{ secrets.ZY_BRAIN_HOST }}"
+          if [ -n "$ZY_BRAIN_HOST" ]; then
+            sed -i "s/ZY_BRAIN_HOST_PLACEHOLDER/$ZY_BRAIN_HOST/g" /tmp/zhuyuan-sovereign.conf
+            echo "✅ 大脑服务器已注入V3桥接: $ZY_BRAIN_HOST"
+          else
+            echo "⚠️ ZY_BRAIN_HOST 未配置，V3桥接不可用"
+            sed -i '/ZY_BRAIN_HOST_PLACEHOLDER/d' /tmp/zhuyuan-sovereign.conf
+          fi
           scp -i ~/.ssh/zy_key \
             /tmp/zhuyuan-sovereign.conf \
             ${{ secrets.ZY_SERVER_USER }}@${{ secrets.ZY_SERVER_HOST }}:/opt/zhuyuan/config/nginx/zhuyuan-sovereign.conf
