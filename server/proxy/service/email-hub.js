@@ -17,6 +17,7 @@
 //   6. 带宽共享验证码 — 发送6位验证码 (∞+1·含VPN系统介绍)
 //   7. 风险提示通知 — 全体用户风险提醒 (∞+1)
 //   8. 安全恢复通知 — 危机解除后全体通知 (∞+1)
+//   9. V3订阅链接 — 含系统介绍 + 带宽共享邀请 (∞+1)
 //
 // 所有邮件底部附「意见反馈」链接
 //
@@ -31,6 +32,7 @@
 //   node email-hub.js bandwidth-auth-all    — 一键发送带宽验证码 (全部用户·∞+1)
 //   node email-hub.js threat-alert <msg>    — 全体用户风险提示 (∞+1)
 //   node email-hub.js threat-cleared        — 全体用户安全恢复通知 (∞+1)
+//   node email-hub.js send-subscription-v3 <email> — 发送V3订阅链接 (含系统介绍+带宽共享邀请)
 //   node email-hub.js list-emails           — 列出所有启用用户的邮箱
 //
 // 运行方式: CLI调用 (由auto-evolution.js调度)
@@ -49,6 +51,11 @@ const KEYS_FILE = process.env.ZY_PROXY_KEYS_FILE || path.join(PROXY_DIR, '.env.k
 const POOL_STATUS_FILE = path.join(DATA_DIR, 'pool-quota-status.json');
 const EMAIL_LOG_FILE = path.join(DATA_DIR, 'email-hub-log.json');
 const RELEASE_NOTES_FILE = path.join(__dirname, '../config/release-notes.json');
+
+// ── 带宽授权页面域名 ─────────────────────────
+// QQ邮箱拦截guanghulab.com域名链接，使用guanghulab.online桥接
+// guanghulab.online通过Nginx反向代理桥接到大脑服务器V3订阅服务
+const BW_AUTH_HOST = process.env.ZY_BW_AUTH_HOST || 'guanghulab.online';
 
 // ── 加载版本更新说明 ────────────────────────────
 function loadReleaseNotes() {
@@ -607,9 +614,9 @@ function generateBandwidthAuthEmail(code, authPageUrl, config) {
 
     <h3 class="section-heading" style="color: #1a1a2e; font-size: 16px; margin: 0 0 12px; font-weight: 600;">🔑 带宽共享加速 · 验证码授权</h3>
     <p style="color: #444; line-height: 1.9; font-size: 14px; margin: 0 0 24px;">
-      您正在参与<strong>光湖语言世界</strong>的带宽共享加速计划。<br>
-      这是一项<strong>完全自愿</strong>的功能，参与后可让VPN网络整体更快。<br>
-      如果您<strong>同意授权</strong>，请复制以下验证码并提交：
+      本邮件为<strong>光湖语言世界</strong>带宽共享加速计划的授权验证通知。<br>
+      带宽共享为<strong>自愿参与</strong>机制，参与后将提升全网连接速度与稳定性。<br>
+      如您确认授权，请复制以下验证码并在授权页面提交：
     </p>
 
     <!-- 验证码展示区 -->
@@ -628,31 +635,31 @@ function generateBandwidthAuthEmail(code, authPageUrl, config) {
 
     <!-- 同意说明 -->
     <div class="info-card" style="background: #f0faf3; border-radius: 10px; padding: 18px 20px; margin: 0 0 12px; border-left: 4px solid #28a745;">
-      <h4 style="color: #155724; margin: 0 0 8px; font-size: 14px; font-weight: 600;">✅ 同意授权 = 输入验证码</h4>
+      <h4 style="color: #155724; margin: 0 0 8px; font-size: 14px; font-weight: 600;">✅ 授权确认 · 提交验证码</h4>
       <p style="color: #555; font-size: 13px; margin: 0; line-height: 1.9;">
-        您的多余带宽将用于加速VPN网络。<br>
-        用的人越多，系统越快。您自己也会享受到加速效果。
+        您的闲置带宽将纳入光湖语言世界加速网络。<br>
+        参与带宽共享的用户越多，全网加速效能越高，您的连接速度将同步提升。
       </p>
     </div>
 
     <!-- 不同意说明 -->
     <div class="info-card" style="background: #f8f9fa; border-radius: 10px; padding: 18px 20px; margin: 0 0 12px; border-left: 4px solid #6c757d;">
-      <h4 style="color: #495057; margin: 0 0 8px; font-size: 14px; font-weight: 600;">❌ 不同意 = 忽略此邮件即可</h4>
+      <h4 style="color: #495057; margin: 0 0 8px; font-size: 14px; font-weight: 600;">❌ 暂不参与 · 无需操作</h4>
       <p style="color: #555; font-size: 13px; margin: 0; line-height: 1.9;">
-        完全没问题，这是您的自由选择。您可以继续正常使用VPN，<br>
-        只是走系统自身带宽，速度可能慢一些，但也比普通VPN好太多了。<br>
-        如果以后改变主意，随时可以联系我们重新发送验证码。
+        本功能为自愿参与机制，不影响您的正常服务使用。<br>
+        未参与带宽共享的用户将通过系统默认带宽通道连接，服务质量不受影响。<br>
+        如后续需要参与，可通过仪表盘页面重新发起授权申请。
       </p>
     </div>
 
     <!-- 安全说明 -->
     <div class="info-card" style="background: #fffbeb; border: 1px solid #ffc107; border-radius: 10px; padding: 16px 20px; margin: 16px 0 0;">
       <p style="color: #856404; font-size: 13px; margin: 0; line-height: 1.8;">
-        🔒 <strong>安全说明</strong>：本VPN是内部专用的，用户都是团队自己人。
-        您的IP仅用于带宽加速，系统内部加密存储（SHA256 + 盐值），外部无法看到。
-        若检测到任何风险，系统会<strong>自动切断您的共享通道</strong>，
-        并格式化所有共享记录——就像这条路从未出现过一样。
-        危机解除后，我们会重新为您推送新的订阅链接。您的隐私安全，铸渊守护。
+        🔒 <strong>安全机制说明</strong>：本系统为内部授权用户专用，所有参与者均为受邀成员。
+        您的IP地址仅用于带宽加速调度，系统采用 <strong>SHA256 + 盐值</strong> 加密存储，外部无法访问。
+        当系统检测到安全风险时，将自动执行以下保护措施：
+        即时切断所有共享通道、格式化全部共享记录确保无痕清除。
+        风险解除后，系统将自动重新分配订阅链接。您的隐私安全由铸渊守护体系全程保障。
       </p>
     </div>`;
 
@@ -720,6 +727,108 @@ function generateThreatClearedEmail(config) {
     </div>`;
 
   return wrapEmailTemplate('安全恢复通知', content, config);
+}
+
+// ═══════════════════════════════════════════════
+// 📧 邮件类型 9: V3订阅链接 (含系统介绍 + 带宽共享邀请)
+// ═══════════════════════════════════════════════
+function generateSubscriptionV3Email(subUrl, dashboardUrl, bwAuthUrl, config) {
+  const releaseNotes = loadReleaseNotesObj();
+  const vpnIntro = getVpnSystemIntroHtml(releaseNotes);
+
+  const content = `
+    <div class="alert-box" style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 10px; padding: 16px 20px; margin: 0 0 24px;">
+      <strong style="color: #155724; font-size: 15px;">✅ 光湖语言世界 V3 正式版 · 专属订阅</strong>
+    </div>
+
+    <h3 class="section-heading" style="color: #1a1a2e; font-size: 16px; margin: 0 0 12px; font-weight: 600;">📱 订阅链接</h3>
+    <div class="info-card" style="background: #f0f4ff; border: 1px solid #d0d8ff; border-radius: 10px; padding: 16px 20px; word-break: break-all; font-family: Consolas, Monaco, 'Courier New', monospace; font-size: 13px; margin: 0 0 8px; color: #333;">
+      ${escapeHtml(subUrl)}
+    </div>
+    <p style="color: #999; font-size: 12px; margin: 0 0 24px;">
+      ⚠️ 此链接为个人专属，请勿对外分享。全部用户共享 2000GB 月流量池。
+    </p>
+
+    <h3 class="section-heading" style="color: #1a1a2e; font-size: 16px; margin: 0 0 12px; font-weight: 600;">📊 流量仪表盘</h3>
+    <div class="info-card" style="background: #fff8e1; border: 1px solid #ffe082; border-radius: 10px; padding: 16px 20px; word-break: break-all; font-family: Consolas, Monaco, 'Courier New', monospace; font-size: 13px; margin: 0 0 8px; color: #333;">
+      ${escapeHtml(dashboardUrl)}
+    </div>
+    <p style="color: #999; font-size: 12px; margin: 0 0 24px;">
+      💡 在浏览器中打开，可查看实时流量统计与节点状态。
+    </p>
+
+    <h3 class="section-heading" style="color: #1a1a2e; font-size: 16px; margin: 0 0 16px; font-weight: 600;">📋 客户端配置指引</h3>
+    <div class="info-card" style="background: #fafbfc; border-radius: 10px; padding: 20px; border: 1px solid #e8eaed; margin: 0 0 24px;">
+      <h4 style="color: #555; margin: 0 0 8px; font-size: 14px; font-weight: 600;">🍎 iOS (Shadowrocket)</h4>
+      <ol style="color: #666; line-height: 2; font-size: 13px; padding-left: 20px; margin: 0 0 16px;">
+        <li>打开 Shadowrocket → 点击右上角 <strong>+</strong></li>
+        <li>选择 <strong>Subscribe</strong> (订阅) → 粘贴订阅链接</li>
+        <li>点击完成 → 选择节点 → 开启连接</li>
+      </ol>
+      <h4 style="color: #555; margin: 0 0 8px; font-size: 14px; font-weight: 600;">💻 Mac / Windows (Clash Verge)</h4>
+      <ol style="color: #666; line-height: 2; font-size: 13px; padding-left: 20px; margin: 0 0 16px;">
+        <li>打开 Clash Verge → 点击 <strong>Profiles</strong></li>
+        <li>粘贴订阅链接到输入框 → 点击 <strong>Import</strong></li>
+        <li>选中新配置 → 开启系统代理</li>
+      </ol>
+      <h4 style="color: #555; margin: 0 0 8px; font-size: 14px; font-weight: 600;">🤖 Android (ClashMi / Clash Meta)</h4>
+      <ol style="color: #666; line-height: 2; font-size: 13px; padding-left: 20px; margin: 0;">
+        <li>打开 ClashMi → <strong>Profile</strong> → <strong>New Profile</strong></li>
+        <li>选择 <strong>URL</strong> → 粘贴订阅链接</li>
+        <li>保存 → 选中配置 → 启动</li>
+      </ol>
+    </div>
+
+    ${vpnIntro}
+
+    <h3 class="section-heading" style="color: #1a1a2e; font-size: 16px; margin: 0 0 12px; font-weight: 600;">📊 服务配额</h3>
+    <table class="data-table" role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse: collapse; margin: 0 0 24px;">
+      <tr style="border-bottom: 1px solid #f0f2f5;">
+        <td style="padding: 12px 16px; color: #666; font-size: 14px; width: 40%;">月流量池</td>
+        <td style="padding: 12px 16px; font-weight: 600; color: #1a1a2e; font-size: 14px;">2000 GB (共享配额)</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #f0f2f5; background: #fafbfc;">
+        <td style="padding: 12px 16px; color: #666; font-size: 14px;">重置日期</td>
+        <td style="padding: 12px 16px; color: #1a1a2e; font-size: 14px;">每月1日</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #f0f2f5;">
+        <td style="padding: 12px 16px; color: #666; font-size: 14px;">传输协议</td>
+        <td style="padding: 12px 16px; color: #1a1a2e; font-size: 14px;">VLESS + Reality</td>
+      </tr>
+      <tr>
+        <td style="padding: 12px 16px; color: #666; font-size: 14px;">节点位置</td>
+        <td style="padding: 12px 16px; color: #1a1a2e; font-size: 14px;">🇸🇬 新加坡 (多节点)</td>
+      </tr>
+    </table>
+
+    <!-- 带宽共享邀请 -->
+    <div style="background: linear-gradient(135deg, #e8f4fd 0%, #f0f7ff 100%); border: 1px solid #b8daff; border-radius: 12px; padding: 20px; margin: 0 0 16px;">
+      <h3 style="color: #004085; font-size: 15px; margin: 0 0 12px; font-weight: 700;">🌊 带宽共享加速计划 · 自愿参与</h3>
+      <p style="color: #444; font-size: 13px; margin: 0 0 16px; line-height: 1.9;">
+        光湖语言世界支持带宽共享加速机制。参与用户的闲置带宽将纳入全网加速池，
+        提升所有用户的连接速度与稳定性。此功能为<strong>自愿参与</strong>机制，
+        不参与不影响正常服务使用。
+      </p>
+      ${bwAuthUrl ? `
+      <div style="text-align: center; margin: 0 0 16px;">
+        <a href="${bwAuthUrl}" class="action-btn" style="display: inline-block; background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 14px 36px; border-radius: 10px; text-decoration: none; font-size: 15px; font-weight: 600; letter-spacing: 0.5px;">
+          🌊 前往参与带宽共享
+        </a>
+      </div>` : ''}
+      <p style="color: #888; font-size: 12px; margin: 0; line-height: 1.8;">
+        点击上方按钮进入授权页面，在页面中申请验证码完成授权。<br>
+        如暂不参与，无需任何操作。此邮件仅为系统通知，不参与不产生任何影响。
+      </p>
+    </div>
+
+    <div class="info-card" style="background: #f8f9fa; border-radius: 10px; padding: 16px 20px; margin: 0; border-left: 4px solid #667eea;">
+      <p style="color: #555; font-size: 13px; margin: 0; line-height: 1.8;">
+        🔒 <strong>安全机制说明</strong>：所有参与带宽共享的用户IP地址均采用 SHA256 + 盐值 加密存储。
+        系统检测到风险时将自动切断共享通道并清除所有记录。您的隐私安全由铸渊守护体系全程保障。
+      </p>
+    </div>`;
+
+  return wrapEmailTemplate('V3 专属订阅 · 光湖语言世界', content, config);
 }
 
 // ── HTML转义 ─────────────────────────────────
@@ -937,6 +1046,40 @@ async function sendThreatClearedEmail() {
 }
 
 /**
+ * 发送V3订阅链接给单个用户 (含系统介绍 + 带宽共享邀请)
+ * 自动从users.json查找用户token，构建订阅/仪表盘/授权URL
+ * @param {string} email 目标邮箱
+ */
+async function sendSubscriptionV3Email(email) {
+  const config = loadConfig();
+  const users = getEnabledUsers();
+  const user = users.find(u => u.email === email);
+
+  if (!user || !user.token) {
+    console.error(`[邮件中枢] ❌ 用户不存在或token无效: ${email}`);
+    return { sent: 0, failed: 1 };
+  }
+
+  const host = config.server_host || 'guanghulab.com';
+  const subUrl = `https://${host}/api/proxy-v3/sub/${user.token}`;
+  const dashboardUrl = `https://${host}/api/proxy-v3/dashboard/${user.token}`;
+  const bwAuthUrl = `https://${BW_AUTH_HOST}/api/proxy-v3/bandwidth-auth/${user.token}`;
+
+  const html = generateSubscriptionV3Email(subUrl, dashboardUrl, bwAuthUrl, config);
+
+  try {
+    await sendEmail(email, '🌐 光湖语言世界 · V3专属订阅链接', html);
+    console.log(`[邮件中枢] ✅ V3订阅已发送: ${email}`);
+    logEmail('subscription-v3', email, true, null);
+    return { sent: 1, failed: 0 };
+  } catch (err) {
+    console.error(`[邮件中枢] ❌ V3订阅发送失败: ${err.message}`);
+    logEmail('subscription-v3', email, false, err.message);
+    return { sent: 0, failed: 1 };
+  }
+}
+
+/**
  * 一键发送带宽共享验证码给所有用户 (∞+1)
  * 自动提取所有启用用户邮箱，为每位用户生成独立验证码并加密发送
  */
@@ -968,11 +1111,10 @@ async function sendBandwidthAuthAllEmail() {
       // 为每位用户生成独立验证码
       const authCode = bwPool.createAuthCode(user.email);
 
-      // 构建用户专属授权页面URL
+      // 构建用户专属授权页面URL (使用guanghulab.online桥接域名)
       let authPageUrl;
       if (user.token) {
-        const host = config.server_host || 'guanghulab.com';
-        authPageUrl = `https://${host}/api/proxy-v3/bandwidth-auth/${user.token}`;
+        authPageUrl = `https://${BW_AUTH_HOST}/api/proxy-v3/bandwidth-auth/${user.token}`;
       }
 
       const html = generateBandwidthAuthEmail(authCode, authPageUrl, config);
@@ -1013,6 +1155,7 @@ async function main() {
     console.log('  node email-hub.js bandwidth-auth-all            — 一键发送带宽验证码 (全部用户·∞+1)');
     console.log('  node email-hub.js threat-alert <消息>           — 全体用户风险提示 (∞+1)');
     console.log('  node email-hub.js threat-cleared                — 全体用户安全恢复通知 (∞+1)');
+    console.log('  node email-hub.js send-subscription-v3 <邮箱>   — V3订阅链接 (含系统介绍+带宽共享邀请)');
     console.log('  node email-hub.js list-emails                  — 列出所有用户邮箱');
     console.log('');
     console.log('💡 描述支持分号分隔多条内容，自动渲染为功能清单:');
@@ -1108,14 +1251,12 @@ async function main() {
       const bwPool = require('./bandwidth-pool-agent');
       const authCode = bwPool.createAuthCode(arg1);
 
-      // 查找用户token以构建授权页面URL
+      // 查找用户token以构建授权页面URL (使用guanghulab.online桥接域名)
       let bwAuthPageUrl;
-      const bwConfig = loadConfig();
       const bwUsers = getEnabledUsers();
       const bwUser = bwUsers.find(u => u.email === arg1);
       if (bwUser && bwUser.token) {
-        const bwHost = bwConfig.server_host || 'guanghulab.com';
-        bwAuthPageUrl = `https://${bwHost}/api/proxy-v3/bandwidth-auth/${bwUser.token}`;
+        bwAuthPageUrl = `https://${BW_AUTH_HOST}/api/proxy-v3/bandwidth-auth/${bwUser.token}`;
       }
 
       const result = await sendBandwidthAuthEmail(arg1, authCode, bwAuthPageUrl);
@@ -1146,6 +1287,17 @@ async function main() {
       break;
     }
 
+    case 'send-subscription-v3': {
+      if (!arg1) {
+        console.error('❌ 请提供邮箱');
+        console.error('用法: node email-hub.js send-subscription-v3 <邮箱>');
+        process.exit(1);
+      }
+      const result = await sendSubscriptionV3Email(arg1);
+      console.log(`📧 V3订阅链接: ${result.sent}成功 / ${result.failed}失败`);
+      break;
+    }
+
     default:
       console.error(`❌ 未知操作: ${action}`);
       process.exit(1);
@@ -1164,6 +1316,7 @@ module.exports = {
   sendBandwidthAuthAllEmail,
   sendThreatAlertEmail,
   sendThreatClearedEmail,
+  sendSubscriptionV3Email,
   getEnabledUsers,
   listUserEmails,
   loadReleaseNotes,

@@ -1046,7 +1046,7 @@ mode: direct
 
   <div class="card">
     <h3>🔑 输入验证码</h3>
-    <p style="font-size: 0.88em; color: #888; margin-bottom: 12px; line-height: 1.7;">请查看您的QQ邮箱，将收到的6位验证码输入以下框中</p>
+    <p style="font-size: 0.88em; color: #888; margin-bottom: 12px; line-height: 1.7;">请查看您的邮箱，将收到的6位验证码输入以下框中。如尚未收到验证码，请点击下方按钮申请。</p>
 
     <form id="authForm" onsubmit="submitCode(event)">
       <div class="input-group">
@@ -1055,22 +1055,30 @@ mode: direct
       <button type="submit" class="submit-btn" id="submitBtn">🔓 提交授权</button>
     </form>
 
+    <div style="text-align: center; margin-top: 14px;">
+      <button onclick="requestCode()" id="requestCodeBtn" style="background: transparent; border: 1px solid #667eea; color: #667eea; padding: 10px 24px; border-radius: 8px; font-size: 0.9em; cursor: pointer; transition: all 0.3s;">
+        📧 申请发送验证码
+      </button>
+    </div>
+
+    <div id="codeResult" class="result"></div>
+
     <div id="result" class="result"></div>
   </div>
 
   <div class="info-box green">
-    <strong>✅ 同意授权 = 输入验证码</strong>
-    您的多余带宽将用于加速VPN网络。用的人越多，系统越快。您自己也会享受到加速效果。
+    <strong>✅ 授权确认 · 提交验证码</strong>
+    您的闲置带宽将纳入光湖语言世界加速网络。参与带宽共享的用户越多，全网加速效能越高，您的连接速度将同步提升。
   </div>
 
   <div class="info-box gray">
-    <strong>❌ 不同意 = 关闭此页面</strong>
-    完全没问题。您可以继续正常使用VPN，只是走我们系统的带宽，速度可能慢一些，但也比普通VPN好太多了。无论您选择什么，都不影响正常使用。
+    <strong>❌ 暂不参与 · 关闭此页面</strong>
+    本功能为自愿参与机制，不影响您的正常服务使用。未参与带宽共享的用户将通过系统默认带宽通道连接，服务质量不受影响。
   </div>
 
   <div class="info-box yellow">
-    <strong>🔒 安全保障</strong>
-    本VPN是内部专用的，用户都是团队自己人，已经相对安全。您的IP仅用于带宽加速，系统内部加密存储。若检测到任何风险，系统会自动切断您的共享通道并格式化所有共享记录——就像这条路从未出现过。危机解除后会重新推送新的订阅链接。您的隐私安全，铸渊守护。
+    <strong>🔒 安全机制说明</strong>
+    本系统为内部授权用户专用，所有参与者均为受邀成员。您的IP地址仅用于带宽加速调度，系统采用 SHA256 + 盐值 加密存储，外部无法访问。当系统检测到安全风险时，将自动切断所有共享通道并格式化全部共享记录，确保无痕清除。风险解除后，系统将自动重新分配订阅链接。您的隐私安全由铸渊守护体系全程保障。
   </div>
 
   <div class="footer">
@@ -1080,6 +1088,43 @@ mode: direct
 </div>
 
 <script>
+async function requestCode() {
+  const btn = document.getElementById('requestCodeBtn');
+  const codeResult = document.getElementById('codeResult');
+
+  btn.disabled = true;
+  btn.textContent = '⏳ 发送中...';
+
+  try {
+    const sendCodeUrl = window.location.pathname.replace('/bandwidth-auth/', '/bandwidth-send-code/');
+    const resp = await fetch(sendCodeUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({})
+    });
+    const data = await resp.json();
+
+    codeResult.style.display = 'block';
+    if (data.success) {
+      codeResult.className = 'result success';
+      codeResult.textContent = '✅ ' + data.message;
+      btn.textContent = '✅ 验证码已发送';
+      setTimeout(() => { btn.disabled = false; btn.textContent = '📧 重新发送验证码'; }, 60000);
+    } else {
+      codeResult.className = 'result error';
+      codeResult.textContent = '❌ ' + data.message;
+      btn.disabled = false;
+      btn.textContent = '📧 申请发送验证码';
+    }
+  } catch (err) {
+    codeResult.style.display = 'block';
+    codeResult.className = 'result error';
+    codeResult.textContent = '❌ 网络异常，请稍后重试';
+    btn.disabled = false;
+    btn.textContent = '📧 申请发送验证码';
+  }
+}
+
 async function submitCode(e) {
   e.preventDefault();
   const code = document.getElementById('codeInput').value.trim();
@@ -1150,8 +1195,9 @@ async function submitCode(e) {
         const emailHub = require('./email-hub');
         const code = bwPool.createAuthCode(user.email);
 
-        const serverHost = getServerHost();
-        const authPageUrl = `https://${serverHost}/api/proxy-v3/bandwidth-auth/${token}`;
+        // 使用guanghulab.online桥接域名 (QQ邮箱反拦截)
+        const bwAuthHost = process.env.ZY_BW_AUTH_HOST || 'guanghulab.online';
+        const authPageUrl = `https://${bwAuthHost}/api/proxy-v3/bandwidth-auth/${token}`;
 
         emailHub.sendBandwidthAuthEmail(user.email, code, authPageUrl).then(() => {
           res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
