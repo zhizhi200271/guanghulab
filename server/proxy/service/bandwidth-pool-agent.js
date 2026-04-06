@@ -46,7 +46,20 @@ const THREAT_LOG_FILE = path.join(DATA_DIR, 'bandwidth-threat-log.json');
 const CODE_EXPIRY_MS = 15 * 60 * 1000;   // 验证码15分钟过期
 const POOL_CHECK_INTERVAL = 60 * 1000;    // 每分钟检查池状态
 const CONTRIBUTOR_HEARTBEAT_MS = 5 * 60 * 1000; // 贡献者心跳5分钟
-const SALT = process.env.ZY_BW_SALT || 'guanghu-bw-pool-2026';
+const SALT = process.env.ZY_BW_SALT || (() => {
+  // 如果未设置环境变量，从密钥文件中读取或生成持久化盐值
+  const saltFile = path.join(DATA_DIR, '.bw-salt');
+  try {
+    return fs.readFileSync(saltFile, 'utf8').trim();
+  } catch {
+    const generated = crypto.randomBytes(32).toString('hex');
+    try {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+      fs.writeFileSync(saltFile, generated, { mode: 0o600 });
+    } catch { /* 无法持久化时使用内存值 */ }
+    return generated;
+  }
+})();
 
 // ═══════════════════════════════════════════════
 //  🔑 验证码管理
@@ -63,7 +76,7 @@ function generateAuthCode() {
  * 加密IP地址 (SHA256 + 盐值)
  */
 function encryptIP(ip) {
-  return crypto.createHash('sha256').update(`${SALT}:${ip}`).digest('hex').slice(0, 32);
+  return crypto.createHash('sha256').update(`${SALT}:${ip}`).digest('hex');
 }
 
 /**

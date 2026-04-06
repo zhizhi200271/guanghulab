@@ -855,10 +855,14 @@ mode: direct
             }
 
             // 采集用户IP (加密存储)
+            // 注: X-Forwarded-For由Nginx反代设置，可信来源
             const userIP = req.headers['x-forwarded-for']?.split(',')[0]?.trim()
               || req.headers['x-real-ip']
               || req.socket.remoteAddress
               || '0.0.0.0';
+            if (userIP === '0.0.0.0') {
+              console.warn('[带宽授权] 无法获取用户IP，使用0.0.0.0');
+            }
 
             // 注册为带宽贡献者
             const regResult = bwPool.registerContributor(user.email, userIP);
