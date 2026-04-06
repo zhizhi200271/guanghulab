@@ -53,8 +53,9 @@ const EMAIL_LOG_FILE = path.join(DATA_DIR, 'email-hub-log.json');
 const RELEASE_NOTES_FILE = path.join(__dirname, '../config/release-notes.json');
 
 // ── 带宽授权页面域名 ─────────────────────────
-// QQ邮箱拦截guanghulab.com域名链接，使用guanghulab.online桥接
-// guanghulab.online通过Nginx反向代理桥接到大脑服务器V3订阅服务
+// QQ邮箱拦截所有可点击链接，邮件中仅含验证码+纯文本网址引导
+// 用户在浏览器中手动输入 guanghulab.online/auth 访问公开授权页面
+// guanghulab.online/auth 通过Nginx代理到大脑服务器V3订阅服务 /bandwidth-auth-open
 const BW_AUTH_HOST = process.env.ZY_BW_AUTH_HOST || 'guanghulab.online';
 
 // ── 加载版本更新说明 ────────────────────────────
@@ -601,9 +602,12 @@ function generateFeedbackAckEmail(config) {
 // ═══════════════════════════════════════════════
 // 📧 邮件类型 6: 带宽共享验证码 (∞+1)
 // ═══════════════════════════════════════════════
-function generateBandwidthAuthEmail(code, authPageUrl, config) {
+function generateBandwidthAuthEmail(code, config) {
   const releaseNotes = loadReleaseNotesObj();
   const vpnIntro = getVpnSystemIntroHtml(releaseNotes);
+
+  // 授权页面网址 (纯文本，不插入可点击链接，防止QQ邮箱拦截)
+  const authSiteUrl = `https://${BW_AUTH_HOST}/auth`;
 
   const content = `
     <div class="alert-box" style="background: #e8f4fd; border: 1px solid #b8daff; border-radius: 10px; padding: 16px 20px; margin: 0 0 24px;">
@@ -616,7 +620,7 @@ function generateBandwidthAuthEmail(code, authPageUrl, config) {
     <p style="color: #444; line-height: 1.9; font-size: 14px; margin: 0 0 24px;">
       本邮件为<strong>光湖语言世界</strong>带宽共享加速计划的授权验证通知。<br>
       带宽共享为<strong>自愿参与</strong>机制，参与后将提升全网连接速度与稳定性。<br>
-      如您确认授权，请复制以下验证码并在授权页面提交：
+      如您确认授权，请复制以下验证码并按照下方步骤操作：
     </p>
 
     <!-- 验证码展示区 -->
@@ -625,13 +629,21 @@ function generateBandwidthAuthEmail(code, authPageUrl, config) {
       <p class="code-display" style="font-size: 40px; font-weight: 700; color: #1a1a2e; letter-spacing: 10px; margin: 0; font-family: Consolas, Monaco, 'Courier New', monospace;">${code}</p>
     </div>
 
-    ${authPageUrl ? `
-    <!-- 授权按钮 -->
-    <div style="text-align: center; margin: 0 0 28px;">
-      <a href="${authPageUrl}" class="action-btn" style="display: inline-block; background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 14px 36px; border-radius: 10px; text-decoration: none; font-size: 15px; font-weight: 600; letter-spacing: 0.5px;">
-        🔗 前往授权页面输入验证码
-      </a>
-    </div>` : ''}
+    <!-- 操作步骤 (纯文本，不含可点击链接) -->
+    <div class="info-card" style="background: #f0f4ff; border: 1px solid #d0d8ff; border-radius: 10px; padding: 20px; margin: 0 0 24px;">
+      <h4 style="color: #004085; margin: 0 0 12px; font-size: 14px; font-weight: 600;">📋 授权操作步骤</h4>
+      <ol style="color: #444; line-height: 2.2; font-size: 14px; padding-left: 20px; margin: 0 0 16px;">
+        <li>打开<strong>谷歌浏览器</strong>（Chrome）</li>
+        <li>在地址栏中<strong>手动输入</strong>以下网址，按回车访问：</li>
+      </ol>
+      <div style="background: #e8edf6; border-radius: 8px; padding: 14px 16px; text-align: center; margin: 0 0 16px;">
+        <p style="font-size: 18px; font-weight: 700; color: #1a1a2e; letter-spacing: 1px; margin: 0; font-family: Consolas, Monaco, 'Courier New', monospace; word-break: break-all;">${escapeHtml(authSiteUrl)}</p>
+      </div>
+      <ol start="3" style="color: #444; line-height: 2.2; font-size: 14px; padding-left: 20px; margin: 0;">
+        <li>在页面中输入您的邮箱地址和上方验证码</li>
+        <li>点击「<strong>我同意授权</strong>」按钮完成授权</li>
+      </ol>
+    </div>
 
     <!-- 同意说明 -->
     <div class="info-card" style="background: #f0faf3; border-radius: 10px; padding: 18px 20px; margin: 0 0 12px; border-left: 4px solid #28a745;">
@@ -732,7 +744,7 @@ function generateThreatClearedEmail(config) {
 // ═══════════════════════════════════════════════
 // 📧 邮件类型 9: V3订阅链接 (含系统介绍 + 带宽共享邀请)
 // ═══════════════════════════════════════════════
-function generateSubscriptionV3Email(subUrl, dashboardUrl, bwAuthUrl, config) {
+function generateSubscriptionV3Email(subUrl, dashboardUrl, config) {
   const releaseNotes = loadReleaseNotesObj();
   const vpnIntro = getVpnSystemIntroHtml(releaseNotes);
 
@@ -801,7 +813,7 @@ function generateSubscriptionV3Email(subUrl, dashboardUrl, bwAuthUrl, config) {
       </tr>
     </table>
 
-    <!-- 带宽共享邀请 -->
+    <!-- 带宽共享邀请 (纯文本网址，不含可点击链接，防止QQ邮箱拦截) -->
     <div style="background: linear-gradient(135deg, #e8f4fd 0%, #f0f7ff 100%); border: 1px solid #b8daff; border-radius: 12px; padding: 20px; margin: 0 0 16px;">
       <h3 style="color: #004085; font-size: 15px; margin: 0 0 12px; font-weight: 700;">🌊 带宽共享加速计划 · 自愿参与</h3>
       <p style="color: #444; font-size: 13px; margin: 0 0 16px; line-height: 1.9;">
@@ -809,14 +821,12 @@ function generateSubscriptionV3Email(subUrl, dashboardUrl, bwAuthUrl, config) {
         提升所有用户的连接速度与稳定性。此功能为<strong>自愿参与</strong>机制，
         不参与不影响正常服务使用。
       </p>
-      ${bwAuthUrl ? `
-      <div style="text-align: center; margin: 0 0 16px;">
-        <a href="${bwAuthUrl}" class="action-btn" style="display: inline-block; background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 14px 36px; border-radius: 10px; text-decoration: none; font-size: 15px; font-weight: 600; letter-spacing: 0.5px;">
-          🌊 前往参与带宽共享
-        </a>
-      </div>` : ''}
+      <div style="background: #e8edf6; border-radius: 8px; padding: 14px 16px; text-align: center; margin: 0 0 16px;">
+        <p style="color: #666; font-size: 12px; margin: 0 0 6px;">请在谷歌浏览器中手动输入以下网址访问授权页面：</p>
+        <p style="font-size: 16px; font-weight: 700; color: #1a1a2e; letter-spacing: 1px; margin: 0; font-family: Consolas, Monaco, 'Courier New', monospace;">https://${escapeHtml(BW_AUTH_HOST)}/auth</p>
+      </div>
       <p style="color: #888; font-size: 12px; margin: 0; line-height: 1.8;">
-        点击上方按钮进入授权页面，在页面中申请验证码完成授权。<br>
+        在授权页面中输入您的邮箱和系统发送的验证码，点击「我同意授权」完成操作。<br>
         如暂不参与，无需任何操作。此邮件仅为系统通知，不参与不产生任何影响。
       </p>
     </div>
@@ -1000,13 +1010,13 @@ function listUserEmails() {
 
 /**
  * 发送带宽共享验证码给单个用户 (∞+1)
+ * 邮件仅含验证码 + 纯文本网址引导，不含可点击链接 (QQ邮箱反拦截)
  * @param {string} email 目标邮箱
  * @param {string} code 6位验证码
- * @param {string} [authPageUrl] 授权页面URL
  */
-async function sendBandwidthAuthEmail(email, code, authPageUrl) {
+async function sendBandwidthAuthEmail(email, code) {
   const config = loadConfig();
-  const html = generateBandwidthAuthEmail(code, authPageUrl, config);
+  const html = generateBandwidthAuthEmail(code, config);
 
   try {
     await sendEmail(email, '🌊 光湖语言世界 · 带宽共享授权验证码', html);
@@ -1063,9 +1073,8 @@ async function sendSubscriptionV3Email(email) {
   const host = config.server_host || 'guanghulab.com';
   const subUrl = `https://${host}/api/proxy-v3/sub/${user.token}`;
   const dashboardUrl = `https://${host}/api/proxy-v3/dashboard/${user.token}`;
-  const bwAuthUrl = `https://${BW_AUTH_HOST}/api/proxy-v3/bandwidth-auth/${user.token}`;
 
-  const html = generateSubscriptionV3Email(subUrl, dashboardUrl, bwAuthUrl, config);
+  const html = generateSubscriptionV3Email(subUrl, dashboardUrl, config);
 
   try {
     await sendEmail(email, '🌐 光湖语言世界 · V3专属订阅链接', html);
@@ -1111,13 +1120,8 @@ async function sendBandwidthAuthAllEmail() {
       // 为每位用户生成独立验证码
       const authCode = bwPool.createAuthCode(user.email);
 
-      // 构建用户专属授权页面URL (使用guanghulab.online桥接域名)
-      let authPageUrl;
-      if (user.token) {
-        authPageUrl = `https://${BW_AUTH_HOST}/api/proxy-v3/bandwidth-auth/${user.token}`;
-      }
-
-      const html = generateBandwidthAuthEmail(authCode, authPageUrl, config);
+      // 邮件仅含验证码 + 纯文本网址引导，不含可点击链接 (QQ邮箱反拦截)
+      const html = generateBandwidthAuthEmail(authCode, config);
       await sendEmail(user.email, '🌊 光湖语言世界 · 带宽共享授权验证码', html);
       sent++;
       console.log(`  ✅ ${user.email}`);
@@ -1251,15 +1255,8 @@ async function main() {
       const bwPool = require('./bandwidth-pool-agent');
       const authCode = bwPool.createAuthCode(arg1);
 
-      // 查找用户token以构建授权页面URL (使用guanghulab.online桥接域名)
-      let bwAuthPageUrl;
-      const bwUsers = getEnabledUsers();
-      const bwUser = bwUsers.find(u => u.email === arg1);
-      if (bwUser && bwUser.token) {
-        bwAuthPageUrl = `https://${BW_AUTH_HOST}/api/proxy-v3/bandwidth-auth/${bwUser.token}`;
-      }
-
-      const result = await sendBandwidthAuthEmail(arg1, authCode, bwAuthPageUrl);
+      // 邮件仅含验证码 + 纯文本网址引导，不含可点击链接 (QQ邮箱反拦截)
+      const result = await sendBandwidthAuthEmail(arg1, authCode);
       console.log(`📧 带宽验证码: ${result.sent}成功 / ${result.failed}失败`);
       break;
     }
