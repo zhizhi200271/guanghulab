@@ -81,18 +81,21 @@ jobs:
             deploy-infinity)
               echo "部署∞版本..."
               # 先同步最新代码到服务器
+              $SSH_CMD "mkdir -p $PROXY_DIR/.deploy-tmp"
+
               scp -i ~/.ssh/brain_key -o StrictHostKeyChecking=no \
                 server/proxy/service/auto-evolution.js \
                 server/proxy/service/email-hub.js \
                 server/proxy/service/protocol-mirror.js \
                 server/proxy/ecosystem.brain-proxy-v3.config.js \
-                ${{ secrets.ZY_BRAIN_USER }}@${{ secrets.ZY_BRAIN_HOST }}:/tmp/
+                ${{ secrets.ZY_BRAIN_USER }}@${{ secrets.ZY_BRAIN_HOST }}:$PROXY_DIR/.deploy-tmp/
 
               $SSH_CMD "
-                cp /tmp/auto-evolution.js $PROXY_DIR/service/
-                cp /tmp/email-hub.js $PROXY_DIR/service/
-                cp /tmp/protocol-mirror.js $PROXY_DIR/service/
-                cp /tmp/ecosystem.brain-proxy-v3.config.js $PROXY_DIR/
+                cp $PROXY_DIR/.deploy-tmp/auto-evolution.js $PROXY_DIR/service/
+                cp $PROXY_DIR/.deploy-tmp/email-hub.js $PROXY_DIR/service/
+                cp $PROXY_DIR/.deploy-tmp/protocol-mirror.js $PROXY_DIR/service/
+                cp $PROXY_DIR/.deploy-tmp/ecosystem.brain-proxy-v3.config.js $PROXY_DIR/
+                rm -rf $PROXY_DIR/.deploy-tmp
                 mkdir -p $PROXY_DIR/data/evolution-reports
                 cd $PROXY_DIR && pm2 startOrRestart ecosystem.brain-proxy-v3.config.js --update-env && pm2 save
                 echo '✅ ∞版本已部署'

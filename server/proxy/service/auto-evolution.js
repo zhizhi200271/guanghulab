@@ -372,8 +372,9 @@ async function checkTrafficPoolAlert() {
     const lastRun = status.schedules.traffic_alert_70.last_run;
     const currentPeriod = pool.period || new Date().toISOString().slice(0, 7);
 
-    // 检查本月是否已发过
-    if (!lastRun || !lastRun.startsWith(currentPeriod.replace('-', '').slice(0, 6))) {
+    // 检查本月是否已发过 (比较YYYY-MM)
+    const lastRunMonth = lastRun ? lastRun.slice(0, 7) : '';
+    if (lastRunMonth !== currentPeriod) {
       await handleTrafficAlert(Math.round(pct));
       status.schedules.traffic_alert_70.last_run = new Date().toISOString();
       saveEvolutionStatus(status);
@@ -408,19 +409,16 @@ async function checkSchedule() {
   // ── 月度进化 (每月1号 00:00-00:04) ──
   if (day === 1 && hour === 0 && minute < 5) {
     const lastMonthly = status.schedules.monthly_evolution.last_run;
-    const today = now.toISOString().slice(0, 10);
-    if (!lastMonthly || !lastMonthly.startsWith(today.slice(0, 4))) {
-      // 进一步检查: 确保本月还没执行过
-      const lastRunDate = lastMonthly ? new Date(lastMonthly) : null;
-      const lastRunMonth = lastRunDate ? `${lastRunDate.getFullYear()}-${String(lastRunDate.getMonth() + 1).padStart(2, '0')}` : '';
-      const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    // 比较YYYY-MM确保本月未执行过
+    const lastRunDate = lastMonthly ? new Date(lastMonthly) : null;
+    const lastRunMonth = lastRunDate ? `${lastRunDate.getFullYear()}-${String(lastRunDate.getMonth() + 1).padStart(2, '0')}` : '';
+    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
-      if (lastRunMonth !== currentMonth) {
-        try {
-          await monthlyEvolution();
-        } catch (err) {
-          console.error('[自主进化] 月度进化调度异常:', err.message);
-        }
+    if (lastRunMonth !== currentMonth) {
+      try {
+        await monthlyEvolution();
+      } catch (err) {
+        console.error('[自主进化] 月度进化调度异常:', err.message);
       }
     }
   }

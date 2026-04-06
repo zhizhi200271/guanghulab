@@ -86,6 +86,15 @@ async function sendEmail(to, subject, htmlBody) {
   const smtpPort = 465;
 
   return new Promise((resolve, reject) => {
+    let settled = false;
+    const timeoutId = setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        try { socket.destroy(); } catch { /* ignore */ }
+        reject(new Error('SMTP超时(30s)'));
+      }
+    }, 30000);
+
     const socket = tls.connect(smtpPort, smtpHost, {}, () => {
       let step = 0;
       const from = config.smtp_user;
@@ -107,20 +116,29 @@ async function sendEmail(to, subject, htmlBody) {
           socket.write(commands[step]);
           step++;
         }
-        if (step >= commands.length) {
+        if (step >= commands.length && !settled) {
+          settled = true;
+          clearTimeout(timeoutId);
           resolve(true);
         }
       });
 
-      socket.on('error', (err) => { reject(err); });
+      socket.on('error', (err) => {
+        if (!settled) {
+          settled = true;
+          clearTimeout(timeoutId);
+          reject(err);
+        }
+      });
     });
 
-    socket.on('error', (err) => { reject(err); });
-
-    setTimeout(() => {
-      try { socket.destroy(); } catch { /* ignore */ }
-      reject(new Error('SMTP超时(30s)'));
-    }, 30000);
+    socket.on('error', (err) => {
+      if (!settled) {
+        settled = true;
+        clearTimeout(timeoutId);
+        reject(err);
+      }
+    });
   });
 }
 
