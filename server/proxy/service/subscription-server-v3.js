@@ -36,6 +36,41 @@ const LIVE_NODES_FRESHNESS_MS = parseInt(process.env.ZY_CLOUD_HB_EXPIRY_MS || '6
 // 引入用户管理器
 const userManager = require('./user-manager');
 
+// ── 操作快照文件 ──────────────────────────────
+const AUTH_SNAPSHOT_FILE = path.join(DATA_DIR, 'bandwidth-auth-snapshots.json');
+const MAX_SNAPSHOTS = 500; // 最多保留500条快照记录
+
+/**
+ * 保存用户操作快照
+ * 记录用户授权操作详情，用于审计追溯
+ * @param {Object} snapshot 快照数据
+ */
+function saveAuthSnapshot(snapshot) {
+  try {
+    let snapshots = [];
+    try {
+      const raw = JSON.parse(fs.readFileSync(AUTH_SNAPSHOT_FILE, 'utf8'));
+      if (Array.isArray(raw)) snapshots = raw;
+    } catch { /* 文件不存在或格式错误，使用空数组 */ }
+
+    snapshots.push({
+      ...snapshot,
+      timestamp: new Date().toISOString(),
+      timestamp_ms: Date.now()
+    });
+
+    // 保留最近MAX_SNAPSHOTS条记录
+    if (snapshots.length > MAX_SNAPSHOTS) {
+      snapshots = snapshots.slice(-MAX_SNAPSHOTS);
+    }
+
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+    fs.writeFileSync(AUTH_SNAPSHOT_FILE, JSON.stringify(snapshots, null, 2));
+  } catch (err) {
+    console.error('[操作快照] 保存失败:', err.message);
+  }
+}
+
 // ── 加载密钥 ────────────────────────────────
 function loadKeys() {
   const keys = {};
@@ -809,6 +844,412 @@ mode: direct
       return;
     }
 
+    // ── ∞+1 公开带宽共享授权页面: /bandwidth-auth-open ──
+    // 用户通过邮件中纯文本网址引导访问，输入邮箱+验证码完成授权
+    // 不需要token，通过邮箱+验证码双重验证身份
+    if (pathname === '/bandwidth-auth-open') {
+
+      // POST: 提交邮箱+验证码
+      if (req.method === 'POST') {
+        let body = '';
+        req.on('data', chunk => { body += chunk; });
+        req.on('end', () => {
+          try {
+            let code = '';
+            let email = '';
+            // 支持 JSON 和 form-urlencoded
+            if (req.headers['content-type']?.includes('application/json')) {
+              const json = JSON.parse(body);
+              code = String(json.code || '').trim();
+              email = String(json.email || '').trim().toLowerCase();
+            } else {
+              const params = new URLSearchParams(body);
+              code = String(params.get('code') || '').trim();
+              email = String(params.get('email') || '').trim().toLowerCase();
+            }
+
+            if (!email || !email.includes('@')) {
+              res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+              res.end(JSON.stringify({ success: false, message: '请输入有效的邮箱地址' }));
+              return;
+            }
+
+            if (!code || code.length !== 6) {
+              res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+              res.end(JSON.stringify({ success: false, message: '请输入6位验证码' }));
+              return;
+            }
+
+            // 采集用户IP
+            const userIP = req.headers['x-forwarded-for']?.split(',')[0]?.trim()
+              || req.headers['x-real-ip']
+              || req.socket.remoteAddress
+              || '0.0.0.0';
+
+            // 验证码校验 (邮箱+验证码交叉验证)
+            const bwPool = require('./bandwidth-pool-agent');
+            const verifyResult = bwPool.verifyAuthCode(code, email);
+
+            if (!verifyResult.valid) {
+              // 保存失败操作快照
+              saveAuthSnapshot({
+                email,
+                action: 'bandwidth-auth-consent',
+                result: 'failed',
+                error: verifyResult.error,
+                ip: userIP,
+                user_agent: req.headers['user-agent'] || 'unknown',
+                auth_type: 'public-open'
+              });
+              res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+              res.end(JSON.stringify({ success: false, message: verifyResult.error }));
+              return;
+            }
+
+            // 注册为带宽贡献者
+            const regResult = bwPool.registerContributor(email, userIP);
+
+            // 保存用户操作快照 (授权记录)
+            saveAuthSnapshot({
+              email,
+              action: 'bandwidth-auth-consent',
+              result: 'authorized',
+              ip: userIP,
+              user_agent: req.headers['user-agent'] || 'unknown',
+              auth_type: 'public-open',
+              contributor_id: regResult.contributor_id
+            });
+
+            // 激活用户守护Agent
+            try {
+              const guardian = require('./user-guardian-agent');
+              guardian.activateGuardian(email);
+            } catch { /* guardian not loaded */ }
+
+            res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+            res.end(JSON.stringify({
+              success: true,
+              message: '授权成功！您的带宽已加入加速池，感谢支持。',
+              contributor_id: regResult.contributor_id
+            }));
+          } catch (err) {
+            res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+            res.end(JSON.stringify({ success: false, message: '系统异常，请稍后重试' }));
+          }
+        });
+        return;
+      }
+
+      // GET: 渲染公开授权页面 (邮箱+验证码输入)
+      const esc2 = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+      // 读取带宽池状态
+      let poolInfo2 = { active_contributors: 0, total_contributed_gb: 0 };
+      try {
+        poolInfo2 = JSON.parse(fs.readFileSync(path.join(DATA_DIR, 'bandwidth-pool-status.json'), 'utf8'));
+      } catch { /* ignore */ }
+
+      const openAuthHtml = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>光湖语言世界 · 带宽共享授权</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", Roboto, sans-serif;
+    background: #0a0e27;
+    color: #e0e0e0;
+    padding: 20px;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.6;
+    -webkit-text-size-adjust: 100%;
+  }
+  .container { max-width: 480px; width: 100%; }
+  .header { text-align: center; padding: 28px 0 20px; }
+  .header h1 {
+    font-size: 1.5em;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 6px;
+  }
+  .header p { color: #888; font-size: 0.9em; margin-top: 6px; }
+  .card {
+    background: #141832;
+    border-radius: 14px;
+    padding: 24px 20px;
+    margin: 14px 0;
+    border: 1px solid #1e2448;
+  }
+  .card h3 {
+    font-size: 1em;
+    color: #667eea;
+    margin-bottom: 16px;
+  }
+  .input-group { margin: 14px 0; }
+  .input-group label {
+    display: block;
+    color: #aaa;
+    font-size: 0.85em;
+    margin-bottom: 6px;
+  }
+  .input-group input {
+    width: 100%;
+    padding: 14px 16px;
+    background: #1e2448;
+    border: 2px solid #2d3566;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 1em;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+  .input-group input:focus { border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15); }
+  .input-group input::placeholder { font-size: 0.85em; color: #555; }
+  .code-input {
+    text-align: center;
+    letter-spacing: 8px;
+    font-size: 1.3em !important;
+  }
+  .code-input::placeholder { letter-spacing: 0 !important; font-size: 0.6em !important; }
+  .consent-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 18px 0;
+    padding: 14px 16px;
+    background: #1a1f3d;
+    border-radius: 10px;
+    border: 1px solid #2d3566;
+    cursor: pointer;
+    transition: border-color 0.3s;
+  }
+  .consent-box:hover { border-color: #667eea; }
+  .consent-box input[type="checkbox"] {
+    margin-top: 3px;
+    width: 18px;
+    height: 18px;
+    accent-color: #667eea;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .consent-box .consent-text {
+    color: #ccc;
+    font-size: 0.88em;
+    line-height: 1.7;
+  }
+  .submit-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.05em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.3s, transform 0.15s;
+    margin-top: 6px;
+  }
+  .submit-btn:hover { opacity: 0.92; }
+  .submit-btn:active { transform: scale(0.98); }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .info-box {
+    background: #1a1f3d;
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin: 12px 0;
+    font-size: 0.88em;
+    line-height: 1.9;
+    color: #aaa;
+  }
+  .info-box.green { border-left: 4px solid #2ecc71; }
+  .info-box.gray { border-left: 4px solid #6c757d; }
+  .info-box.yellow { border-left: 4px solid #f39c12; }
+  .info-box strong { color: #e0e0e0; display: block; margin-bottom: 6px; }
+  .result {
+    text-align: center;
+    padding: 16px;
+    border-radius: 10px;
+    margin-top: 14px;
+    display: none;
+    font-size: 0.95em;
+    line-height: 1.6;
+  }
+  .result.success { background: #1a3a2a; color: #2ecc71; }
+  .result.error { background: #3a1a1a; color: #e74c3c; }
+  .stats { display: flex; justify-content: space-around; margin: 12px 0; gap: 12px; }
+  .stat { text-align: center; flex: 1; }
+  .stat .num { font-size: 1.4em; font-weight: 700; color: #667eea; }
+  .stat .label { font-size: 0.78em; color: #888; margin-top: 4px; }
+  .footer {
+    text-align: center;
+    padding: 20px 0 8px;
+    color: #555;
+    font-size: 0.78em;
+    line-height: 1.8;
+  }
+  @media (max-width: 520px) {
+    body { padding: 12px; }
+    .container { max-width: 100%; }
+    .header { padding: 20px 0 14px; }
+    .header h1 { font-size: 1.3em; }
+    .card { padding: 20px 16px; margin: 10px 0; border-radius: 12px; }
+    .input-group input { padding: 12px 14px; }
+    .code-input { font-size: 1.15em !important; letter-spacing: 6px; }
+    .submit-btn { padding: 14px; font-size: 1em; }
+    .info-box { padding: 14px 16px; font-size: 0.84em; }
+  }
+  @media (max-width: 380px) {
+    body { padding: 8px; }
+    .header h1 { font-size: 1.15em; }
+    .card { padding: 16px 14px; }
+    .card h3 { font-size: 0.92em; }
+    .code-input { font-size: 1.05em !important; letter-spacing: 4px; }
+    .stat .num { font-size: 1.2em; }
+    .info-box { padding: 12px 14px; font-size: 0.82em; line-height: 1.8; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🌊 带宽共享加速</h1>
+    <p>光湖语言世界 · 授权验证</p>
+  </div>
+
+  <div class="card">
+    <h3>📊 加速池状态</h3>
+    <div class="stats">
+      <div class="stat"><div class="num">${poolInfo2.active_contributors || 0}</div><div class="label">活跃贡献者</div></div>
+      <div class="stat"><div class="num">${poolInfo2.total_contributed_gb || 0}</div><div class="label">总贡献 (GB)</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🔑 授权验证</h3>
+    <p style="font-size: 0.88em; color: #888; margin-bottom: 12px; line-height: 1.7;">请输入您的邮箱地址和邮件中收到的6位验证码。如尚未收到验证码，请联系管理员申请。</p>
+
+    <form id="authForm" onsubmit="submitAuth(event)">
+      <div class="input-group">
+        <label for="emailInput">📧 邮箱地址</label>
+        <input type="email" id="emailInput" placeholder="请输入您的邮箱地址" autocomplete="email" required>
+      </div>
+      <div class="input-group">
+        <label for="codeInput">🔑 验证码</label>
+        <input type="text" id="codeInput" class="code-input" maxlength="6" pattern="[0-9]{6}" placeholder="输入6位验证码" inputmode="numeric" autocomplete="off" required>
+      </div>
+
+      <label class="consent-box" for="consentCheck">
+        <input type="checkbox" id="consentCheck" required>
+        <span class="consent-text">
+          我已阅读并理解带宽共享加速计划说明，自愿将闲置带宽纳入光湖语言世界加速网络。
+          我了解系统采用 SHA256 + 盐值加密存储我的IP地址，且在检测到安全风险时将自动切断所有共享通道并清除记录。
+        </span>
+      </label>
+
+      <button type="submit" class="submit-btn" id="submitBtn">✅ 我同意授权</button>
+    </form>
+
+    <div id="result" class="result"></div>
+  </div>
+
+  <div class="info-box green">
+    <strong>✅ 授权确认 · 提交验证码</strong>
+    您的闲置带宽将纳入光湖语言世界加速网络。参与带宽共享的用户越多，全网加速效能越高，您的连接速度将同步提升。
+  </div>
+
+  <div class="info-box gray">
+    <strong>❌ 暂不参与 · 关闭此页面</strong>
+    本功能为自愿参与机制，不影响您的正常服务使用。未参与带宽共享的用户将通过系统默认带宽通道连接，服务质量不受影响。
+  </div>
+
+  <div class="info-box yellow">
+    <strong>🔒 安全机制说明</strong>
+    本系统为内部授权用户专用，所有参与者均为受邀成员。您的IP地址仅用于带宽加速调度，系统采用 SHA256 + 盐值 加密存储，外部无法访问。当系统检测到安全风险时，将自动切断所有共享通道并格式化全部共享记录，确保无痕清除。风险解除后，系统将自动重新分配订阅链接。您的隐私安全由铸渊守护体系全程保障。
+  </div>
+
+  <div class="footer">
+    光湖语言世界 · 冰朔开发维护<br>
+    国作登字-2026-A-00037559
+  </div>
+</div>
+
+<script>
+async function submitAuth(e) {
+  e.preventDefault();
+  var email = document.getElementById('emailInput').value.trim().toLowerCase();
+  var code = document.getElementById('codeInput').value.trim();
+  var consent = document.getElementById('consentCheck').checked;
+  var btn = document.getElementById('submitBtn');
+  var result = document.getElementById('result');
+
+  if (!email || email.indexOf('@') === -1) {
+    result.className = 'result error';
+    result.style.display = 'block';
+    result.textContent = '请输入有效的邮箱地址';
+    return;
+  }
+
+  if (code.length !== 6 || !/^\\d{6}$/.test(code)) {
+    result.className = 'result error';
+    result.style.display = 'block';
+    result.textContent = '请输入6位数字验证码';
+    return;
+  }
+
+  if (!consent) {
+    result.className = 'result error';
+    result.style.display = 'block';
+    result.textContent = '请先勾选同意授权条款';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '⏳ 提交中...';
+
+  try {
+    var resp = await fetch(window.location.href, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, code: code })
+    });
+    var data = await resp.json();
+
+    result.style.display = 'block';
+    if (data.success) {
+      result.className = 'result success';
+      result.textContent = '✅ ' + data.message;
+      btn.textContent = '✅ 授权成功';
+    } else {
+      result.className = 'result error';
+      result.textContent = '❌ ' + data.message;
+      btn.disabled = false;
+      btn.textContent = '✅ 我同意授权';
+    }
+  } catch (err) {
+    result.className = 'result error';
+    result.style.display = 'block';
+    result.textContent = '❌ 网络异常，请稍后重试';
+    btn.disabled = false;
+    btn.textContent = '✅ 我同意授权';
+  }
+}
+</script>
+</body>
+</html>`;
+
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.end(openAuthHtml);
+      return;
+    }
+
     // ── ∞+1 带宽共享授权页面: /bandwidth-auth/{token} ──
     // 用户输入验证码授权带宽共享 · 安全加密
     const bwAuthMatch = pathname.match(/^\/bandwidth-auth\/([a-f0-9]+)$/);
@@ -866,6 +1307,17 @@ mode: direct
 
             // 注册为带宽贡献者
             const regResult = bwPool.registerContributor(user.email, userIP);
+
+            // 保存用户操作快照 (授权记录)
+            saveAuthSnapshot({
+              email: user.email,
+              action: 'bandwidth-auth-consent',
+              result: 'authorized',
+              ip: userIP,
+              user_agent: req.headers['user-agent'] || 'unknown',
+              auth_type: 'token-based',
+              contributor_id: regResult.contributor_id
+            });
 
             // 激活用户守护Agent
             try {
@@ -1052,7 +1504,7 @@ mode: direct
       <div class="input-group">
         <input type="text" id="codeInput" maxlength="6" pattern="[0-9]{6}" placeholder="输入6位验证码" inputmode="numeric" autocomplete="off" required>
       </div>
-      <button type="submit" class="submit-btn" id="submitBtn">🔓 提交授权</button>
+      <button type="submit" class="submit-btn" id="submitBtn">✅ 我同意授权</button>
     </form>
 
     <div style="text-align: center; margin-top: 14px;">
@@ -1160,14 +1612,14 @@ async function submitCode(e) {
       result.className = 'result error';
       result.textContent = '❌ ' + data.message;
       btn.disabled = false;
-      btn.textContent = '🔓 提交授权';
+      btn.textContent = '✅ 我同意授权';
     }
   } catch (err) {
     result.className = 'result error';
     result.style.display = 'block';
     result.textContent = '❌ 网络异常，请稍后重试';
     btn.disabled = false;
-    btn.textContent = '🔓 提交授权';
+    btn.textContent = '✅ 我同意授权';
   }
 }
 </script>
@@ -1197,11 +1649,8 @@ async function submitCode(e) {
         const emailHub = require('./email-hub');
         const code = bwPool.createAuthCode(user.email);
 
-        // 使用guanghulab.online桥接域名 (QQ邮箱反拦截)
-        const bwAuthHost = process.env.ZY_BW_AUTH_HOST || 'guanghulab.online';
-        const authPageUrl = `https://${bwAuthHost}/api/proxy-v3/bandwidth-auth/${token}`;
-
-        emailHub.sendBandwidthAuthEmail(user.email, code, authPageUrl).then(() => {
+        // 邮件仅含验证码 + 纯文本网址引导，不含可点击链接 (QQ邮箱反拦截)
+        emailHub.sendBandwidthAuthEmail(user.email, code).then(() => {
           res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
           res.end(JSON.stringify({
             success: true,
