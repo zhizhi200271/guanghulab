@@ -6,13 +6,23 @@
     "created": "2026-04-01T17:45:00Z"
   },
   "stats": {
-    "total_observed": 39,
-    "success": 33,
+    "total_observed": 40,
+    "success": 34,
     "failure": 6,
     "repair_attempted": 0,
     "repair_success": 0
   },
   "recent_deploys": [
+    {
+      "run_id": 24020286358,
+      "workflow": "🏛️ 铸渊主权服务器 · 部署",
+      "conclusion": "success",
+      "head_sha": "f835e36b",
+      "actor": "qinfendebingshuo",
+      "observed_at": "2026-04-06T05:39:55.728Z",
+      "error_summary": "",
+      "log_file": "deploy-24020286358-2026-04-06.json"
+    },
     {
       "run_id": 24019421677,
       "workflow": "🏛️ 铸渊主权服务器 · 部署",
@@ -302,17 +312,7 @@
       "observed_at": "2026-04-03T07:55:11.626Z",
       "error_summary": "",
       "log_file": "deploy-23938893073-2026-04-03.json"
-    },
-    {
-      "run_id": 23921287327,
-      "workflow": "🏛️ 铸渊主权服务器 · 部署",
-      "conclusion": "success",
-      "head_sha": "5636aed4",
-      "actor": "qinfendebingshuo",
-      "observed_at": "2026-04-02T20:49:37.906Z",
-      "error_summary": "",
-      "log_file": "deploy-23921287327-2026-04-02.json"
     }
   ],
-  "last_updated": "2026-04-06T05:02:46.903Z"
+  "last_updated": "2026-04-06T05:39:55.729Z"
 }
