@@ -25,6 +25,7 @@ on:
       - 'server/proxy/service/bandwidth-pool-agent.js'
       - 'server/proxy/service/swarm-defense-agent.js'
       - 'server/proxy/service/user-guardian-agent.js'
+      - 'server/proxy/service/subscription-server-v3.js'
       - 'server/proxy/config/release-notes.json'
       - 'server/proxy/ecosystem.brain-proxy-v3.config.js'
   schedule:
@@ -40,6 +41,10 @@ on:
           - monthly-evolution
           - deploy-infinity
           - status
+          - add-user
+          - remove-user
+          - list-users
+          - send-subscription-v3
           - send-monthly-reset
           - send-update-notify
           - send-update-notify-single
@@ -55,9 +60,14 @@ on:
         required: false
         type: string
       email:
-        description: '目标邮箱 (send-update-notify-single/send-bandwidth-auth-single时需要 · 可先用list-user-emails查看)'
+        description: '目标邮箱 (add-user/remove-user/send-subscription-v3/send-update-notify-single/send-bandwidth-auth-single时需要)'
         required: false
         type: string
+      quota_gb:
+        description: '月配额GB (add-user时可选，默认500)'
+        required: false
+        type: string
+        default: '500'
 
 permissions:
   contents: read
@@ -89,6 +99,7 @@ jobs:
           ACTION: ${{ github.event_name == 'push' && 'deploy-infinity' || github.event.inputs.action || 'monthly-evolution' }}
           MESSAGE: ${{ github.event.inputs.message || '' }}
           EMAIL: ${{ github.event.inputs.email || '' }}
+          QUOTA: ${{ github.event.inputs.quota_gb || '500' }}
           ZY_SMTP_USER: ${{ secrets.ZY_SMTP_USER }}
           ZY_SMTP_PASS: ${{ secrets.ZY_SMTP_PASS }}
         run: |
@@ -98,18 +109,20 @@ jobs:
           REMOTE_HOST="${{ secrets.ZY_BRAIN_USER }}@${{ secrets.ZY_BRAIN_HOST }}"
 
           # ── 同步邮件模块到服务器 ──
-          # 确保服务器上的email-hub.js和release-notes.json是最新版本
+          # 确保服务器上的email-hub.js和相关模块是最新版本
           sync_email_files() {
             echo "📦 同步邮件模块到服务器..."
             $SSH_CMD "mkdir -p $PROXY_DIR/.deploy-tmp $PROXY_DIR/config"
             $SCP_CMD \
               server/proxy/service/email-hub.js \
               server/proxy/service/bandwidth-pool-agent.js \
+              server/proxy/service/subscription-server-v3.js \
               server/proxy/config/release-notes.json \
               ${REMOTE_HOST}:$PROXY_DIR/.deploy-tmp/
             $SSH_CMD "
               cp $PROXY_DIR/.deploy-tmp/email-hub.js $PROXY_DIR/service/
               cp $PROXY_DIR/.deploy-tmp/bandwidth-pool-agent.js $PROXY_DIR/service/
+              cp $PROXY_DIR/.deploy-tmp/subscription-server-v3.js $PROXY_DIR/service/
               cp $PROXY_DIR/.deploy-tmp/release-notes.json $PROXY_DIR/config/
               rm -rf $PROXY_DIR/.deploy-tmp
             "
@@ -133,6 +146,7 @@ jobs:
                 server/proxy/service/bandwidth-pool-agent.js \
                 server/proxy/service/swarm-defense-agent.js \
                 server/proxy/service/user-guardian-agent.js \
+                server/proxy/service/subscription-server-v3.js \
                 server/proxy/config/release-notes.json \
                 server/proxy/ecosystem.brain-proxy-v3.config.js \
                 ${{ secrets.ZY_BRAIN_USER }}@${{ secrets.ZY_BRAIN_HOST }}:$PROXY_DIR/.deploy-tmp/
@@ -144,6 +158,7 @@ jobs:
                 cp $PROXY_DIR/.deploy-tmp/bandwidth-pool-agent.js $PROXY_DIR/service/
                 cp $PROXY_DIR/.deploy-tmp/swarm-defense-agent.js $PROXY_DIR/service/
                 cp $PROXY_DIR/.deploy-tmp/user-guardian-agent.js $PROXY_DIR/service/
+                cp $PROXY_DIR/.deploy-tmp/subscription-server-v3.js $PROXY_DIR/service/
                 mkdir -p $PROXY_DIR/config
                 cp $PROXY_DIR/.deploy-tmp/release-notes.json $PROXY_DIR/config/
                 cp $PROXY_DIR/.deploy-tmp/ecosystem.brain-proxy-v3.config.js $PROXY_DIR/
@@ -182,6 +197,71 @@ jobs:
                 echo ''
                 echo '── 流量池 ──'
                 cat data/pool-quota-status.json 2>/dev/null || echo '(未初始化)'
+              "
+              ;;
+
+            add-user)
+              if [ -z "$EMAIL" ]; then
+                echo "❌ 请提供目标邮箱 (email字段)"
+                exit 1
+              fi
+              if ! echo "$EMAIL" | grep -qE '^[^@]+@[^@]+\.[^@]+$'; then
+                echo "❌ 邮箱格式不正确: $EMAIL"
+                exit 1
+              fi
+              echo "➕ 新增用户: $EMAIL (配额: ${QUOTA}GB/月)"
+              $SSH_CMD "
+                cd $PROXY_DIR
+                node service/user-manager.js add '$EMAIL' '${QUOTA}'
+              "
+              echo ""
+              echo "════════════════════════════════════════"
+              echo "✅ 用户已添加"
+              echo "下一步: 运行 send-subscription-v3 发送V3订阅链接到 $EMAIL"
+              echo "════════════════════════════════════════"
+              ;;
+
+            remove-user)
+              if [ -z "$EMAIL" ]; then
+                echo "❌ 请提供目标邮箱 (email字段)"
+                exit 1
+              fi
+              if ! echo "$EMAIL" | grep -qE '^[^@]+@[^@]+\.[^@]+$'; then
+                echo "❌ 邮箱格式不正确: $EMAIL"
+                exit 1
+              fi
+              echo "➖ 移除用户: $EMAIL"
+              $SSH_CMD "
+                cd $PROXY_DIR
+                node service/user-manager.js remove '$EMAIL'
+              "
+              ;;
+
+            list-users)
+              echo "📋 用户列表:"
+              $SSH_CMD "
+                cd $PROXY_DIR
+                node service/user-manager.js list
+              "
+              ;;
+
+            send-subscription-v3)
+              if [ -z "$EMAIL" ]; then
+                echo "❌ 请提供目标邮箱 (email字段)"
+                echo "💡 可先使用 list-users 或 list-user-emails 查看用户"
+                exit 1
+              fi
+              if ! echo "$EMAIL" | grep -qE '^[^@]+@[^@]+\.[^@]+$'; then
+                echo "❌ 邮箱格式不正确: $EMAIL"
+                exit 1
+              fi
+              sync_email_files
+              echo "发送V3订阅链接 (含系统介绍+带宽共享邀请) 给: $EMAIL ..."
+              $SSH_CMD "
+                cd $PROXY_DIR
+                export ZY_SMTP_USER='$ZY_SMTP_USER'
+                export ZY_SMTP_PASS='$ZY_SMTP_PASS'
+                node service/email-hub.js send-subscription-v3 '$EMAIL'
               "
               ;;
 

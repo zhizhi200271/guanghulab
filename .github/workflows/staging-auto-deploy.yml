@@ -172,6 +172,12 @@ jobs:
           else
             sed -i "s/ZY_DOMAIN_PREVIEW_PLACEHOLDER/_/g" /tmp/zhuyuan-sovereign.conf
           fi
+          ZY_BRAIN_HOST="${{ secrets.ZY_BRAIN_HOST }}"
+          if [ -n "$ZY_BRAIN_HOST" ]; then
+            sed -i "s/ZY_BRAIN_HOST_PLACEHOLDER/$ZY_BRAIN_HOST/g" /tmp/zhuyuan-sovereign.conf
+          else
+            sed -i '/ZY_BRAIN_HOST_PLACEHOLDER/d' /tmp/zhuyuan-sovereign.conf
+          fi
           scp -i $KEY /tmp/zhuyuan-sovereign.conf \
             $USER@$HOST:/opt/zhuyuan/config/nginx/zhuyuan-sovereign.conf 2>&1 || true
 
