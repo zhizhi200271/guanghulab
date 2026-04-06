@@ -165,6 +165,10 @@ jobs:
                 echo "💡 可先使用 list-user-emails 查看所有用户邮箱"
                 exit 1
               fi
+              if ! echo "$EMAIL" | grep -qE '^[^@]+@[^@]+\.[^@]+$'; then
+                echo "❌ 邮箱格式不正确: $EMAIL"
+                exit 1
+              fi
               echo "单独发送更新通知给: $EMAIL ..."
               $SSH_CMD "
                 cd $PROXY_DIR
