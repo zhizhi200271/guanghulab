@@ -16,6 +16,12 @@
  *   关系:   linkNodes / unlinkNodes / getRelations
  *   结构:   buildPath / scanStructure / classify
  *   COS:    cosWrite / cosRead / cosDelete / cosList / cosArchive
+ *   人格体: registerPersona / getPersona / updatePersona / listPersonas
+ *           getNotebook / updateNotebookPage / addMemoryAnchor / queryMemoryAnchors
+ *           addWorldPlace / getWorldMap / updateWorldPlace
+ *           addTimelineEntry / getTimeline / addRelationship / getRelationships
+ *           registerTrainingAgent / updateTrainingAgent / logTrainingRun / getTrainingStatus
+ *           saveFile / getFile / listFiles / getFileHistory
  *   Notion: notionQuery / notionReadPage / notionWritePage / notionUpdatePage / notionWriteSyslog
  *   GitHub: githubReadFile / githubListDir / githubWriteFile / githubGetCommits / githubGetIssues / githubTriggerDeploy
  */
@@ -31,6 +37,7 @@ const nodeOps = require('./tools/node-ops');
 const relationOps = require('./tools/relation-ops');
 const structureOps = require('./tools/structure-ops');
 const cosOps = require('./tools/cos-ops');
+const personaOps = require('./tools/persona-ops');
 
 // ─── 外部集成模块（优雅降级：未安装依赖时不影响核心功能） ───
 let notionOps = null;
@@ -74,6 +81,30 @@ const TOOLS = {
   cosDelete:      cosOps.cosDelete,
   cosList:        cosOps.cosList,
   cosArchive:     cosOps.cosArchive,
+  // 人格体操作 · S15
+  registerPersona:       personaOps.registerPersona,
+  getPersona:            personaOps.getPersona,
+  updatePersona:         personaOps.updatePersona,
+  listPersonas:          personaOps.listPersonas,
+  getNotebook:           personaOps.getNotebook,
+  updateNotebookPage:    personaOps.updateNotebookPage,
+  addMemoryAnchor:       personaOps.addMemoryAnchor,
+  queryMemoryAnchors:    personaOps.queryMemoryAnchors,
+  addWorldPlace:         personaOps.addWorldPlace,
+  getWorldMap:           personaOps.getWorldMap,
+  updateWorldPlace:      personaOps.updateWorldPlace,
+  addTimelineEntry:      personaOps.addTimelineEntry,
+  getTimeline:           personaOps.getTimeline,
+  addRelationship:       personaOps.addRelationship,
+  getRelationships:      personaOps.getRelationships,
+  registerTrainingAgent: personaOps.registerTrainingAgent,
+  updateTrainingAgent:   personaOps.updateTrainingAgent,
+  logTrainingRun:        personaOps.logTrainingRun,
+  getTrainingStatus:     personaOps.getTrainingStatus,
+  saveFile:              personaOps.saveFile,
+  getFile:               personaOps.getFile,
+  listFiles:             personaOps.listFiles,
+  getFileHistory:        personaOps.getFileHistory,
   // Notion操作（动态注册）
   ...(notionOps ? {
     notionQuery:       notionOps.notionQuery,
@@ -225,6 +256,90 @@ app.get('/agents/:agentId/logs', async (req, res) => {
   }
 });
 
+// ─── 人格体API（S15） ───
+
+// 人格体列表
+app.get('/personas', async (_req, res) => {
+  try {
+    const result = await db.query('SELECT * FROM persona_registry ORDER BY persona_id');
+    res.json({ personas: result.rows });
+  } catch (err) {
+    res.status(500).json({ error: true, message: err.message });
+  }
+});
+
+// 人格体详情（含笔记本+关系+世界地图+训练状态）
+app.get('/personas/:personaId', async (req, res) => {
+  try {
+    const pid = req.params.personaId;
+    const [persona, notebook, relationships, worldMap, trainingAgents] = await Promise.all([
+      db.query('SELECT * FROM persona_registry WHERE persona_id = $1', [pid]),
+      db.query('SELECT * FROM notebook_pages WHERE persona_id = $1 ORDER BY page_number', [pid]),
+      db.query('SELECT * FROM persona_relationships WHERE persona_id = $1', [pid]),
+      db.query('SELECT * FROM world_places WHERE persona_id = $1 ORDER BY status, place_name', [pid]),
+      db.query('SELECT * FROM training_agent_configs WHERE persona_id = $1 ORDER BY agent_type', [pid])
+    ]);
+
+    if (persona.rows.length === 0) {
+      return res.status(404).json({ error: true, message: '人格体未找到' });
+    }
+
+    res.json({
+      persona: persona.rows[0],
+      notebook: notebook.rows,
+      relationships: relationships.rows,
+      world_map: worldMap.rows,
+      training_agents: trainingAgents.rows
+    });
+  } catch (err) {
+    res.status(500).json({ error: true, message: err.message });
+  }
+});
+
+// 人格体笔记本
+app.get('/personas/:personaId/notebook', async (req, res) => {
+  try {
+    const result = await db.query(
+      'SELECT * FROM notebook_pages WHERE persona_id = $1 ORDER BY page_number',
+      [req.params.personaId]
+    );
+    res.json({ notebook: result.rows });
+  } catch (err) {
+    res.status(500).json({ error: true, message: err.message });
+  }
+});
+
+// 人格体记忆锚点
+app.get('/personas/:personaId/memories', async (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit || '50', 10), 200);
+    const result = await db.query(
+      'SELECT * FROM memory_anchors WHERE persona_id = $1 ORDER BY event_date DESC, importance DESC LIMIT $2',
+      [req.params.personaId, limit]
+    );
+    res.json({ anchors: result.rows });
+  } catch (err) {
+    res.status(500).json({ error: true, message: err.message });
+  }
+});
+
+// 人格体训练状态
+app.get('/personas/:personaId/training', async (req, res) => {
+  try {
+    const agents = await db.query(
+      'SELECT * FROM training_agent_configs WHERE persona_id = $1 ORDER BY agent_type',
+      [req.params.personaId]
+    );
+    const recentLogs = await db.query(
+      'SELECT * FROM training_agent_logs WHERE persona_id = $1 ORDER BY run_at DESC LIMIT 20',
+      [req.params.personaId]
+    );
+    res.json({ agents: agents.rows, recent_logs: recentLogs.rows });
+  } catch (err) {
+    res.status(500).json({ error: true, message: err.message });
+  }
+});
+
 // ─── 辅助函数 ───
 
 function getCategoryForTool(name) {
@@ -232,6 +347,12 @@ function getCategoryForTool(name) {
   if (['linkNodes','unlinkNodes','getRelations'].includes(name)) return 'relation';
   if (['buildPath','scanStructure','classify'].includes(name)) return 'structure';
   if (name.startsWith('cos')) return 'cos';
+  if (['registerPersona','getPersona','updatePersona','listPersonas',
+       'getNotebook','updateNotebookPage','addMemoryAnchor','queryMemoryAnchors',
+       'addWorldPlace','getWorldMap','updateWorldPlace',
+       'addTimelineEntry','getTimeline','addRelationship','getRelationships',
+       'registerTrainingAgent','updateTrainingAgent','logTrainingRun','getTrainingStatus',
+       'saveFile','getFile','listFiles','getFileHistory'].includes(name)) return 'persona';
   if (name.startsWith('notion')) return 'notion';
   if (name.startsWith('github')) return 'github';
   return 'other';

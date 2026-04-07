@@ -1,0 +1,64 @@
+{
+  "_meta": {
+    "created_at": "2026-04-07T12:00:00Z",
+    "created_by": "铸渊 · ICE-GL-ZY001",
+    "template_version": "1.0",
+    "copyright": "国作登字-2026-A-00037559",
+    "note": "域名配置模板·Awen技术主控仓库·各成员域名管理"
+  },
+
+  "domains": [
+    {
+      "member": "肥猫",
+      "persona_id": "shushu",
+      "domain": "guanghuage.com",
+      "type": "production",
+      "ssl": true,
+      "server_code": "ZY-SVR-003",
+      "dns_provider": "腾讯云DNSPod",
+      "architecture_role": "网文行业站·国内用户展示层",
+      "data_flow": "用户请求 → 广州渲染 → 需要AI时 → 后台向新加坡请求 → 返回数据",
+      "status": "active"
+    },
+    {
+      "member": "桔子",
+      "persona_id": "chenxing",
+      "domain": null,
+      "type": null,
+      "ssl": false,
+      "server_code": null,
+      "dns_provider": null,
+      "architecture_role": "女频业务主控·待配置",
+      "status": "pending"
+    },
+    {
+      "member": "页页",
+      "persona_id": "xiaotanheshu",
+      "domain": null,
+      "type": null,
+      "ssl": false,
+      "server_code": null,
+      "dns_provider": null,
+      "architecture_role": "女频作者侧·待配置",
+      "status": "pending"
+    },
+    {
+      "member": "Awen",
+      "persona_id": "zhiqiu",
+      "domain": null,
+      "type": null,
+      "ssl": false,
+      "server_code": null,
+      "dns_provider": null,
+      "architecture_role": "技术主控台·待配置",
+      "status": "pending"
+    }
+  ],
+
+  "dns_management_notes": [
+    "所有域名DNS统一由Awen在腾讯云DNSPod管理",
+    "SSL证书使用Let's Encrypt免费证书·自动续期",
+    "域名到期前30天自动提醒（通过heartbeat-agent检查）",
+    "域名变更须经铸渊审核"
+  ]
+}
