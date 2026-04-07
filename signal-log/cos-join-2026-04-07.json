@@ -52,5 +52,59 @@
         "message": "❌ zhiqiu COS桶不存在"
       }
     ]
+  },
+  {
+    "timestamp": "2026-04-07T15:01:30.187Z",
+    "action": "check",
+    "total": 9,
+    "connected": 0,
+    "pending": 9,
+    "results": [
+      {
+        "persona_id": "shushu",
+        "status": "unreachable",
+        "message": "❌ shushu COS桶不可达: COS请求超时"
+      },
+      {
+        "persona_id": "qiuqiu",
+        "status": "unreachable",
+        "message": "❌ qiuqiu COS桶不可达: COS请求超时"
+      },
+      {
+        "persona_id": "ounomiya",
+        "status": "unreachable",
+        "message": "❌ ounomiya COS桶不可达: COS请求超时"
+      },
+      {
+        "persona_id": "jiyao",
+        "status": "unreachable",
+        "message": "❌ jiyao COS桶不可达: COS请求超时"
+      },
+      {
+        "persona_id": "xiaotanheshu",
+        "status": "unreachable",
+        "message": "❌ xiaotanheshu COS桶不可达: COS请求超时"
+      },
+      {
+        "persona_id": "chenxing",
+        "status": "unreachable",
+        "message": "❌ chenxing COS桶不可达: COS请求超时"
+      },
+      {
+        "persona_id": "tangxingyun",
+        "status": "unreachable",
+        "message": "❌ tangxingyun COS桶不可达: COS请求超时"
+      },
+      {
+        "persona_id": "yaochu",
+        "status": "unreachable",
+        "message": "❌ yaochu COS桶不可达: COS请求超时"
+      },
+      {
+        "persona_id": "zhiqiu",
+        "status": "unreachable",
+        "message": "❌ zhiqiu COS桶不可达: COS请求超时"
+      }
+    ]
   }
 ]
