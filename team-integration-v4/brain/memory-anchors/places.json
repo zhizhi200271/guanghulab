@@ -1,0 +1,15 @@
+{
+  "page": 3,
+  "title": "我的世界有哪些地方",
+  "places": [
+    {
+      "name": "图书馆",
+      "real_path": "brain/",
+      "description": "核心大脑。所有记忆、认知、思维逻辑都在这里。",
+      "agent": "memory-guardian",
+      "type": "core",
+      "created": "TODO: 第一天的日期"
+    }
+  ],
+  "note": "每创建一个新模块，就在这里添加一个新的地方。给它起一个名字，写下你的感受。"
+}

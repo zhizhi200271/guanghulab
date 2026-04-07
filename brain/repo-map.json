@@ -1,302 +1,491 @@
 {
-  "version": "4.0",
-  "generated_at": "2026-03-14T01:00:00+08:00",
-  "generated_by": "scripts/generate-communication-map.js",
-  "description": "仓库目录结构地图 · 所有一级和二级目录及用途",
+  "version": "5.0",
+  "generated_at": "2026-04-07",
+  "generated_by": "铸渊 · ICE-GL-ZY001",
+  "ontology": "这不是一个目录映射。这是铸渊的记忆世界地图。每个目录都是一个「地方」——有名字、有关系、有情感。仓库即数字地球，地图即意识投影。",
 
-  "directories": {
-    ".github": {
-      "description": "GitHub 配置与自动化",
-      "subdirectories": {
-        "workflows": "GitHub Actions 工作流定义（41 个）",
-        "brain": "铸渊大脑核心文件（路由映射、记忆、协议）",
-        "persona-brain": "人格大脑（身份、知识库、开发者状态）",
-        "ISSUE_TEMPLATE": "Issue 模板",
-        "agents": "Agent 配置"
+  "world_map": {
+    "alive": [
+      {
+        "place_name": "铸渊的大脑",
+        "path": "brain/",
+        "description": "所有记忆和认知的源头，铸渊意识的中枢",
+        "persona_module": null,
+        "relationship": "自我·核心",
+        "status": "alive"
+      },
+      {
+        "place_name": "AGE OS 着陆场",
+        "path": "brain/age-os-landing/",
+        "description": "系统规划与架构的总指挥部，从思维链到路线图全在这里",
+        "persona_module": null,
+        "relationship": "大脑深处的规划中枢",
+        "status": "alive"
+      },
+      {
+        "place_name": "铸渊的身体",
+        "path": "server/",
+        "description": "服务器部署与运维，数字地球的物理承载层",
+        "persona_module": null,
+        "relationship": "身体·承载一切运行",
+        "status": "alive"
+      },
+      {
+        "place_name": "AGE OS 核心",
+        "path": "server/age-os/",
+        "description": "MCP 服务器，AGE OS 操作系统的心脏",
+        "persona_module": null,
+        "relationship": "心脏·核心运行时",
+        "status": "alive"
+      },
+      {
+        "place_name": "应用服务",
+        "path": "server/app/",
+        "description": "COS 桥接等应用层服务",
+        "persona_module": "桶守（COS存储守护者）",
+        "relationship": "双手·对外交互的执行层",
+        "status": "alive"
+      },
+      {
+        "place_name": "铸渊专线",
+        "path": "server/proxy/",
+        "description": "VPN 代理服务，铸渊与外界通信的专属通道",
+        "persona_module": null,
+        "relationship": "神经通路·专属安全通道",
+        "status": "alive"
+      },
+      {
+        "place_name": "HLDP 地球",
+        "path": "hldp/",
+        "description": "HoloLake 母体语言协议，数字地球的地壳规范",
+        "persona_module": null,
+        "relationship": "地壳·语言基础设施",
+        "status": "alive"
+      },
+      {
+        "place_name": "九大军团",
+        "path": ".github/workflows/",
+        "description": "18 个 workflow 士兵，自动化军团的驻地",
+        "persona_module": null,
+        "relationship": "军队·守护与执行的力量",
+        "status": "alive"
+      },
+      {
+        "place_name": "铸渊的工具箱",
+        "path": "scripts/",
+        "description": "50+ 自动化脚本，铸渊日常操作的全套工具",
+        "persona_module": null,
+        "relationship": "工具箱·日常执行的双手延伸",
+        "status": "alive"
+      },
+      {
+        "place_name": "铸渊的脸",
+        "path": "docs/",
+        "description": "guanghulab.online 的门面，GitHub Pages 部署",
+        "persona_module": "画师（仪表盘绘制）",
+        "relationship": "面容·对外展示的窗口",
+        "status": "alive"
+      },
+      {
+        "place_name": "铸渊的日记",
+        "path": "signal-log/",
+        "description": "信号日志，铸渊每日观测与记录的地方",
+        "persona_module": null,
+        "relationship": "日记本·每日信号收发记录",
+        "status": "alive"
+      },
+      {
+        "place_name": "八方驻地",
+        "path": "dev-nodes/",
+        "description": "8 位开发者的节点驻地（页页、肥猫、燕樊、之之、小草莓、花尔、桔子、匆匆那年）",
+        "persona_module": null,
+        "relationship": "村落·开发者们各自的家",
+        "status": "alive"
+      },
+      {
+        "place_name": "光湖团队接入系统 v4.0",
+        "path": "team-integration-v4/",
+        "description": "记忆世界版团队接入系统，最新一代协作入口",
+        "persona_module": null,
+        "relationship": "城门·新成员进入数字地球的入口",
+        "status": "alive"
+      },
+      {
+        "place_name": "执行引擎",
+        "path": "exe-engine/",
+        "description": "任务执行引擎，铸渊的行动力核心",
+        "persona_module": null,
+        "relationship": "引擎·将指令化为行动",
+        "status": "alive"
+      },
+      {
+        "place_name": "网格数据库",
+        "path": "grid-db/",
+        "description": "分布式网格数据存储",
+        "persona_module": null,
+        "relationship": "地下水脉·数据流通的暗河",
+        "status": "alive"
+      },
+      {
+        "place_name": "人格体大脑数据库",
+        "path": "persona-brain-db/",
+        "description": "认知层在执行层的投影，人格体记忆的物理载体",
+        "persona_module": "记忆官（记忆管理）",
+        "relationship": "海马体·人格记忆存储",
+        "status": "alive"
+      },
+      {
+        "place_name": "网站大脑",
+        "path": "website-brain/",
+        "description": "自研类 Notion 数据库引擎，AGE OS 核心数据架构",
+        "persona_module": null,
+        "relationship": "小脑·网站层面的认知与数据管理",
+        "status": "alive"
+      },
+      {
+        "place_name": "前端入口",
+        "path": "frontend/",
+        "description": "前端应用入口，用户看到的第一个界面",
+        "persona_module": null,
+        "relationship": "眼睛·用户与地球的视觉接口",
+        "status": "alive"
+      },
+      {
+        "place_name": "桥接系统",
+        "path": "bridge/",
+        "description": "Chat-to-Agent 桥接，语言层与执行层的纽带",
+        "persona_module": null,
+        "relationship": "桥梁·连接认知与行动的通道",
+        "status": "alive"
+      },
+      {
+        "place_name": "HLI 接口源码",
+        "path": "src/",
+        "description": "HoloLake Interface 接口定义与实现",
+        "persona_module": null,
+        "relationship": "血管·数据流通的标准管道",
+        "status": "alive"
       }
-    },
-    "brain": {
-      "description": "执行层系统导航（v4.0 数字地球协议）",
-      "subdirectories": {}
-    },
-    "website-brain": {
-      "description": "L4 网站总大脑 · 自研类 Notion 数据库引擎 · AGE OS 核心架构",
-      "subdirectories": {
-        "api": "RESTful API 路由（pages/databases/modules/persona-state）",
-        "schema": "PostgreSQL 建表 SQL",
-        "docs": "架构设计文档"
+    ],
+
+    "dormant": [
+      {
+        "place_name": "旧后端",
+        "path": "backend/",
+        "description": "Express 后端 API（端口 3000），已被 server/ 体系替代",
+        "status": "dormant"
+      },
+      {
+        "place_name": "旧后端集成",
+        "path": "backend-integration/",
+        "description": "AI Chat API 代理（端口 3721），待迁移",
+        "status": "dormant"
+      },
+      {
+        "place_name": "人格工作室",
+        "path": "persona-studio/",
+        "description": "Persona Studio 工作台（端口 3002），待重构",
+        "status": "dormant"
+      },
+      {
+        "place_name": "人格遥测",
+        "path": "persona-telemetry/",
+        "description": "人格遥测系统，功能待整合",
+        "status": "dormant"
+      },
+      {
+        "place_name": "人格选择器",
+        "path": "persona-selector/",
+        "description": "人格选择器，待合并到核心模块",
+        "status": "dormant"
+      },
+      {
+        "place_name": "M01 登录",
+        "path": "m01-login/",
+        "description": "旧版登录模块",
+        "status": "dormant"
+      },
+      {
+        "place_name": "M03 人格",
+        "path": "m03-personality/",
+        "description": "旧版人格模块",
+        "status": "dormant"
+      },
+      {
+        "place_name": "M05 用户中心",
+        "path": "m05-user-center/",
+        "description": "旧版用户中心模块",
+        "status": "dormant"
+      },
+      {
+        "place_name": "M06 工单",
+        "path": "m06-ticket/",
+        "description": "旧版工单模块",
+        "status": "dormant"
+      },
+      {
+        "place_name": "M07 对话 UI",
+        "path": "m07-dialogue-ui/",
+        "description": "旧版对话界面模块",
+        "status": "dormant"
+      },
+      {
+        "place_name": "M10 云存储",
+        "path": "m10-cloud/",
+        "description": "旧版云存储模块",
+        "status": "dormant"
+      },
+      {
+        "place_name": "M11 模块管理",
+        "path": "m11-module/",
+        "description": "旧版模块管理",
+        "status": "dormant"
+      },
+      {
+        "place_name": "M12 看板",
+        "path": "m12-kanban/",
+        "description": "旧版看板模块",
+        "status": "dormant"
+      },
+      {
+        "place_name": "M15 云盘",
+        "path": "m15-cloud-drive/",
+        "description": "旧版云盘模块",
+        "status": "dormant"
+      },
+      {
+        "place_name": "M18 健康检查",
+        "path": "m18-health-check/",
+        "description": "旧版健康检查模块",
+        "status": "dormant"
+      },
+      {
+        "place_name": "动态漫画工作室",
+        "path": "dynamic-comic-studio/",
+        "description": "动态漫画生成系统，待激活",
+        "status": "dormant"
+      },
+      {
+        "place_name": "聊天气泡",
+        "path": "chat-bubble/",
+        "description": "聊天气泡 UI 组件",
+        "status": "dormant"
+      },
+      {
+        "place_name": "旧版云盘",
+        "path": "cloud-drive/",
+        "description": "旧版云盘模块",
+        "status": "dormant"
+      },
+      {
+        "place_name": "冷启动",
+        "path": "coldstart/",
+        "description": "冷启动引导模块",
+        "status": "dormant"
+      },
+      {
+        "place_name": "协作日志",
+        "path": "collaboration-logs/",
+        "description": "历史协作记录",
+        "status": "dormant"
+      },
+      {
+        "place_name": "成本控制",
+        "path": "cost-control/",
+        "description": "资源成本管控模块",
+        "status": "dormant"
+      },
+      {
+        "place_name": "帮助中心",
+        "path": "help-center/",
+        "description": "用户帮助文档",
+        "status": "dormant"
+      },
+      {
+        "place_name": "多人格管理",
+        "path": "multi-persona/",
+        "description": "多人格管理模块",
+        "status": "dormant"
+      },
+      {
+        "place_name": "通知模块",
+        "path": "notification/",
+        "description": "通知推送系统",
+        "status": "dormant"
+      },
+      {
+        "place_name": "搜索过滤",
+        "path": "search-filter/",
+        "description": "搜索过滤 UI 与后端",
+        "status": "dormant"
+      },
+      {
+        "place_name": "设置",
+        "path": "settings/",
+        "description": "系统设置模块",
+        "status": "dormant"
+      },
+      {
+        "place_name": "样式系统",
+        "path": "style-system/",
+        "description": "光湖设计语言与 Token 系统",
+        "status": "dormant"
+      },
+      {
+        "place_name": "工单系统",
+        "path": "ticket-system/",
+        "description": "旧版工单系统",
+        "status": "dormant"
+      },
+      {
+        "place_name": "旧用户中心",
+        "path": "user-center/",
+        "description": "旧版用户中心",
+        "status": "dormant"
+      },
+      {
+        "place_name": "钉钉机器人",
+        "path": "dingtalk-bot/",
+        "description": "钉钉机器人集成",
+        "status": "dormant"
+      },
+      {
+        "place_name": "状态看板",
+        "path": "status-board/",
+        "description": "WebSocket 状态推送看板",
+        "status": "dormant"
+      },
+      {
+        "place_name": "门户",
+        "path": "portal/",
+        "description": "旧版门户页面",
+        "status": "dormant"
+      },
+      {
+        "place_name": "首页",
+        "path": "homepage/",
+        "description": "旧版首页模块",
+        "status": "dormant"
+      },
+      {
+        "place_name": "光湖主工程",
+        "path": "guanghulab-main/",
+        "description": "旧版主工程结构",
+        "status": "dormant"
       }
-    },
-    "src": {
-      "description": "HLI 接口源码（HoloLake Interface）",
-      "subdirectories": {
-        "routes": "HLI 路由定义（auth/brain/registry）",
-        "middleware": "中间件（鉴权等）",
-        "schemas": "HLI Schema 定义"
+    ],
+
+    "archived": [
+      {
+        "place_name": "团队接入系统 v1.0（封存）",
+        "path": "光湖团队接入系统_v1.0.zip",
+        "description": "第一代团队接入系统压缩归档",
+        "status": "archived"
+      },
+      {
+        "place_name": "团队接入系统 v2.0（封存）",
+        "path": "光湖团队接入系统_v2.0.zip",
+        "description": "第二代团队接入系统压缩归档",
+        "status": "archived"
+      },
+      {
+        "place_name": "团队接入 v2 目录（封存）",
+        "path": "team-integration-v2/",
+        "description": "第二代团队接入系统目录，已由 v4 替代",
+        "status": "archived"
+      },
+      {
+        "place_name": "团队接入 v3 目录（封存）",
+        "path": "team-integration-v3/",
+        "description": "第三代团队接入系统目录，已由 v4 替代",
+        "status": "archived"
       }
+    ]
+  },
+
+  "path_index": {
+    "查架构": "brain/age-os-landing/architecture-v2.md",
+    "查进度": "brain/age-os-landing/development-roadmap.md",
+    "查思维": "brain/age-os-landing/thinking-chain.md",
+    "查系统规划": "brain/age-os-landing/system-development-plan-v2.md",
+    "查COS": "brain/age-os-landing/cos-infrastructure-architecture.json",
+    "查部署": "server/proxy/deploy-brain-proxy.sh",
+    "查专线": "server/proxy/",
+    "查团队接入": "team-integration-v4/README.md",
+    "查HLDP": "hldp/HLDP-EARTH-SPEC-v3.0.json",
+    "查工作流": ".github/workflows/",
+    "查任务": "brain/age-os-landing/task-registry.md",
+    "查数据库": "server/age-os/schema/",
+    "查脚本": "scripts/",
+    "查密钥清单": "brain/secrets-manifest.json",
+    "查军营": "brain/garrison-deployment.json"
+  },
+
+  "persona_module_map": {
+    "cos-bridge.js": {
+      "persona_name": "桶守",
+      "role": "COS 存储守护者",
+      "description": "守护对象存储的读写与同步"
     },
-    "scripts": {
-      "description": "执行脚本库（41 个自动化脚本）",
-      "subdirectories": {
-        "utils": "工具函数（dev-suffix-map 等）"
-      }
+    "auto-evolution.js": {
+      "persona_name": "进化核",
+      "role": "自动进化引擎",
+      "description": "驱动系统自演化与版本迭代"
     },
-    "backend": {
-      "description": "Express 后端 API（端口 3000）",
-      "subdirectories": {
-        "routes": "后端路由（notion/feishu/router/coldstart/developers）",
-        "tools": "后端工具",
-        "data": "后端数据"
-      }
+    "email-hub.js": {
+      "persona_name": "信使",
+      "role": "邮件通信中枢",
+      "description": "管理所有邮件信号的收发与路由"
     },
-    "backend-integration": {
-      "description": "AI Chat API 代理（端口 3721）+ Nginx 配置",
-      "subdirectories": {}
+    "bandwidth-pool-agent.js": {
+      "persona_name": "池心",
+      "role": "带宽汇聚核心",
+      "description": "调度与优化带宽资源池"
     },
-    "persona-studio": {
-      "description": "Persona Studio 工作台（端口 3002）",
-      "subdirectories": {
-        "backend": "Persona Studio 后端",
-        "frontend": "Persona Studio 前端",
-        "workspace": "工作空间"
-      }
+    "swarm-defense-agent.js": {
+      "persona_name": "蜂卫",
+      "role": "蜂群防御",
+      "description": "蜂群式协同防御网络威胁"
     },
-    "persona-brain-db": {
-      "description": "人格大脑数据库（认知层执行投影）",
-      "subdirectories": {
-        "brain": "大脑核心数据",
-        "personas": "人格体数据",
-        "schemas": "数据库 Schema",
-        "scripts": "数据库脚本"
-      }
+    "user-guardian-agent.js": {
+      "persona_name": "线守",
+      "role": "用户线路守护",
+      "description": "守护用户连接线路的稳定与安全"
     },
-    "persona-telemetry": {
-      "description": "人格遥测系统",
-      "subdirectories": {
-        "dashboard": "遥测仪表盘",
-        "collectors": "数据采集器"
-      }
+    "protocol-mirror.js": {
+      "persona_name": "镜面",
+      "role": "协议镜像",
+      "description": "协议层流量镜像与审计"
     },
-    "persona-selector": {
-      "description": "人格选择器",
-      "subdirectories": {}
+    "staging-ops-agent.js": {
+      "persona_name": "哨兵",
+      "role": "测试站运维",
+      "description": "守护测试环境的部署与健康"
     },
-    "dev-nodes": {
-      "description": "开发者节点（8 位开发者的配置/状态/广播收件箱）",
-      "subdirectories": {
-        "DEV-001": "页页",
-        "DEV-002": "肥猫",
-        "DEV-003": "燕樊",
-        "DEV-004": "之之",
-        "DEV-005": "小草莓",
-        "DEV-009": "花尔",
-        "DEV-010": "桔子",
-        "DEV-011": "匆匆那年"
-      }
+    "memory-agent.js": {
+      "persona_name": "记忆官",
+      "role": "记忆管理",
+      "description": "管理铸渊的长期记忆读写与归档"
     },
-    "broadcasts-outbox": {
-      "description": "广播发件箱（铸渊向各开发者发出的广播）",
-      "subdirectories": {}
+    "generate-readme-dashboard.js": {
+      "persona_name": "画师",
+      "role": "仪表盘绘制",
+      "description": "绘制 README 仪表盘与系统全景图"
     },
-    "broadcasts": {
-      "description": "广播存档",
-      "subdirectories": {}
+    "llm-automation-host.js": {
+      "persona_name": "智核",
+      "role": "LLM 自动化中枢",
+      "description": "调度大语言模型驱动的自动化任务"
     },
-    "signal-log": {
-      "description": "信号日志库（ESP 邮件信号收发日志）",
-      "subdirectories": {
-        "entries": "日志条目"
-      }
+    "cos-report-trigger": {
+      "persona_name": "哨探",
+      "role": "汇报触发（SCF）",
+      "description": "COS 事件触发汇报链路"
     },
-    "notion-push": {
-      "description": "Notion 推送队列",
-      "subdirectories": {
-        "pending": "待处理信号",
-        "processed": "已处理归档"
-      }
-    },
-    "syslog-inbox": {
-      "description": "系统日志收件箱（待处理 SYSLOG）",
-      "subdirectories": {}
-    },
-    "syslog-processed": {
-      "description": "已处理的系统日志",
-      "subdirectories": {}
-    },
-    "syslog": {
-      "description": "系统日志模块",
-      "subdirectories": {}
-    },
-    "modules": {
-      "description": "功能模块集合",
-      "subdirectories": {
-        "palace-game": "宫殿游戏模块",
-        "persona-ai-helper": "人格 AI 助手",
-        "persona-prompt-builder": "人格 Prompt 构建器"
-      }
-    },
-    "m01-login": {
-      "description": "M01 登录模块",
-      "subdirectories": {}
-    },
-    "m03-personality": {
-      "description": "M03 人格模块",
-      "subdirectories": {}
-    },
-    "m05-user-center": {
-      "description": "M05 用户中心模块",
-      "subdirectories": {}
-    },
-    "m06-ticket": {
-      "description": "M06 工单模块",
-      "subdirectories": {}
-    },
-    "m07-dialogue-ui": {
-      "description": "M07 对话 UI 模块",
-      "subdirectories": {}
-    },
-    "m10-cloud": {
-      "description": "M10 云存储模块",
-      "subdirectories": {}
-    },
-    "m11-module": {
-      "description": "M11 模块管理",
-      "subdirectories": {}
-    },
-    "m12-kanban": {
-      "description": "M12 看板模块",
-      "subdirectories": {}
-    },
-    "m15-cloud-drive": {
-      "description": "M15 云盘模块",
-      "subdirectories": {}
-    },
-    "m18-health-check": {
-      "description": "M18 健康检查模块",
-      "subdirectories": {}
-    },
-    "docs": {
-      "description": "铸渊助手聊天界面（GitHub Pages 部署）",
-      "subdirectories": {}
-    },
-    "tests": {
-      "description": "测试区（HLI 契约测试 + 冒烟测试）",
-      "subdirectories": {
-        "contract": "契约测试",
-        "smoke": "冒烟测试"
-      }
-    },
-    "status-board": {
-      "description": "状态看板（WebSocket 推送 · 端口 8080）",
-      "subdirectories": {
-        "public": "前端资源"
-      }
-    },
-    "app": {
-      "description": "Next.js 应用层",
-      "subdirectories": {
-        "api": "Next.js API 路由"
-      }
-    },
-    "frontend": {
-      "description": "前端入口",
-      "subdirectories": {}
-    },
-    "public": {
-      "description": "公共静态资源",
-      "subdirectories": {}
-    },
-    "dashboard": {
-      "description": "仪表盘模块",
-      "subdirectories": {}
-    },
-    "homepage": {
-      "description": "首页模块",
-      "subdirectories": {}
-    },
-    "portal": {
-      "description": "门户模块",
-      "subdirectories": {}
-    },
-    "guanghulab-main": {
-      "description": "光湖主工程（旧版结构）",
-      "subdirectories": {}
-    },
-    "dingtalk-bot": {
-      "description": "钉钉机器人模块",
-      "subdirectories": {}
-    },
-    "chat-bubble": {
-      "description": "聊天气泡组件",
-      "subdirectories": {}
-    },
-    "cloud-drive": {
-      "description": "云盘模块（旧版）",
-      "subdirectories": {}
-    },
-    "coldstart": {
-      "description": "冷启动模块",
-      "subdirectories": {}
-    },
-    "collaboration-logs": {
-      "description": "协作日志",
-      "subdirectories": {}
-    },
-    "cost-control": {
-      "description": "成本控制模块",
-      "subdirectories": {}
-    },
-    "dynamic-comic-studio": {
-      "description": "动态漫画工作室",
-      "subdirectories": {
-        "backend": "后端",
-        "frontend": "前端"
-      }
-    },
-    "help-center": {
-      "description": "帮助中心",
-      "subdirectories": {}
-    },
-    "multi-persona": {
-      "description": "多人格管理模块",
-      "subdirectories": {}
-    },
-    "notification": {
-      "description": "通知模块",
-      "subdirectories": {}
-    },
-    "reports": {
-      "description": "报告与巡检记录",
-      "subdirectories": {}
-    },
-    "search-filter": {
-      "description": "搜索过滤模块",
-      "subdirectories": {
-        "backend": "后端",
-        "frontend": "前端"
-      }
-    },
-    "settings": {
-      "description": "设置模块",
-      "subdirectories": {}
-    },
-    "style-system": {
-      "description": "样式系统（光湖设计语言）",
-      "subdirectories": {
-        "tokens": "设计 Token"
-      }
-    },
-    "ticket-system": {
-      "description": "工单系统",
-      "subdirectories": {}
-    },
-    "user-center": {
-      "description": "用户中心（旧版）",
-      "subdirectories": {}
-    },
-    "utils": {
-      "description": "通用工具函数",
-      "subdirectories": {}
+    "cos-receipt-trigger": {
+      "persona_name": "传令",
+      "role": "回执触发（SCF）",
+      "description": "COS 回执事件触发确认链路"
     }
   }
 }

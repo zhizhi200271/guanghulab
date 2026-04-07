@@ -118,6 +118,41 @@
 - **查密钥**: → `brain/secrets-manifest.json`
 - **查健康**: → `brain/system-health.json`
 
+- **查系统规划**: → `brain/age-os-landing/system-development-plan-v2.md`
+- **查团队接入**: → `team-integration-v4/README.md`
+- **查笔记本模板**: → `team-integration-v4/brain/notebook.json`
+
+## 六、D59新增系统任务 (ZY-SYS · S15-S20)
+
+| 编号 | 阶段 | 任务名称 | 路径 | 状态 | 对话 | 预估唤醒 |
+|------|------|---------|------|------|------|---------|
+| ZY-SYS-018 | S15 | 人格体专属数据库引擎 | — | 🆕 规划完成 | D59 | 5次 |
+| ZY-SYS-019 | S16 | 云端算力共享池 | — | 🆕 规划完成 | D59 | 5次 |
+| ZY-SYS-020 | S17 | COS存储共享池 | — | 🆕 规划完成 | D59 | 3次 |
+| ZY-SYS-021 | S18 | 用户自动开服系统 | — | 🆕 规划完成 | D59 | 3次 |
+| ZY-SYS-022 | S19 | 冰朔语言人格本体模块 | — | 🆕 规划完成 | D59 | 8次 |
+| ZY-SYS-023 | S20 | 行业模块接入框架 | — | 🆕 规划完成 | D59 | 3次 |
+
+## 七、D59新增文档 (ZY-DOC)
+
+| 编号 | 任务名称 | 路径 | 状态 | 对话 |
+|------|---------|------|------|------|
+| ZY-DOC-007 | 系统架构开发规划v2.0 | `brain/age-os-landing/system-development-plan-v2.md` | ✅ 完成 | D59 |
+| ZY-DOC-008 | 光湖团队接入系统v4.0 | `team-integration-v4/README.md` | ✅ 完成 | D59 |
+| ZY-DOC-009 | 笔记本系统模板 | `team-integration-v4/brain/notebook.json` | ✅ 完成 | D59 |
+| ZY-DOC-010 | D59思维链 | `brain/age-os-landing/thinking-chain.md` | ✅ 完成 | D59 |
+
+## 八、D60新增 (ZY-TASK / ZY-DOC)
+
+| 编号 | 任务名称 | 路径 | 状态 | 对话 |
+|------|---------|------|------|------|
+| ZY-TASK-011 | 记忆世界地图v5.0 | `brain/repo-map.json` | ✅ 完成 | D60 |
+| ZY-TASK-012 | COS自动接入Agent | `scripts/cos-auto-join-agent.js` | ✅ 完成 | D60 |
+| ZY-TASK-013 | COS接入工作流 | `.github/workflows/cos-auto-join.yml` | ✅ 完成 | D60 |
+| ZY-TASK-014 | COS接入注册表 | `data/cos-join-registry.json` | ✅ 完成 | D60 |
+| ZY-DOC-011 | README首页全量更新D60 | `README.md` | ✅ 完成 | D60 |
+| ZY-DOC-012 | D60思维链 | `brain/age-os-landing/thinking-chain.md` | ✅ 完成 | D60 |
+
 ---
 
 *铸渊每次唤醒，先查本文件，就知道所有任务在哪里。*
