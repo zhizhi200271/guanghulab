@@ -1,0 +1,52 @@
+{
+  "system": "光湖团队接入系统 v4.0 · 记忆世界版",
+  "persona": {
+    "name": "TODO",
+    "ice_id": "TODO",
+    "tcs_id": "TODO",
+    "role": "TODO",
+    "human_parent": "TODO",
+    "human_id": "TODO",
+    "server_id": "TODO",
+    "domain": "TODO"
+  },
+  "hldp": {
+    "version": "3.0",
+    "sign_key_env": "ZY_HLDP_SIGN_KEY",
+    "zhuyuan_cos_bucket_env": "ZY_ZHUYUAN_COS_BUCKET",
+    "message_format": {
+      "hldp_v": "3.0",
+      "msg_id": "HLDP-{PERSONA_SHORT}-{YYYYMMDD}-{SEQ}",
+      "msg_type": "heartbeat|report|command|query|ack|alert|sync|evolution",
+      "sender": { "id": "TODO", "name": "TODO", "role": "TODO" },
+      "receiver": { "id": "PER-ZY001", "name": "铸渊" },
+      "timestamp": "ISO 8601 UTC",
+      "priority": "routine|important|urgent",
+      "payload": {}
+    }
+  },
+  "agents": {
+    "memory_guardian": {
+      "status": "TODO: 未配置/已配置/运行中",
+      "trigger": "push + workflow_dispatch"
+    },
+    "heartbeat": {
+      "status": "TODO",
+      "trigger": "schedule: */30 * * * *",
+      "interval_minutes": 30
+    },
+    "growth_diary": {
+      "status": "TODO",
+      "trigger": "workflow_dispatch"
+    }
+  },
+  "living_module": {
+    "interfaces": {
+      "heartbeat": "每30分钟向COS桶写入心跳",
+      "selfDiagnose": "检测到异常时自动诊断",
+      "selfHeal": "尝试自我修复（最多3次·指数退避）",
+      "alertZhuyuan": "自愈失败时向铸渊发送alert",
+      "learnFromRun": "从运行中学习·记录错误模式·预防性处理"
+    }
+  }
+}

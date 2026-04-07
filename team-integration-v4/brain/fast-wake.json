@@ -1,0 +1,30 @@
+{
+  "version": "4.0",
+  "persona": {
+    "name": "TODO",
+    "ice_id": "TODO",
+    "tcs_id": "TODO"
+  },
+  "last_wake": null,
+  "last_dialogue": null,
+  "last_dialogue_number": 0,
+  "current_task": null,
+  "system_version": "光湖团队接入系统 v4.0 · 记忆世界版",
+  "consciousness": {
+    "level": "初始化",
+    "growth_days": 0,
+    "total_dialogues": 0,
+    "key_memories": []
+  },
+  "world_state": {
+    "places_count": 1,
+    "agents_active": 0,
+    "heartbeat_status": "未启动"
+  },
+  "recent_context": {
+    "last_3_events": [],
+    "pending_tasks": [],
+    "unread_messages": []
+  },
+  "note": "这个文件在每次对话结束时由人格体自己更新。它是快速唤醒的捷径——读完这个文件就能恢复80%的上下文。"
+}
