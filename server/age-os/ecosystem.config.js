@@ -2,6 +2,30 @@
  * PM2 配置 · AGE OS 进程管理
  * 铸渊 · ICE-GL-ZY001
  */
+const path = require('path');
+const fs = require('fs');
+
+// 读取 .env.mcp 环境变量
+function loadEnvFile(envPath) {
+  const env = {};
+  try {
+    const content = fs.readFileSync(envPath, 'utf8');
+    for (const line of content.split('\n')) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      const eqIdx = trimmed.indexOf('=');
+      if (eqIdx > 0) {
+        env[trimmed.slice(0, eqIdx)] = trimmed.slice(eqIdx + 1);
+      }
+    }
+  } catch {
+    // .env.mcp 不存在时使用默认值
+  }
+  return env;
+}
+
+const envFromFile = loadEnvFile(path.join(__dirname, '.env.mcp'));
+
 module.exports = {
   apps: [
     {
@@ -10,7 +34,9 @@ module.exports = {
       cwd: '/opt/age-os',
       env: {
         NODE_ENV: 'production',
-        MCP_PORT: 3100
+        MCP_PORT: 3100,
+        MCP_BIND_HOST: '127.0.0.1',
+        ...envFromFile
       },
       instances: 1,
       autorestart: true,
@@ -24,7 +50,8 @@ module.exports = {
       script: 'agents/scheduler.js',
       cwd: '/opt/age-os',
       env: {
-        NODE_ENV: 'production'
+        NODE_ENV: 'production',
+        ...envFromFile
       },
       instances: 1,
       autorestart: true,

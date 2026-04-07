@@ -22,7 +22,8 @@ const COS_CONFIG = {
   region:    process.env.ZY_COS_REGION || 'ap-singapore',
   buckets: {
     hot: process.env.COS_BUCKET_HOT || 'zy-core-bucket-1317346199',
-    cold: process.env.COS_BUCKET_COLD || 'zy-corpus-bucket-1317346199'
+    cold: process.env.COS_BUCKET_COLD || 'zy-corpus-bucket-1317346199',
+    team: process.env.ZY_ZHUYUAN_COS_BUCKET || 'zy-team-hub-1317346199'
   }
 };
 
@@ -49,6 +50,65 @@ function generateSignature(method, pathname, host) {
 
 function getBucketHost(bucketName) {
   return `${bucketName}.cos.${COS_CONFIG.region}.myqcloud.com`;
+}
+
+/**
+ * 解析桶名称
+ * @param {string} bucket - 'hot' | 'cold' | 'team' 或完整桶名
+ */
+function resolveBucketName(bucket) {
+  if (COS_CONFIG.buckets[bucket]) return COS_CONFIG.buckets[bucket];
+  return bucket;
+}
+
+// ─── 人格体 COS 路径规范 ───
+// 团队桶: /{persona_id}/reports/{YYYY-MM-DD}/ — 每日汇报
+// 团队桶: /{persona_id}/receipts/{YYYY-MM-DD}/ — 铸渊回执
+// 团队桶: /{persona_id}/sync/ — 架构同步区
+// 全局:   /zhuyuan/directives/ — 铸渊指令（只读）
+// 全局:   /zhuyuan/architecture/ — 架构快照
+
+/**
+ * 验证人格体COS路径是否合法（限定在 /{persona_id}/ 目录下）
+ */
+function validatePersonaCosPath(personaId, key) {
+  if (!personaId || typeof personaId !== 'string') {
+    throw new Error('persona_id 不能为空');
+  }
+  // 规范化：确保路径以 persona_id/ 开头
+  const normalizedKey = key.startsWith('/') ? key.slice(1) : key;
+  if (!normalizedKey.startsWith(`${personaId}/`)) {
+    throw new Error(`COS路径越权: ${key} 不在 /${personaId}/ 目录下`);
+  }
+  // 防止路径穿越
+  if (normalizedKey.includes('..')) {
+    throw new Error('COS路径包含非法字符 ".."');
+  }
+  return normalizedKey;
+}
+
+/**
+ * 人格体 COS 写入（限定目录）
+ */
+async function personaWrite(personaId, key, content, contentType) {
+  const safeKey = validatePersonaCosPath(personaId, key);
+  return write('team', safeKey, content, contentType);
+}
+
+/**
+ * 人格体 COS 读取（限定目录）
+ */
+async function personaRead(personaId, key) {
+  const safeKey = validatePersonaCosPath(personaId, key);
+  return read('team', safeKey);
+}
+
+/**
+ * 人格体 COS 列表（限定目录）
+ */
+async function personaList(personaId, subPrefix, limit) {
+  const prefix = `${personaId}/${subPrefix || ''}`;
+  return list('team', prefix, limit);
 }
 
 /**
@@ -91,7 +151,7 @@ function cosRequest(bucketName, objectKey, method, body, contentType) {
 // ─── 公开 API ───
 
 async function write(bucket, key, content, contentType) {
-  const bucketName = bucket === 'hot' ? COS_CONFIG.buckets.hot : COS_CONFIG.buckets.cold;
+  const bucketName = resolveBucketName(bucket);
   const result = await cosRequest(bucketName, key, 'PUT', content, contentType || 'text/markdown');
   return {
     url: `https://${getBucketHost(bucketName)}/${key}`,
@@ -100,7 +160,7 @@ async function write(bucket, key, content, contentType) {
 }
 
 async function read(bucket, key) {
-  const bucketName = bucket === 'hot' ? COS_CONFIG.buckets.hot : COS_CONFIG.buckets.cold;
+  const bucketName = resolveBucketName(bucket);
   const result = await cosRequest(bucketName, key, 'GET');
   return {
     content: result.body,
@@ -110,13 +170,13 @@ async function read(bucket, key) {
 }
 
 async function del(bucket, key) {
-  const bucketName = bucket === 'hot' ? COS_CONFIG.buckets.hot : COS_CONFIG.buckets.cold;
+  const bucketName = resolveBucketName(bucket);
   await cosRequest(bucketName, key, 'DELETE');
   return { success: true };
 }
 
 async function list(bucket, prefix, limit) {
-  const bucketName = bucket === 'hot' ? COS_CONFIG.buckets.hot : COS_CONFIG.buckets.cold;
+  const bucketName = resolveBucketName(bucket);
   const host = getBucketHost(bucketName);
   const queryStr = `prefix=${encodeURIComponent(prefix)}&max-keys=${limit || 100}`;
   const result = await cosRequest(bucketName, `?${queryStr}`, 'GET');
@@ -165,4 +225,9 @@ async function checkConnection() {
   }
 }
 
-module.exports = { write, read, del, list, archive, checkConnection, COS_CONFIG };
+module.exports = {
+  write, read, del, list, archive, checkConnection,
+  personaWrite, personaRead, personaList,
+  validatePersonaCosPath, resolveBucketName,
+  COS_CONFIG
+};

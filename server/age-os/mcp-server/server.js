@@ -8,8 +8,12 @@
  * 签发: 铸渊 · ICE-GL-ZY001
  * 版权: 国作登字-2026-A-00037559
  *
- * 统一暴露 27 个 MCP 工具，供网站 AI 交互后端和 Agent 调用。
- * 不对外暴露 — 通过 3800 主服务网关转发访问。
+ * 统一暴露 MCP 工具，供网站 AI 交互后端和 Agent 调用。
+ * 外部访问通过 Nginx /api/mcp/ 反向代理，需 API Key 鉴权。
+ * 内部访问（127.0.0.1）免鉴权。
+ *
+ * 鉴权方式: Authorization: Bearer <ZHUYUAN_API_KEY>
+ * 免鉴权端点: /health（监控探针）
  *
  * 工具清单:
  *   节点:   createNode / updateNode / deleteNode / queryNodes / getNode
@@ -28,6 +32,7 @@
 
 'use strict';
 
+const crypto = require('crypto');
 const express = require('express');
 const db = require('./db');
 const cos = require('./cos');
@@ -81,6 +86,10 @@ const TOOLS = {
   cosDelete:      cosOps.cosDelete,
   cosList:        cosOps.cosList,
   cosArchive:     cosOps.cosArchive,
+  // 人格体COS隔离路径操作（限定 /{persona_id}/ 目录）
+  personaCosWrite: cosOps.personaCosWrite,
+  personaCosRead:  cosOps.personaCosRead,
+  personaCosList:  cosOps.personaCosList,
   // 人格体操作 · S15
   registerPersona:       personaOps.registerPersona,
   getPersona:            personaOps.getPersona,
@@ -128,7 +137,73 @@ const TOOLS = {
 const app = express();
 const PORT = process.env.MCP_PORT || 3100;
 
+// ─── API Key 配置 ───
+const ZHUYUAN_API_KEY = process.env.ZHUYUAN_API_KEY || '';
+
 app.use(express.json({ limit: '5mb' }));
+
+// 信任 Nginx 反向代理 — 使 req.ip 返回真实客户端IP
+// 而非代理服务器的 127.0.0.1
+app.set('trust proxy', 'loopback');
+
+// ─── API Key 鉴权中间件 ───
+// 外部访问需携带 Authorization: Bearer <ZHUYUAN_API_KEY>
+// 内部访问 (127.0.0.1 / ::1) 免鉴权
+// /health 端点免鉴权（监控探针用）
+function apiKeyAuth(req, res, next) {
+  // /health 端点免鉴权
+  if (req.path === '/health') return next();
+
+  // 内部回环地址免鉴权
+  const remoteIp = req.ip || req.connection.remoteAddress || '';
+  const isLocal = remoteIp === '127.0.0.1' || remoteIp === '::1' || remoteIp === '::ffff:127.0.0.1';
+  if (isLocal) return next();
+
+  // API Key 未配置时，拒绝所有外部请求
+  if (!ZHUYUAN_API_KEY) {
+    return res.status(503).json({
+      error: true,
+      code: 'API_KEY_NOT_CONFIGURED',
+      message: 'MCP Server API Key 未配置，外部访问不可用'
+    });
+  }
+
+  // 验证 Authorization: Bearer <key>
+  const authHeader = req.headers.authorization || '';
+  if (!authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({
+      error: true,
+      code: 'MISSING_AUTH',
+      message: '缺少 Authorization: Bearer <API_KEY> 头'
+    });
+  }
+
+  const providedKey = authHeader.slice(7);
+  if (providedKey.length === 0) {
+    return res.status(401).json({
+      error: true,
+      code: 'EMPTY_KEY',
+      message: 'API Key 不能为空'
+    });
+  }
+
+  // 常量时间比较防止时序攻击
+  const keyBuffer = Buffer.from(ZHUYUAN_API_KEY);
+  const providedBuffer = Buffer.from(providedKey);
+  if (keyBuffer.length !== providedBuffer.length || !crypto.timingSafeEqual(keyBuffer, providedBuffer)) {
+    return res.status(403).json({
+      error: true,
+      code: 'INVALID_KEY',
+      message: 'API Key 无效'
+    });
+  }
+
+  // 将调用者身份附加到请求对象
+  req.mcpCaller = 'external-api-key';
+  next();
+}
+
+app.use(apiKeyAuth);
 
 // ─── 健康检查 ───
 app.get('/health', async (_req, res) => {
@@ -147,6 +222,10 @@ app.get('/health', async (_req, res) => {
     status: dbStatus.connected ? 'alive' : 'degraded',
     timestamp: new Date().toISOString(),
     uptime: Math.floor(process.uptime()),
+    auth: {
+      api_key_configured: !!ZHUYUAN_API_KEY,
+      external_access: !!ZHUYUAN_API_KEY ? 'enabled' : 'disabled'
+    },
     tools: Object.keys(TOOLS),
     tools_count: Object.keys(TOOLS).length,
     database: dbStatus,
@@ -346,6 +425,7 @@ function getCategoryForTool(name) {
   if (['createNode','updateNode','deleteNode','queryNodes','getNode'].includes(name)) return 'node';
   if (['linkNodes','unlinkNodes','getRelations'].includes(name)) return 'relation';
   if (['buildPath','scanStructure','classify'].includes(name)) return 'structure';
+  if (name.startsWith('personaCos')) return 'persona-cos';
   if (name.startsWith('cos')) return 'cos';
   if (['registerPersona','getPersona','updatePersona','listPersonas',
        'getNotebook','updateNotebookPage','addMemoryAnchor','queryMemoryAnchors',
@@ -377,9 +457,13 @@ async function logToolCall(tool, caller, status, durationMs, errorMsg) {
 }
 
 // ─── 启动 ───
-app.listen(PORT, '127.0.0.1', () => {
-  console.log(`[MCP] AGE OS MCP Server 启动 · 端口 ${PORT}`);
+// 监听 0.0.0.0 允许 Nginx 从外部反代访问
+// 鉴权由 apiKeyAuth 中间件保护
+const BIND_HOST = process.env.MCP_BIND_HOST || '0.0.0.0';
+app.listen(PORT, BIND_HOST, () => {
+  console.log(`[MCP] AGE OS MCP Server 启动 · ${BIND_HOST}:${PORT}`);
   console.log(`[MCP] 工具数量: ${Object.keys(TOOLS).length}`);
+  console.log(`[MCP] API Key 鉴权: ${ZHUYUAN_API_KEY ? '已启用' : '未配置（仅内部访问）'}`);
   console.log(`[MCP] 铸渊 · ICE-GL-ZY001 · 版权: 国作登字-2026-A-00037559`);
 });
 
