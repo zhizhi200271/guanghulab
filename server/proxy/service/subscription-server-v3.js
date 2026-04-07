@@ -199,14 +199,14 @@ function buildStaticNodes() {
   const svPbk = getEnvOrKey('ZY_SVR_SV_REALITY_PUBLIC_KEY');
   const svSid = getEnvOrKey('ZY_SVR_SV_REALITY_SHORT_ID');
   const svPort = parseInt(getEnvOrKey('ZY_SVR_SV_PORT') || '443', 10);
-  if (svHost && svPbk && svSid) {
+  if (svHost && svPbk) {
     nodes.push({
       id: 'zy-sv-claude',
       name: '🇺🇸 光湖-SV(Claude专线)',
       host: svHost,
       port: svPort,
       pbk: svPbk,
-      sid: svSid,
+      sid: svSid || '',
       region: 'us-sv',
       priority: 4
     });
