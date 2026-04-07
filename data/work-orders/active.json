@@ -269,6 +269,40 @@
       "deploy_logs": [],
       "created_at": "2026-04-07T15:27:47.590Z",
       "updated_at": "2026-04-07T15:28:18.381Z"
+    },
+    {
+      "id": "WO-20260407-1749",
+      "title": "Merge pull request #309 from qinfendebingshuo/copilot/setup-vpn-singapore-node",
+      "status": "testing",
+      "commit_sha": "ad788cb12bd9e4229587918ac2a496068661b9d9",
+      "branch": "main",
+      "created_by": "qinfendebingshuo",
+      "responsible": "Agent",
+      "retry_count": 0,
+      "max_retries": 3,
+      "timeline": [
+        {
+          "timestamp": "2026-04-07T17:49:13.117Z",
+          "status": "pending",
+          "actor": "system",
+          "message": "工单创建 · Merge pull request #309 from qinfendebingshuo/copilot/setup-vpn-singapore-node"
+        },
+        {
+          "timestamp": "2026-04-07T17:49:13.155Z",
+          "status": "deploying",
+          "actor": "Agent",
+          "message": "开始部署到测试站"
+        },
+        {
+          "timestamp": "2026-04-07T17:49:51.110Z",
+          "status": "testing",
+          "actor": "Agent",
+          "message": "部署完成 · 开始健康检查"
+        }
+      ],
+      "deploy_logs": [],
+      "created_at": "2026-04-07T17:49:13.117Z",
+      "updated_at": "2026-04-07T17:49:51.110Z"
     }
   ]
 }
