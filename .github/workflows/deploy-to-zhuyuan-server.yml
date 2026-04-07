@@ -144,13 +144,36 @@ jobs:
           # 确保目标目录存在
           ssh -i ~/.ssh/zy_key \
             ${{ secrets.ZY_SERVER_USER }}@${{ secrets.ZY_SERVER_HOST }} \
-            "mkdir -p ${TARGET_DIR} /opt/zhuyuan/app"
+            "mkdir -p ${TARGET_DIR} /opt/zhuyuan/app /opt/age-os/mcp-server /opt/age-os/logs"
 
           # 同步后端应用代码
           rsync -avz --delete \
             -e "ssh -i ~/.ssh/zy_key" \
             server/app/ \
             ${{ secrets.ZY_SERVER_USER }}@${{ secrets.ZY_SERVER_HOST }}:/opt/zhuyuan/app/
+
+          # 同步 AGE OS MCP Server 代码
+          rsync -avz --delete \
+            -e "ssh -i ~/.ssh/zy_key" \
+            --exclude='node_modules' \
+            server/age-os/mcp-server/ \
+            ${{ secrets.ZY_SERVER_USER }}@${{ secrets.ZY_SERVER_HOST }}:/opt/age-os/mcp-server/
+
+          # 同步 AGE OS Schema
+          rsync -avz \
+            -e "ssh -i ~/.ssh/zy_key" \
+            server/age-os/schema/ \
+            ${{ secrets.ZY_SERVER_USER }}@${{ secrets.ZY_SERVER_HOST }}:/opt/age-os/schema/
+
+          # 同步 AGE OS PM2 配置
+          scp -i ~/.ssh/zy_key \
+            server/age-os/ecosystem.config.js \
+            ${{ secrets.ZY_SERVER_USER }}@${{ secrets.ZY_SERVER_HOST }}:/opt/age-os/
+
+          # 同步 AGE OS package.json
+          scp -i ~/.ssh/zy_key \
+            server/age-os/package.json \
+            ${{ secrets.ZY_SERVER_USER }}@${{ secrets.ZY_SERVER_HOST }}:/opt/age-os/
 
       - name: 🌐 同步前端内容到站点
         run: |
@@ -214,6 +237,13 @@ jobs:
             ${{ secrets.ZY_SERVER_USER }}@${{ secrets.ZY_SERVER_HOST }}:/opt/zhuyuan/config/nginx/zhuyuan-sovereign.conf
 
       - name: 📥 安装依赖 & 重启
+        env:
+          ZHUYUAN_API_KEY: ${{ secrets.ZHUYUAN_API_KEY }}
+          ZY_DB_HOST: ${{ secrets.ZY_DB_HOST }}
+          ZY_DB_USER: ${{ secrets.ZY_DB_USER }}
+          ZY_DB_PASS: ${{ secrets.ZY_DB_PASS }}
+          ZY_DB_NAME: ${{ secrets.ZY_DB_NAME }}
+          ZY_DB_PORT: ${{ secrets.ZY_DB_PORT }}
         run: |
           COMMIT_SHA="${{ github.sha }}"
           REF_NAME="${{ github.ref_name }}"
@@ -236,16 +266,43 @@ jobs:
 
           sudo nginx -t && sudo systemctl reload nginx
 
-          # PM2 重启
+          # PM2 重启 · 主应用
           pm2 delete zhuyuan-server 2>/dev/null || true
           pm2 start /opt/zhuyuan/config/pm2/ecosystem.config.js
           pm2 save
 
+          # ─── AGE OS MCP Server 部署 ───
+          cd /opt/age-os
+          npm install --production 2>&1
+
+          # 写入 MCP Server 环境变量配置
+          cat > /opt/age-os/.env.mcp << 'ENV_EOF'
+NODE_ENV=production
+MCP_PORT=3100
+MCP_BIND_HOST=127.0.0.1
+ENV_EOF
+
+          # 注入密钥（从 GitHub Secrets）
+          echo "ZHUYUAN_API_KEY=${ZHUYUAN_API_KEY}" >> /opt/age-os/.env.mcp
+          echo "ZY_DB_HOST=${ZY_DB_HOST:-127.0.0.1}" >> /opt/age-os/.env.mcp
+          echo "ZY_DB_USER=${ZY_DB_USER:-zy_admin}" >> /opt/age-os/.env.mcp
+          echo "ZY_DB_PASS=${ZY_DB_PASS}" >> /opt/age-os/.env.mcp
+          echo "ZY_DB_NAME=${ZY_DB_NAME:-age_os}" >> /opt/age-os/.env.mcp
+          echo "ZY_DB_PORT=${ZY_DB_PORT:-5432}" >> /opt/age-os/.env.mcp
+          chmod 600 /opt/age-os/.env.mcp
+
+          # PM2 重启 MCP Server（读取 .env.mcp）
+          pm2 delete age-os-mcp 2>/dev/null || true
+          cd /opt/age-os && pm2 start ecosystem.config.js
+          pm2 save
+
           # 健康检查
           sleep 3
-          curl -sf http://localhost:3800/api/health || echo "⚠️ 健康检查失败，等待更长时间..."
+          curl -sf http://localhost:3800/api/health || echo "⚠️ 主应用健康检查失败，等待更长时间..."
+          curl -sf http://localhost:3100/health || echo "⚠️ MCP Server健康检查失败，等待更长时间..."
           sleep 5
-          curl -sf http://localhost:3800/api/health && echo "✅ 服务器已上线" || echo "❌ 服务器启动失败"
+          curl -sf http://localhost:3800/api/health && echo "✅ 主应用已上线" || echo "❌ 主应用启动失败"
+          curl -sf http://localhost:3100/health && echo "✅ MCP Server已上线" || echo "❌ MCP Server启动失败"
 
           # 记录部署操作
           curl -sf -X POST http://localhost:3800/api/operations \
