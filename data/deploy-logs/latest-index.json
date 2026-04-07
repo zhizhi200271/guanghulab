@@ -6,13 +6,23 @@
     "created": "2026-04-01T17:45:00Z"
   },
   "stats": {
-    "total_observed": 48,
+    "total_observed": 49,
     "success": 40,
-    "failure": 8,
+    "failure": 9,
     "repair_attempted": 0,
     "repair_success": 0
   },
   "recent_deploys": [
+    {
+      "run_id": 24089672399,
+      "workflow": "🚀 铸渊智能运维 · 测试站自动部署",
+      "conclusion": "failure",
+      "head_sha": "3e2ffff2",
+      "actor": "qinfendebingshuo",
+      "observed_at": "2026-04-07T15:29:06.802Z",
+      "error_summary": "[medium] 命令执行失败",
+      "log_file": "deploy-24089672399-2026-04-07.json"
+    },
     {
       "run_id": 24082110249,
       "workflow": "🏛️ 铸渊主权服务器 · 部署",
@@ -302,17 +312,7 @@
       "observed_at": "2026-04-04T11:45:52.831Z",
       "error_summary": "",
       "log_file": "deploy-23978193891-2026-04-04.json"
-    },
-    {
-      "run_id": 23978193888,
-      "workflow": "🚀 铸渊智能运维 · 测试站自动部署",
-      "conclusion": "failure",
-      "head_sha": "cc5ed414",
-      "actor": "qinfendebingshuo",
-      "observed_at": "2026-04-04T11:44:29.651Z",
-      "error_summary": "未匹配到已知错误模式 · 需要深度分析",
-      "log_file": "deploy-23978193888-2026-04-04.json"
     }
   ],
-  "last_updated": "2026-04-07T12:48:46.606Z"
+  "last_updated": "2026-04-07T15:29:06.804Z"
 }
