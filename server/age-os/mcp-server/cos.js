@@ -75,6 +75,10 @@ function validatePersonaCosPath(personaId, key) {
   if (!personaId || typeof personaId !== 'string') {
     throw new Error('persona_id 不能为空');
   }
+  // 验证 persona_id 仅包含安全字符（字母、数字、下划线、连字符）
+  if (!/^[a-zA-Z0-9_-]+$/.test(personaId)) {
+    throw new Error('persona_id 包含非法字符，仅允许字母、数字、下划线、连字符');
+  }
   // 规范化：确保路径以 persona_id/ 开头
   const normalizedKey = key.startsWith('/') ? key.slice(1) : key;
   if (!normalizedKey.startsWith(`${personaId}/`)) {

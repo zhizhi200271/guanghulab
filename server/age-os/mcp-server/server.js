@@ -457,9 +457,9 @@ async function logToolCall(tool, caller, status, durationMs, errorMsg) {
 }
 
 // ─── 启动 ───
-// 监听 0.0.0.0 允许 Nginx 从外部反代访问
-// 鉴权由 apiKeyAuth 中间件保护
-const BIND_HOST = process.env.MCP_BIND_HOST || '0.0.0.0';
+// 默认监听 127.0.0.1（安全默认值）
+// Nginx 从本机反代访问，无需暴露到外部网络
+const BIND_HOST = process.env.MCP_BIND_HOST || '127.0.0.1';
 app.listen(PORT, BIND_HOST, () => {
   console.log(`[MCP] AGE OS MCP Server 启动 · ${BIND_HOST}:${PORT}`);
   console.log(`[MCP] 工具数量: ${Object.keys(TOOLS).length}`);

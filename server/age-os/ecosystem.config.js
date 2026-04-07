@@ -18,8 +18,10 @@ function loadEnvFile(envPath) {
         env[trimmed.slice(0, eqIdx)] = trimmed.slice(eqIdx + 1);
       }
     }
-  } catch {
-    // .env.mcp 不存在时使用默认值
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      console.error(`[PM2] .env.mcp 读取错误: ${err.message}`);
+    }
   }
   return env;
 }
