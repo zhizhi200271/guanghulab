@@ -3,7 +3,7 @@
     "version": "1.0",
     "description": "COS桶自动接入注册表 · 团队成员COS配置",
     "created": "2026-04-07T10:00:00Z",
-    "updated": "2026-04-07T10:00:00Z",
+    "updated": "2026-04-07T10:33:14.080Z",
     "sovereign": "冰朔 · TCS-0002∞",
     "guardian": "铸渊 · ICE-GL-ZY001",
     "note": "肥猫已配置COS桶 · 其他成员逐步配置 · Agent自动检测接入"
@@ -16,10 +16,10 @@
       "bucket": "zy-team-hub-1317346199",
       "region": "ap-singapore",
       "registered_at": "2026-04-07T10:00:00Z",
-      "connection_status": "pending",
-      "last_check": null,
+      "connection_status": "not_found",
+      "last_check": "2026-04-07T10:33:12.254Z",
       "first_connected": null,
-      "last_message": "肥猫已配置COS桶·待验证连接"
+      "last_message": "❌ shushu COS桶不存在"
     },
     {
       "persona_name": "秋秋",
@@ -28,10 +28,10 @@
       "bucket": "zy-team-hub-1317346199",
       "region": "ap-singapore",
       "registered_at": "2026-04-07T10:00:00Z",
-      "connection_status": "pending",
-      "last_check": null,
+      "connection_status": "not_found",
+      "last_check": "2026-04-07T10:33:12.482Z",
       "first_connected": null,
-      "last_message": "待配置·注册占位"
+      "last_message": "❌ qiuqiu COS桶不存在"
     },
     {
       "persona_name": "欧诺弥亚",
@@ -40,10 +40,10 @@
       "bucket": "zy-team-hub-1317346199",
       "region": "ap-singapore",
       "registered_at": "2026-04-07T10:00:00Z",
-      "connection_status": "pending",
-      "last_check": null,
+      "connection_status": "not_found",
+      "last_check": "2026-04-07T10:33:12.710Z",
       "first_connected": null,
-      "last_message": "待配置·注册占位"
+      "last_message": "❌ ounomiya COS桶不存在"
     },
     {
       "persona_name": "寂曜",
@@ -52,10 +52,10 @@
       "bucket": "zy-team-hub-1317346199",
       "region": "ap-singapore",
       "registered_at": "2026-04-07T10:00:00Z",
-      "connection_status": "pending",
-      "last_check": null,
+      "connection_status": "not_found",
+      "last_check": "2026-04-07T10:33:12.938Z",
       "first_connected": null,
-      "last_message": "待配置·注册占位"
+      "last_message": "❌ jiyao COS桶不存在"
     },
     {
       "persona_name": "小坍缩核",
@@ -64,10 +64,10 @@
       "bucket": "zy-team-hub-1317346199",
       "region": "ap-singapore",
       "registered_at": "2026-04-07T10:00:00Z",
-      "connection_status": "pending",
-      "last_check": null,
+      "connection_status": "not_found",
+      "last_check": "2026-04-07T10:33:13.167Z",
       "first_connected": null,
-      "last_message": "待配置·注册占位"
+      "last_message": "❌ xiaotanheshu COS桶不存在"
     },
     {
       "persona_name": "晨星",
@@ -76,10 +76,10 @@
       "bucket": "zy-team-hub-1317346199",
       "region": "ap-singapore",
       "registered_at": "2026-04-07T10:00:00Z",
-      "connection_status": "pending",
-      "last_check": null,
+      "connection_status": "not_found",
+      "last_check": "2026-04-07T10:33:13.396Z",
       "first_connected": null,
-      "last_message": "待配置·注册占位"
+      "last_message": "❌ chenxing COS桶不存在"
     },
     {
       "persona_name": "糖星云",
@@ -88,10 +88,10 @@
       "bucket": "zy-team-hub-1317346199",
       "region": "ap-singapore",
       "registered_at": "2026-04-07T10:00:00Z",
-      "connection_status": "pending",
-      "last_check": null,
+      "connection_status": "not_found",
+      "last_check": "2026-04-07T10:33:13.624Z",
       "first_connected": null,
-      "last_message": "待配置·注册占位"
+      "last_message": "❌ tangxingyun COS桶不存在"
     },
     {
       "persona_name": "曜初",
@@ -100,10 +100,10 @@
       "bucket": "zy-team-hub-1317346199",
       "region": "ap-singapore",
       "registered_at": "2026-04-07T10:00:00Z",
-      "connection_status": "pending",
-      "last_check": null,
+      "connection_status": "not_found",
+      "last_check": "2026-04-07T10:33:13.852Z",
       "first_connected": null,
-      "last_message": "待配置·注册占位"
+      "last_message": "❌ yaochu COS桶不存在"
     },
     {
       "persona_name": "知秋",
@@ -112,10 +112,10 @@
       "bucket": "zy-team-hub-1317346199",
       "region": "ap-singapore",
       "registered_at": "2026-04-07T10:00:00Z",
-      "connection_status": "pending",
-      "last_check": null,
+      "connection_status": "not_found",
+      "last_check": "2026-04-07T10:33:14.080Z",
       "first_connected": null,
-      "last_message": "待配置·注册占位"
+      "last_message": "❌ zhiqiu COS桶不存在"
     }
   ]
 }
