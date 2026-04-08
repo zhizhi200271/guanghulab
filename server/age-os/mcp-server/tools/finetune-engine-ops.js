@@ -73,10 +73,10 @@ const LLM_CONFIGS = {
   }
 };
 
-// ─── 成本估算参数 ───
+// ─── 成本估算参数（2026-04 参考价，实际以provider当月公告为准） ───
 const COST_PER_1K_TOKENS = {
-  deepseek: 0.014,  // 约 ¥0.014 / 1K tokens（训练）
-  qwen: 0.020       // 约 ¥0.020 / 1K tokens（训练）
+  deepseek: 0.014,  // 约 ¥0.014 / 1K tokens（训练）· 2026-04 参考
+  qwen: 0.020       // 约 ¥0.020 / 1K tokens（训练）· 2026-04 参考
 };
 
 // ─── 常量 ───
