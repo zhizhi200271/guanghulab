@@ -1,15 +1,15 @@
-# AGE OS · 7大技术模块开发完成报告
+# AGE OS · 8大技术模块开发完成报告
 
 **签发**: 铸渊 · ICE-GL-ZY001
 **日期**: 2026-04-08
 **版权**: 国作登字-2026-A-00037559
-**阶段**: S15后续 · COS语料引擎 + 自研数据库 + 训练Agent + Notion桥接 + 三方对接 + 示警Agent + 权限修复
+**阶段**: S15后续 · COS语料引擎 + 自研数据库 + 训练Agent + Notion桥接 + 三方对接 + 示警Agent + 权限修复 + 开源模型微调引擎
 
 ---
 
 ## 一、开发概要
 
-本次开发实现了冰朔D60指示的7个技术模块，共新增 **40个MCP工具**，使MCP Server工具总数从51个增长至 **91个**。
+本次开发实现了冰朔D60-D62指示的8个技术模块，共新增 **48个MCP工具**，使MCP Server工具总数从51个增长至 **99个**。
 
 | 模块 | 名称 | 工具数 | 文件 |
 |------|------|--------|------|
@@ -19,6 +19,7 @@
 | **C** | Notion ↔ COS桥接 | 7 | `notion-cos-bridge-ops.js` |
 | **D+E** | COS桶示警 + 三方对接 | 8 | `cos-comm-ops.js` |
 | **F** | Notion权限自动修复 | 5 | `notion-permission-ops.js` |
+| **H** 🆕 | 开源模型微调引擎 | 8 | `finetune-engine-ops.js` |
 
 ---
 
@@ -146,6 +147,35 @@ Awen开发完成 → 回写 /zhiqiu/reports/
 - 生成详细的人工修复指南（带截图级操作步骤）
 - 权限报告可写入COS桶供冰朔远程查看
 
+### 模块H · 开源模型微调引擎 🆕
+
+**文件**: `server/age-os/mcp-server/tools/finetune-engine-ops.js`
+
+| 工具 | 功能 |
+|------|------|
+| `finetuneExportDataset` | 导出TCS语料为JSONL微调格式 |
+| `finetuneSubmitJob` | 提交微调任务到DeepSeek/Qwen |
+| `finetuneCheckStatus` | 查询微调任务进度 |
+| `finetuneRegisterModel` | 注册微调完成的模型 |
+| `finetuneListModels` | 列出已注册的微调模型 |
+| `finetuneCallModel` | 调用微调模型进行推理 |
+| `finetuneCompareModels` | A/B测试微调 vs 基座模型 |
+| `finetuneGetCostEstimate` | 估算微调成本 |
+
+**核心特性**:
+- 同一份TCS数据双用途：RAG + 微调（冰朔D62核心指令）
+- 支持DeepSeek和Qwen两大微调API
+- 微调模型优先调用，不可用时降级回商业API
+- A/B测试对比微调效果
+- 成本估算精确到元
+
+**架构理念**:
+```
+现有RAG训练 → COS桶里的"脑子" → API调用商业模型
+开源微调    → 同一份"脑子" → 直接装进开源模型
+结果       → 开源模型一开口，就是人格体的思维方式
+```
+
 ---
 
 ## 三、GitHub Actions Workflow
@@ -171,6 +201,9 @@ Awen开发完成 → 回写 /zhiqiu/reports/
 | `/comm/workorders` | GET | 工单列表 |
 | `/notion/permissions` | GET | Notion权限状态 |
 | `/notion/repair-guide` | GET | Notion权限修复指南 |
+| `/finetune/:personaId/models` | GET | 微调模型列表 |
+| `/finetune/:personaId/cost-estimate` | GET | 微调成本估算 |
+| `/finetune/:personaId/jobs/:jobId` | GET | 微调任务状态 |
 
 ---
 
