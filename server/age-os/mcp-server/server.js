@@ -28,6 +28,8 @@
  *           saveFile / getFile / listFiles / getFileHistory
  *   Notion: notionQuery / notionReadPage / notionWritePage / notionUpdatePage / notionWriteSyslog
  *   GitHub: githubReadFile / githubListDir / githubWriteFile / githubGetCommits / githubGetIssues / githubTriggerDeploy
+ *   活模块: registerModule / getModule / listModules / moduleHeartbeat / diagnoseModule
+ *           getModuleAlerts / getModuleLearnings / sendHLDP / getHLDPStats
  */
 
 'use strict';
@@ -43,6 +45,7 @@ const relationOps = require('./tools/relation-ops');
 const structureOps = require('./tools/structure-ops');
 const cosOps = require('./tools/cos-ops');
 const personaOps = require('./tools/persona-ops');
+const livingModuleOps = require('./tools/living-module-ops');
 
 // ─── 外部集成模块（优雅降级：未安装依赖时不影响核心功能） ───
 let notionOps = null;
@@ -130,7 +133,17 @@ const TOOLS = {
     githubGetCommits:    githubOps.githubGetCommits,
     githubGetIssues:     githubOps.githubGetIssues,
     githubTriggerDeploy: githubOps.githubTriggerDeploy
-  } : {})
+  } : {}),
+  // 活模块操作 · S5
+  registerModule:     livingModuleOps.registerModule,
+  getModule:          livingModuleOps.getModule,
+  listModules:        livingModuleOps.listModules,
+  moduleHeartbeat:    livingModuleOps.moduleHeartbeat,
+  diagnoseModule:     livingModuleOps.diagnoseModule,
+  getModuleAlerts:    livingModuleOps.getModuleAlerts,
+  getModuleLearnings: livingModuleOps.getModuleLearnings,
+  sendHLDP:           livingModuleOps.sendHLDP,
+  getHLDPStats:       livingModuleOps.getHLDPStats
 };
 
 // ─── Express 应用 ───
@@ -419,6 +432,92 @@ app.get('/personas/:personaId/training', async (req, res) => {
   }
 });
 
+// ─── 活模块API（S5） ───
+
+// 活模块列表
+app.get('/modules', async (req, res) => {
+  try {
+    const { status, module_type } = req.query;
+    const result = await livingModuleOps.listModules({ status, module_type });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: true, message: err.message });
+  }
+});
+
+// 活模块详情
+app.get('/modules/:moduleId', async (req, res) => {
+  try {
+    const result = await livingModuleOps.getModule({ module_id: req.params.moduleId });
+    if (!result.found) {
+      return res.status(404).json({ error: true, message: '模块未找到' });
+    }
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: true, message: err.message });
+  }
+});
+
+// 活模块心跳上报
+app.post('/modules/:moduleId/heartbeat', async (req, res) => {
+  try {
+    const result = await livingModuleOps.moduleHeartbeat({
+      module_id: req.params.moduleId,
+      ...req.body
+    });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: true, message: err.message });
+  }
+});
+
+// 活模块报警记录
+app.get('/modules/:moduleId/alerts', async (req, res) => {
+  try {
+    const result = await livingModuleOps.getModuleAlerts({
+      module_id: req.params.moduleId,
+      resolved: req.query.resolved === 'true' ? true : (req.query.resolved === 'false' ? false : undefined),
+      limit: parseInt(req.query.limit || '20', 10)
+    });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: true, message: err.message });
+  }
+});
+
+// 活模块学习记录
+app.get('/modules/:moduleId/learnings', async (req, res) => {
+  try {
+    const result = await livingModuleOps.getModuleLearnings({
+      module_id: req.params.moduleId,
+      limit: parseInt(req.query.limit || '20', 10)
+    });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: true, message: err.message });
+  }
+});
+
+// HLDP消息发送
+app.post('/hldp/send', async (req, res) => {
+  try {
+    const result = await livingModuleOps.sendHLDP(req.body);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: true, message: err.message });
+  }
+});
+
+// HLDP统计
+app.get('/hldp/stats', async (_req, res) => {
+  try {
+    const result = await livingModuleOps.getHLDPStats({});
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: true, message: err.message });
+  }
+});
+
 // ─── 辅助函数 ───
 
 function getCategoryForTool(name) {
@@ -435,6 +534,8 @@ function getCategoryForTool(name) {
        'saveFile','getFile','listFiles','getFileHistory'].includes(name)) return 'persona';
   if (name.startsWith('notion')) return 'notion';
   if (name.startsWith('github')) return 'github';
+  if (['registerModule','getModule','listModules','moduleHeartbeat','diagnoseModule',
+       'getModuleAlerts','getModuleLearnings','sendHLDP','getHLDPStats'].includes(name)) return 'living-module';
   return 'other';
 }
 
