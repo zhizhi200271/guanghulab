@@ -193,9 +193,8 @@ class ModuleRegistry {
         const sinceLastHeart = now - module.lastHeartbeatAt.getTime();
         if (sinceLastHeart > this._heartbeatTimeoutMs && module.status === 'alive') {
           console.warn(`[Registry] ${moduleId} 心跳超时 ${Math.round(sinceLastHeart / 1000)}秒`);
-          module.status = 'degraded';
 
-          // 尝试触发自诊断
+          // 通过模块自身的诊断方法更新状态
           try {
             await module.selfDiagnose();
           } catch (err) {

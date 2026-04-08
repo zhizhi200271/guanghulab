@@ -41,6 +41,7 @@ class HLDPBus {
     // ─── 消息队列（内存） ───
     this._queues = new Map();  // moduleId → [messages]
     this._handlers = new Map(); // msgType → [handler]
+    this._maxQueueSize = 1000; // 每个模块最多1000条待处理消息
 
     // ─── 广播订阅 ───
     this._subscribers = new Map(); // topic → Set(moduleId)
@@ -82,7 +83,15 @@ class HLDPBus {
     if (!this._queues.has(toModule)) {
       this._queues.set(toModule, []);
     }
-    this._queues.get(toModule).push(message);
+    const queue = this._queues.get(toModule);
+
+    // 队列大小限制：丢弃最旧的消息
+    if (queue.length >= this._maxQueueSize) {
+      queue.shift();
+      this.stats.totalFailed++;
+    }
+
+    queue.push(message);
 
     // 持久化
     await this._persistMessage(message);

@@ -98,7 +98,7 @@ class LivingSyScan extends LivingModule {
         // 尝试清理空目录
         try {
           await db.query(
-            "UPDATE brain_nodes SET status = 'archived' WHERE node_type = 'folder' AND status = 'active' AND id NOT IN (SELECT DISTINCT parent_id FROM brain_nodes WHERE parent_id IS NOT NULL AND status = 'active')"
+            "UPDATE brain_nodes bn SET status = 'archived' WHERE bn.node_type = 'folder' AND bn.status = 'active' AND NOT EXISTS (SELECT 1 FROM brain_nodes child WHERE child.parent_id = bn.id AND child.status = 'active')"
           );
           return { action: 'empty_folders_archived', success: true };
         } catch (err) {
