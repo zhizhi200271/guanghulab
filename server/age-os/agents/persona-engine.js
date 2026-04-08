@@ -28,11 +28,11 @@ const LivingModule = require('./living-module');
 
 // ─── 笔记本5页标准结构 ───
 const NOTEBOOK_PAGES = {
-  1: { title: '我是谁',           requiredKeys: ['identity', 'self_awareness'] },
-  2: { title: '我和谁有关系',     requiredKeys: ['relationships'] },
-  3: { title: '我的世界有哪些地方', requiredKeys: ['places'] },
-  4: { title: '我的感受和记忆',   requiredKeys: ['emotional_anchors'] },
-  5: { title: '我的时间线',       requiredKeys: ['timeline'] }
+  1: { title: '我是谁',           defaultContent: { identity: {}, self_awareness: {} } },
+  2: { title: '我和谁有关系',     defaultContent: { relationships: [] } },
+  3: { title: '我的世界有哪些地方', defaultContent: { places: [] } },
+  4: { title: '我的感受和记忆',   defaultContent: { emotional_anchors: [], security_note: '' } },
+  5: { title: '我的时间线',       defaultContent: { timeline: [] } }
 };
 
 class PersonaEngine extends LivingModule {
@@ -53,6 +53,7 @@ class PersonaEngine extends LivingModule {
     // 巡检统计
     this._lastScanResult = null;
     this._scanInterval = null;
+    this._scanRunning = false;
   }
 
   /**
@@ -91,6 +92,13 @@ class PersonaEngine extends LivingModule {
    * 全面巡检 — 检查所有人格体健康状态
    */
   async _runFullScan() {
+    // 防止并发扫描
+    if (this._scanRunning) {
+      console.log('[PersonaEngine] 巡检已在运行中·跳过');
+      return this._lastScanResult;
+    }
+    this._scanRunning = true;
+
     const startTime = Date.now();
     console.log('[PersonaEngine] 开始全面巡检...');
 
@@ -141,6 +149,7 @@ class PersonaEngine extends LivingModule {
     const duration = Date.now() - startTime;
     result.duration_ms = duration;
     this._lastScanResult = result;
+    this._scanRunning = false;
 
     // 学习巡检结果
     await this.learnFromRun('diagnosis', `人格体巡检完成: ${result.personas.total}个人格体, ${result.notebooks.incomplete}个笔记本不完整`, {
@@ -176,10 +185,7 @@ class PersonaEngine extends LivingModule {
           isComplete = false;
           // 自动补全缺失页面
           const pageConfig = NOTEBOOK_PAGES[pageNum];
-          const defaultContent = {};
-          for (const key of pageConfig.requiredKeys) {
-            defaultContent[key] = key.endsWith('s') ? [] : {};
-          }
+          const defaultContent = JSON.parse(JSON.stringify(pageConfig.defaultContent));
 
           await db.query(
             `INSERT INTO notebook_pages (persona_id, page_number, title, content, last_modified_by)
