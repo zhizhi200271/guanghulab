@@ -311,8 +311,11 @@ ${nodeNames}
   // 1. fallback组: 优先SV节点，SV不可用时自动回落到其他节点（解决"切不过去"问题）
   // 2. select组: 用户可手动选择具体走哪个节点
   // 有SV节点时优先SV，无SV节点时自动使用现有节点
+  const nonSvNodes = nodes.filter(n => n.region !== 'us-sv');
   const claudeFallbackProxies = svNode
-    ? `      - "${svNode.name}"\n${nodes.filter(n => n.region !== 'us-sv').map(n => `      - "${n.name}"`).join('\n')}`
+    ? (nonSvNodes.length > 0
+      ? `      - "${svNode.name}"\n${nonSvNodes.map(n => `      - "${n.name}"`).join('\n')}`
+      : `      - "${svNode.name}"`)
     : nodeNames;
 
   const claudeSelectProxies = svNode
@@ -1139,9 +1142,10 @@ function refreshDashboard() {
 }
 
 // 页面加载后立即刷新一次仪表盘数据（确保刷新页面即拿到最新数据）
+// 延迟避免与页面初始渲染竞争DOM元素
+var DASHBOARD_INIT_DELAY_MS = 100;
 if (dashToken) {
-  // 延迟100ms避免与页面渲染竞争
-  setTimeout(refreshDashboard, 100);
+  setTimeout(refreshDashboard, DASHBOARD_INIT_DELAY_MS);
 }
 
 // 刷新加速状态 (从dashboard-api获取最新全量数据)
