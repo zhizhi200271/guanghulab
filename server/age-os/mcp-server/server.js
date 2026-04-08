@@ -50,6 +50,7 @@
 'use strict';
 
 const crypto = require('crypto');
+const https = require('https');
 const express = require('express');
 const db = require('./db');
 const cos = require('./cos');
@@ -244,6 +245,9 @@ app.set('trust proxy', 'loopback');
 function apiKeyAuth(req, res, next) {
   // /health 端点免鉴权
   if (req.path === '/health') return next();
+
+  // /webhook/* 端点免API Key鉴权（使用独立的webhook密钥验证）
+  if (req.path.startsWith('/webhook/')) return next();
 
   // 内部回环地址免鉴权
   const remoteIp = req.ip || req.connection.remoteAddress || '';
@@ -903,6 +907,135 @@ app.get('/finetune/:personaId/jobs/:jobId', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: true, message: err.message });
   }
+});
+
+// ─── COS事件Webhook端点 ───
+// 接收腾讯COS桶事件通知（如文件上传），转发为GitHub repository_dispatch触发训练Agent
+// COS桶设置: 事件通知 → HTTP回调 → https://guanghulab.online/api/mcp/webhook/cos-event
+//
+// 此端点免API Key鉴权，但使用独立的webhook密钥验证
+
+app.post('/webhook/cos-event', async (req, res) => {
+  // COS Webhook密钥验证（独立于API Key，防止外部伪造请求）
+  const webhookSecret = process.env.COS_WEBHOOK_SECRET || '';
+  if (webhookSecret) {
+    const providedSecret = req.headers['x-cos-webhook-secret'] || req.query.secret || '';
+    if (providedSecret !== webhookSecret) {
+      return res.status(403).json({ error: true, code: 'INVALID_WEBHOOK_SECRET', message: 'Webhook密钥无效' });
+    }
+  }
+
+  const event = req.body;
+  const now = new Date().toISOString();
+
+  // 解析COS事件（腾讯COS事件通知格式）
+  let eventType = 'unknown';
+  let bucketName = '';
+  let objectKey = '';
+  let objectSize = 0;
+
+  try {
+    if (event.Records && Array.isArray(event.Records) && event.Records.length > 0) {
+      // 标准COS事件格式
+      const record = event.Records[0];
+      eventType = record.event?.eventName || record.eventName || 'cos:ObjectCreated';
+      bucketName = record.cos?.cosBucket?.name || record.s3?.bucket?.name || '';
+      objectKey = record.cos?.cosObject?.key || record.s3?.object?.key || '';
+      objectSize = record.cos?.cosObject?.size || record.s3?.object?.size || 0;
+    } else if (event.bucket && event.key) {
+      // 简化格式（手动测试用）
+      eventType = event.event || 'cos:ObjectCreated';
+      bucketName = event.bucket;
+      objectKey = event.key;
+      objectSize = event.size || 0;
+    }
+  } catch {
+    // 解析失败继续处理
+  }
+
+  console.log(`[COS Webhook] 事件: ${eventType} · 桶: ${bucketName} · 文件: ${objectKey}`);
+
+  // 触发GitHub repository_dispatch（如果配置了GitHub PAT）
+  const githubToken = process.env.GITHUB_DISPATCH_TOKEN || process.env.GITHUB_TOKEN || '';
+  const githubRepo = process.env.GITHUB_REPO || 'qinfendebingshuo/guanghulab';
+  let dispatchResult = null;
+
+  if (githubToken) {
+    try {
+      const [owner, repo] = githubRepo.split('/');
+      const dispatchPayload = JSON.stringify({
+        event_type: 'cos-file-uploaded',
+        client_payload: {
+          bucket: bucketName,
+          key: objectKey,
+          size: objectSize,
+          event: eventType,
+          timestamp: now
+        }
+      });
+
+      dispatchResult = await new Promise((resolve, reject) => {
+        const dispatchReq = https.request({
+          hostname: 'api.github.com',
+          port: 443,
+          path: `/repos/${owner}/${repo}/dispatches`,
+          method: 'POST',
+          headers: {
+            'Accept': 'application/vnd.github+json',
+            'Authorization': `Bearer ${githubToken}`,
+            'X-GitHub-Api-Version': '2022-11-28',
+            'User-Agent': 'ZY-MCP-COS-Webhook',
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(dispatchPayload)
+          },
+          timeout: 15000
+        }, (dispatchRes) => {
+          let body = '';
+          dispatchRes.on('data', c => body += c);
+          dispatchRes.on('end', () => {
+            resolve({ status: dispatchRes.statusCode, body });
+          });
+        });
+        dispatchReq.on('error', reject);
+        dispatchReq.on('timeout', () => { dispatchReq.destroy(); reject(new Error('dispatch timeout')); });
+        dispatchReq.write(dispatchPayload);
+        dispatchReq.end();
+      });
+
+      console.log(`[COS Webhook] GitHub dispatch: ${dispatchResult.status}`);
+    } catch (err) {
+      console.error(`[COS Webhook] GitHub dispatch失败: ${err.message}`);
+      dispatchResult = { status: 'error', error: err.message };
+    }
+  } else {
+    console.log('[COS Webhook] 未配置GITHUB_DISPATCH_TOKEN，跳过dispatch');
+  }
+
+  // 写入告警日志到COS（异步，不阻塞响应）
+  const logEntry = {
+    event_type: eventType,
+    bucket: bucketName,
+    key: objectKey,
+    size: objectSize,
+    received_at: now,
+    dispatch: dispatchResult ? { status: dispatchResult.status } : null
+  };
+
+  try {
+    await cos.write('team', `zhuyuan/cos-events/${now.slice(0, 10)}/${Date.now()}.json`,
+      JSON.stringify(logEntry, null, 2), 'application/json');
+  } catch {
+    // 日志写入失败不影响响应
+  }
+
+  res.json({
+    received: true,
+    event_type: eventType,
+    bucket: bucketName,
+    key: objectKey,
+    dispatch: dispatchResult ? (dispatchResult.status === 204 ? 'triggered' : 'failed') : 'no_token',
+    timestamp: now
+  });
 });
 
 // ─── 数据库迁移状态API ───
