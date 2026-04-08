@@ -31,6 +31,20 @@ const inflate = promisify(zlib.inflate);
 // ─── 支持的压缩格式 ───
 const COMPRESSED_EXTENSIONS = ['.zip', '.gz', '.tar.gz', '.tgz', '.json.gz'];
 
+// ─── 支持的语料文件格式（含非压缩） ───
+const ALL_CORPUS_EXTENSIONS = [
+  '.zip', '.gz', '.tar.gz', '.tgz', '.json.gz',  // 压缩格式
+  '.json', '.jsonl', '.md', '.txt', '.csv',        // 非压缩格式
+];
+
+// ─── 排除的路径前缀（处理结果目录，不视为原始语料） ───
+const EXCLUDED_CORPUS_PREFIXES = [
+  'tcs-structured/',
+  'training-sessions/',
+  'training-results/',
+  'training-memory/',
+];
+
 // ─── TCS结构化格式定义 ───
 // TCS = 通感语言核系统编程语言（Tonggan Core System）
 // 所有语料转换后统一为此格式
@@ -42,6 +56,20 @@ const TCS_CORPUS_VERSION = '1.0';
 function isCompressedFile(key) {
   const lower = key.toLowerCase();
   return COMPRESSED_EXTENSIONS.some(ext => lower.endsWith(ext));
+}
+
+/**
+ * 检测文件是否为任意语料文件（含非压缩格式）
+ */
+function isCorpusFile(key) {
+  // 排除处理结果目录
+  for (const prefix of EXCLUDED_CORPUS_PREFIXES) {
+    if (key.startsWith(prefix)) return false;
+  }
+  // 排除目录标记（以/结尾的空key）
+  if (key.endsWith('/')) return false;
+  const lower = key.toLowerCase();
+  return ALL_CORPUS_EXTENSIONS.some(ext => lower.endsWith(ext));
 }
 
 /**
@@ -341,14 +369,24 @@ async function cosGetCorpusStatus(input) {
     cos.list(bucket, 'tcs-structured/', 500)
   ]);
 
-  const rawCorpus = rawFiles.files.filter(f => isCompressedFile(f.key));
+  // 检测所有语料文件（含压缩和非压缩格式）
+  const allCorpus = rawFiles.files.filter(f => isCorpusFile(f.key));
+  const compressedCorpus = allCorpus.filter(f => isCompressedFile(f.key));
+  const uncompressedCorpus = allCorpus.filter(f => !isCompressedFile(f.key));
   const processed = processedFiles.files.filter(f => f.key.endsWith('.tcs.json'));
 
   return {
     raw_corpus: {
-      total: rawCorpus.length,
-      total_size_bytes: rawCorpus.reduce((sum, f) => sum + f.size_bytes, 0),
-      files: rawCorpus.map(f => ({ key: f.key, size_bytes: f.size_bytes }))
+      total: allCorpus.length,
+      compressed: compressedCorpus.length,
+      uncompressed: uncompressedCorpus.length,
+      total_size_bytes: allCorpus.reduce((sum, f) => sum + f.size_bytes, 0),
+      files: allCorpus.map(f => ({
+        key: f.key,
+        size_bytes: f.size_bytes,
+        compressed: isCompressedFile(f.key),
+        corpus_type: detectCorpusType(f.key)
+      }))
     },
     processed: {
       total: processed.length,
@@ -360,7 +398,7 @@ async function cosGetCorpusStatus(input) {
       },
       files: processed.map(f => ({ key: f.key, size_bytes: f.size_bytes }))
     },
-    pending: rawCorpus.length - processed.length,
+    pending: Math.max(0, allCorpus.length - processed.length),
     timestamp: new Date().toISOString()
   };
 }
