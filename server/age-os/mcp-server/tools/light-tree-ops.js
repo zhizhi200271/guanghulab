@@ -87,7 +87,11 @@ async function growLeaf(input) {
   const parentNode = await db.query('SELECT depth, path FROM light_tree_nodes WHERE id = $1', [actualParentId]);
   if (parentNode.rows.length === 0) throw new Error(`父节点未找到: ${actualParentId}`);
   const newDepth = parentNode.rows[0].depth + 1;
-  const leafPath = path || `${parentNode.rows[0].path}/${title.replace(/[^a-zA-Z0-9\u4e00-\u9fa5_-]/g, '').substring(0, 50)}`;
+  const leafPath = path || (() => {
+    const sanitized = title.replace(/[^a-zA-Z0-9\u4e00-\u9fa5_-]/g, '').substring(0, 50);
+    const suffix = sanitized || `leaf-${Date.now()}`;
+    return `${parentNode.rows[0].path}/${suffix}`;
+  })();
 
   const result = await db.query(
     `INSERT INTO light_tree_nodes (persona_id, parent_id, node_type, depth, path, title, content, human_said, persona_said, feeling, growth_note, importance, created_by, tags)
@@ -316,6 +320,9 @@ async function getTianyanView(input) {
     await db.query('REFRESH MATERIALIZED VIEW tianyan_global_view');
   } catch (err) {
     // 首次运行或并发刷新时可能失败，不影响查询
+    if (err.message && !err.message.includes('has not been populated')) {
+      console.warn(`[光之树] 天眼视图刷新警告: ${err.message}`);
+    }
   }
 
   const viewResult = await db.query('SELECT * FROM tianyan_global_view');

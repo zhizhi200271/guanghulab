@@ -47,7 +47,7 @@
       "msg_type": {
         "type": "enum",
         "values": ["heartbeat", "report", "command", "query", "ack", "alert", "sync", "evolution", "battle", "tree"],
-        "description": "消息类型·10种基础类型·可通过evolution扩展"
+        "description": "消息类型·10种基础类型(v3.0.1新增tree)·可通过evolution扩展"
       },
       "sender": {
         "type": "object",
