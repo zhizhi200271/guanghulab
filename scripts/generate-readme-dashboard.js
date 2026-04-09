@@ -275,7 +275,7 @@ function countMCPTools() {
   const serverCode = fs.readFileSync(MCP_SERVER_JS, 'utf8');
 
   // 提取 TOOLS 对象区域
-  const toolsMatch = serverCode.match(/const TOOLS\s*=\s*\{([\s\S]*?)^\};/m);
+  const toolsMatch = serverCode.match(/const TOOLS\s*=\s*\{([\s\S]*?)\n\};/m);
   if (!toolsMatch) {
     console.log('[MCP-STATS] ⚠️ 无法解析TOOLS注册表');
     return result;
