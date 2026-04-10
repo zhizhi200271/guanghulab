@@ -28,6 +28,7 @@
 'use strict';
 
 const cron = require('node-cron');
+const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const cos = require('./cos');
@@ -36,6 +37,8 @@ const cos = require('./cos');
 const DEFAULT_INTERVAL = process.env.COS_WATCHER_INTERVAL || '*/5 * * * *'; // 每5分钟
 const STATE_FILE = path.join(__dirname, 'cos-watcher-state.json');
 const MAX_LOG_ENTRIES = 200;
+// 启动后延迟执行首次扫描，等待MCP Server Express + DB连接完全就绪
+const INITIAL_SCAN_DELAY_MS = 5000;
 
 // 9个人格体ID
 const PERSONA_IDS = [
@@ -255,10 +258,10 @@ async function handleNewReport(report) {
     // 生成自动回执（基础版：确认收到）
     const now = new Date();
     const dateStr = now.toISOString().slice(0, 10);
-    const receiptKey = `${report.persona_id}/receipts/${dateStr}/auto-receipt-${Date.now()}.json`;
+    const receiptKey = `${report.persona_id}/receipts/${dateStr}/auto-receipt-${crypto.randomBytes(6).toString('hex')}.json`;
 
     const receipt = {
-      receipt_id: `RCPT-${Date.now()}`,
+      receipt_id: `RCPT-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`,
       report_key: report.key,
       persona_id: report.persona_id,
       status: 'green',
@@ -303,8 +306,8 @@ async function handleNewReceipt(receipt) {
   try {
     const mapStr = process.env.PERSONA_REPO_MAP || '{}';
     personaRepoMap = JSON.parse(mapStr);
-  } catch {
-    // 映射解析失败
+  } catch (err) {
+    logEvent('config_error', `PERSONA_REPO_MAP parse failed: ${err.message}`);
   }
 
   const targetRepo = personaRepoMap[receipt.persona_id];
@@ -515,12 +518,12 @@ function start(interval) {
   console.log(`[COS-Watcher] COS桶轮询守护进程已启动 · 间隔: ${cronExpr}`);
   logEvent('started', `轮询间隔: ${cronExpr}`);
 
-  // 启动后立即执行一次扫描
+  // 启动后延迟执行首次扫描，等待MCP Server完全就绪
   setTimeout(() => {
     runScan().catch(err => {
       console.error(`[COS-Watcher] 初始扫描异常: ${err.message}`);
     });
-  }, 5000); // 延迟5秒，等MCP Server完全启动
+  }, INITIAL_SCAN_DELAY_MS);
 }
 
 /**

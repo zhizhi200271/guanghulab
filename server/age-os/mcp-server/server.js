@@ -338,6 +338,8 @@ app.get('/health', async (_req, res) => {
     githubClient ? githubClient.checkConnection().catch(e => ({ connected: false, error: e.message })) : Promise.resolve({ connected: false, reason: '模块未加载' })
   ]);
 
+  const watcherStatus = cosWatcher.getStatus();
+
   res.json({
     server: 'ZY-MCP-001',
     identity: '铸渊 · AGE OS MCP Server',
@@ -353,10 +355,10 @@ app.get('/health', async (_req, res) => {
     database: dbStatus,
     cos: cosStatus,
     cos_watcher: {
-      enabled: cosWatcher.getStatus().enabled,
-      last_scan: cosWatcher.getStatus().last_scan,
-      scan_count: cosWatcher.getStatus().scan_count,
-      errors: cosWatcher.getStatus().errors
+      enabled: watcherStatus.enabled,
+      last_scan: watcherStatus.last_scan,
+      scan_count: watcherStatus.scan_count,
+      errors: watcherStatus.errors
     },
     notion: notionStatus,
     github: githubStatus
