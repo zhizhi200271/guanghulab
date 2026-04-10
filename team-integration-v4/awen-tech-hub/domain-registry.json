@@ -51,7 +51,24 @@
       "server_code": null,
       "dns_provider": null,
       "architecture_role": "技术主控台·待配置",
-      "status": "pending"
+      "status": "pending",
+      "reverse_proxy": {
+        "enabled": true,
+        "proxy_server": "ZY-SVR-002 (新加坡)",
+        "backend_server": "ZY-SVR-AWEN (广州)",
+        "reason": "域名未备案·通过新加坡服务器反向代理·免备案",
+        "config_file": "server/nginx/awen-domain-proxy.conf",
+        "deploy_workflow": ".github/workflows/deploy-awen-domain-proxy.yml",
+        "setup_steps": [
+          "1. 配置 GitHub Secret: AWEN_DOMAIN (Awen的域名)",
+          "2. 配置 GitHub Secret: AWEN_BACKEND_HOST (广州服务器IP)",
+          "3. 配置 GitHub Secret: AWEN_BACKEND_PORT (后端端口·默认80)",
+          "4. Awen将域名DNS A记录指向新加坡服务器IP (ZY-SVR-002)",
+          "5. 运行 workflow: deploy-awen-domain-proxy → deploy",
+          "6. 运行 workflow: deploy-awen-domain-proxy → setup-ssl",
+          "7. 广州服务器防火墙白名单添加新加坡IP"
+        ]
+      }
     }
   ],
 
