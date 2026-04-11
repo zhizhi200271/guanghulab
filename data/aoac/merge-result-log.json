@@ -2,30 +2,102 @@
   "aoac_agent": "AOAC-02",
   "aoac_agent_name": "action-merge-sentinel",
   "status": "half_ready",
-  "timestamp": "2026-04-11 14:49:06+08:00",
-  "timestamp_utc": "2026-04-11T06:49:06.316Z",
+  "timestamp": "2026-04-11 15:55:32+08:00",
+  "timestamp_utc": "2026-04-11T07:55:32.218Z",
   "merge": {
-    "pr_number": 335,
-    "pr_title": "fix: README auto-update workflow concurrent push race condition",
-    "merge_commit_sha": "808379f2c8777fba375c9ca083782935b3c72c3c",
-    "head_sha": "d96389fcd0806599c5e30bb6c01b9d939e43da4a",
+    "pr_number": 336,
+    "pr_title": "🔑⏰ Unify secret names, fix AOAC push conflicts, add temporal-core brain",
+    "merge_commit_sha": "bbee7c1f65564f22989a22718d034e022c20b45c",
+    "head_sha": "85c47509c06a64d5bfceea3e7340d29c809f06ac",
     "base_branch": "main"
   },
   "ci": {
     "combined_status": "failure",
     "overall_result": "failure",
     "summary": {
-      "total": 2,
+      "total": 10,
       "passed": 0,
       "failed": 0,
-      "skipped": 0
+      "skipped": 5
     },
     "check_runs": [
+      {
+        "name": "💚 ���康检查",
+        "status": "completed",
+        "conclusion": "skipped",
+        "started_at": "2026-04-11T07:55:26Z",
+        "completed_at": "2026-04-11T07:55:25Z",
+        "output_title": null,
+        "output_summary": ""
+      },
+      {
+        "name": "gate-guard",
+        "status": "completed",
+        "conclusion": "skipped",
+        "started_at": "2026-04-11T07:55:26Z",
+        "completed_at": "2026-04-11T07:55:25Z",
+        "output_title": null,
+        "output_summary": ""
+      },
+      {
+        "name": "🚀 预览站→主站 一键推送",
+        "status": "completed",
+        "conclusion": "skipped",
+        "started_at": "2026-04-11T07:55:25Z",
+        "completed_at": "2026-04-11T07:55:25Z",
+        "output_title": null,
+        "output_summary": ""
+      },
+      {
+        "name": "🔒 SSL证书配置",
+        "status": "completed",
+        "conclusion": "skipped",
+        "started_at": "2026-04-11T07:55:25Z",
+        "completed_at": "2026-04-11T07:55:25Z",
+        "output_title": null,
+        "output_summary": ""
+      },
+      {
+        "name": "🔧 服务器初始化",
+        "status": "completed",
+        "conclusion": "skipped",
+        "started_at": "2026-04-11T07:55:25Z",
+        "completed_at": "2026-04-11T07:55:25Z",
+        "output_title": null,
+        "output_summary": ""
+      },
+      {
+        "name": "deploy",
+        "status": "in_progress",
+        "conclusion": null,
+        "started_at": "2026-04-11T07:55:30Z",
+        "completed_at": null,
+        "output_title": null,
+        "output_summary": ""
+      },
       {
         "name": "build",
         "status": "in_progress",
         "conclusion": null,
-        "started_at": "2026-04-11T06:49:03Z",
+        "started_at": "2026-04-11T07:55:30Z",
+        "completed_at": null,
+        "output_title": null,
+        "output_summary": ""
+      },
+      {
+        "name": "🚀 部署应用代码",
+        "status": "in_progress",
+        "conclusion": null,
+        "started_at": "2026-04-11T07:55:28Z",
+        "completed_at": null,
+        "output_title": null,
+        "output_summary": ""
+      },
+      {
+        "name": "update-readme",
+        "status": "in_progress",
+        "conclusion": null,
+        "started_at": "2026-04-11T07:55:28Z",
         "completed_at": null,
         "output_title": null,
         "output_summary": ""
@@ -34,7 +106,7 @@
         "name": "📡 Bridge E · GitHub Changes → Notion",
         "status": "in_progress",
         "conclusion": null,
-        "started_at": "2026-04-11T06:49:02Z",
+        "started_at": "2026-04-11T07:55:28Z",
         "completed_at": null,
         "output_title": null,
         "output_summary": ""
