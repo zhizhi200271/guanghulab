@@ -51,11 +51,12 @@ module.exports = {
       watch: false,
       max_memory_restart: '512M',
       env: {
+        ...appEnv,
+        // 实例专属配置放在 ...appEnv 之后，确保不被 .env.app 中的值覆盖
         NODE_ENV: 'production',
         PORT: 3800,
         ZY_ROOT: '/opt/zhuyuan',
-        ZY_SITE_MODE: 'production',
-        ...appEnv
+        ZY_SITE_MODE: 'production'
       },
       log_file: '/opt/zhuyuan/data/logs/pm2-combined.log',
       error_file: '/opt/zhuyuan/data/logs/pm2-error.log',
@@ -73,11 +74,13 @@ module.exports = {
       watch: false,
       max_memory_restart: '256M',
       env: {
+        ...appEnv,
+        // 实例专属配置放在 ...appEnv 之后，确保不被 .env.app 中的值覆盖
+        // .env.app 中的 PORT=3800 和 ZY_SITE_MODE=production 不能覆盖预览实例的值
         NODE_ENV: 'production',
         PORT: 3801,
         ZY_ROOT: '/opt/zhuyuan',
-        ZY_SITE_MODE: 'preview',
-        ...appEnv
+        ZY_SITE_MODE: 'preview'
       },
       log_file: '/opt/zhuyuan/data/logs/pm2-preview-combined.log',
       error_file: '/opt/zhuyuan/data/logs/pm2-preview-error.log',
