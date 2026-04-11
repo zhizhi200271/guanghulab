@@ -187,33 +187,55 @@ jobs:
           TARGET_DIR="/opt/zhuyuan/sites/${TARGET}"
           echo "🌐 同步前端 → ${TARGET_DIR}"
 
-          # 同步 docs/ 目录下的前端文件到站点目录
-          # 排除不需要的文件(markdown文档、CNAME等)
-          rsync -avz --delete \
-            -e "ssh -i ~/.ssh/zy_key" \
-            --exclude='CNAME' \
-            --exclude='*.md' \
-            --exclude='.nojekyll' \
-            --exclude='ontology/' \
-            --exclude='daily-reports/' \
-            --exclude='dashboard/' \
-            --exclude='dev-portal/' \
-            docs/ \
-            ${{ secrets.ZY_SERVER_USER }}@${{ secrets.ZY_SERVER_HOST }}:${TARGET_DIR}/
+          # 确保零点原核频道目录存在
+          ssh -i ~/.ssh/zy_key \
+            ${{ secrets.ZY_SERVER_USER }}@${{ secrets.ZY_SERVER_HOST }} \
+            "mkdir -p /opt/zhuyuan/sites/yaoming"
 
-          echo "✅ 前端内容已部署到 ${TARGET_DIR}"
+          # 同步主站门户 (server/sites/portal/) 到目标站点目录
+          if [ -d "server/sites/portal" ]; then
+            rsync -avz --delete \
+              -e "ssh -i ~/.ssh/zy_key" \
+              server/sites/portal/ \
+              ${{ secrets.ZY_SERVER_USER }}@${{ secrets.ZY_SERVER_HOST }}:${TARGET_DIR}/
+            echo "✅ 主站门户已部署到 ${TARGET_DIR}"
+          else
+            # 降级: 使用 docs/ 目录
+            rsync -avz --delete \
+              -e "ssh -i ~/.ssh/zy_key" \
+              --exclude='CNAME' \
+              --exclude='*.md' \
+              --exclude='.nojekyll' \
+              --exclude='ontology/' \
+              --exclude='daily-reports/' \
+              --exclude='dashboard/' \
+              --exclude='dev-portal/' \
+              docs/ \
+              ${{ secrets.ZY_SERVER_USER }}@${{ secrets.ZY_SERVER_HOST }}:${TARGET_DIR}/
+            echo "✅ 前端内容(docs/)已部署到 ${TARGET_DIR}"
+          fi
+
+          # 同步零点原核频道 (server/sites/yaoming/) 到 yaoming 目录
+          if [ -d "server/sites/yaoming" ]; then
+            rsync -avz --delete \
+              -e "ssh -i ~/.ssh/zy_key" \
+              server/sites/yaoming/ \
+              ${{ secrets.ZY_SERVER_USER }}@${{ secrets.ZY_SERVER_HOST }}:/opt/zhuyuan/sites/yaoming/
+            echo "✅ 零点原核频道已部署到 /opt/zhuyuan/sites/yaoming/"
+          fi
 
       - name: 📦 同步配置文件
         env:
           ZY_DOMAIN_MAIN: ${{ secrets.ZY_DOMAIN_MAIN }}
           ZY_DOMAIN_PREVIEW: ${{ secrets.ZY_DOMAIN_PREVIEW }}
+          ZY_FACE_DOMAIN: ${{ secrets.ZY_FACE_DOMAIN }}
         run: |
           # PM2 配置
           scp -i ~/.ssh/zy_key \
             server/ecosystem.config.js \
             ${{ secrets.ZY_SERVER_USER }}@${{ secrets.ZY_SERVER_HOST }}:/opt/zhuyuan/config/pm2/
 
-          # Nginx 配置 — 注入域名
+          # Nginx 配置 — 主站 · 注入域名
           cp server/nginx/zhuyuan-sovereign.conf /tmp/zhuyuan-sovereign.conf
           if [ -n "$ZY_DOMAIN_MAIN" ]; then
             sed -i "s/ZY_DOMAIN_MAIN_PLACEHOLDER/$ZY_DOMAIN_MAIN/g" /tmp/zhuyuan-sovereign.conf
@@ -241,6 +263,22 @@ jobs:
           scp -i ~/.ssh/zy_key \
             /tmp/zhuyuan-sovereign.conf \
             ${{ secrets.ZY_SERVER_USER }}@${{ secrets.ZY_SERVER_HOST }}:/opt/zhuyuan/config/nginx/zhuyuan-sovereign.conf
+
+          # Nginx 配置 — 零点原核频道 · 注入域名
+          if [ -f "server/nginx/guanghuyaoming.conf" ]; then
+            cp server/nginx/guanghuyaoming.conf /tmp/guanghuyaoming.conf
+            if [ -n "$ZY_FACE_DOMAIN" ]; then
+              sed -i "s/ZY_FACE_DOMAIN_PLACEHOLDER/$ZY_FACE_DOMAIN/g" /tmp/guanghuyaoming.conf
+              echo "✅ 零点原核域名已注入: $ZY_FACE_DOMAIN"
+            else
+              echo "⚠️ ZY_FACE_DOMAIN 未配置，零点原核频道使用默认server_name"
+              sed -i "s/ZY_FACE_DOMAIN_PLACEHOLDER/_/g" /tmp/guanghuyaoming.conf
+            fi
+            scp -i ~/.ssh/zy_key \
+              /tmp/guanghuyaoming.conf \
+              ${{ secrets.ZY_SERVER_USER }}@${{ secrets.ZY_SERVER_HOST }}:/opt/zhuyuan/config/nginx/guanghuyaoming.conf
+            echo "✅ 零点原核Nginx配置已上传"
+          fi
 
       - name: 📦 同步迁移脚本
         run: |
@@ -281,6 +319,13 @@ jobs:
           # 复制Nginx配置
           sudo cp /opt/zhuyuan/config/nginx/zhuyuan-sovereign.conf /etc/nginx/sites-available/zhuyuan.conf
           sudo ln -sf /etc/nginx/sites-available/zhuyuan.conf /etc/nginx/sites-enabled/zhuyuan.conf
+
+          # 零点原核频道Nginx配置
+          if [ -f "/opt/zhuyuan/config/nginx/guanghuyaoming.conf" ]; then
+            sudo cp /opt/zhuyuan/config/nginx/guanghuyaoming.conf /etc/nginx/sites-available/guanghuyaoming.conf
+            sudo ln -sf /etc/nginx/sites-available/guanghuyaoming.conf /etc/nginx/sites-enabled/guanghuyaoming.conf
+            echo "✅ 零点原核Nginx配置已启用"
+          fi
 
           # 移除默认配置文件，避免 duplicate default_server 冲突
           # zhuyuan.conf 已声明 listen 80 default_server，不能与 default 文件共存

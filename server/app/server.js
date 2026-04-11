@@ -66,13 +66,18 @@ app.use((req, res, next) => {
 });
 
 // ─── 加载模块 ───
-let cosBridge, smartRouter, chatEngine;
+let cosBridge, smartRouter, chatEngine, domesticGateway;
 try {
   cosBridge = require('./modules/cos-bridge');
   smartRouter = require('./modules/smart-router');
   chatEngine = require('./modules/chat-engine');
 } catch (err) {
   console.error(`模块加载警告: ${err.message}`);
+}
+try {
+  domesticGateway = require('./modules/domestic-llm-gateway');
+} catch (err) {
+  console.error(`国内模型网关加载警告: ${err.message}`);
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -287,9 +292,59 @@ app.post('/api/chat', async (req, res) => {
 // ─── 聊天统计 ───
 app.get('/api/chat/stats', (_req, res) => {
   if (chatEngine) {
-    res.json(chatEngine.getChatStats());
+    const stats = chatEngine.getChatStats();
+    // 合并国内网关统计
+    if (domesticGateway) {
+      stats.domesticGateway = domesticGateway.getGatewayStats();
+    }
+    res.json(stats);
   } else {
-    res.json({ activeUsers: 0, modelUsage: {}, pricing: {} });
+    const stats = { activeUsers: 0, modelUsage: {}, pricing: {} };
+    if (domesticGateway) {
+      stats.domesticGateway = domesticGateway.getGatewayStats();
+    }
+    res.json(stats);
+  }
+});
+
+// ─── 国内模型智能对话（独立线路） ───
+app.post('/api/chat/domestic', async (req, res) => {
+  try {
+    const { message, userId } = req.body;
+    if (!message) {
+      return res.status(400).json({ error: true, message: '消息不能为空' });
+    }
+
+    const sessionId = userId || `guest-${req.ip.replace(/[.:]/g, '-')}`;
+
+    if (domesticGateway) {
+      const result = await domesticGateway.chat(sessionId, message);
+      res.json({ ...result, sessionId });
+    } else {
+      // 降级到通用聊天引擎
+      if (chatEngine) {
+        const result = await chatEngine.chat(sessionId, message);
+        res.json({ success: true, ...result, sessionId });
+      } else {
+        res.json({
+          success: true,
+          message: '💫 铸渊正在唤醒中...国内模型网关尚未加载。',
+          model: 'offline',
+          sessionId
+        });
+      }
+    }
+  } catch (err) {
+    res.status(500).json({ error: true, message: err.message });
+  }
+});
+
+// ─── 国内模型网关状态 ───
+app.get('/api/chat/domestic/stats', (_req, res) => {
+  if (domesticGateway) {
+    res.json(domesticGateway.getGatewayStats());
+  } else {
+    res.json({ available: false, message: '国内模型网关未加载' });
   }
 });
 
