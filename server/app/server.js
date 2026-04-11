@@ -38,6 +38,10 @@ const PORT = process.env.PORT || 3800;
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
+// ─── 信任代理 (Nginx反代 → Express正确读取客户端IP) ───
+// 冰朔 D67 实机排查: 缺少此行会导致 express-rate-limit 无法获取真实IP → PM2崩溃
+app.set('trust proxy', 1);
+
 // ─── 速率限制 ───
 const rateLimit = require('express-rate-limit');
 

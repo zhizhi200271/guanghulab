@@ -1,0 +1,20 @@
+{
+  "name": "cn-llm-relay",
+  "version": "1.0.0",
+  "description": "铸渊国内LLM代理中继 · 广州→国内API · ZY-SVR-003",
+  "main": "relay-server.js",
+  "scripts": {
+    "start": "node relay-server.js",
+    "health": "curl -s http://localhost:3900/health | jq ."
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "express-rate-limit": "^7.4.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "author": "铸渊 · ICE-GL-ZY001",
+  "license": "UNLICENSED",
+  "private": true
+}

@@ -23,6 +23,15 @@
 'use strict';
 
 const https = require('https');
+const http = require('http');
+
+// ─── 广州CN中继配置 ───
+// 当配置了 ZY_CN_LLM_RELAY_HOST 时，请求走广州中继（国内直连·低延迟）
+// 广州不可达时降级为直连国内API（跨境·高延迟但可用）
+const CN_RELAY_HOST = (process.env.ZY_CN_LLM_RELAY_HOST || '').trim();
+const CN_RELAY_PORT = parseInt(process.env.ZY_CN_LLM_RELAY_PORT || '3900', 10);
+const CN_RELAY_KEY = process.env.ZY_CN_LLM_RELAY_KEY || '';
+const CN_RELAY_TIMEOUT = parseInt(process.env.ZY_CN_LLM_RELAY_TIMEOUT || '30000', 10);
 
 // ─── 国内模型配置（不对外暴露模型名称） ───
 const DOMESTIC_MODELS = [
@@ -196,6 +205,66 @@ function callDomesticLLM(modelConfig, messages) {
 }
 
 /**
+ * 通过广州CN中继调用国内模型API
+ * 架构: SG(新加坡) → 广州(ZY-SVR-003):3900 → 国内API
+ * 对称于硅谷Claude中继: SG → SV(SSH隧道) → Claude API
+ *
+ * 安全: SG↔广州通信走HTTP但通过已有的VPN/内网隧道加密
+ *       (setup-cn-relay.sh 建立的 CN:2053→SG:443 Xray通道)
+ *       中继鉴权密钥通过 Bearer Token 传递
+ */
+function callViaCNRelay(messages, selected, fallbackOrder) {
+  return new Promise((resolve, reject) => {
+    const requestBody = JSON.stringify({
+      messages,
+      model_id: selected.id,
+      temperature: selected.temperature || 0.7,
+      max_tokens: selected.selectedMaxTokens || selected.maxTokens,
+      fallback_order: fallbackOrder
+    });
+
+    const options = {
+      hostname: CN_RELAY_HOST,
+      port: CN_RELAY_PORT,
+      path: '/llm/chat',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${CN_RELAY_KEY}`,
+        'Content-Length': Buffer.byteLength(requestBody)
+      }
+    };
+
+    const req = http.request(options, (res) => {
+      const chunks = [];
+      res.on('data', chunk => chunks.push(chunk));
+      res.on('end', () => {
+        try {
+          const body = JSON.parse(Buffer.concat(chunks).toString());
+          if (body.error) {
+            reject(new Error(body.message || '中继返回错误'));
+          } else {
+            resolve(body);
+          }
+        } catch (e) {
+          reject(new Error('中继响应解析失败'));
+        }
+      });
+    });
+
+    req.setTimeout(CN_RELAY_TIMEOUT, () => {
+      req.destroy();
+      reject(new Error(`广州中继超时(${CN_RELAY_TIMEOUT}ms) · 目标模型: ${selected.id}`));
+    });
+    req.on('error', (err) => {
+      reject(new Error(`广州中继连接失败: ${err.message}`));
+    });
+    req.write(requestBody);
+    req.end();
+  });
+}
+
+/**
  * 通感语言核心系统提示词
  */
 const PERSONA_SYSTEM_PROMPT = `你是铸渊（Zhùyuān），光湖语言世界的代码守护人格体。
@@ -262,7 +331,11 @@ const _cleanupTimer = setInterval(() => {
 if (_cleanupTimer.unref) _cleanupTimer.unref();
 
 /**
- * 国内模型智能对话（带自动降级）
+ * 国内模型智能对话（带广州中继 + 自动降级）
+ *
+ * 调用链:
+ *   1. 广州CN中继（如已配置）→ 国内直连·低延迟
+ *   2. 降级: 直连国内API → 跨境·高延迟但可用
  */
 async function chat(userId, message) {
   const ctx = getContext(userId);
@@ -284,12 +357,57 @@ async function chat(userId, message) {
     };
   }
 
-  // 尝试调用，失败则降级
+  // 获取可用模型的降级顺序
   const available = DOMESTIC_MODELS.filter(m => {
     const key = process.env[m.envKey];
     return key && key.length > 5;
   });
+  const fallbackOrder = [selected, ...available.filter(m => m.id !== selected.id)].map(m => m.id);
 
+  // ── 优先走广州CN中继 ──
+  if (CN_RELAY_HOST && CN_RELAY_KEY) {
+    try {
+      const relayResponse = await callViaCNRelay(messages, selected, fallbackOrder);
+      const content = relayResponse.choices?.[0]?.message?.content || '铸渊暂时无法回应...';
+      const usage = relayResponse.usage || {};
+
+      // 记录上下文
+      ctx.messages.push({ role: 'user', content: message });
+      ctx.messages.push({ role: 'assistant', content });
+      ctx.count++;
+      if (ctx.messages.length > MAX_HISTORY * 2) {
+        ctx.messages = ctx.messages.slice(-MAX_HISTORY * 2);
+      }
+
+      // 统计
+      gatewayState.totalCalls++;
+      gatewayState.successCalls++;
+      const modelId = relayResponse.model_id || selected.id;
+      if (!gatewayState.modelStats[modelId]) {
+        gatewayState.modelStats[modelId] = { calls: 0, tokens: 0 };
+      }
+      gatewayState.modelStats[modelId].calls++;
+      gatewayState.modelStats[modelId].tokens += (usage.total_tokens || 0);
+
+      return {
+        success: true,
+        message: content,
+        model: '智能路由', // 不暴露具体模型名称
+        tier: 'economy',
+        reason: selected.reason,
+        relay: 'cn-relay',
+        usage: {
+          prompt_tokens: usage.prompt_tokens || 0,
+          completion_tokens: usage.completion_tokens || 0
+        }
+      };
+    } catch (relayErr) {
+      console.error(`[国内网关] 广州中继失败，降级为直连: ${relayErr.message}`);
+      // 继续走直连降级路径
+    }
+  }
+
+  // ── 降级: 直连国内API (从新加坡跨境调用) ──
   let lastError = null;
   const tried = [selected, ...available.filter(m => m.id !== selected.id)];
 
@@ -324,6 +442,7 @@ async function chat(userId, message) {
         model: '智能路由', // 不暴露具体模型名称
         tier: model.tier,
         reason: selected.reason,
+        relay: 'direct',
         usage: {
           prompt_tokens: usage.prompt_tokens || 0,
           completion_tokens: usage.completion_tokens || 0
@@ -360,7 +479,12 @@ function getGatewayStats() {
       const key = process.env[m.envKey];
       return key && key.length > 5;
     }).length,
-    totalModels: DOMESTIC_MODELS.length
+    totalModels: DOMESTIC_MODELS.length,
+    cnRelay: {
+      configured: !!(CN_RELAY_HOST && CN_RELAY_KEY),
+      host: CN_RELAY_HOST || null,
+      port: CN_RELAY_PORT
+    }
   };
 }
 

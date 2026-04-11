@@ -304,6 +304,8 @@ jobs:
           ZY_OSS_SECRET: ${{ secrets.ZY_OSS_SECRET }}
           ZY_COS_REGION: ${{ secrets.ZY_COS_REGION }}
           ZY_NOTION_TOKEN: ${{ secrets.ZY_NOTION_TOKEN }}
+          ZY_CN_LLM_RELAY_HOST: ${{ secrets.ZY_CN_LLM_RELAY_HOST }}
+          ZY_CN_LLM_RELAY_KEY: ${{ secrets.ZY_CN_LLM_RELAY_KEY }}
         run: |
           COMMIT_SHA="${{ github.sha }}"
           REF_NAME="${{ github.ref_name }}"
@@ -326,6 +328,15 @@ jobs:
           echo "ZY_KIMI_API_KEY=${ZY_KIMI_API_KEY}" >> /opt/zhuyuan/app/.env.app
           echo "ZY_QINGYAN_API_KEY=${ZY_QINGYAN_API_KEY}" >> /opt/zhuyuan/app/.env.app
           echo "ZY_NOTION_TOKEN=${ZY_NOTION_TOKEN}" >> /opt/zhuyuan/app/.env.app
+          # ─── 广州CN中继配置（可选·配置后国内API走广州中继） ───
+          if [ -n "${ZY_CN_LLM_RELAY_HOST}" ]; then
+            echo "ZY_CN_LLM_RELAY_HOST=${ZY_CN_LLM_RELAY_HOST}" >> /opt/zhuyuan/app/.env.app
+            echo "ZY_CN_LLM_RELAY_KEY=${ZY_CN_LLM_RELAY_KEY}" >> /opt/zhuyuan/app/.env.app
+            echo "ZY_CN_LLM_RELAY_PORT=3900" >> /opt/zhuyuan/app/.env.app
+            echo "✅ 广州CN中继已配置: ${ZY_CN_LLM_RELAY_HOST}:3900"
+          else
+            echo "ℹ️ 广州CN中继未配置·国内API走直连"
+          fi
           chmod 600 /opt/zhuyuan/app/.env.app
 
           # 复制Nginx配置
@@ -345,8 +356,9 @@ jobs:
 
           sudo nginx -t && sudo systemctl reload nginx
 
-          # PM2 重启 · 主应用
+          # PM2 重启 · 主应用 + 预览进程 (两个都要清理·否则残留errored进程导致502)
           pm2 delete zhuyuan-server 2>/dev/null || true
+          pm2 delete zhuyuan-preview 2>/dev/null || true
           pm2 start /opt/zhuyuan/config/pm2/ecosystem.config.js
           pm2 save
 
@@ -396,13 +408,15 @@ jobs:
           cd /opt/age-os && pm2 start ecosystem.config.js
           pm2 save
 
-          # 健康检查
+          # 健康检查 · 主应用(3800) + 预览进程(3801) + MCP(3100)
           sleep 3
           curl -sf http://localhost:3800/api/health || echo "⚠️ 主应用健康检查失败，等待更长时间..."
+          curl -sf http://localhost:3801/api/health || echo "⚠️ 预览进程健康检查失败，等待更长时间..."
           curl -sf http://localhost:3100/health || echo "⚠️ MCP Server健康检查失败，等待更长时间..."
           sleep 5
-          curl -sf http://localhost:3800/api/health && echo "✅ 主应用已上线" || echo "❌ 主应用启动失败"
-          curl -sf http://localhost:3100/health && echo "✅ MCP Server已上线" || echo "❌ MCP Server启动失败"
+          curl -sf http://localhost:3800/api/health && echo "✅ 主应用已上线 (3800)" || echo "❌ 主应用启动失败 (3800)"
+          curl -sf http://localhost:3801/api/health && echo "✅ 预览进程已上线 (3801)" || echo "❌ 预览进程启动失败 (3801) · guanghulab.online 可能502"
+          curl -sf http://localhost:3100/health && echo "✅ MCP Server已上线 (3100)" || echo "❌ MCP Server启动失败 (3100)"
 
           # 记录部署操作
           curl -sf -X POST http://localhost:3800/api/operations \

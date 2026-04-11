@@ -1,0 +1,174 @@
+name: 🇨🇳 CN LLM中继 · 部署
+
+# ═══════════════════════════════════════════════════════════
+# 广州国内LLM API中继服务部署
+# 编号: ZY-WF-CN-RELAY
+# 服务器: ZY-SVR-003 · 43.138.243.30 · 广州
+# 守护: 铸渊 · ICE-GL-ZY001
+# 版权: 国作登字-2026-A-00037559
+#
+# 功能: 将 cn-llm-relay 代理服务部署到广州服务器
+#       注入国内LLM API密钥 + 中继鉴权密钥
+#       PM2 守护进程管理
+# ═══════════════════════════════════════════════════════════
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: '部署动作'
+        required: true
+        default: 'deploy'
+        type: choice
+        options:
+          - deploy
+          - health-check
+          - restart
+
+concurrency:
+  group: cn-llm-relay-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: 🚀 部署CN中继
+    if: github.event.inputs.action == 'deploy' || github.event.inputs.action == ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 🔐 配置SSH
+        env:
+          SSH_KEY: ${{ secrets.ZY_CN_LLM_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/cn_key
+          chmod 600 ~/.ssh/cn_key
+          if head -1 ~/.ssh/cn_key | grep -q "BEGIN" && tail -1 ~/.ssh/cn_key | grep -q "END"; then
+            echo "✅ SSH私钥格式正确"
+          else
+            echo "❌ SSH私钥格式异常 — 请检查 ZY_CN_LLM_KEY"
+            exit 1
+          fi
+          ssh-keyscan -H ${{ secrets.ZY_CN_LLM_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: 📦 同步代码到广州
+        run: |
+          rsync -avz --delete \
+            -e "ssh -i ~/.ssh/cn_key" \
+            --exclude='node_modules' \
+            --exclude='.env.relay' \
+            --exclude='logs' \
+            server/cn-llm-relay/ \
+            ${{ secrets.ZY_CN_LLM_USER }}@${{ secrets.ZY_CN_LLM_HOST }}:/opt/cn-llm-relay/
+
+      - name: 📥 安装依赖 & 配置 & 启动
+        env:
+          ZY_DEEPSEEK_API_KEY: ${{ secrets.ZY_DEEPSEEK_API_KEY }}
+          ZY_QIANWEN_API_KEY: ${{ secrets.ZY_QIANWEN_API_KEY }}
+          ZY_KIMI_API_KEY: ${{ secrets.ZY_KIMI_API_KEY }}
+          ZY_QINGYAN_API_KEY: ${{ secrets.ZY_QINGYAN_API_KEY }}
+          ZY_CN_RELAY_API_KEY: ${{ secrets.ZY_CN_LLM_RELAY_KEY }}
+        run: |
+          ssh -i ~/.ssh/cn_key \
+            ${{ secrets.ZY_CN_LLM_USER }}@${{ secrets.ZY_CN_LLM_HOST }} << 'DEPLOY_CMD'
+
+          set -e
+          cd /opt/cn-llm-relay
+
+          # 创建日志目录
+          mkdir -p /opt/cn-llm-relay/logs
+
+          # 安装依赖
+          npm install --production 2>&1
+
+          DEPLOY_CMD
+
+          # 写入环境变量（在本地构建后通过SSH写入，避免heredoc变量展开问题）
+          ssh -i ~/.ssh/cn_key \
+            ${{ secrets.ZY_CN_LLM_USER }}@${{ secrets.ZY_CN_LLM_HOST }} \
+            "cat > /opt/cn-llm-relay/.env.relay << 'ENVEOF'
+          RELAY_PORT=3900
+          ZY_CN_RELAY_API_KEY=${ZY_CN_RELAY_API_KEY}
+          ZY_DEEPSEEK_API_KEY=${ZY_DEEPSEEK_API_KEY}
+          ZY_QIANWEN_API_KEY=${ZY_QIANWEN_API_KEY}
+          ZY_KIMI_API_KEY=${ZY_KIMI_API_KEY}
+          ZY_QINGYAN_API_KEY=${ZY_QINGYAN_API_KEY}
+          ENVEOF
+          chmod 600 /opt/cn-llm-relay/.env.relay"
+
+          # PM2 启动
+          ssh -i ~/.ssh/cn_key \
+            ${{ secrets.ZY_CN_LLM_USER }}@${{ secrets.ZY_CN_LLM_HOST }} << 'PM2_CMD'
+          set -e
+          cd /opt/cn-llm-relay
+          pm2 delete cn-llm-relay 2>/dev/null || true
+          pm2 start ecosystem.config.js
+          pm2 save
+
+          # 健康检查
+          sleep 3
+          HEALTH_RESULT=$(curl -s http://127.0.0.1:3900/health 2>/dev/null || echo "")
+          if [ -n "$HEALTH_RESULT" ]; then
+            echo "✅ CN LLM Relay 健康检查通过"
+            echo "$HEALTH_RESULT" | head -c 500
+          else
+            echo "⚠️ 健康检查未通过 · 查看日志"
+            pm2 logs cn-llm-relay --lines 20 --nostream
+          fi
+          PM2_CMD
+
+  health-check:
+    name: 🩺 健康检查
+    if: github.event.inputs.action == 'health-check'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🔐 配置SSH
+        env:
+          SSH_KEY: ${{ secrets.ZY_CN_LLM_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/cn_key
+          chmod 600 ~/.ssh/cn_key
+          ssh-keyscan -H ${{ secrets.ZY_CN_LLM_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: 🩺 检查服务状态
+        run: |
+          ssh -i ~/.ssh/cn_key \
+            ${{ secrets.ZY_CN_LLM_USER }}@${{ secrets.ZY_CN_LLM_HOST }} << 'CMD'
+          echo "═══ PM2 状态 ═══"
+          pm2 list
+          echo ""
+          echo "═══ 健康检查 ═══"
+          curl -s http://127.0.0.1:3900/health || echo "❌ 服务未响应"
+          echo ""
+          echo "═══ 最近日志 ═══"
+          pm2 logs cn-llm-relay --lines 10 --nostream 2>/dev/null || echo "无日志"
+          CMD
+
+  restart:
+    name: 🔄 重启服务
+    if: github.event.inputs.action == 'restart'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🔐 配置SSH
+        env:
+          SSH_KEY: ${{ secrets.ZY_CN_LLM_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/cn_key
+          chmod 600 ~/.ssh/cn_key
+          ssh-keyscan -H ${{ secrets.ZY_CN_LLM_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: 🔄 重启
+        run: |
+          ssh -i ~/.ssh/cn_key \
+            ${{ secrets.ZY_CN_LLM_USER }}@${{ secrets.ZY_CN_LLM_HOST }} << 'CMD'
+          cd /opt/cn-llm-relay
+          pm2 restart cn-llm-relay
+          sleep 2
+          curl -s http://127.0.0.1:3900/health || echo "❌ 重启后服务未响应"
+          CMD
