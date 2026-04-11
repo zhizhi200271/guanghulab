@@ -228,7 +228,6 @@ jobs:
         env:
           ZY_DOMAIN_MAIN: ${{ secrets.ZY_DOMAIN_MAIN }}
           ZY_DOMAIN_PREVIEW: ${{ secrets.ZY_DOMAIN_PREVIEW }}
-          ZY_DOMAIN_ALIAS: ${{ secrets.ZY_DOMAIN_ALIAS }}
           ZY_FACE_DOMAIN: ${{ secrets.ZY_FACE_DOMAIN }}
         run: |
           # PM2 配置
@@ -244,14 +243,6 @@ jobs:
           else
             echo "⚠️ ZY_DOMAIN_MAIN 未配置，使用IP访问"
             sed -i "s/ZY_DOMAIN_MAIN_PLACEHOLDER//g" /tmp/zhuyuan-sovereign.conf
-          fi
-          # 域名别名 (guanghulab.com 等) — 与主域名共享同一 server block
-          if [ -n "$ZY_DOMAIN_ALIAS" ]; then
-            sed -i "s/ZY_DOMAIN_ALIAS_PLACEHOLDER/$ZY_DOMAIN_ALIAS/g" /tmp/zhuyuan-sovereign.conf
-            echo "✅ 域名别名已注入: $ZY_DOMAIN_ALIAS"
-          else
-            # 未配置别名时移除占位符
-            sed -i "s/ZY_DOMAIN_ALIAS_PLACEHOLDER//g" /tmp/zhuyuan-sovereign.conf
           fi
           if [ -n "$ZY_DOMAIN_PREVIEW" ]; then
             sed -i "s/ZY_DOMAIN_PREVIEW_PLACEHOLDER/$ZY_DOMAIN_PREVIEW/g" /tmp/zhuyuan-sovereign.conf
@@ -316,7 +307,6 @@ jobs:
           ZY_CN_LLM_RELAY_HOST: ${{ secrets.ZY_CN_LLM_RELAY_HOST }}
           ZY_CN_LLM_RELAY_KEY: ${{ secrets.ZY_CN_LLM_RELAY_KEY }}
           ZY_DOMAIN_MAIN: ${{ secrets.ZY_DOMAIN_MAIN }}
-          ZY_DOMAIN_ALIAS: ${{ secrets.ZY_DOMAIN_ALIAS }}
           ZY_DOMAIN_PREVIEW: ${{ secrets.ZY_DOMAIN_PREVIEW }}
           ZY_FACE_DOMAIN: ${{ secrets.ZY_FACE_DOMAIN }}
         run: |
@@ -436,7 +426,7 @@ jobs:
           echo ""
           echo "═══ DNS 诊断 ═══"
           SERVER_IP="43.134.16.246"
-          for DOMAIN in "${ZY_DOMAIN_MAIN}" "${ZY_DOMAIN_ALIAS}" "${ZY_DOMAIN_PREVIEW}" "${ZY_FACE_DOMAIN}"; do
+          for DOMAIN in "${ZY_DOMAIN_MAIN}" "${ZY_DOMAIN_PREVIEW}" "${ZY_FACE_DOMAIN}"; do
             if [ -n "$DOMAIN" ] && [ "$DOMAIN" != "_" ]; then
               RESOLVED=$(dig +short "$DOMAIN" A 2>/dev/null | head -1)
               if [ -z "$RESOLVED" ]; then
@@ -448,6 +438,24 @@ jobs:
               fi
             fi
           done
+          echo "═══════════════════"
+
+          # LLM API 密钥诊断 · 检查聊天功能所需密钥
+          echo ""
+          echo "═══ 聊天API密钥诊断 ═══"
+          LLM_KEY_COUNT=0
+          for KEY_NAME in ZY_DEEPSEEK_API_KEY ZY_QIANWEN_API_KEY ZY_KIMI_API_KEY ZY_QINGYAN_API_KEY; do
+            if grep -q "${KEY_NAME}=.\{6,\}" /opt/zhuyuan/app/.env.app 2>/dev/null; then
+              echo "✅ ${KEY_NAME}: 已配置"
+              LLM_KEY_COUNT=$((LLM_KEY_COUNT + 1))
+            else
+              echo "❌ ${KEY_NAME}: 未配置或为空 · 人格体对话功能受影响"
+            fi
+          done
+          echo "可用国内模型数: ${LLM_KEY_COUNT}/4"
+          if [ "$LLM_KEY_COUNT" -eq 0 ]; then
+            echo "⚠️ 警告: 所有国内模型API密钥未配置 · 聊天功能将不可用"
+          fi
           echo "═══════════════════"
 
           # Nginx 配置诊断 · 检查 server_name 冲突
@@ -540,13 +548,12 @@ jobs:
       - name: 🌐 DNS 域名解析检查
         env:
           ZY_DOMAIN_MAIN: ${{ secrets.ZY_DOMAIN_MAIN }}
-          ZY_DOMAIN_ALIAS: ${{ secrets.ZY_DOMAIN_ALIAS }}
           ZY_DOMAIN_PREVIEW: ${{ secrets.ZY_DOMAIN_PREVIEW }}
           ZY_FACE_DOMAIN: ${{ secrets.ZY_FACE_DOMAIN }}
         run: |
           echo "═══ DNS 域名解析诊断 ═══"
           SERVER_IP="43.134.16.246"
-          for DOMAIN in "$ZY_DOMAIN_MAIN" "$ZY_DOMAIN_ALIAS" "$ZY_DOMAIN_PREVIEW" "$ZY_FACE_DOMAIN"; do
+          for DOMAIN in "$ZY_DOMAIN_MAIN" "$ZY_DOMAIN_PREVIEW" "$ZY_FACE_DOMAIN"; do
             if [ -n "$DOMAIN" ] && [ "$DOMAIN" != "_" ]; then
               RESOLVED=$(dig +short "$DOMAIN" A 2>/dev/null | head -1)
               if [ -z "$RESOLVED" ]; then
