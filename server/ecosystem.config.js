@@ -52,7 +52,7 @@ module.exports = {
       max_memory_restart: '512M',
       env: {
         ...appEnv,
-        // 实例专属配置放在 ...appEnv 之后，确保不被 .env.app 中的值覆盖
+        // ⚠️ 实例专属值必须在 ...appEnv 之后 · 覆盖 .env.app 中可能残留的 PORT/ZY_SITE_MODE
         NODE_ENV: 'production',
         PORT: 3800,
         ZY_ROOT: '/opt/zhuyuan',
@@ -75,8 +75,7 @@ module.exports = {
       max_memory_restart: '256M',
       env: {
         ...appEnv,
-        // 实例专属配置放在 ...appEnv 之后，确保不被 .env.app 中的值覆盖
-        // .env.app 中的 PORT=3800 和 ZY_SITE_MODE=production 不能覆盖预览实例的值
+        // ⚠️ 实例专属值必须在 ...appEnv 之后 · 预览实例 PORT=3801 不能被 .env.app 的 PORT=3800 覆盖
         NODE_ENV: 'production',
         PORT: 3801,
         ZY_ROOT: '/opt/zhuyuan',
