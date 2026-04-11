@@ -602,7 +602,6 @@ setInterval(fetchStatus,60000);
 // ═══ 公告栏：从GitHub仓库拉取最新动态 ═══
 (async function loadBulletin(){
   const board=document.getElementById('bulletinBoard');
-  // 静态公告 + 尝试从GitHub API获取最新commit
   const staticBulletins=[
     {icon:'🚀',title:'AGE OS v51.0 正式发布',desc:'系统面板重构 · 4个大模型API确认上线 · 硅谷Claude节点接入 · COS存储桶2+1配置完成',time:'2026-04',tag:'deploy',tagText:'版本发布'},
     {icon:'🌳',title:'光之树架构上线',desc:'HLDP v3.0 · HNL母语词典v1.0 · 四枝干记忆结构 · 闭包表自动维护',time:'2026-03',tag:'sys',tagText:'架构升级'},
@@ -610,23 +609,39 @@ setInterval(fetchStatus,60000);
     {icon:'📝',title:'码字工作台内测中',desc:'沉浸式写作环境 · 智能大纲 · 角色管理 · 每日字数目标追踪 · 人格体陪伴',time:'2026-04',tag:'dev',tagText:'功能开发'},
     {icon:'🔗',title:'行业接入通道筹备',desc:'网文行业技术主控台 · Awen主导 · 频道化部署架构 · 每人一条专属通道',time:'2026-04',tag:'dev',tagText:'即将开放'},
   ];
-  // 尝试从GitHub API获取最新提交
+  // 尝试从GitHub API获取最新提交（带客户端缓存，避免速率限制）
+  const cacheKey='hololake-commits-cache';
+  const cacheTTL=300000; // 5分钟缓存
   try{
-    const res=await fetch('https://api.github.com/repos/qinfendebingshuo/guanghulab/commits?per_page=3',{
-      headers:{'Accept':'application/vnd.github.v3+json'}
-    });
-    if(res.ok){
-      const commits=await res.json();
-      const commitBulletins=commits.map(c=>({
-        icon:'📦',
-        title:c.commit.message.split('\n')[0].slice(0,60),
-        desc:'提交者: '+(c.commit.author?.name||'铸渊')+' · '+c.sha.slice(0,7),
-        time:c.commit.author?.date?.slice(0,10)||'',
-        tag:'hot',tagText:'最新提交'
-      }));
+    const cached=sessionStorage.getItem(cacheKey);
+    let commits;
+    if(cached){
+      const {data,ts}=JSON.parse(cached);
+      if(Date.now()-ts<cacheTTL){commits=data}
+    }
+    if(!commits){
+      const res=await fetch('https://api.github.com/repos/qinfendebingshuo/guanghulab/commits?per_page=3',{
+        headers:{'Accept':'application/vnd.github.v3+json'}
+      });
+      if(res.ok){
+        commits=await res.json();
+        sessionStorage.setItem(cacheKey,JSON.stringify({data:commits,ts:Date.now()}));
+      }
+    }
+    if(commits){
+      const commitBulletins=commits.map(c=>{
+        const msg=c.commit.message.split('\n')[0];
+        return{
+          icon:'📦',
+          title:msg.length>60?msg.slice(0,57)+'...':msg,
+          desc:'提交者: '+(c.commit.author?.name||'铸渊')+' · '+c.sha.slice(0,7),
+          time:c.commit.author?.date?.slice(0,10)||'',
+          tag:'hot',tagText:'最新提交'
+        };
+      });
       staticBulletins.unshift(...commitBulletins);
     }
-  }catch(e){/* GitHub API不可达时使用静态公告 */}
+  }catch(e){console.warn('[公告栏] GitHub API不可达，使用静态公告',e.message)}
 
   board.innerHTML=staticBulletins.map(b=>`
     <div class="bulletin-item">
