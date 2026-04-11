@@ -1,0 +1,23 @@
+{
+  "aoac_agent": "AOAC-04",
+  "aoac_agent_name": "readme-sync-module",
+  "payload_id": "AOAC-PAYLOAD-20260411-268",
+  "timestamp": "2026-04-11 23:34:04+08:00",
+  "timestamp_utc": "2026-04-11T15:34:04.968Z",
+  "source_report": "AOAC-CHAIN-20260411-879",
+  "updates": {
+    "aoac_section": "| AOAC-CHAIN-20260411-879 | PR #343 | fix: PM2 preview process restart + trust proxy + C | 0文件 +0/-0 | ❌ failure | 2026-04-11 22:54:31+08:00 |",
+    "progress_entries": [
+      {
+        "type": "dev_merge",
+        "title": "fix: PM2 preview process restart + trust proxy + CN LLM relay",
+        "result": "failure",
+        "timestamp": "2026-04-11 22:54:31+08:00"
+      }
+    ],
+    "status_badge": "❌"
+  },
+  "changes_summary": "CI: failure (✅0 ❌0)",
+  "trigger_master": true,
+  "next_agent": "AOAC-05 (readme-master-agent)"
+}
