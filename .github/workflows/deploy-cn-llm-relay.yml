@@ -62,11 +62,14 @@ jobs:
           fi
 
           # 显示密钥指纹用于调试（不泄露私钥内容）
-          ssh-keygen -l -f ~/.ssh/cn_key && echo "✅ 密钥指纹读取成功" || echo "⚠️ 无法读取密钥指纹"
+          ssh-keygen -l -f ~/.ssh/cn_key && echo "✅ 密钥指纹读取成功" || echo "⚠️ 无法读取密钥指纹 — 密钥可能格式异常，请检查 ZY_CN_LLM_KEY 或重新生成密钥对"
 
           # 写入 SSH config · 统一连接参数
-          cat > ~/.ssh/config << 'SSHCONF'
+          # 使用 heredoc 直接插值 Host/User（secrets 由 GitHub Actions 运行时注入，不会出现在日志中）
+          cat > ~/.ssh/config << SSHCONF
           Host cn-relay
+            HostName ${{ secrets.ZY_CN_LLM_HOST }}
+            User ${{ secrets.ZY_CN_LLM_USER }}
             StrictHostKeyChecking accept-new
             UserKnownHostsFile ~/.ssh/known_hosts
             IdentityFile ~/.ssh/cn_key
@@ -75,9 +78,6 @@ jobs:
             ServerAliveCountMax 3
             ConnectTimeout 30
           SSHCONF
-          # 注入实际 Host/User（避免 heredoc 内插值泄露）
-          sed -i "1a\\  HostName ${{ secrets.ZY_CN_LLM_HOST }}" ~/.ssh/config
-          sed -i "2a\\  User ${{ secrets.ZY_CN_LLM_USER }}" ~/.ssh/config
           chmod 600 ~/.ssh/config
 
           # 扫描主机公钥（不静默·便于排查）
@@ -91,7 +91,7 @@ jobs:
           ssh -vvv -o BatchMode=yes -o ConnectTimeout=15 \
             -i ~/.ssh/cn_key \
             ${{ secrets.ZY_CN_LLM_USER }}@${{ secrets.ZY_CN_LLM_HOST }} \
-            "echo '✅ SSH连接成功 · $(hostname) · $(date)'" \
+            "echo '✅ SSH连接成功 · $(hostname) · $(date)' && test -d /opt/cn-llm-relay && echo '✅ 部署目录存在' || echo '⚠️ /opt/cn-llm-relay 不存在·首次部署将自动创建'" \
             2>&1 || {
               echo ""
               echo "═══ SSH连接失败 · 排查方向 ═══"
