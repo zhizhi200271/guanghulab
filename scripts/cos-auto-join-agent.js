@@ -47,6 +47,9 @@ function hmacSha1(key, str) {
 }
 
 function generateCosAuth(secretId, secretKey, method, pathname, host) {
+  if (!host) {
+    throw new Error('COS签名需要host参数');
+  }
   const now = Math.floor(Date.now() / 1000);
   const exp = now + 600; // 10分钟有效
   const keyTime = `${now};${exp}`;
@@ -56,7 +59,7 @@ function generateCosAuth(secretId, secretKey, method, pathname, host) {
   const qIdx = pathname.indexOf('?');
   const signPath = qIdx >= 0 ? pathname.substring(0, qIdx) : pathname;
 
-  const httpString = `${method.toLowerCase()}\n${signPath}\n\nhost=${host || ''}\n`;
+  const httpString = `${method.toLowerCase()}\n${signPath}\n\nhost=${host}\n`;
   const sha1edHttpString = crypto.createHash('sha1').update(httpString).digest('hex');
   const stringToSign = `sha1\n${keyTime}\n${sha1edHttpString}\n`;
   const signature = hmacSha1(signKey, stringToSign).toString('hex');
