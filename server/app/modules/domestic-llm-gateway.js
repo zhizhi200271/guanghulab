@@ -28,7 +28,7 @@ const http = require('http');
 // ─── 广州CN中继配置 ───
 // 当配置了 ZY_CN_LLM_RELAY_HOST 时，请求走广州中继（国内直连·低延迟）
 // 广州不可达时降级为直连国内API（跨境·高延迟但可用）
-const CN_RELAY_HOST = process.env.ZY_CN_LLM_RELAY_HOST || '';
+const CN_RELAY_HOST = (process.env.ZY_CN_LLM_RELAY_HOST || '').trim();
 const CN_RELAY_PORT = parseInt(process.env.ZY_CN_LLM_RELAY_PORT || '3900', 10);
 const CN_RELAY_KEY = process.env.ZY_CN_LLM_RELAY_KEY || '';
 const CN_RELAY_TIMEOUT = parseInt(process.env.ZY_CN_LLM_RELAY_TIMEOUT || '30000', 10);

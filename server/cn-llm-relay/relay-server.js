@@ -203,10 +203,10 @@ app.post('/llm/chat', async (req, res) => {
   try {
     const { messages, model_id, temperature, max_tokens, fallback_order } = req.body;
 
-    if (!messages || !Array.isArray(messages)) {
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return res.status(400).json({
         error: true,
-        message: '缺少messages参数'
+        message: '缺少messages参数或消息列表为空'
       });
     }
 
