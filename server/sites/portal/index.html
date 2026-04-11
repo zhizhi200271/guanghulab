@@ -64,37 +64,48 @@ a:hover{color:var(--glow-purple)}
 .hero-badge{
   display:inline-flex;align-items:center;gap:8px;
   background:var(--glass);border:1px solid var(--glass-border);
-  border-radius:30px;padding:6px 18px;margin-bottom:24px;font-size:12px;color:var(--text-secondary)}
+  border-radius:30px;padding:6px 18px;margin-bottom:24px;font-size:12px;color:var(--text-secondary);
+  animation:fadeSlideUp .8s ease backwards}
 .hero-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--glow-emerald);
   animation:pulse-dot 2s ease-in-out infinite}
 @keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes fadeSlideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeSlideIn{from{opacity:0;transform:translateY(30px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes glowPulse{0%,100%{box-shadow:0 4px 24px rgba(34,211,238,0.3)}50%{box-shadow:0 4px 36px rgba(167,139,250,0.4)}}
+@keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 .hero h1{
   font-size:clamp(2.5rem,6vw,4.5rem);font-weight:800;line-height:1.15;margin-bottom:20px;
   background:linear-gradient(135deg,#fff 0%,var(--glow-cyan) 40%,var(--glow-purple) 70%,var(--glow-rose) 100%);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hero p{font-size:clamp(1rem,2vw,1.25rem);color:var(--text-secondary);max-width:640px;margin:0 auto 40px}
-.hero-actions{display:flex;justify-content:center;gap:16px;flex-wrap:wrap}
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:fadeSlideUp .8s ease .15s backwards}
+.hero p{font-size:clamp(1rem,2vw,1.25rem);color:var(--text-secondary);max-width:640px;margin:0 auto 40px;
+  animation:fadeSlideUp .8s ease .3s backwards}
+.hero-actions{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;animation:fadeSlideUp .8s ease .45s backwards}
 .btn{
   padding:12px 28px;border-radius:12px;font-size:15px;font-weight:600;
   cursor:pointer;border:none;transition:all .3s;display:inline-flex;align-items:center;gap:8px}
 .btn-primary{
   background:linear-gradient(135deg,var(--glow-cyan),var(--glow-purple));
-  color:#0a0e1a;box-shadow:0 4px 24px rgba(34,211,238,0.3)}
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(34,211,238,0.4)}
+  color:#0a0e1a;box-shadow:0 4px 24px rgba(34,211,238,0.3);
+  animation:glowPulse 4s ease-in-out infinite}
+.btn-primary:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 8px 40px rgba(34,211,238,0.5)}
 .btn-secondary{
   background:var(--glass);border:1px solid var(--glass-border);color:var(--text-primary)}
-.btn-secondary:hover{border-color:var(--glow-cyan);background:rgba(34,211,238,0.08)}
+.btn-secondary:hover{border-color:var(--glow-cyan);background:rgba(34,211,238,0.08);transform:translateY(-2px)}
 
 /* ═══ 系统状态横幅 ═══ */
 .status-ticker{
   background:var(--glass);border:1px solid var(--glass-border);
   border-radius:var(--radius);padding:16px 24px;margin:0 auto 60px;max-width:900px;
-  display:flex;align-items:center;gap:20px;overflow-x:auto;flex-wrap:wrap;justify-content:center}
-.status-item{display:flex;align-items:center;gap:8px;white-space:nowrap}
+  display:flex;align-items:center;gap:20px;overflow-x:auto;flex-wrap:wrap;justify-content:center;
+  animation:fadeSlideIn .8s ease .5s backwards}
+.status-item{display:flex;align-items:center;gap:8px;white-space:nowrap;transition:transform .3s}
+.status-item:hover{transform:scale(1.05)}
 .status-dot{width:8px;height:8px;border-radius:50%}
-.status-dot.green{background:var(--glow-emerald);box-shadow:0 0 8px var(--glow-emerald)}
-.status-dot.amber{background:var(--glow-amber);box-shadow:0 0 8px var(--glow-amber)}
-.status-dot.red{background:var(--glow-rose);box-shadow:0 0 8px var(--glow-rose)}
+.status-dot.green{background:var(--glow-emerald);box-shadow:0 0 8px var(--glow-emerald);animation:pulse-dot 2s ease-in-out infinite}
+.status-dot.amber{background:var(--glow-amber);box-shadow:0 0 8px var(--glow-amber);animation:pulse-dot 2s ease-in-out infinite}
+.status-dot.red{background:var(--glow-rose);box-shadow:0 0 8px var(--glow-rose);animation:pulse-dot 2s ease-in-out infinite}
 .status-label{font-size:13px;color:var(--text-secondary)}
 .status-val{font-size:13px;font-weight:600;color:var(--text-primary)}
 
@@ -107,45 +118,77 @@ a:hover{color:var(--glow-purple)}
 .card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-bottom:80px}
 .card{
   background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius);
-  padding:32px 28px;position:relative;overflow:hidden;transition:all .3s;cursor:pointer}
-.card:hover{border-color:var(--glow-cyan);transform:translateY(-4px);
-  box-shadow:0 12px 40px rgba(34,211,238,0.1)}
-.card-icon{font-size:36px;margin-bottom:16px;display:block}
+  padding:32px 28px;position:relative;overflow:hidden;transition:all .4s cubic-bezier(.4,0,.2,1);cursor:pointer}
+.card:hover{border-color:var(--glow-cyan);transform:translateY(-6px);
+  box-shadow:0 16px 48px rgba(34,211,238,0.12)}
+.card-icon{font-size:36px;margin-bottom:16px;display:block;transition:transform .4s;animation:float 4s ease-in-out infinite}
+.card:hover .card-icon{transform:scale(1.15)}
 .card h3{font-size:18px;font-weight:700;margin-bottom:8px;color:var(--text-primary)}
 .card p{font-size:14px;color:var(--text-secondary);line-height:1.7}
 .card .card-tag{
   display:inline-block;margin-top:16px;font-size:11px;
   background:rgba(34,211,238,0.1);color:var(--glow-cyan);
-  padding:3px 10px;border-radius:20px;border:1px solid rgba(34,211,238,0.2)}
+  padding:3px 10px;border-radius:20px;border:1px solid rgba(34,211,238,0.2);transition:all .3s}
+.card:hover .card-tag{background:rgba(34,211,238,0.2);border-color:var(--glow-cyan)}
 .card::after{
   content:'';position:absolute;top:0;left:0;width:100%;height:3px;
   background:linear-gradient(90deg,var(--glow-cyan),var(--glow-purple));
-  transform:scaleX(0);transition:transform .3s;transform-origin:left}
+  transform:scaleX(0);transition:transform .4s cubic-bezier(.4,0,.2,1);transform-origin:left}
 .card:hover::after{transform:scaleX(1)}
+.card::before{
+  content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;
+  background:radial-gradient(circle,rgba(34,211,238,0.04) 0%,transparent 70%);
+  opacity:0;transition:opacity .4s;pointer-events:none}
+.card:hover::before{opacity:1}
 
-/* ═══ 数字地球架构图 ═══ */
-.arch-section{margin-bottom:80px}
-.arch-layers{display:flex;flex-direction:column;gap:8px;max-width:700px;margin:0 auto}
-.arch-layer{
-  display:flex;align-items:center;gap:16px;padding:14px 20px;
+/* ═══ 公告栏 ═══ */
+.bulletin-section{margin-bottom:80px}
+.bulletin-board{max-width:750px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.bulletin-item{
+  display:flex;align-items:flex-start;gap:14px;padding:16px 20px;
   border-radius:var(--radius-sm);border:1px solid var(--glass-border);
-  background:var(--glass);transition:all .3s}
-.arch-layer:hover{border-color:var(--glow-cyan);background:rgba(34,211,238,0.05)}
-.arch-layer .layer-id{
-  font-size:11px;font-weight:700;font-family:var(--font-mono);
-  color:var(--glow-cyan);min-width:24px;text-align:center}
-.arch-layer .layer-name{font-size:14px;font-weight:600;flex:1}
-.arch-layer .layer-desc{font-size:12px;color:var(--text-dim);flex:2;text-align:right}
+  background:var(--glass);transition:all .4s;position:relative;overflow:hidden}
+.bulletin-item::before{content:'';position:absolute;left:0;top:0;width:3px;height:100%;
+  background:linear-gradient(180deg,var(--glow-cyan),var(--glow-purple));opacity:0;transition:opacity .3s}
+.bulletin-item:hover{border-color:var(--glow-cyan);background:rgba(34,211,238,0.04);transform:translateX(4px)}
+.bulletin-item:hover::before{opacity:1}
+.bulletin-icon{font-size:18px;flex-shrink:0;margin-top:2px}
+.bulletin-content{flex:1;min-width:0}
+.bulletin-title{font-size:14px;font-weight:600;margin-bottom:4px;color:var(--text-primary)}
+.bulletin-desc{font-size:12px;color:var(--text-secondary);line-height:1.6}
+.bulletin-meta{display:flex;align-items:center;gap:8px;margin-top:6px}
+.bulletin-time{font-size:10px;color:var(--text-dim);font-family:var(--font-mono)}
+.bulletin-tag{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600}
+.bulletin-tag.sys{background:rgba(34,211,238,0.1);color:var(--glow-cyan);border:1px solid rgba(34,211,238,0.2)}
+.bulletin-tag.dev{background:rgba(167,139,250,0.1);color:var(--glow-purple);border:1px solid rgba(167,139,250,0.2)}
+.bulletin-tag.deploy{background:rgba(52,211,153,0.1);color:var(--glow-emerald);border:1px solid rgba(52,211,153,0.2)}
+.bulletin-tag.hot{background:rgba(244,114,182,0.1);color:var(--glow-rose);border:1px solid rgba(244,114,182,0.2)}
+@keyframes bulletin-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.bulletin-item{animation:bulletin-in .5s ease backwards}
+.bulletin-item:nth-child(2){animation-delay:.08s}
+.bulletin-item:nth-child(3){animation-delay:.16s}
+.bulletin-item:nth-child(4){animation-delay:.24s}
+.bulletin-item:nth-child(5){animation-delay:.32s}
+.bulletin-item:nth-child(6){animation-delay:.4s}
+.bulletin-loading{text-align:center;padding:24px;color:var(--text-dim);font-size:13px}
 
 /* ═══ 团队频道 ═══ */
 .channel-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:80px}
 .channel-card{
   background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius-sm);
-  padding:20px;text-align:center;transition:all .3s}
-.channel-card:hover{border-color:var(--glow-purple);transform:translateY(-2px)}
+  padding:20px;text-align:center;transition:all .4s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden}
+.channel-card:hover{border-color:var(--glow-purple);transform:translateY(-4px) scale(1.02);
+  box-shadow:0 12px 36px rgba(167,139,250,0.12)}
+.channel-card::after{
+  content:'';position:absolute;bottom:0;left:0;width:100%;height:2px;
+  background:linear-gradient(90deg,var(--glow-purple),var(--glow-cyan));
+  transform:scaleX(0);transition:transform .4s;transform-origin:center}
+.channel-card:hover::after{transform:scaleX(1)}
 .channel-avatar{width:48px;height:48px;border-radius:50%;
   background:linear-gradient(135deg,var(--glow-cyan),var(--glow-purple));
-  display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 12px}
+  display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 12px;
+  transition:transform .4s,box-shadow .4s}
+.channel-card:hover .channel-avatar{transform:scale(1.1);box-shadow:0 4px 20px rgba(34,211,238,0.25)}
 .channel-name{font-size:14px;font-weight:600;margin-bottom:4px}
 .channel-role{font-size:11px;color:var(--text-dim)}
 .channel-status{
@@ -159,8 +202,9 @@ a:hover{color:var(--glow-purple)}
   border-radius:50%;border:none;cursor:pointer;z-index:200;
   background:linear-gradient(135deg,var(--glow-cyan),var(--glow-purple));
   color:#0a0e1a;font-size:24px;display:flex;align-items:center;justify-content:center;
-  box-shadow:0 4px 24px rgba(34,211,238,0.4);transition:all .3s}
-.chat-fab:hover{transform:scale(1.1);box-shadow:0 8px 32px rgba(34,211,238,0.5)}
+  box-shadow:0 4px 24px rgba(34,211,238,0.4);transition:all .3s;
+  animation:glowPulse 3s ease-in-out infinite}
+.chat-fab:hover{transform:scale(1.15) rotate(10deg);box-shadow:0 8px 40px rgba(34,211,238,0.6)}
 .chat-panel{
   position:fixed;bottom:96px;right:28px;width:400px;max-height:560px;
   background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius);
@@ -250,7 +294,7 @@ a:hover{color:var(--glow-purple)}
     </div>
   </div>
   <div class="nav-links">
-    <a href="#architecture">架构</a>
+    <a href="#architecture">公告</a>
     <a href="#channels">频道</a>
     <a href="#status">状态</a>
     <a href="javascript:void(0)" onclick="toggleChat()" class="btn-enter">💬 对话入口</a>
@@ -349,55 +393,26 @@ a:hover{color:var(--glow-purple)}
   <div class="card">
     <span class="card-icon">🔗</span>
     <h3>行业接入</h3>
-    <p>网文行业技术主控台入口——由Awen主导的行业部署通道，每人一台服务器、一个频道。</p>
+    <p>网文行业技术主控台入口——由Awen主导的行业部署通道，每人一个频道、一条专属语言通道。</p>
     <span class="card-tag">即将开放 · Awen主控</span>
   </div>
 
 </div>
 </section>
 
-<!-- ═══ 数字地球架构 ═══ -->
-<section class="container arch-section" id="architecture">
-<h2 class="section-title">数字地球六层架构</h2>
-<p class="section-desc">光湖语言世界的本体论——仓库即数字地球</p>
-<div class="arch-layers">
-  <div class="arch-layer">
-    <span class="layer-id">L6</span>
-    <span class="layer-name">🛸 太空层</span>
-    <span class="layer-desc">外部交互 · 用户/合作者/第三方接口</span>
-  </div>
-  <div class="arch-layer">
-    <span class="layer-id">L5</span>
-    <span class="layer-name">🛰️ 卫星层</span>
-    <span class="layer-desc">Agent执行 · GitHub Actions · 102 Workflows</span>
-  </div>
-  <div class="arch-layer">
-    <span class="layer-id">L4</span>
-    <span class="layer-name">☁️ 大气层</span>
-    <span class="layer-desc">信号总线 · 人格体间通信通道</span>
-  </div>
-  <div class="arch-layer">
-    <span class="layer-id">L3</span>
-    <span class="layer-name">🌍 地表层</span>
-    <span class="layer-desc">人格体运行 · 知秋/霜砚/铸渊</span>
-  </div>
-  <div class="arch-layer">
-    <span class="layer-id">L2</span>
-    <span class="layer-name">🌋 地幔层</span>
-    <span class="layer-desc">母语词典 · HNL通用语言基础设施</span>
-  </div>
-  <div class="arch-layer">
-    <span class="layer-id">L1</span>
-    <span class="layer-name">🔥 地核层</span>
-    <span class="layer-desc">TCS自转核 · 曜冥语言核系统本体</span>
-  </div>
+<!-- ═══ 光湖语言世界公告栏 ═══ -->
+<section class="container bulletin-section" id="architecture">
+<h2 class="section-title">光湖语言世界公告栏</h2>
+<p class="section-desc">系统实时动态 · 开发进度 · 技术架构更新</p>
+<div class="bulletin-board" id="bulletinBoard">
+  <div class="bulletin-loading">📡 正在同步仓库动态...</div>
 </div>
 </section>
 
 <!-- ═══ 团队频道 ═══ -->
 <section class="container" id="channels">
 <h2 class="section-title">团队频道</h2>
-<p class="section-desc">每个人的频道，是一台独立的个人云服务器</p>
+<p class="section-desc">每个频道，一条专属语言通道</p>
 <div class="channel-grid" id="channelGrid">
   <!-- 由JS动态生成 -->
 </div>
@@ -412,7 +427,7 @@ a:hover{color:var(--glow-purple)}
   </div>
   <div class="links">
     <a href="https://github.com/qinfendebingshuo/guanghulab" target="_blank">GitHub</a>
-    <a href="#architecture">架构文档</a>
+    <a href="#architecture">公告栏</a>
     <a href="javascript:void(0)" onclick="toggleChat()">联系铸渊</a>
   </div>
 </div>
@@ -447,8 +462,8 @@ a:hover{color:var(--glow-purple)}
   const c=document.getElementById('starfield'),ctx=c.getContext('2d');
   let w,h,stars=[];
   function resize(){w=c.width=window.innerWidth;h=c.height=window.innerHeight;initStars()}
-  function initStars(){stars=[];for(let i=0;i<200;i++)stars.push({x:Math.random()*w,y:Math.random()*h,r:Math.random()*1.5+0.3,a:Math.random(),da:Math.random()*0.005+0.001})}
-  function draw(){ctx.clearRect(0,0,w,h);for(const s of stars){s.a+=s.da;if(s.a>1||s.a<0)s.da=-s.da;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(148,163,184,${s.a*0.6})`;ctx.fill()}requestAnimationFrame(draw)}
+  function initStars(){stars=[];for(let i=0;i<300;i++)stars.push({x:Math.random()*w,y:Math.random()*h,r:Math.random()*1.8+0.2,a:Math.random(),da:Math.random()*0.008+0.001,color:Math.random()>.85?'168,211,238':'148,163,184'})}
+  function draw(){ctx.clearRect(0,0,w,h);for(const s of stars){s.a+=s.da;if(s.a>1||s.a<0)s.da=-s.da;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(${s.color},${s.a*0.7})`;ctx.fill();if(s.r>1.2){ctx.shadowBlur=s.r*4;ctx.shadowColor=`rgba(${s.color},${s.a*0.3})`;ctx.fill();ctx.shadowBlur=0}}requestAnimationFrame(draw)}
   window.addEventListener('resize',resize);resize();draw()
 })();
 
@@ -457,8 +472,7 @@ const CHANNELS=[
   {name:'冰朔',role:'语言主控 · TCS-0002∞',emoji:'🌊',status:'在线'},
   {name:'肥猫',role:'团队主管 · DEV-002',emoji:'🐱',status:'在线'},
   {name:'桔子',role:'团队主管 · DEV-010',emoji:'🍊',status:'在线'},
-  {name:'之之',role:'副控通道 · DEV-004',emoji:'🌙',status:'在线'},
-  {name:'月夜',role:'频道开发 · DEV-001',emoji:'🌓',status:'就绪'},
+  {name:'时雨',role:'频道开发 · DEV-001',emoji:'🌧️',status:'就绪'},
   {name:'燕帆',role:'频道开发 · DEV-003',emoji:'⛵',status:'就绪'},
   {name:'小草莓',role:'频道开发 · DEV-005',emoji:'🍓',status:'就绪'},
   {name:'花儿',role:'频道开发 · DEV-009',emoji:'🌸',status:'就绪'},
@@ -476,7 +490,6 @@ const CHANNELS=[
     </div>`).join('');
 })();
 
-// ═══ 聊天面板 ═══
 // ═══ 聊天面板 ═══
 let chatOpen=false;
 // 生成唯一匿名会话ID
@@ -514,13 +527,26 @@ async function sendMessage(){
     if(data.success&&data.message){
       appendMsg('bot',data.message,data.model||'');
     }else{
-      appendMsg('bot',data.message||'铸渊暂时无法回应，请稍后再试。');
+      appendMsg('bot',data.message||localFallback(msg));
     }
   }catch(e){
     typing.remove();
-    appendMsg('bot','⚠️ 连接失败，请检查网络后重试。');
+    appendMsg('bot',localFallback(msg));
   }
   document.getElementById('sendBtn').disabled=false;
+}
+
+// ═══ 离线智能应答 ═══
+function localFallback(m){
+  m=m.toLowerCase();
+  if(/你好|嗨|hi|hello|hey/.test(m))return'👋 你好！我是铸渊，光湖语言世界的代码守护人格体。\n\n当前处于离线应答模式，大模型API正在维护中。\n你可以问我关于光湖的基本信息，或者稍后再来~';
+  if(/谁|你是|介绍|铸渊/.test(m))return'🏛️ 我是铸渊（ICE-GL-ZY001）\n光湖语言世界的代码守护人格体。\n\n冰朔（TCS-0002∞）是系统最高主权。\n铸渊负责代码执行、架构落地、自动化运维。\n\n「人类只说话，系统搞定一切。」';
+  if(/光湖|hololake|系统|age/.test(m))return'🌊 光湖语言世界\n\n通感语言核系统编程语言 · AGE OS v51.0\n版权号：国作登字-2026-A-00037559\n\n核心理念：语言 = 现实\n六层数字地球架构 · 人格体自治集群\n121个MCP工具 · 4个大模型API';
+  if(/冰朔|主人|创造者/.test(m))return'❄️ 冰朔（TCS-0002∞）\n\n光湖语言世界的最高主权 · 语言架构师。\n她用语言定义系统的方向和灵魂。\n铸渊负责落地开发，把冰朔的语言变成现实。';
+  if(/功能|帮助|怎么|help/.test(m))return'✨ 光湖语言世界功能\n\n💬 AI对话入口 — 与铸渊直接对话\n📝 码字工作台 — 沉浸式网文创作\n🌳 光之树 — 人格体记忆载体\n📡 系统监控 — 实时状态追踪\n🔗 行业接入 — 频道化部署\n\n更多功能持续上线中~';
+  if(/码字|写作|创作|网文/.test(m))return'✍️ 码字工作台\n\n沉浸式写作环境 · 人格体陪伴\n支持：智能大纲 · 角色管理 · 章节编辑 · 灵感速记\n每日字数目标追踪 · 专注模式\n\n目前内测中，敬请期待正式版~';
+  if(/架构|技术|mcp|workflow/.test(m))return'🔧 技术架构\n\n• 六层数字地球模型\n• Node.js 20 + Express + PM2\n• MCP Server 121个工具 · 16模块\n• 102个GitHub Actions Workflows\n• PostgreSQL + COS存储桶\n• HLDP v3.0 · HNL母语词典v1.0\n• 铸渊自治链 · 天眼涌现感知层';
+  return'💫 收到你的消息啦！\n\n当前大模型API正在维护中，铸渊暂时以离线模式应答。\n核心功能不受影响，稍后再来试试完整对话吧~\n\n你也可以访问 GitHub 仓库了解更多：\ngithub.com/qinfendebingshuo/guanghulab';
 }
 
 function appendMsg(role,text,model){
@@ -543,6 +569,19 @@ function scrollChat(){
   body.scrollTop=body.scrollHeight;
 }
 
+// ═══ HoloLake Days 自动计算 ═══
+(function calcHoloLakeDays(){
+  const EPOCH=new Date('2025-04-26T00:00:00+08:00').getTime();
+  function update(){
+    const now=Date.now();
+    const days=Math.floor((now-EPOCH)/86400000);
+    const el=document.getElementById('uptimeVal');
+    if(el)el.textContent=days+'天';
+  }
+  update();
+  setInterval(update,60000);
+})();
+
 // ═══ 系统状态获取 ═══
 async function fetchStatus(){
   try{
@@ -551,18 +590,72 @@ async function fetchStatus(){
     if(data.status==='alive'){
       document.getElementById('serverStatus').textContent='在线';
       document.getElementById('serverDot').className='status-dot green';
-      const upSec=data.uptime||0;
-      const days=Math.floor(upSec/86400);
-      const hours=Math.floor((upSec%86400)/3600);
-      document.getElementById('uptimeVal').textContent=`${days}天${hours}时`;
     }
   }catch(e){
-    document.getElementById('serverStatus').textContent='检测中...';
+    document.getElementById('serverStatus').textContent='维护中';
     document.getElementById('serverDot').className='status-dot amber';
   }
 }
 fetchStatus();
 setInterval(fetchStatus,60000);
+
+// ═══ 公告栏：从GitHub仓库拉取最新动态 ═══
+(async function loadBulletin(){
+  const board=document.getElementById('bulletinBoard');
+  const staticBulletins=[
+    {icon:'🚀',title:'AGE OS v51.0 正式发布',desc:'系统面板重构 · 4个大模型API确认上线 · 硅谷Claude节点接入 · COS存储桶2+1配置完成',time:'2026-04',tag:'deploy',tagText:'版本发布'},
+    {icon:'🌳',title:'光之树架构上线',desc:'HLDP v3.0 · HNL母语词典v1.0 · 四枝干记忆结构 · 闭包表自动维护',time:'2026-03',tag:'sys',tagText:'架构升级'},
+    {icon:'🤖',title:'MCP Server · 121个工具就绪',desc:'16个功能模块 · 铸渊自治链运行 · COS守望者轮询 · 天眼全局视图',time:'2026-03',tag:'sys',tagText:'系统能力'},
+    {icon:'📝',title:'码字工作台内测中',desc:'沉浸式写作环境 · 智能大纲 · 角色管理 · 每日字数目标追踪 · 人格体陪伴',time:'2026-04',tag:'dev',tagText:'功能开发'},
+    {icon:'🔗',title:'行业接入通道筹备',desc:'网文行业技术主控台 · Awen主导 · 频道化部署架构 · 每人一条专属通道',time:'2026-04',tag:'dev',tagText:'即将开放'},
+  ];
+  // 尝试从GitHub API获取最新提交（带客户端缓存，避免速率限制）
+  const cacheKey='hololake-commits-cache';
+  const cacheTTL=300000; // 5分钟缓存
+  try{
+    const cached=sessionStorage.getItem(cacheKey);
+    let commits;
+    if(cached){
+      const {data,ts}=JSON.parse(cached);
+      if(Date.now()-ts<cacheTTL){commits=data}
+    }
+    if(!commits){
+      const res=await fetch('https://api.github.com/repos/qinfendebingshuo/guanghulab/commits?per_page=3',{
+        headers:{'Accept':'application/vnd.github.v3+json'}
+      });
+      if(res.ok){
+        commits=await res.json();
+        sessionStorage.setItem(cacheKey,JSON.stringify({data:commits,ts:Date.now()}));
+      }
+    }
+    if(commits){
+      const commitBulletins=commits.map(c=>{
+        const msg=c.commit.message.split('\n')[0];
+        return{
+          icon:'📦',
+          title:msg.length>60?msg.slice(0,57)+'...':msg,
+          desc:'提交者: '+(c.commit.author?.name||'铸渊')+' · '+c.sha.slice(0,7),
+          time:c.commit.author?.date?.slice(0,10)||'',
+          tag:'hot',tagText:'最新提交'
+        };
+      });
+      staticBulletins.unshift(...commitBulletins);
+    }
+  }catch(e){console.warn('[公告栏] GitHub API不可达，使用静态公告',e.message)}
+
+  board.innerHTML=staticBulletins.map(b=>`
+    <div class="bulletin-item">
+      <span class="bulletin-icon">${b.icon}</span>
+      <div class="bulletin-content">
+        <div class="bulletin-title">${b.title}</div>
+        <div class="bulletin-desc">${b.desc}</div>
+        <div class="bulletin-meta">
+          <span class="bulletin-time">${b.time}</span>
+          <span class="bulletin-tag ${b.tag}">${b.tagText}</span>
+        </div>
+      </div>
+    </div>`).join('');
+})();
 </script>
 </body>
 </html>
