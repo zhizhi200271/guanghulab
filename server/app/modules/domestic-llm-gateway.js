@@ -147,7 +147,7 @@ function callDomesticLLM(modelConfig, messages) {
   return new Promise((resolve, reject) => {
     const apiKey = process.env[modelConfig.envKey] || '';
     if (!apiKey) {
-      return reject(new Error(`API密钥未配置: ${modelConfig.envKey}`));
+      return reject(new Error('模型API密钥未配置'));
     }
 
     const url = new URL(modelConfig.endpoint);
@@ -250,7 +250,7 @@ function getContext(userId) {
 }
 
 // 定期清理过期会话
-setInterval(() => {
+const _cleanupTimer = setInterval(() => {
   const now = Date.now();
   for (const [key, val] of contexts) {
     if (now - val.lastActive > CONTEXT_TTL_MS) {
@@ -258,6 +258,8 @@ setInterval(() => {
     }
   }
 }, 300000); // 每5分钟清理一次
+// 允许进程优雅退出
+if (_cleanupTimer.unref) _cleanupTimer.unref();
 
 /**
  * 国内模型智能对话（带自动降级）
