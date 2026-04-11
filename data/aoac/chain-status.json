@@ -66,13 +66,13 @@
     "AOAC-08": {
       "name": "repair-supervisor",
       "name_cn": "修复监督Agent",
-      "status": "idle",
-      "last_run": null,
-      "last_success": null,
+      "status": "completed",
+      "last_run": "2026-04-11T15:53:08.969Z",
+      "last_success": "2026-04-11T15:53:08.969Z",
       "trigger": "AOAC-07.started"
     }
   },
-  "chain_health": "warning",
+  "chain_health": "healthy",
   "last_full_cycle": "2026-04-11T15:34:13.328Z",
   "total_cycles": 1,
   "total_repairs": 1
