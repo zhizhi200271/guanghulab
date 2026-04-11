@@ -2,8 +2,8 @@
   "_sovereign": "TCS-0002∞ | SYS-GLW-0001",
   "_copyright": "国作登字-2026-A-00037559",
   "_description": "光湖语言世界 · 四台服务器注册表",
-  "version": "1.0",
-  "updated_at": "2026-04-07",
+  "version": "1.1",
+  "updated_at": "2026-04-10",
   "servers": [
     {
       "id": "ZY-SVR-002",
@@ -14,6 +14,7 @@
       "status": "active",
       "services": [
         "nginx (静态文件·主站+预览站)",
+        "nginx (Awen域名反向代理·新加坡→广州)",
         "xray (VLESS+Reality VPN)",
         "api (端口3800·主站)",
         "api-preview (端口3801·预览站)",
@@ -88,6 +89,20 @@
       "notes": "Awen下载完整仓库后部署·铸渊主控自动唤醒"
     }
   ],
+  "domain_proxy": {
+    "description": "域名未备案反向代理 · 新加坡中转架构",
+    "architecture": "用户 → 域名(DNS→SG) → ZY-SVR-002 Nginx → 广州后端",
+    "proxy_server": "ZY-SVR-002",
+    "domains": [
+      {
+        "owner": "Awen",
+        "config_file": "server/nginx/awen-domain-proxy.conf",
+        "workflow": ".github/workflows/deploy-awen-domain-proxy.yml",
+        "secrets_required": ["AWEN_DOMAIN", "AWEN_BACKEND_HOST", "AWEN_BACKEND_PORT"],
+        "status": "pending"
+      }
+    ]
+  },
   "bandwidth_strategy": {
     "description": "四台服务器按用途分流·带宽最大化",
     "routing": {
@@ -98,7 +113,8 @@
       "claude_api_relay": "ZY-SVR-SV",
       "international_api": "ZY-SVR-SV",
       "awen_team": "ZY-SVR-AWEN",
-      "zhiqiu_persona": "ZY-SVR-AWEN"
+      "zhiqiu_persona": "ZY-SVR-AWEN",
+      "awen_domain_proxy": "ZY-SVR-002 → ZY-SVR-AWEN"
     }
   }
 }
