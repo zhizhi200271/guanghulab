@@ -304,6 +304,8 @@ jobs:
           ZY_OSS_SECRET: ${{ secrets.ZY_OSS_SECRET }}
           ZY_COS_REGION: ${{ secrets.ZY_COS_REGION }}
           ZY_NOTION_TOKEN: ${{ secrets.ZY_NOTION_TOKEN }}
+          ZY_CN_LLM_RELAY_HOST: ${{ secrets.ZY_CN_LLM_RELAY_HOST }}
+          ZY_CN_LLM_RELAY_KEY: ${{ secrets.ZY_CN_LLM_RELAY_KEY }}
         run: |
           COMMIT_SHA="${{ github.sha }}"
           REF_NAME="${{ github.ref_name }}"
@@ -326,6 +328,15 @@ jobs:
           echo "ZY_KIMI_API_KEY=${ZY_KIMI_API_KEY}" >> /opt/zhuyuan/app/.env.app
           echo "ZY_QINGYAN_API_KEY=${ZY_QINGYAN_API_KEY}" >> /opt/zhuyuan/app/.env.app
           echo "ZY_NOTION_TOKEN=${ZY_NOTION_TOKEN}" >> /opt/zhuyuan/app/.env.app
+          # ─── 广州CN中继配置（可选·配置后国内API走广州中继） ───
+          if [ -n "${ZY_CN_LLM_RELAY_HOST}" ]; then
+            echo "ZY_CN_LLM_RELAY_HOST=${ZY_CN_LLM_RELAY_HOST}" >> /opt/zhuyuan/app/.env.app
+            echo "ZY_CN_LLM_RELAY_KEY=${ZY_CN_LLM_RELAY_KEY}" >> /opt/zhuyuan/app/.env.app
+            echo "ZY_CN_LLM_RELAY_PORT=3900" >> /opt/zhuyuan/app/.env.app
+            echo "✅ 广州CN中继已配置: ${ZY_CN_LLM_RELAY_HOST}:3900"
+          else
+            echo "ℹ️ 广州CN中继未配置·国内API走直连"
+          fi
           chmod 600 /opt/zhuyuan/app/.env.app
 
           # 复制Nginx配置

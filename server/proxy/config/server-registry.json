@@ -1,9 +1,9 @@
 {
   "_sovereign": "TCS-0002∞ | SYS-GLW-0001",
   "_copyright": "国作登字-2026-A-00037559",
-  "_description": "光湖语言世界 · 四台服务器注册表",
-  "version": "1.1",
-  "updated_at": "2026-04-10",
+  "_description": "光湖语言世界 · 五台服务器注册表",
+  "version": "1.2",
+  "updated_at": "2026-04-11",
   "servers": [
     {
       "id": "ZY-SVR-002",
@@ -28,6 +28,25 @@
       }
     },
     {
+      "id": "ZY-SVR-003",
+      "name": "国内出口",
+      "role": "国内LLM API中继+VPN中转",
+      "location": "Guangzhou, China",
+      "ipv4": "43.138.243.30",
+      "spec": "低配",
+      "status": "active",
+      "services": [
+        "cn-llm-relay (端口3900·国内LLM API代理中继)",
+        "nginx stream (VPN中转·端口2053→SG:443)"
+      ],
+      "github_secrets": {
+        "host": "ZY_CN_LLM_HOST",
+        "key": "ZY_CN_LLM_KEY",
+        "user": "ZY_CN_LLM_USER"
+      },
+      "notes": "肥猫广州服务器·复用为国内LLM API中继·冰朔D67批准"
+    },
+    {
       "id": "ZY-SVR-005",
       "name": "大脑",
       "role": "数据库+MCP+Agent+订阅服务",
@@ -36,7 +55,7 @@
       "status": "active",
       "services": [
         "postgresql (人格体数据库)",
-        "mcp-server (端口3100·99个工具)",
+        "mcp-server (端口3100·121个工具)",
         "subscription-v3 (端口3805·多用户专线)",
         "bandwidth-pool-agent (带宽汇聚)",
         "email-hub (邮件通信中枢)",
@@ -103,13 +122,25 @@
       }
     ]
   },
+  "llm_relay": {
+    "description": "双向LLM API中继架构",
+    "routes": {
+      "domestic_api": "ZY-SVR-002 → ZY-SVR-003(广州) → 国内API (DeepSeek/千问/Kimi/智谱)",
+      "claude_api": "ZY-SVR-002 → ZY-SVR-SV(硅谷SSH隧道) → Claude API"
+    },
+    "config_files": {
+      "domestic": "server/proxy/config/cn-llm-relay-config.json",
+      "claude": "server/proxy/config/claude-relay-config.json"
+    }
+  },
   "bandwidth_strategy": {
-    "description": "四台服务器按用途分流·带宽最大化",
+    "description": "五台服务器按用途分流·带宽最大化",
     "routing": {
       "static_frontend": "ZY-SVR-002",
       "vpn_main_entry": "ZY-SVR-002",
       "database_mcp": "ZY-SVR-005",
       "subscription_service": "ZY-SVR-005",
+      "domestic_llm_relay": "ZY-SVR-003",
       "claude_api_relay": "ZY-SVR-SV",
       "international_api": "ZY-SVR-SV",
       "awen_team": "ZY-SVR-AWEN",

@@ -1,0 +1,79 @@
+{
+  "_sovereign": "TCS-0002∞ | SYS-GLW-0001",
+  "_copyright": "国作登字-2026-A-00037559",
+  "_description": "广州国内LLM中继配置 · API走广州·算力走新加坡",
+  "version": "1.0",
+  "relay_architecture": {
+    "description": "反向中继: 新加坡(算力) → 广州(国内网络出口) → 国内LLM API",
+    "note": "与硅谷Claude中继对称: SG→SV→Claude = SG→GZ→国内API",
+    "singapore_servers": {
+      "ZY-SVR-002": {
+        "role": "面孔·前端+专线主入口",
+        "location": "Singapore",
+        "spec": "2核8G"
+      },
+      "ZY-SVR-005": {
+        "role": "大脑·DB+MCP+Agent+订阅",
+        "location": "Singapore",
+        "spec": "4核8G"
+      }
+    },
+    "guangzhou_server": {
+      "ZY-SVR-003": {
+        "role": "国内LLM API中继·国内网络出口",
+        "location": "Guangzhou, China",
+        "ipv4": "43.138.243.30",
+        "purpose": "在国内网络环境下直连国内LLM API（零跨境延迟）",
+        "github_secrets": {
+          "host": "ZY_CN_LLM_HOST",
+          "ssh_key": "ZY_CN_LLM_KEY",
+          "user": "ZY_CN_LLM_USER"
+        }
+      }
+    }
+  },
+  "domestic_routing": {
+    "trigger_models": [
+      "deepseek-chat",
+      "qwen-turbo",
+      "moonshot-v1-8k",
+      "glm-4-flash"
+    ],
+    "relay_method": "http_proxy",
+    "relay_config": {
+      "description": "新加坡服务器通过HTTP将国内LLM请求转发到广州中继服务",
+      "relay_port": 3900,
+      "relay_path": "/llm/chat",
+      "auth_method": "Bearer Token (ZY_CN_LLM_RELAY_KEY)",
+      "protocol": "HTTP (内部通信·服务器间)"
+    },
+    "fallback": "direct",
+    "fallback_note": "如广州中继不可用，降级为直连国内API（从新加坡跨境调用·延迟高但可用）"
+  },
+  "bandwidth_optimization": {
+    "strategy": "广州国内出口中继",
+    "description": "请求体通常很小(几KB)，广州中继延迟可忽略。国内API调用从跨境秒级降到毫秒级。",
+    "gz_bandwidth": "国内直连·零跨境延迟",
+    "sg_bandwidth": "高带宽·算力中心·会话管理"
+  },
+  "setup_requirements": {
+    "guangzhou_server": [
+      "安装Node.js 20+",
+      "部署 cn-llm-relay 服务 (端口3900)",
+      "配置 .env.relay (国内API密钥 + 中继鉴权密钥)",
+      "PM2守护进程·开机自启",
+      "防火墙放行3900端口 (仅允许新加坡服务器IP)"
+    ],
+    "singapore_server": [
+      "配置 ZY_CN_LLM_RELAY_HOST (广州服务器IP)",
+      "配置 ZY_CN_LLM_RELAY_KEY (中继鉴权密钥)",
+      "domestic-llm-gateway.js 自动检测并使用中继"
+    ],
+    "github_secrets": [
+      "ZY_CN_LLM_HOST — 广州服务器IP (43.138.243.30)",
+      "ZY_CN_LLM_KEY — SSH私钥 (部署用)",
+      "ZY_CN_LLM_USER — SSH用户名",
+      "ZY_CN_LLM_RELAY_KEY — 中继API鉴权密钥 (新加坡→广州通信用)"
+    ]
+  }
+}
