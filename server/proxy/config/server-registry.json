@@ -106,6 +106,25 @@
         "user": "ZY_SVR_AWEN_USER"
       },
       "notes": "Awen下载完整仓库后部署·铸渊主控自动唤醒"
+    },
+    {
+      "id": "ZY-SVR-004",
+      "name": "国内备案服务器",
+      "role": "ICP备案挂载+人格体备用大脑",
+      "location": "Guangzhou, China (广州七区)",
+      "ipv4": "43.139.217.141",
+      "spec": "2核2G",
+      "status": "active",
+      "services": [
+        "nginx (ICP备案落地页·guanghulab.com)",
+        "备用大脑 (不涉及国外模型调用)"
+      ],
+      "github_secrets": {
+        "host": "ZY_CN_SERVER_HOST",
+        "key": "ZY_CN_SERVER_KEY",
+        "user": "ZY_CN_SERVER_USER"
+      },
+      "notes": "ICP备案域名guanghulab.com必须指向此服务器·冰朔实名大陆服务器"
     }
   ],
   "cn_domain": {

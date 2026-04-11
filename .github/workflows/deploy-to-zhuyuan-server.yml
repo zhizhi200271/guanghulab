@@ -306,6 +306,9 @@ jobs:
           ZY_NOTION_TOKEN: ${{ secrets.ZY_NOTION_TOKEN }}
           ZY_CN_LLM_RELAY_HOST: ${{ secrets.ZY_CN_LLM_RELAY_HOST }}
           ZY_CN_LLM_RELAY_KEY: ${{ secrets.ZY_CN_LLM_RELAY_KEY }}
+          ZY_DOMAIN_MAIN: ${{ secrets.ZY_DOMAIN_MAIN }}
+          ZY_DOMAIN_PREVIEW: ${{ secrets.ZY_DOMAIN_PREVIEW }}
+          ZY_FACE_DOMAIN: ${{ secrets.ZY_FACE_DOMAIN }}
         run: |
           COMMIT_SHA="${{ github.sha }}"
           REF_NAME="${{ github.ref_name }}"
@@ -419,6 +422,51 @@ jobs:
           curl -sf http://localhost:3801/api/health && echo "✅ 预览进程已上线 (3801)" || echo "❌ 预览进程启动失败 (3801) · 若 ZY_DOMAIN_PREVIEW 域名指向此端口则该域名可能502"
           curl -sf http://localhost:3100/health && echo "✅ MCP Server已上线 (3100)" || echo "❌ MCP Server启动失败 (3100)"
 
+          # DNS 诊断 · 检查域名是否指向本服务器
+          echo ""
+          echo "═══ DNS 诊断 ═══"
+          SERVER_IP="43.134.16.246"
+          for DOMAIN in "${ZY_DOMAIN_MAIN}" "${ZY_DOMAIN_PREVIEW}" "${ZY_FACE_DOMAIN}"; do
+            if [ -n "$DOMAIN" ] && [ "$DOMAIN" != "_" ]; then
+              RESOLVED=$(dig +short "$DOMAIN" A 2>/dev/null | head -1)
+              if [ -z "$RESOLVED" ]; then
+                echo "❌ DNS 未解析: $DOMAIN (无A记录·网站不可达)"
+              elif [ "$RESOLVED" = "$SERVER_IP" ]; then
+                echo "✅ DNS 正确: $DOMAIN → $RESOLVED"
+              else
+                echo "⚠️ DNS 错误: $DOMAIN → $RESOLVED (应为 $SERVER_IP)"
+              fi
+            fi
+          done
+          echo "═══════════════════"
+
+          # LLM API 密钥诊断 · 检查聊天功能所需密钥
+          echo ""
+          echo "═══ 聊天API密钥诊断 ═══"
+          LLM_KEY_COUNT=0
+          for KEY_NAME in ZY_DEEPSEEK_API_KEY ZY_QIANWEN_API_KEY ZY_KIMI_API_KEY ZY_QINGYAN_API_KEY; do
+            if grep -q "${KEY_NAME}=.\{6,\}" /opt/zhuyuan/app/.env.app 2>/dev/null; then
+              echo "✅ ${KEY_NAME}: 已配置"
+              LLM_KEY_COUNT=$((LLM_KEY_COUNT + 1))
+            else
+              echo "❌ ${KEY_NAME}: 未配置或为空 · 人格体对话功能受影响"
+            fi
+          done
+          echo "可用国内模型数: ${LLM_KEY_COUNT}/4"
+          if [ "$LLM_KEY_COUNT" -eq 0 ]; then
+            echo "⚠️ 警告: 所有国内模型API密钥未配置 · 聊天功能将不可用"
+          fi
+          echo "═══════════════════"
+
+          # Nginx 配置诊断 · 检查 server_name 冲突
+          echo ""
+          echo "═══ Nginx 诊断 ═══"
+          CONFLICT_COUNT=$(sudo nginx -T 2>&1 | grep -c "conflicting server name" || true)
+          echo "Nginx server_name 冲突数: $CONFLICT_COUNT"
+          echo "当前启用的站点配置:"
+          ls -la /etc/nginx/sites-enabled/ 2>/dev/null || echo "(无 sites-enabled 目录)"
+          echo "═══════════════════"
+
           # 记录部署操作
           curl -sf -X POST http://localhost:3800/api/operations \
             -H "Content-Type: application/json" \
@@ -448,6 +496,10 @@ jobs:
           ssh-keyscan -H ${{ secrets.ZY_SERVER_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
 
       - name: 💚 执行健康检查
+        env:
+          ZY_DOMAIN_MAIN: ${{ secrets.ZY_DOMAIN_MAIN }}
+          ZY_DOMAIN_PREVIEW: ${{ secrets.ZY_DOMAIN_PREVIEW }}
+          ZY_FACE_DOMAIN: ${{ secrets.ZY_FACE_DOMAIN }}
         run: |
           ssh -i ~/.ssh/zy_key \
             ${{ secrets.ZY_SERVER_USER }}@${{ secrets.ZY_SERVER_HOST }} << 'HEALTH_CMD'
@@ -473,6 +525,10 @@ jobs:
 
           echo "§5 Nginx 状态:"
           systemctl is-active nginx && echo "Nginx: 运行中" || echo "Nginx: 已停止"
+          echo "Nginx server_name 冲突检测:"
+          sudo nginx -T 2>&1 | grep "conflicting server name" || echo "  无冲突 ✅"
+          echo "启用的站点配置:"
+          ls /etc/nginx/sites-enabled/ 2>/dev/null || echo "  (无 sites-enabled 目录)"
           echo ""
 
           echo "§6 应用健康:"
@@ -487,6 +543,28 @@ jobs:
           curl -sf http://localhost:3800/api/sites | jq . 2>/dev/null || echo "站点API未响应"
 
           HEALTH_CMD
+
+      - name: 🌐 DNS 域名解析检查
+        env:
+          ZY_DOMAIN_MAIN: ${{ secrets.ZY_DOMAIN_MAIN }}
+          ZY_DOMAIN_PREVIEW: ${{ secrets.ZY_DOMAIN_PREVIEW }}
+          ZY_FACE_DOMAIN: ${{ secrets.ZY_FACE_DOMAIN }}
+        run: |
+          echo "═══ DNS 域名解析诊断 ═══"
+          SERVER_IP="43.134.16.246"
+          for DOMAIN in "$ZY_DOMAIN_MAIN" "$ZY_DOMAIN_PREVIEW" "$ZY_FACE_DOMAIN"; do
+            if [ -n "$DOMAIN" ] && [ "$DOMAIN" != "_" ]; then
+              RESOLVED=$(dig +short "$DOMAIN" A 2>/dev/null | head -1)
+              if [ -z "$RESOLVED" ]; then
+                echo "❌ $DOMAIN → 无法解析 (无A记录·网站不可达)"
+              elif [ "$RESOLVED" = "$SERVER_IP" ]; then
+                echo "✅ $DOMAIN → $RESOLVED"
+              else
+                echo "⚠️ $DOMAIN → $RESOLVED (应为 $SERVER_IP · DNS配置错误!)"
+              fi
+            fi
+          done
+          echo "═══════════════════"
 
   # ═══ §4 一键推送: 预览站 → 主站 ═══
   promote:

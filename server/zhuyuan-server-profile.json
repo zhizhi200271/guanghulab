@@ -31,11 +31,12 @@
   "dual_domain_architecture": {
     "description": "双域名架构 · 所有部署先到预览站验证→冰朔确认后一键推送到主站",
     "main_domain": {
-      "status": "待冰朔提供域名",
+      "status": "✅ 已配置",
       "secret_name": "ZY_DOMAIN_MAIN",
       "purpose": "语言驱动操作系统正式对外网站",
       "site_root": "/opt/zhuyuan/sites/production",
-      "port": 3800
+      "port": 3800,
+      "dns_note": "ZY_DOMAIN_MAIN 的 A 记录必须指向 43.134.16.246"
     },
     "preview_domain": {
       "domain": "guanghulab.online",
@@ -70,7 +71,7 @@
   "access_requirements": {
     "ssh_key": {
       "status": "待确认",
-      "instruction": "冰朔，以下GitHub Secrets是部署到服务器的关键配置。\n如果之前已配置过，无需重复操作。如未配置，请添加：\n1. ZY_SERVER_HOST = 43.134.16.246\n2. ZY_SERVER_USER = root\n3. ZY_SERVER_KEY = SSH私钥内容 (PEM格式)\n4. ZY_SERVER_PATH = /opt/zhuyuan\n5. ZY_DOMAIN_PREVIEW = guanghulab.online\n6. ZY_DOMAIN_MAIN = 主域名 (后续准备好时配置)\n\n操作编号：ZY-SVR-SETUP-001\n操作人：冰朔 TCS-0002∞\n\n验证方法：铸渊可在 GitHub Actions 中手动触发 deploy-to-zhuyuan-server.yml → action=health-check 来测试SSH连接是否正常。",
+      "instruction": "冰朔，以下GitHub Secrets是部署到服务器的关键配置。\n如果之前已配置过，无需重复操作。如未配置，请添加：\n1. ZY_SERVER_HOST = 43.134.16.246\n2. ZY_SERVER_USER = root\n3. ZY_SERVER_KEY = SSH私钥内容 (PEM格式)\n4. ZY_SERVER_PATH = /opt/zhuyuan\n5. ZY_DOMAIN_PREVIEW = guanghulab.online\n6. ZY_DOMAIN_MAIN = 主域名 (已配置)\n\n⚠️ guanghulab.com 是ICP备案域名:\n  → DNS A记录必须指向 43.139.217.141 (广州 ZY-SVR-004)\n  → 不是新加坡服务器! 由 deploy-cn-landing.yml 单独部署\n\n⚠️ 聊天功能:\n  需要配置 ZY_DEEPSEEK_API_KEY / ZY_QIANWEN_API_KEY / ZY_KIMI_API_KEY / ZY_QINGYAN_API_KEY\n  至少配置一个密钥才能启用人格体对话\n\n操作编号：ZY-SVR-SETUP-001\n操作人：冰朔 TCS-0002∞\n\n验证方法：铸渊可在 GitHub Actions 中手动触发 deploy-to-zhuyuan-server.yml → action=health-check 来测试SSH连接是否正常。",
       "request_id": "ZY-SVR-SETUP-001"
     }
   },

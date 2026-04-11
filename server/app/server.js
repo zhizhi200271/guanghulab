@@ -278,7 +278,11 @@ app.post('/api/chat', async (req, res) => {
     if (domesticGateway) {
       try {
         const result = await domesticGateway.chat(sessionId, message);
-        return res.json({ ...result, sessionId });
+        // 网关返回成功才使用其结果，否则降级到通用聊天引擎
+        if (result && result.success !== false) {
+          return res.json({ ...result, sessionId });
+        }
+        console.warn(`[聊天网关] 国内模型网关返回失败: ${result?.message || '未知'} · 降级到通用引擎`);
       } catch (gwErr) {
         console.error(`[聊天网关] 国内模型网关异常: ${gwErr.message}`);
         // 降级到通用聊天引擎
