@@ -37,13 +37,19 @@ on:
 permissions:
   contents: write
 
+# 防止并发运行：同一时间只允许一个实例，后触发的排队等待
+concurrency:
+  group: readme-auto-update
+  cancel-in-progress: false
+
 jobs:
   update-readme:
     # 只在PR被合并时运行（不是关闭未合并），或push/手动触发
+    # push 事件排除 [skip ci] 提交（防止自身触发循环）
     if: >
-      github.event_name == 'push' ||
       github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+      (github.event_name == 'pull_request' && github.event.pull_request.merged == true) ||
+      (github.event_name == 'push' && !contains(github.event.head_commit.message, '[skip ci]'))
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -101,8 +107,25 @@ jobs:
               MSG="📡 README自动更新 · 手动触发 · $(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M')"
             fi
             git commit -m "$MSG [skip ci]"
-            git push
-            echo "✅ README变更已提交并推送"
+
+            # 推送前拉取远程变更，最多重试3次
+            for i in 1 2 3; do
+              if ! git pull --rebase origin main; then
+                echo "⚠️ rebase 失败，尝试中止并重建提交..."
+                git rebase --abort 2>/dev/null || true
+                git pull --rebase origin main 2>/dev/null || true
+              fi
+              if git push; then
+                echo "✅ README变更已提交并推送 (第${i}次尝试)"
+                break
+              fi
+              if [ "$i" -eq 3 ]; then
+                echo "⚠️ 推送失败3次，跳过本次更新（下次触发时会重试）"
+                exit 0
+              fi
+              echo "⚠️ 推送失败，${i}秒后重试..."
+              sleep "$i"
+            done
           else
             echo "ℹ️ 无变更需要提交"
           fi
