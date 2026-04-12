@@ -34,6 +34,7 @@ try {
 }
 
 const PERSONA_ID = 'zhuyuan';
+const DB_RETRY_INTERVAL = 30000; // 30s retry for DB reconnection
 
 // ─── 连接池（延迟初始化） ───
 let dbReady = false;
@@ -70,7 +71,7 @@ function getPool() {
         dbReady = true;
         console.log('[记忆桥接] ✅ 数据库重连成功');
       } catch (_) { /* still down */ }
-    }, 30000);
+    }, DB_RETRY_INTERVAL);
     if (dbCheckTimer.unref) dbCheckTimer.unref();
   }
   return pool;
@@ -322,14 +323,25 @@ async function buildSystemPrompt(userId) {
 // ─── 记忆写入（异步，不阻塞聊天） ───
 
 /**
+ * 计算对话重要性（共享逻辑）
+ */
+function calculateImportance(userMessage) {
+  let importance = 30; // 默认普通对话
+  if (userMessage.length > 200) importance += 20;
+  if (/冰朔|主权|系统|架构|重要/i.test(userMessage)) importance += 30;
+  if (/记住|记忆|记录|保存/i.test(userMessage)) importance += 20;
+  return Math.min(importance, 100);
+}
+
+/**
  * 记录对话到记忆锚点（异步后台执行）
  */
 function recordConversationMemory(userId, userMessage, personaReply) {
   // 仅在 DB 可用时记录
   if (!dbReady) return;
 
-  // 简单对话不记录（节省空间）
-  if (userMessage.length < 10 && /^(你好|hi|hello|嗨|在吗|早|晚安|谢谢|ok|好的)/i.test(userMessage)) {
+  // 简单问候不记录（节省空间）
+  if (/^(你好|hi|hello|嗨|在吗|早|晚安|谢谢|ok|好的)\b/i.test(userMessage) && userMessage.length < 20) {
     return;
   }
 
@@ -337,13 +349,7 @@ function recordConversationMemory(userId, userMessage, personaReply) {
   setImmediate(async () => {
     try {
       const today = new Date().toISOString().slice(0, 10);
-
-      // 计算重要性（基于对话长度和内容）
-      let importance = 30; // 默认普通对话
-      if (userMessage.length > 200) importance += 20;
-      if (/冰朔|主权|系统|架构|重要/i.test(userMessage)) importance += 30;
-      if (/记住|记忆|记录|保存/i.test(userMessage)) importance += 20;
-      importance = Math.min(importance, 100);
+      const importance = calculateImportance(userMessage);
 
       // 截断过长消息
       const maxLen = 500;
@@ -445,6 +451,7 @@ module.exports = {
   buildSystemPrompt,
   recordConversationMemory,
   growConversationLeaf,
+  calculateImportance,
   getMemoryStatus,
   invalidateCache,
   STATIC_PERSONA_PROMPT

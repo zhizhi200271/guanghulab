@@ -196,12 +196,7 @@ async function chat(userId, userMessage) {
 
     // 7. 记录到人格体记忆（异步，不阻塞响应）
     if (personaMemory) {
-      let importance = 30;
-      if (userMessage.length > 200) importance += 20;
-      if (/冰朔|主权|系统|架构|重要/i.test(userMessage)) importance += 30;
-      if (/记住|记忆|记录|保存/i.test(userMessage)) importance += 20;
-      importance = Math.min(importance, 100);
-
+      const importance = personaMemory.calculateImportance(userMessage);
       personaMemory.recordConversationMemory(userId, userMessage, assistantMessage);
       personaMemory.growConversationLeaf(userId, userMessage, assistantMessage, importance);
     }
