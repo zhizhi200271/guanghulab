@@ -291,24 +291,42 @@ app.post('/api/chat', async (req, res) => {
 
     // 降级到通用聊天引擎
     if (chatEngine) {
-      const result = await chatEngine.chat(sessionId, message);
-      return res.json({
-        success: true,
-        ...result,
-        sessionId
-      });
+      try {
+        const result = await chatEngine.chat(sessionId, message);
+        return res.json({
+          success: true,
+          ...result,
+          sessionId
+        });
+      } catch (ceErr) {
+        console.error(`[聊天引擎] 通用引擎异常: ${ceErr.message}`);
+        // 继续到离线回复
+      }
     }
 
-    // 所有引擎都不可用
+    // 所有引擎都不可用 — 仍然返回成功，给用户有意义的反馈
+    const engineStatus = [];
+    if (!domesticGateway) engineStatus.push('国内模型网关未加载');
+    else {
+      try {
+        const gwStats = domesticGateway.getGatewayStats();
+        if (gwStats.availableModels === 0) engineStatus.push('无可用模型API密钥');
+        else engineStatus.push(`已配置${gwStats.availableModels}个模型`);
+      } catch (e) { engineStatus.push('网关状态未知'); }
+    }
+    if (!chatEngine) engineStatus.push('通用引擎未加载');
+
     res.json({
       success: true,
-      message: '💫 铸渊正在唤醒中...聊天引擎尚未加载。请稍后再试。',
+      message: '💫 铸渊正在唤醒中...聊天引擎尚未就绪。请稍后再试，或在聊天面板中配置你的API密钥直连大模型。',
       model: 'offline',
       tier: 'free',
+      engineStatus: engineStatus.join(' · '),
       sessionId
     });
   } catch (err) {
-    res.status(500).json({ error: true, message: err.message });
+    console.error(`[聊天API] 未捕获异常: ${err.message}`);
+    res.status(500).json({ error: true, message: '聊天服务暂时异常，请稍后重试' });
   }
 });
 

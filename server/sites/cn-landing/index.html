@@ -3,8 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>光湖实验室 · GuanghuLab</title>
-<meta name="description" content="光湖实验室 — 语言驱动的智能创作平台">
+<title>光湖实验室 · GuanghuLab — 语言驱动的智能创作平台</title>
+<meta name="description" content="光湖实验室（GuanghuLab）— 语言驱动的智能创作平台，探索人类与AI共生的数字世界。ICP备案号：陕ICP备2025071211号">
+<meta name="keywords" content="光湖实验室,GuanghuLab,语言驱动,智能创作,AI创作平台">
+<meta name="author" content="光湖实验室">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://guanghulab.com/">
+<!-- Open Graph -->
+<meta property="og:title" content="光湖实验室 · GuanghuLab">
+<meta property="og:description" content="语言驱动的智能创作平台，探索人类与AI共生的数字世界">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://guanghulab.com/">
+<meta property="og:locale" content="zh_CN">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌊</text></svg>">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -129,15 +139,21 @@ body{
 /* ═══ 底部备案 ═══ */
 .footer{
   position:fixed;bottom:0;left:0;width:100%;z-index:10;
-  padding:20px;text-align:center;
-  background:linear-gradient(to top,rgba(7,11,26,0.95),transparent);
+  padding:20px 20px 24px;text-align:center;
+  background:linear-gradient(to top,rgba(7,11,26,0.98) 60%,transparent);
+}
+.icp-info{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
 }
 .icp-link{
   color:var(--text-dim);font-size:13px;text-decoration:none;
   transition:color .3s;display:inline-flex;align-items:center;gap:6px;
 }
-.icp-link:hover{color:var(--text-secondary)}
+.icp-link:hover{color:var(--glow-cyan);text-decoration:underline}
 .icp-link .icp-icon{font-size:11px;opacity:.6}
+.icp-copyright{
+  color:var(--text-dim);font-size:11px;opacity:.5;
+}
 
 /* ═══ 入场动画 ═══ */
 .fade-up{animation:fadeUp 1s ease-out both}
@@ -189,10 +205,13 @@ body{
 
 <!-- 底部ICP备案 -->
 <footer class="footer">
-  <a class="icp-link" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">
-    <span class="icp-icon">🛡️</span>
-    陕ICP备2025071211号
-  </a>
+  <div class="icp-info">
+    <a class="icp-link" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">
+      <span class="icp-icon">🛡️</span>
+      陕ICP备2025071211号
+    </a>
+    <span class="icp-copyright">© 2025 光湖实验室 GuanghuLab</span>
+  </div>
 </footer>
 
 <script>

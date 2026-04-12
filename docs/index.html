@@ -2303,6 +2303,7 @@ async function send(){
   // 3. 调用API —— 优先用用户自己的API Key（直接走用户网络），其次尝试后端
   sending=true;document.getElementById('chatSnd').disabled=true;showTyp();
   var replied=false;
+  var backendError='';
 
   // 用户配了API Key → 直接用用户的网络通道调用，不经过后端
   if(apiCfg.connected&&apiCfg.key){
@@ -2327,28 +2328,48 @@ async function send(){
         document.getElementById('mM').textContent=apiCfg.model;
         replied=true;
       }
-    }catch(e){}
+    }catch(e){backendError='用户API: '+(e.name==='TimeoutError'?'请求超时':e.message)}
   }
 
-  // 用户没配Key或调用失败 → 尝试后端
+  // 用户没配Key或调用失败 → 尝试后端（含自动重试）
   if(!replied){
-    try{
-      var res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,userId:usr.id}),signal:AbortSignal.timeout(60000)});
-      var data=await res.json();hideTyp();
-      if(data.message){
-        replied=true;
-        chatMsg(data.message,'b',{m:data.model||'铸渊',t:data.tier||''});
-        if(data.tier!=='free')mCalls++;
-        document.getElementById('mC').textContent=mCalls;
-        document.getElementById('chatTg').textContent=data.model||'ready';
-        if(data.model)document.getElementById('mM').textContent=data.model;
+    var retryCount=0;var maxRetries=2;
+    while(retryCount<=maxRetries&&!replied){
+      try{
+        var res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,userId:usr.id}),signal:AbortSignal.timeout(retryCount===0?60000:30000)});
+        if(!res.ok){
+          backendError='服务器返回 '+res.status;
+          retryCount++;continue;
+        }
+        var data=await res.json();hideTyp();
+        if(data.message){
+          replied=true;
+          chatMsg(data.message,'b',{m:data.model||'铸渊',t:data.tier||''});
+          if(data.tier!=='free')mCalls++;
+          document.getElementById('mC').textContent=mCalls;
+          document.getElementById('chatTg').textContent=data.model||'ready';
+          if(data.model)document.getElementById('mM').textContent=data.model;
+        }else if(data.error){
+          backendError=data.message||'服务端错误';
+          retryCount++;continue;
+        }
+        break;
+      }catch(e){
+        backendError=e.name==='TimeoutError'?'后端响应超时':'网络连接失败';
+        retryCount++;
+        if(retryCount<=maxRetries){await new Promise(function(r){setTimeout(r,1000*retryCount)})}
       }
-    }catch(e){}
+    }
   }
 
-  // 所有外部通道都失败 → 用本地智能回复（用户浏览器就是计算资源）
+  // 所有外部通道都失败 → 用本地智能回复 + 显示连接状态
   if(!replied){
-    hideTyp();chatMsg(offline(msg),'b',{m:'铸渊',t:'本地智能'});
+    hideTyp();
+    var offlineMsg=offline(msg);
+    if(backendError){offlineMsg+='\n\n⚠️ 后端状态: '+backendError+'\n点击右下角💬重试，或配置API密钥直连大模型。'}
+    chatMsg(offlineMsg,'b',{m:'铸渊',t:'本地智能'});
+    document.getElementById('chatTg').textContent='离线';
+    document.getElementById('chatTg').style.color='var(--err,#f87171)';
   }
 
   sending=false;document.getElementById('chatSnd').disabled=false;
@@ -2761,7 +2782,11 @@ checkConn();setInterval(checkConn,30000);
     chatOverlay.classList.toggle('open',chatOpen);
     fab.classList.toggle('on',chatOpen);
     fab.textContent=chatOpen?'✕':'💬';
-    if(chatOpen)setTimeout(function(){chatIn.focus()},200);
+    if(chatOpen){
+      setTimeout(function(){chatIn.focus()},200);
+      // 打开聊天时预检后端连接状态
+      checkChatBackend();
+    }
   };
   fab.onclick=function(e){
     if(hasMoved){hasMoved=false;return}
@@ -2772,6 +2797,59 @@ checkConn();setInterval(checkConn,30000);
     if(chatOpen)origToggle();
   };
 })();
+
+/* ════════════════════════════════════════
+   CHAT BACKEND HEALTH CHECK (打开聊天时预检)
+   ════════════════════════════════════════ */
+var chatBackendOk=null;
+async function checkChatBackend(){
+  var tg=document.getElementById('chatTg');
+  try{
+    var r=await fetch('/api/health',{signal:AbortSignal.timeout(5000)});
+    if(r.ok){
+      chatBackendOk=true;
+      if(tg){tg.textContent='ready';tg.style.color=''}
+    }else{
+      chatBackendOk=false;
+      if(tg){tg.textContent='后端异常('+r.status+')';tg.style.color='var(--err,#f87171)'}
+    }
+  }catch(e){
+    chatBackendOk=false;
+    if(tg){tg.textContent='后端未连接';tg.style.color='var(--err,#f87171)'}
+    // 显示连接提示
+    if(chatMs&&!document.getElementById('chatConnTip')){
+      var tip=document.createElement('div');
+      tip.id='chatConnTip';
+      tip.className='cm s';
+      tip.innerHTML='⚠️ 后端服务暂时未连接。本地智能回复可用，配置API密钥可解锁AI对话。<br><button onclick="retryChatBackend()" style="margin-top:6px;padding:4px 12px;border-radius:4px;border:1px solid var(--accent,#6ea8fe);background:transparent;color:var(--accent,#6ea8fe);cursor:pointer;font-size:12px">🔄 重新连接</button>';
+      chatMs.appendChild(tip);
+      chatMs.scrollTop=chatMs.scrollHeight;
+    }
+  }
+}
+async function retryChatBackend(){
+  var tip=document.getElementById('chatConnTip');
+  if(tip)tip.remove();
+  var tg=document.getElementById('chatTg');
+  if(tg){tg.textContent='连接中...';tg.style.color='var(--warn,#fbbf24)'}
+  try{
+    var r=await fetch('/api/chat/reconnect',{method:'POST',signal:AbortSignal.timeout(15000)});
+    var data=await r.json();
+    if(data.connected){
+      chatBackendOk=true;
+      if(tg){tg.textContent='ready';tg.style.color=''}
+      chatMsg(data.message||'🌊 铸渊已重新连接！','b',{m:'铸渊',t:'reconnect'});
+    }else{
+      chatBackendOk=false;
+      if(tg){tg.textContent='离线';tg.style.color='var(--err,#f87171)'}
+      chatMsg('⚠️ 后端大模型暂时不可用。本地智能回复仍然可用。','b',{m:'铸渊',t:'本地'});
+    }
+  }catch(e){
+    chatBackendOk=false;
+    if(tg){tg.textContent='离线';tg.style.color='var(--err,#f87171)'}
+    chatMsg('⚠️ 无法连接后端服务。请稍后重试或配置API密钥。','b',{m:'铸渊',t:'本地'});
+  }
+}
 
 /* ════════════════════════════════════════
    SYSTEM STATUS (左面板实时数据)
