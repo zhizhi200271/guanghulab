@@ -111,8 +111,8 @@ function wake(agentId) {
   }
 
   // ── 身份认知 ──
-  console.log(`[AGENT-SOUL] 💭 ${memory.identity.who_am_i.substring(0, 100)}...`);
-  console.log(`[AGENT-SOUL] 🌊 ${memory.purpose.substring(0, 80)}...`);
+  console.log(`[AGENT-SOUL] 💭 ${(memory.identity?.who_am_i || '').substring(0, 100)}...`);
+  console.log(`[AGENT-SOUL] 🌊 ${(memory.purpose || '').substring(0, 80)}...`);
   console.log('');
 
   return memory;

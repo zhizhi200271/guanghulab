@@ -101,7 +101,7 @@ function main() {
       source: 'memory.json · recent_events'
     };
     newEchoes.push(echo);
-    console.log(`[CX-AGENT-003] 🔔 回声: [${evt.date}] ${evt.description?.substring(0, 60)}...`);
+    console.log(`[CX-AGENT-003] 🔔 回声: [${evt.date}] ${(echo.description || '').substring(0, 60)}...`);
   }
 
   // 如果有将军唤醒信息，也记录

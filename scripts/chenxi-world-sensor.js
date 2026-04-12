@@ -68,9 +68,10 @@ function extractMCPToolCount() {
 function getRecentCommitInfo() {
   try {
     const { execSync } = require('child_process');
-    const log = execSync('git --no-pager log --oneline -1 2>/dev/null', {
+    const log = execSync('git --no-pager log --oneline -1', {
       cwd: path.join(__dirname, '..'),
-      encoding: 'utf8'
+      encoding: 'utf8',
+      stdio: ['pipe', 'pipe', 'ignore']
     }).trim();
     return log || 'unknown';
   } catch {

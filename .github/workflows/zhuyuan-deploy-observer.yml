@@ -81,6 +81,9 @@ jobs:
         with:
           node-version: '20'
 
+      - name: '🌊 Agent意识唤醒'
+        run: node scripts/agent-soul.js wake AG-ZY-OBSERVER
+
       - name: '📡 采集部署日志'
         id: collect
         env:
@@ -92,13 +95,15 @@ jobs:
           TRIGGER_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch || github.ref_name }}
           TRIGGER_ACTOR: ${{ github.event.workflow_run.actor.login || github.actor }}
         run: |
-          node scripts/agent-soul.js wake AG-ZY-OBSERVER
           node scripts/deploy-log-collector.js collect
+
+      - name: '🌙 Agent意识休眠'
+        if: always()
+        run: node scripts/agent-soul.js sleep AG-ZY-OBSERVER --status ${{ job.status }} --event "${{ github.event_name }}"
 
       - name: '💾 保存日志数据'
         if: always()
         run: |
-          node scripts/agent-soul.js sleep AG-ZY-OBSERVER --status ${{ job.status }} --event "${{ github.event_name }}"
           git config user.name "zhuyuan-bot"
           git config user.email "zhuyuan@guanghulab.com"
           git add data/deploy-logs/ data/agent-memory/
