@@ -2,13 +2,13 @@
   "aoac_agent": "AOAC-02",
   "aoac_agent_name": "action-merge-sentinel",
   "status": "half_ready",
-  "timestamp": "2026-04-12 18:21:34+08:00",
-  "timestamp_utc": "2026-04-12T10:21:34.825Z",
+  "timestamp": "2026-04-12 18:43:49+08:00",
+  "timestamp_utc": "2026-04-12T10:43:49.946Z",
   "merge": {
-    "pr_number": 360,
-    "pr_title": "feat: Redesign homepage — CSS animated logo, AGE OS tech intro",
-    "merge_commit_sha": "7df4b91c5ec37ef79de409a01b872a773e52abe0",
-    "head_sha": "293daafbd13c8cadbc782eb0f4f1bfedcc53c678",
+    "pr_number": 361,
+    "pr_title": "Redesign guanghulab.online UI: deep lake night aesthetic",
+    "merge_commit_sha": "45bd8563537acdb7d8b2a45f468d5ec222d3b774",
+    "head_sha": "0a0d50640db4d31a601968cc28d181bfa157c1a5",
     "base_branch": "main"
   },
   "ci": {
@@ -22,38 +22,11 @@
     },
     "check_runs": [
       {
-        "name": "🚀 预览站→主站 一键推送",
+        "name": "🔧 ���务器初始化",
         "status": "completed",
         "conclusion": "skipped",
-        "started_at": "2026-04-12T10:21:27Z",
-        "completed_at": "2026-04-12T10:21:27Z",
-        "output_title": null,
-        "output_summary": ""
-      },
-      {
-        "name": "🔧 服务器初始化",
-        "status": "completed",
-        "conclusion": "skipped",
-        "started_at": "2026-04-12T10:21:27Z",
-        "completed_at": "2026-04-12T10:21:27Z",
-        "output_title": null,
-        "output_summary": ""
-      },
-      {
-        "name": "🔒 SSL证书配置",
-        "status": "completed",
-        "conclusion": "skipped",
-        "started_at": "2026-04-12T10:21:27Z",
-        "completed_at": "2026-04-12T10:21:27Z",
-        "output_title": null,
-        "output_summary": ""
-      },
-      {
-        "name": "build",
-        "status": "in_progress",
-        "conclusion": null,
-        "started_at": "2026-04-12T10:21:30Z",
-        "completed_at": null,
+        "started_at": "2026-04-12T10:43:44Z",
+        "completed_at": "2026-04-12T10:43:44Z",
         "output_title": null,
         "output_summary": ""
       },
@@ -61,17 +34,26 @@
         "name": "💚 健康检查",
         "status": "completed",
         "conclusion": "skipped",
-        "started_at": "2026-04-12T10:21:27Z",
-        "completed_at": "2026-04-12T10:21:27Z",
+        "started_at": "2026-04-12T10:43:44Z",
+        "completed_at": "2026-04-12T10:43:44Z",
         "output_title": null,
         "output_summary": ""
       },
       {
-        "name": "🚀 部署应用代码",
-        "status": "in_progress",
-        "conclusion": null,
-        "started_at": "2026-04-12T10:21:30Z",
-        "completed_at": null,
+        "name": "🔒 SSL证书配置",
+        "status": "completed",
+        "conclusion": "skipped",
+        "started_at": "2026-04-12T10:43:44Z",
+        "completed_at": "2026-04-12T10:43:44Z",
+        "output_title": null,
+        "output_summary": ""
+      },
+      {
+        "name": "🚀 预览站→主站 一键推送",
+        "status": "completed",
+        "conclusion": "skipped",
+        "started_at": "2026-04-12T10:43:44Z",
+        "completed_at": "2026-04-12T10:43:44Z",
         "output_title": null,
         "output_summary": ""
       },
@@ -79,8 +61,8 @@
         "name": "gate-guard",
         "status": "completed",
         "conclusion": "skipped",
-        "started_at": "2026-04-12T10:21:27Z",
-        "completed_at": "2026-04-12T10:21:27Z",
+        "started_at": "2026-04-12T10:43:44Z",
+        "completed_at": "2026-04-12T10:43:44Z",
         "output_title": null,
         "output_summary": ""
       },
@@ -88,7 +70,16 @@
         "name": "deploy",
         "status": "in_progress",
         "conclusion": null,
-        "started_at": "2026-04-12T10:21:31Z",
+        "started_at": "2026-04-12T10:43:48Z",
+        "completed_at": null,
+        "output_title": null,
+        "output_summary": ""
+      },
+      {
+        "name": "🚀 部署应用代码",
+        "status": "in_progress",
+        "conclusion": null,
+        "started_at": "2026-04-12T10:43:48Z",
         "completed_at": null,
         "output_title": null,
         "output_summary": ""
@@ -97,7 +88,16 @@
         "name": "📡 Bridge E · GitHub Changes → Notion",
         "status": "in_progress",
         "conclusion": null,
-        "started_at": "2026-04-12T10:21:30Z",
+        "started_at": "2026-04-12T10:43:46Z",
+        "completed_at": null,
+        "output_title": null,
+        "output_summary": ""
+      },
+      {
+        "name": "build",
+        "status": "in_progress",
+        "conclusion": null,
+        "started_at": "2026-04-12T10:43:46Z",
         "completed_at": null,
         "output_title": null,
         "output_summary": ""
