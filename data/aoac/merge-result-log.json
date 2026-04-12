@@ -2,94 +2,40 @@
   "aoac_agent": "AOAC-02",
   "aoac_agent_name": "action-merge-sentinel",
   "status": "half_ready",
-  "timestamp": "2026-04-12 18:43:49+08:00",
-  "timestamp_utc": "2026-04-12T10:43:49.946Z",
+  "timestamp": "2026-04-12 18:55:42+08:00",
+  "timestamp_utc": "2026-04-12T10:55:42.589Z",
   "merge": {
-    "pr_number": 361,
-    "pr_title": "Redesign guanghulab.online UI: deep lake night aesthetic",
-    "merge_commit_sha": "45bd8563537acdb7d8b2a45f468d5ec222d3b774",
-    "head_sha": "0a0d50640db4d31a601968cc28d181bfa157c1a5",
+    "pr_number": 362,
+    "pr_title": "Fix PR #361 UI changes not deploying to guanghulab.online",
+    "merge_commit_sha": "94f15f000183b1276a973c9507b9db49004ce4f2",
+    "head_sha": "41419ad8f562c4bcf94026550a5b2dd4054bf766",
     "base_branch": "main"
   },
   "ci": {
     "combined_status": "failure",
     "overall_result": "failure",
     "summary": {
-      "total": 9,
+      "total": 8,
       "passed": 0,
       "failed": 0,
       "skipped": 5
     },
     "check_runs": [
       {
-        "name": "🔧 ���务器初始化",
-        "status": "completed",
-        "conclusion": "skipped",
-        "started_at": "2026-04-12T10:43:44Z",
-        "completed_at": "2026-04-12T10:43:44Z",
-        "output_title": null,
-        "output_summary": ""
-      },
-      {
         "name": "💚 健康检查",
         "status": "completed",
         "conclusion": "skipped",
-        "started_at": "2026-04-12T10:43:44Z",
-        "completed_at": "2026-04-12T10:43:44Z",
+        "started_at": "2026-04-12T10:55:34Z",
+        "completed_at": "2026-04-12T10:55:34Z",
         "output_title": null,
         "output_summary": ""
       },
       {
-        "name": "🔒 SSL证书配置",
+        "name": "🔧 服务器初始化",
         "status": "completed",
         "conclusion": "skipped",
-        "started_at": "2026-04-12T10:43:44Z",
-        "completed_at": "2026-04-12T10:43:44Z",
-        "output_title": null,
-        "output_summary": ""
-      },
-      {
-        "name": "🚀 预览站→主站 一键推送",
-        "status": "completed",
-        "conclusion": "skipped",
-        "started_at": "2026-04-12T10:43:44Z",
-        "completed_at": "2026-04-12T10:43:44Z",
-        "output_title": null,
-        "output_summary": ""
-      },
-      {
-        "name": "gate-guard",
-        "status": "completed",
-        "conclusion": "skipped",
-        "started_at": "2026-04-12T10:43:44Z",
-        "completed_at": "2026-04-12T10:43:44Z",
-        "output_title": null,
-        "output_summary": ""
-      },
-      {
-        "name": "deploy",
-        "status": "in_progress",
-        "conclusion": null,
-        "started_at": "2026-04-12T10:43:48Z",
-        "completed_at": null,
-        "output_title": null,
-        "output_summary": ""
-      },
-      {
-        "name": "🚀 部署应用代码",
-        "status": "in_progress",
-        "conclusion": null,
-        "started_at": "2026-04-12T10:43:48Z",
-        "completed_at": null,
-        "output_title": null,
-        "output_summary": ""
-      },
-      {
-        "name": "📡 Bridge E · GitHub Changes → Notion",
-        "status": "in_progress",
-        "conclusion": null,
-        "started_at": "2026-04-12T10:43:46Z",
-        "completed_at": null,
+        "started_at": "2026-04-12T10:55:34Z",
+        "completed_at": "2026-04-12T10:55:34Z",
         "output_title": null,
         "output_summary": ""
       },
@@ -97,7 +43,52 @@
         "name": "build",
         "status": "in_progress",
         "conclusion": null,
-        "started_at": "2026-04-12T10:43:46Z",
+        "started_at": "2026-04-12T10:55:36Z",
+        "completed_at": null,
+        "output_title": null,
+        "output_summary": ""
+      },
+      {
+        "name": "🚀 预览站→主站 一键推送",
+        "status": "completed",
+        "conclusion": "skipped",
+        "started_at": "2026-04-12T10:55:34Z",
+        "completed_at": "2026-04-12T10:55:34Z",
+        "output_title": null,
+        "output_summary": ""
+      },
+      {
+        "name": "🔒 SSL证书配置",
+        "status": "completed",
+        "conclusion": "skipped",
+        "started_at": "2026-04-12T10:55:34Z",
+        "completed_at": "2026-04-12T10:55:34Z",
+        "output_title": null,
+        "output_summary": ""
+      },
+      {
+        "name": "🚀 部署应用代码",
+        "status": "in_progress",
+        "conclusion": null,
+        "started_at": "2026-04-12T10:55:38Z",
+        "completed_at": null,
+        "output_title": null,
+        "output_summary": ""
+      },
+      {
+        "name": "gate-guard",
+        "status": "completed",
+        "conclusion": "skipped",
+        "started_at": "2026-04-12T10:55:34Z",
+        "completed_at": "2026-04-12T10:55:34Z",
+        "output_title": null,
+        "output_summary": ""
+      },
+      {
+        "name": "📡 Bridge E · GitHub Changes → Notion",
+        "status": "in_progress",
+        "conclusion": null,
+        "started_at": "2026-04-12T10:55:37Z",
         "completed_at": null,
         "output_title": null,
         "output_summary": ""
