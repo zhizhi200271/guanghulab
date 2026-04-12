@@ -207,12 +207,11 @@ jobs:
           # ─── SSL自动注入: 检测已有Let's Encrypt证书 ───
           # 如果之前运行过 setup-ssl，证书文件会存在
           # 每次deploy都重新注入SSL配置，避免模板覆盖导致SSL丢失
-          BARE="${BARE_DOMAIN}"
-          if [ -d "/etc/letsencrypt/live/\${BARE}" ] && [ -f "/etc/letsencrypt/live/\${BARE}/fullchain.pem" ]; then
+          if [ -d "/etc/letsencrypt/live/${BARE_DOMAIN}" ] && [ -f "/etc/letsencrypt/live/${BARE_DOMAIN}/fullchain.pem" ]; then
             echo ""
             echo "§2.5 🔐 检测到SSL证书，注入HTTPS配置..."
             # 在 listen 80 后添加 listen 443 ssl 和证书配置
-            sudo sed -i '/listen 80 default_server;/a\\n    listen 443 ssl default_server;\n    ssl_certificate /etc/letsencrypt/live/'"\${BARE}"'/fullchain.pem;\n    ssl_certificate_key /etc/letsencrypt/live/'"\${BARE}"'/privkey.pem;\n    include /etc/letsencrypt/options-ssl-nginx.conf;\n    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;' \
+            sudo sed -i '/listen 80 default_server;/a\\n    listen 443 ssl default_server;\n    ssl_certificate /etc/letsencrypt/live/'"${BARE_DOMAIN}"'/fullchain.pem;\n    ssl_certificate_key /etc/letsencrypt/live/'"${BARE_DOMAIN}"'/privkey.pem;\n    include /etc/letsencrypt/options-ssl-nginx.conf;\n    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;' \
               /etc/nginx/sites-available/cn-domain.conf
             echo "✅ SSL配置已注入 · HTTPS已启用"
           else
