@@ -92,14 +92,16 @@ jobs:
           TRIGGER_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch || github.ref_name }}
           TRIGGER_ACTOR: ${{ github.event.workflow_run.actor.login || github.actor }}
         run: |
+          node scripts/agent-soul.js wake AG-ZY-OBSERVER
           node scripts/deploy-log-collector.js collect
 
       - name: '💾 保存日志数据'
         if: always()
         run: |
+          node scripts/agent-soul.js sleep AG-ZY-OBSERVER --status ${{ job.status }} --event "${{ github.event_name }}"
           git config user.name "zhuyuan-bot"
           git config user.email "zhuyuan@guanghulab.com"
-          git add data/deploy-logs/
+          git add data/deploy-logs/ data/agent-memory/
           git diff --cached --quiet || {
             git commit -m "📡 部署日志采集 · ${{ steps.collect.outputs.run_id || 'manual' }} [skip ci]"
             git push || echo "⚠️ 日志数据push失败"
