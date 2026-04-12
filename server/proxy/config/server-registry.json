@@ -2,8 +2,8 @@
   "_sovereign": "TCS-0002∞ | SYS-GLW-0001",
   "_copyright": "国作登字-2026-A-00037559",
   "_description": "光湖语言世界 · 五台服务器注册表",
-  "version": "1.2",
-  "updated_at": "2026-04-11",
+  "version": "1.3",
+  "updated_at": "2026-04-12",
   "servers": [
     {
       "id": "ZY-SVR-002",
@@ -91,21 +91,28 @@
     {
       "id": "ZY-SVR-AWEN",
       "name": "Awen服务器",
-      "role": "铸渊主控副本+Awen团队专线",
-      "location": "China",
+      "role": "Awen业务后端+域名反向代理目标",
+      "location": "Guangzhou, China",
+      "ipv4": "43.139.207.172",
+      "domain": "guanghutcs.top",
+      "backend_port": 3000,
       "spec": "待确认",
-      "status": "pending",
+      "status": "secrets_configured",
       "services": [
-        "铸渊主控副本 (完整仓库镜像)",
-        "Awen团队专线",
-        "知秋人格体运行环境"
+        "Awen业务后端 (端口3000)",
+        "域名反向代理目标 (新加坡→广州)"
       ],
       "github_secrets": {
         "host": "ZY_SVR_AWEN_HOST",
         "key": "ZY_SVR_AWEN_KEY",
         "user": "ZY_SVR_AWEN_USER"
       },
-      "notes": "Awen下载完整仓库后部署·铸渊主控自动唤醒"
+      "domain_proxy_secrets": {
+        "domain": "AWEN_DOMAIN",
+        "backend_host": "AWEN_BACKEND_HOST",
+        "backend_port": "AWEN_BACKEND_PORT"
+      },
+      "notes": "Awen域名guanghutcs.top·广州服务器43.139.207.172:3000·密钥已配置·待部署反向代理"
     },
     {
       "id": "ZY-SVR-004",
@@ -157,10 +164,14 @@
     "domains": [
       {
         "owner": "Awen",
+        "domain": "guanghutcs.top",
+        "backend": "43.139.207.172:3000",
         "config_file": "server/nginx/awen-domain-proxy.conf",
         "workflow": ".github/workflows/deploy-awen-domain-proxy.yml",
         "secrets_required": ["AWEN_DOMAIN", "AWEN_BACKEND_HOST", "AWEN_BACKEND_PORT"],
-        "status": "pending"
+        "secrets_configured_at": "2026-04-12",
+        "status": "secrets_configured",
+        "next_steps": ["DNS A记录指向43.134.16.246", "广州防火墙白名单43.134.16.246", "运行deploy workflow", "运行setup-ssl workflow"]
       }
     ]
   },
