@@ -183,14 +183,20 @@ jobs:
 
       - name: 🌐 同步前端内容到站点
         run: |
-          TARGET="${{ github.event.inputs.deploy_target || 'preview' }}"
+          # Push事件: 直接部署到 production (guanghulab.online = ZY_DOMAIN_MAIN = production)
+          # 手动触发: 使用选定的目标 (默认 preview)
+          if [ "${{ github.event_name }}" = "push" ]; then
+            TARGET="production"
+          else
+            TARGET="${{ github.event.inputs.deploy_target || 'preview' }}"
+          fi
           TARGET_DIR="/opt/zhuyuan/sites/${TARGET}"
           echo "🌐 同步前端 → ${TARGET_DIR}"
 
           # 确保零点原核频道目录存在
           ssh -i ~/.ssh/zy_key \
             ${{ secrets.ZY_SERVER_USER }}@${{ secrets.ZY_SERVER_HOST }} \
-            "mkdir -p /opt/zhuyuan/sites/yaoming"
+            "mkdir -p /opt/zhuyuan/sites/yaoming /opt/zhuyuan/sites/production /opt/zhuyuan/sites/preview"
 
           # 同步主站门户 (server/sites/portal/) 到目标站点目录
           if [ -d "server/sites/portal" ]; then
@@ -199,6 +205,15 @@ jobs:
               server/sites/portal/ \
               ${{ secrets.ZY_SERVER_USER }}@${{ secrets.ZY_SERVER_HOST }}:${TARGET_DIR}/
             echo "✅ 主站门户已部署到 ${TARGET_DIR}"
+
+            # Push事件额外同步到 preview 保持两站一致
+            if [ "${{ github.event_name }}" = "push" ]; then
+              rsync -avz --delete \
+                -e "ssh -i ~/.ssh/zy_key" \
+                server/sites/portal/ \
+                ${{ secrets.ZY_SERVER_USER }}@${{ secrets.ZY_SERVER_HOST }}:/opt/zhuyuan/sites/preview/
+              echo "✅ 主站门户已同步到 preview (保持一致)"
+            fi
           else
             # 降级: 使用 docs/ 目录
             rsync -avz --delete \

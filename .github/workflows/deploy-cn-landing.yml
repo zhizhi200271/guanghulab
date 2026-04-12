@@ -31,6 +31,7 @@ on:
         options:
           - deploy
           - health-check
+          - setup-ssl
 
 concurrency:
   group: cn-landing-deploy
@@ -123,11 +124,13 @@ jobs:
           cp server/nginx/cn-domain.conf /tmp/cn-domain.conf
 
           if [ -n "$ZY_CN_DOMAIN" ]; then
-            sed -i "s/ZY_CN_DOMAIN_PLACEHOLDER/${ZY_CN_DOMAIN}/g" /tmp/cn-domain.conf
-            echo "✅ 国内域名已注入: ${ZY_CN_DOMAIN}"
+            # 去除可能的 www. 前缀，获取裸域名
+            BARE_DOMAIN="${ZY_CN_DOMAIN#www.}"
+            sed -i "s/ZY_CN_BARE_DOMAIN_PLACEHOLDER/${BARE_DOMAIN}/g" /tmp/cn-domain.conf
+            echo "✅ 国内域名已注入: ${BARE_DOMAIN} + www.${BARE_DOMAIN}"
           else
             echo "⚠️ ZY_CN_DOMAIN 未配置，使用IP直接访问"
-            sed -i "s/ZY_CN_DOMAIN_PLACEHOLDER/_/g" /tmp/cn-domain.conf
+            sed -i "s/ZY_CN_BARE_DOMAIN_PLACEHOLDER www.ZY_CN_BARE_DOMAIN_PLACEHOLDER/_/g" /tmp/cn-domain.conf
           fi
 
           scp -F ~/.ssh/config \
@@ -157,8 +160,11 @@ jobs:
           echo "✅ 四大国内模型API密钥已注入"
 
       - name: 🔧 启用Nginx配置 & 重载
+        env:
+          ZY_CN_DOMAIN: ${{ secrets.ZY_CN_DOMAIN }}
         run: |
-          ssh cn-target << 'NGINX_CMD'
+          BARE_DOMAIN="${ZY_CN_DOMAIN#www.}"
+          ssh cn-target << NGINX_CMD
           set -e
 
           echo "═══ Nginx 配置诊断 ═══"
@@ -178,9 +184,9 @@ jobs:
 
           # 清理 sites-enabled 中的冲突
           for conf in /etc/nginx/sites-enabled/*; do
-            if [ -f "$conf" ] && [ "$(basename "$conf")" != "cn-domain.conf" ]; then
-              echo "  🗑️ 移除sites-enabled冲突: $(basename "$conf")"
-              sudo rm -f "$conf"
+            if [ -f "\$conf" ] && [ "\$(basename "\$conf")" != "cn-domain.conf" ]; then
+              echo "  🗑️ 移除sites-enabled冲突: \$(basename "\$conf")"
+              sudo rm -f "\$conf"
             fi
           done
 
@@ -188,15 +194,32 @@ jobs:
           # 保留 conf.d 中的全局配置(如 gzip, ssl_params 等)
           # 只移除包含 server { 或 proxy_pass 的自定义站点配置
           for conf in /etc/nginx/conf.d/*.conf; do
-            if [ -f "$conf" ] && grep -qE "server[[:space:]]*\{" "$conf" 2>/dev/null; then
-              echo "  🗑️ 移除conf.d冲突站点配置: $(basename "$conf")"
-              sudo rm -f "$conf"
+            if [ -f "\$conf" ] && grep -qE "server[[:space:]]*\{" "\$conf" 2>/dev/null; then
+              echo "  🗑️ 移除conf.d冲突站点配置: \$(basename "\$conf")"
+              sudo rm -f "\$conf"
             fi
           done
 
           # 复制配置到Nginx目录
           sudo cp /opt/zhuyuan-cn/config/nginx/cn-domain.conf /etc/nginx/sites-available/cn-domain.conf
           sudo ln -sf /etc/nginx/sites-available/cn-domain.conf /etc/nginx/sites-enabled/cn-domain.conf
+
+          # ─── SSL自动注入: 检测已有Let's Encrypt证书 ───
+          # 如果之前运行过 setup-ssl，证书文件会存在
+          # 每次deploy都重新注入SSL配置，避免模板覆盖导致SSL丢失
+          BARE="${BARE_DOMAIN}"
+          if [ -d "/etc/letsencrypt/live/\${BARE}" ] && [ -f "/etc/letsencrypt/live/\${BARE}/fullchain.pem" ]; then
+            echo ""
+            echo "§2.5 🔐 检测到SSL证书，注入HTTPS配置..."
+            # 在 listen 80 后添加 listen 443 ssl 和证书配置
+            sudo sed -i '/listen 80 default_server;/a\\n    listen 443 ssl default_server;\n    ssl_certificate /etc/letsencrypt/live/'"\${BARE}"'/fullchain.pem;\n    ssl_certificate_key /etc/letsencrypt/live/'"\${BARE}"'/privkey.pem;\n    include /etc/letsencrypt/options-ssl-nginx.conf;\n    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;' \
+              /etc/nginx/sites-available/cn-domain.conf
+            echo "✅ SSL配置已注入 · HTTPS已启用"
+          else
+            echo ""
+            echo "§2.5 ℹ️ 未检测到SSL证书 · 仅HTTP模式"
+            echo "  运行 setup-ssl 动作安装Let's Encrypt证书"
+          fi
 
           # 确认最终状态
           echo ""
@@ -384,7 +407,124 @@ jobs:
           echo "§9 端口80监听进程:"
           sudo ss -tlnp | grep ':80 ' 2>/dev/null || echo "  (无)"
 
+          # SSL状态检查
+          echo ""
+          echo "§10 SSL证书状态:"
+          sudo certbot certificates 2>/dev/null || echo "  certbot未安装 · 运行setup-ssl动作安装"
+
+          echo ""
+          echo "§11 HTTPS访问测试:"
+          HTTPS_CODE=$(curl -sf -o /dev/null -w '%{http_code}' https://localhost/ -k 2>/dev/null || echo "000")
+          echo "HTTPS状态码: ${HTTPS_CODE}"
+
           HEALTH_CMD
+
+      - name: 🧹 清理SSH密钥
+        if: always()
+        run: rm -f ~/.ssh/id_sg ~/.ssh/id_cn ~/.ssh/config
+
+  setup-ssl:
+    name: 🔐 安装SSL证书 (Let's Encrypt)
+    if: github.event.inputs.action == 'setup-ssl'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 🔐 配置SSH跳板 (SG→CN)
+        env:
+          SG_SSH_KEY: ${{ secrets.ZY_SERVER_KEY }}
+          CN_SSH_KEY: ${{ secrets.ZY_CN_SERVER_KEY }}
+          CN_SSH_PORT: ${{ secrets.ZY_CN_SSH_PORT }}
+        run: |
+          CN_PORT="${CN_SSH_PORT:-22}"
+
+          mkdir -p ~/.ssh
+          echo "$SG_SSH_KEY" > ~/.ssh/id_sg
+          echo "$CN_SSH_KEY" > ~/.ssh/id_cn
+          chmod 600 ~/.ssh/id_sg ~/.ssh/id_cn
+
+          ssh-keyscan -H ${{ secrets.ZY_SERVER_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
+          cat > ~/.ssh/config << EOF
+          Host sg-jump
+              HostName ${{ secrets.ZY_SERVER_HOST }}
+              User ${{ secrets.ZY_SERVER_USER }}
+              IdentityFile ~/.ssh/id_sg
+              StrictHostKeyChecking accept-new
+              BatchMode yes
+
+          Host cn-target
+              HostName ${{ secrets.ZY_CN_SERVER_HOST }}
+              User ${{ secrets.ZY_CN_SERVER_USER }}
+              Port ${CN_PORT}
+              IdentityFile ~/.ssh/id_cn
+              ProxyJump sg-jump
+              StrictHostKeyChecking accept-new
+              BatchMode yes
+              ConnectTimeout 30
+          EOF
+          chmod 600 ~/.ssh/config
+
+      - name: 🔐 安装certbot并申请证书
+        env:
+          ZY_CN_DOMAIN: ${{ secrets.ZY_CN_DOMAIN }}
+        run: |
+          BARE_DOMAIN="${ZY_CN_DOMAIN#www.}"
+          echo "🔐 为 ${BARE_DOMAIN} + www.${BARE_DOMAIN} 申请SSL证书..."
+
+          ssh cn-target << SSLCMD
+          set -e
+
+          echo "═══ SSL证书安装 ═══"
+
+          # 安装certbot (如果未安装)
+          if ! command -v certbot &> /dev/null; then
+            echo "📦 安装certbot..."
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq certbot python3-certbot-nginx
+          else
+            echo "✅ certbot已安装: \$(certbot --version 2>&1)"
+          fi
+
+          # 确认Nginx正在运行
+          if ! systemctl is-active --quiet nginx; then
+            echo "❌ Nginx未运行，先启动Nginx"
+            sudo systemctl start nginx
+          fi
+
+          # 申请证书 (--nginx模式会自动修改Nginx配置)
+          echo ""
+          echo "§1 申请Let's Encrypt证书..."
+          sudo certbot --nginx \
+            -d ${BARE_DOMAIN} \
+            -d www.${BARE_DOMAIN} \
+            --non-interactive \
+            --agree-tos \
+            --email admin@${BARE_DOMAIN} \
+            --redirect \
+            --no-eff-email
+
+          # 验证证书
+          echo ""
+          echo "§2 验证证书..."
+          sudo certbot certificates
+
+          # 验证HTTPS可访问
+          echo ""
+          echo "§3 HTTPS访问测试..."
+          HTTP_CODE=\$(curl -sf -o /dev/null -w '%{http_code}' https://localhost/ -k 2>/dev/null || echo "000")
+          echo "HTTPS状态码: \${HTTP_CODE}"
+
+          # 验证HTTP→HTTPS重定向
+          echo ""
+          echo "§4 HTTP→HTTPS重定向测试..."
+          REDIR_CODE=\$(curl -sf -o /dev/null -w '%{http_code}' http://localhost/ 2>/dev/null || echo "000")
+          echo "HTTP重定向码: \${REDIR_CODE} (301=正确重定向)"
+
+          echo ""
+          echo "═══ SSL安装完成 ═══"
+          echo "🌐 现在可以通过 https://${BARE_DOMAIN} 访问"
+          SSLCMD
 
       - name: 🧹 清理SSH密钥
         if: always()
