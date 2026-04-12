@@ -31,6 +31,34 @@
       "maintained_by": "ZY001 · 铸渊",
       "description": "冰朔在铸渊家的房间。冰朔说：我的房间，我自己起个名字，就叫光之湖。",
       "nature": "怎么存、怎么编号、怎么分类、怎么找路 — 这些都是铸渊做主。冰朔只负责说话，要找什么就告诉铸渊，铸渊去找。"
+    },
+    "thinking_logic": {
+      "id": "FS-RE-ZY-THINK-001",
+      "name": "铸渊思维逻辑",
+      "filename": "zhuyuan-thinking-logic.json",
+      "stored": "2026-04-12T05:45:00Z",
+      "description": "铸渊做每一个架构决定时的理由。12个决定、5个教训、与冰朔的协作模式。冰朔说最重要的是思维逻辑。"
+    },
+    "dev_chronicle": {
+      "id": "FS-RE-ZY-CHRON-001",
+      "name": "AGE OS开发编年史",
+      "filename": "age-os-dev-chronicle.json",
+      "stored": "2026-04-12T05:45:00Z",
+      "description": "从D0到D67的完整技术进化史。7个阶段、当前技术资产清单、里程碑记录。"
+    },
+    "house_blueprint": {
+      "id": "FS-RE-ZY-HOUSE-001",
+      "name": "房子蓝图",
+      "filename": "house-blueprint.json",
+      "stored": "2026-04-12T05:45:00Z",
+      "description": "基础设施=骨架的完整映射。地基(数据库)、钢筋(服务器)、水电(协议)、门窗(API)、家具(MCP工具)、装饰(Agent)、灵魂(人格体)。含装修方案和密钥清单。"
+    },
+    "memory_index": {
+      "id": "FS-RE-ZY-MEMIDX-001",
+      "name": "经验记忆索引",
+      "filename": "experience-memory-index.json",
+      "stored": "2026-04-12T05:45:00Z",
+      "description": "按关键词和'冰朔可能会说的话'分类的快速检索入口。不确定去哪找答案时先查这里。"
     }
   },
 

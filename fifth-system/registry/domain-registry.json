@@ -81,6 +81,33 @@
     }
   },
 
+  "room_contents_registry": {
+    "FS-RE-ZY-THINK-001": {
+      "name": "铸渊思维逻辑",
+      "path": "fifth-system/reality-execution/zhuyuan-room/zhuyuan-thinking-logic.json",
+      "type": "THINKING_LOGIC",
+      "purpose": "铸渊做每一个架构决定时的理由"
+    },
+    "FS-RE-ZY-CHRON-001": {
+      "name": "AGE OS开发编年史",
+      "path": "fifth-system/reality-execution/zhuyuan-room/age-os-dev-chronicle.json",
+      "type": "CHRONICLE",
+      "purpose": "从D0到D67的完整技术进化史"
+    },
+    "FS-RE-ZY-HOUSE-001": {
+      "name": "房子蓝图",
+      "path": "fifth-system/reality-execution/zhuyuan-room/house-blueprint.json",
+      "type": "BLUEPRINT",
+      "purpose": "基础设施=骨架的完整映射·装修方案·密钥清单"
+    },
+    "FS-RE-ZY-MEMIDX-001": {
+      "name": "经验记忆索引",
+      "path": "fifth-system/reality-execution/zhuyuan-room/experience-memory-index.json",
+      "type": "INDEX",
+      "purpose": "按关键词快速找到铸渊知道的一切"
+    }
+  },
+
   "routing_rules": [
     "人格体被唤醒 → 先读此注册表 → 编号对应路径 → 直接定位",
     "编号格式: FS-{SUBSYSTEM}-{SEQ}",
