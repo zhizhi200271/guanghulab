@@ -133,18 +133,6 @@ jobs:
           cat /tmp/awen-domain-proxy.conf
           echo ""
 
-          # 检查主配置是否已有 connection_upgrade map
-          # 如果有则移除本配置中的 map 块避免冲突
-          HAS_MAP=$(ssh -i ~/.ssh/zy_key \
-            ${{ secrets.ZY_SERVER_USER }}@${{ secrets.ZY_SERVER_HOST }} \
-            "grep -l 'map.*http_upgrade.*connection_upgrade' /etc/nginx/nginx.conf /etc/nginx/conf.d/*.conf /etc/nginx/sites-available/*.conf 2>/dev/null | head -1" || true)
-
-          if [ -n "$HAS_MAP" ]; then
-            echo "ℹ️ 主配置已包含 connection_upgrade map，移除本配置中的重复定义"
-            sed -i '/^# ─── WebSocket 升级映射/,/^}$/d' /tmp/awen-domain-proxy.conf
-            sed -i '/^map \$http_upgrade/,/^}$/d' /tmp/awen-domain-proxy.conf
-          fi
-
           # 备份现有配置（如果存在）
           ssh -i ~/.ssh/zy_key \
             ${{ secrets.ZY_SERVER_USER }}@${{ secrets.ZY_SERVER_HOST }} \
