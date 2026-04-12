@@ -1,0 +1,8 @@
+# guanghulab.com — 光湖实验室 ICP备案落地页
+# 允许搜索引擎索引首页
+User-agent: *
+Allow: /
+Disallow: /health
+
+# 站点地图（落地页仅有一个页面）
+# Sitemap: https://guanghulab.com/sitemap.xml
