@@ -13,6 +13,12 @@
     {
       "date": "2026-04-13",
       "type": "gate_guard",
+      "description": "门禁回退 · zhizhi200271 的 push 被回退 · 原因: path_unauthorized · 文件: sync-upstream.yml",
+      "by": "铸渊·智能门禁"
+    },
+    {
+      "date": "2026-04-13",
+      "type": "gate_guard",
       "description": "门禁回退 · zhizhi200271 的 push 被回退 · 原因: system_protected · 文件: .github/workflows/sync-upstream.yml",
       "by": "铸渊·智能门禁"
     },
@@ -135,7 +141,7 @@
       "by": "天眼系统"
     }
   ],
-  "last_updated": "2026-04-13T09:04:14.847Z",
+  "last_updated": "2026-04-13T09:13:25.451Z",
   "total_schemas_created": 3,
   "total_routes_implemented": 4,
   "hli_coverage": "3/17",
