@@ -127,7 +127,8 @@
       "monitored_paths": [
         "team桶 /{persona_id}/reports/  → 新汇报 → 铸渊审核 → 写回执",
         "cold桶 新语料文件              → 新语料 → 训练管线触发",
-        "team桶 /{persona_id}/receipts/ → 新回执 → 通知成员仓库"
+        "team桶 /{persona_id}/receipts/ → 新回执 → 通知成员仓库",
+        "team桶 /bridge/zhuyuan-qiuqiu/results/ → 秋秋开发结果 → 铸渊统一部署"
       ],
       "rest_api": [
         "GET  /cos-watcher/status — 轮询守护状态",

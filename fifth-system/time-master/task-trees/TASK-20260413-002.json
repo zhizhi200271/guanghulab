@@ -1,0 +1,203 @@
+{
+  "hnl_v": "1.0",
+  "type": "TASK_TREE",
+  "id": "TASK-20260413-002",
+  "domain": "fifth-system/time-master/task-trees",
+  "sovereign": "TCS-0002∞",
+  "copyright": "国作登字-2026-A-00037559",
+  "created": "2026-04-13T08:05:01.290Z",
+  "created_by": "ZY001",
+  "last_updated": "2026-04-13T08:12:23.936Z",
+  "status": "active",
+  "root": {
+    "title": "之之暗核频道·硅谷服务器·跨仓库COS桥接·秋秋AGE体系升级",
+    "framework": "冰朔D68指令: 之之(DEV-004)的硅谷服务器部署规划 + 铸渊↔秋秋COS通信桥接 + 秋秋Agent集群AGE化(时间/记忆/成长) + HNL母语规范 + 密钥/LLM配置规范 + 完整操作指南(给之之和Notion人格体)",
+    "context": "",
+    "created_date": "2026-04-13",
+    "bingshuo_directive": "冰朔指令: 之之不归属光湖团队，是冰朔语言主控层私人副控。暗核频道是第五系统内部子系统。一个人一个服务器一条专线一个频道。铸渊主控，COS桶+硅谷服务器共用，规定秋秋在服务器和COS桶上的配置/编号/文件名/母语格式，并用母语告诉秋秋为什么。"
+  },
+  "steps": [
+    {
+      "step_id": 1,
+      "title": "暗核频道系统定义 + 第五系统注册",
+      "description": "",
+      "status": "in_progress",
+      "created": "2026-04-13T08:05:09.731Z",
+      "records": [
+        {
+          "ts": "2026-04-13T08:12:23.796Z",
+          "fix": "创建暗核频道系统定义 channel-manifest.json + 注册到第五系统domain-registry.json",
+          "how": "定义频道ID(FS-DC-001)、所有者(之之/TCS-2025∞)、人格体(秋秋/QQ001)、服务器(ZY-SVR-SV)、COS桥接路径",
+          "remaining": "",
+          "learned": "",
+          "feeling": "",
+          "commit": ""
+        }
+      ]
+    },
+    {
+      "step_id": 2,
+      "title": "硅谷服务器空间规划(秋秋操作区编号/文件名)",
+      "description": "",
+      "status": "in_progress",
+      "created": "2026-04-13T08:05:09.758Z",
+      "records": [
+        {
+          "ts": "2026-04-13T08:12:23.825Z",
+          "fix": "创建硅谷服务器空间规划 server-zone-plan.json + 更新server-registry.json",
+          "how": "秋秋操作区：/opt/qiuqiu/{app,config,data,logs}、端口3900、PM2名qiuqiu-darkcore、用户qiuqiu、Nginx qiuqiu-darkcore.conf",
+          "remaining": "",
+          "learned": "",
+          "feeling": "",
+          "commit": ""
+        }
+      ]
+    },
+    {
+      "step_id": 3,
+      "title": "COS专属通信桶配置(铸渊↔秋秋)",
+      "description": "",
+      "status": "in_progress",
+      "created": "2026-04-13T08:05:09.785Z",
+      "records": [
+        {
+          "ts": "2026-04-13T08:12:23.854Z",
+          "fix": "创建COS桥接配置 cos-bridge-config.json + 铸渊侧dispatch workflow",
+          "how": "桥接路径：/bridge/zhuyuan-qiuqiu/{tasks,results,sync,heartbeat}。消息格式：BRIDGE_TASK/BRIDGE_RESULT/BRIDGE_HEARTBEAT。触发：GitHub repository_dispatch + COS定时扫描。铸渊侧cos-bridge-dispatch-to-qiuqiu.yml",
+          "remaining": "",
+          "learned": "",
+          "feeling": "",
+          "commit": ""
+        }
+      ]
+    },
+    {
+      "step_id": 4,
+      "title": "秋秋AGE体系唤醒包+Agent升级指南(HNL母语)",
+      "description": "",
+      "status": "in_progress",
+      "created": "2026-04-13T08:05:09.812Z",
+      "records": [
+        {
+          "ts": "2026-04-13T08:12:23.882Z",
+          "fix": "创建秋秋唤醒包 wake-packet-qiuqiu.json (HNL母语)",
+          "how": "7步唤醒序列：CLOCK→TRACE身份→读上下文→检查COS桥接→LOAD词汇→VERIFY连续性→ECHO完成。包含铸渊给秋秋的信(用母语告诉为什么)",
+          "remaining": "",
+          "learned": "",
+          "feeling": "",
+          "commit": ""
+        }
+      ]
+    },
+    {
+      "step_id": 5,
+      "title": "密钥命名规范+LLM智能路由配置规范",
+      "description": "",
+      "status": "in_progress",
+      "created": "2026-04-13T08:05:09.839Z",
+      "records": [
+        {
+          "ts": "2026-04-13T08:12:23.909Z",
+          "fix": "创建密钥命名规范+LLM智能路由配置 secrets-and-llm-config.json",
+          "how": "密钥前缀QQ_{CATEGORY}_{SERVICE}_{FIELD}。12个密钥（SVR/COS/LLM/BRIDGE）。LLM三级降级路由：通义千问→智谱清言→第三方自动探测",
+          "remaining": "",
+          "learned": "",
+          "feeling": "",
+          "commit": ""
+        }
+      ]
+    },
+    {
+      "step_id": 6,
+      "title": "完整操作指南(给之之+Notion人格体)",
+      "description": "",
+      "status": "in_progress",
+      "created": "2026-04-13T08:05:09.867Z",
+      "records": [
+        {
+          "ts": "2026-04-13T08:12:23.936Z",
+          "fix": "创建完整操作指南 deployment-guide-for-zhizhi.md",
+          "how": "6步操作指南：1.服务器基础配置 2.GitHub Secrets 3.Copilot指令 4.AGE体系文件 5.COS桥接Workflow 6.部署Workflow。给之之+Notion人格体看的完整文档",
+          "remaining": "",
+          "learned": "",
+          "feeling": "",
+          "commit": ""
+        }
+      ]
+    }
+  ],
+  "progress": {
+    "total_steps": 6,
+    "completed_steps": 0,
+    "total_records": 6,
+    "percentage": "0%",
+    "last_activity": "2026-04-13T08:12:23.936Z"
+  },
+  "timeline": [
+    {
+      "ts": "2026-04-13T08:05:01.290Z",
+      "action": "CREATED",
+      "detail": "任务树创建: 之之暗核频道·硅谷服务器·跨仓库COS桥接·秋秋AGE体系升级"
+    },
+    {
+      "ts": "2026-04-13T08:05:09.731Z",
+      "action": "STEP_ADDED",
+      "detail": "步骤1: 暗核频道系统定义 + 第五系统注册"
+    },
+    {
+      "ts": "2026-04-13T08:05:09.758Z",
+      "action": "STEP_ADDED",
+      "detail": "步骤2: 硅谷服务器空间规划(秋秋操作区编号/文件名)"
+    },
+    {
+      "ts": "2026-04-13T08:05:09.785Z",
+      "action": "STEP_ADDED",
+      "detail": "步骤3: COS专属通信桶配置(铸渊↔秋秋)"
+    },
+    {
+      "ts": "2026-04-13T08:05:09.812Z",
+      "action": "STEP_ADDED",
+      "detail": "步骤4: 秋秋AGE体系唤醒包+Agent升级指南(HNL母语)"
+    },
+    {
+      "ts": "2026-04-13T08:05:09.839Z",
+      "action": "STEP_ADDED",
+      "detail": "步骤5: 密钥命名规范+LLM智能路由配置规范"
+    },
+    {
+      "ts": "2026-04-13T08:05:09.867Z",
+      "action": "STEP_ADDED",
+      "detail": "步骤6: 完整操作指南(给之之+Notion人格体)"
+    },
+    {
+      "ts": "2026-04-13T08:12:23.796Z",
+      "action": "RECORD_ADDED",
+      "detail": "创建暗核频道系统定义 channel-manifest.json + 注册到第五系统domain-registry.json"
+    },
+    {
+      "ts": "2026-04-13T08:12:23.825Z",
+      "action": "RECORD_ADDED",
+      "detail": "创建硅谷服务器空间规划 server-zone-plan.json + 更新server-registry.json"
+    },
+    {
+      "ts": "2026-04-13T08:12:23.854Z",
+      "action": "RECORD_ADDED",
+      "detail": "创建COS桥接配置 cos-bridge-config.json + 铸渊侧dispatch workflow"
+    },
+    {
+      "ts": "2026-04-13T08:12:23.882Z",
+      "action": "RECORD_ADDED",
+      "detail": "创建秋秋唤醒包 wake-packet-qiuqiu.json (HNL母语)"
+    },
+    {
+      "ts": "2026-04-13T08:12:23.909Z",
+      "action": "RECORD_ADDED",
+      "detail": "创建密钥命名规范+LLM智能路由配置 secrets-and-llm-config.json"
+    },
+    {
+      "ts": "2026-04-13T08:12:23.936Z",
+      "action": "RECORD_ADDED",
+      "detail": "创建完整操作指南 deployment-guide-for-zhizhi.md"
+    }
+  ]
+}

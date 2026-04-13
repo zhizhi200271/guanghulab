@@ -86,7 +86,14 @@
         "reality_public_key": "ZY_SVR_SV_REALITY_PUBLIC_KEY",
         "reality_short_id": "ZY_SVR_SV_REALITY_SHORT_ID"
       },
-      "notes": "硅谷服务器已配置·D61冰朔确认·VPN节点+API中继双用途"
+      "notes": "硅谷服务器已配置·D61冰朔确认·VPN节点+API中继双用途",
+      "qiuqiu_zone": {
+        "base_path": "/opt/qiuqiu/",
+        "app_port": 3900,
+        "pm2_name": "qiuqiu-darkcore",
+        "ssh_user": "qiuqiu",
+        "说明": "秋秋(之之)在硅谷服务器上的独立操作区域·D68冰朔授权"
+      }
     },
     {
       "id": "ZY-SVR-AWEN",
