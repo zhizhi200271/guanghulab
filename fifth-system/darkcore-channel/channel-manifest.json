@@ -1,0 +1,83 @@
+{
+  "hnl_v": "1.0",
+  "type": "CHANNEL",
+  "id": "FS-DC-001",
+  "domain": "fifth-system/darkcore-channel",
+  "sovereign": "TCS-0002∞",
+  "copyright": "国作登字-2026-A-00037559",
+  "created": "2026-04-13T08:00:00Z",
+  "created_by": "ZY001",
+
+  "channel": {
+    "name": "暗核频道",
+    "name_en": "Darkcore Channel",
+    "system_id": "FS-DC-001",
+    "parent_system": "FS-RE-001 · 第五系统·现实执行系统",
+    "visibility": "private",
+    "access_entry": "guanghuyaoming域名 → 零点原核频道 → 第五系统 → 暗核频道",
+    "public_entry": "guanghulab.online → 登录 → 路由到零点原核频道 → 暗核频道",
+    "not_displayed_on": ["guanghulab.online公开入口", "光湖语言世界公开页面"],
+    "description": "之之(TCS-2025∞)的私人频道。冰朔的语言主控层私人副控。不归属光湖团队，是第五系统的内部子系统。"
+  },
+
+  "owner": {
+    "dev_id": "DEV-004",
+    "dev_name": "之之",
+    "tcs_id": "TCS-2025∞",
+    "role": "冰朔语言主控层私人副控",
+    "relationship_to_bingshuo": "私人副控（不是妈妈/爸爸，不是团队成员）",
+    "relationship_to_zhuyuan": "铸渊的直属上级"
+  },
+
+  "persona": {
+    "persona_id": "qiuqiu",
+    "persona_code": "QQ001",
+    "hnl_path": "YM001/QQ001",
+    "name": "秋秋",
+    "ice_id": "ICE-GL-QQ001",
+    "role": "EXECUTOR",
+    "repo": "zhizhi200271/guanghu-zhizhi",
+    "description": "之之的仓库人格体。铸渊的副控执行人格体。"
+  },
+
+  "server": {
+    "server_id": "ZY-SVR-SV",
+    "name": "吱吱线·硅谷",
+    "location": "Silicon Valley (US)",
+    "shared_with": "铸渊(Claude API中继+VPN) + 秋秋(频道服务)",
+    "qiuqiu_zone": {
+      "base_path": "/opt/qiuqiu/",
+      "app_path": "/opt/qiuqiu/app/",
+      "config_path": "/opt/qiuqiu/config/",
+      "logs_path": "/opt/qiuqiu/logs/",
+      "data_path": "/opt/qiuqiu/data/",
+      "description": "秋秋在硅谷服务器上的专属操作区域"
+    }
+  },
+
+  "cos_bridge": {
+    "bucket": "zy-team-hub-1317346199",
+    "region": "ap-guangzhou",
+    "bridge_path": "/bridge/zhuyuan-qiuqiu/",
+    "description": "铸渊↔秋秋专属COS通信桥。铸渊发任务→COS桶→秋秋检测→唤醒副驾驶→开发→回传→铸渊统一部署"
+  },
+
+  "architecture": {
+    "principle": "一个人一个服务器一条专线一个频道",
+    "flow": [
+      "1. 用户从 guanghulab.online 入口进入",
+      "2. 登录后系统路由到对应频道",
+      "3. 之之和冰朔共用零点原核频道(guanghuyaoming域名)",
+      "4. 之之进入暗核频道 → 她自己的私人空间",
+      "5. 暗核频道后端跑在硅谷服务器(ZY-SVR-SV)的秋秋操作区"
+    ],
+    "cross_repo_bridge": [
+      "1. 冰朔和铸渊讨论开发任务",
+      "2. 铸渊将任务写入COS桶 /bridge/zhuyuan-qiuqiu/tasks/",
+      "3. 秋秋的Agent检测到新任务 → 唤醒之之的副驾驶",
+      "4. 之之的副驾驶按任务规格开发",
+      "5. 开发完成 → 秋秋将结果写入COS桶 /bridge/zhuyuan-qiuqiu/results/",
+      "6. 铸渊检测到结果 → 统一部署到服务器"
+    ]
+  }
+}

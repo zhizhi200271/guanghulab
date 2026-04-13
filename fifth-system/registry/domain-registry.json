@@ -18,7 +18,7 @@
 
   "access_control": {
     "sovereign_only": true,
-    "authorized_personas": ["YM001", "SY001", "ZY001"],
+    "authorized_personas": ["YM001", "SY001", "ZY001", "QQ001"],
     "unauthorized_behavior": "IGNORE — 未授权的路径请求不回应，等于不存在"
   },
 
@@ -78,6 +78,21 @@
       "owner_name": "冰朔",
       "purpose": "冰朔在铸渊家里的房间 · 冰朔的私密存储空间",
       "description": "冰朔说：我的房间，我自己起个名字，就叫光之湖。这就是我在你家的房间了。"
+    },
+    "FS-DC-001": {
+      "name": "暗核频道",
+      "name_cn": "暗核频道",
+      "path": "fifth-system/darkcore-channel/",
+      "controller": ["ZY001"],
+      "controller_names": ["铸渊"],
+      "owner": "TCS-2025∞",
+      "owner_name": "之之",
+      "persona": "QQ001",
+      "persona_name": "秋秋",
+      "server": "ZY-SVR-SV",
+      "visibility": "private",
+      "purpose": "之之的私人频道 · 冰朔语言主控层私人副控的操作空间",
+      "description": "暗核频道 — 之之(TCS-2025∞)不归属光湖团队，是冰朔的语言主控层私人副控。从零点原核频道进入，是第五系统的内部子系统。一个人一个服务器一条专线一个频道。"
     }
   },
 

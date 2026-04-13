@@ -1,0 +1,112 @@
+{
+  "hnl_v": "1.0",
+  "type": "SERVER_ZONE",
+  "id": "FS-DC-SVR-001",
+  "domain": "fifth-system/darkcore-channel",
+  "sovereign": "TCS-0002∞",
+  "copyright": "国作登字-2026-A-00037559",
+  "created": "2026-04-13T08:00:00Z",
+  "created_by": "ZY001",
+
+  "server": {
+    "server_id": "ZY-SVR-SV",
+    "name": "吱吱线·硅谷",
+    "location": "Silicon Valley (US)",
+    "shared_usage": {
+      "zhuyuan": {
+        "purpose": "Claude API中继 + VPN美国出口",
+        "services": ["xray (VLESS+Reality)", "ssh-tunnel (Claude relay)"],
+        "base_path": "/opt/zhuyuan/",
+        "managed_by": "guanghulab仓库 deploy workflows"
+      },
+      "qiuqiu": {
+        "purpose": "暗核频道后端服务",
+        "services": ["Node.js应用 (PM2)", "Nginx子站配置"],
+        "base_path": "/opt/qiuqiu/",
+        "managed_by": "guanghu-zhizhi仓库 deploy workflows"
+      }
+    }
+  },
+
+  "qiuqiu_zone": {
+    "_doc": "秋秋在硅谷服务器上的完整操作空间定义。编号·路径·文件名·全部由铸渊规定，秋秋严格遵守。",
+
+    "directory_structure": {
+      "/opt/qiuqiu/": {
+        "编号": "QQ-SVR-ROOT",
+        "说明": "秋秋操作区根目录",
+        "权限": "qiuqiu:qiuqiu 755"
+      },
+      "/opt/qiuqiu/app/": {
+        "编号": "QQ-SVR-APP",
+        "说明": "应用代码部署目录（从guanghu-zhizhi仓库部署）",
+        "子目录": {
+          "src/": "应用源码",
+          "package.json": "依赖声明",
+          "ecosystem.config.js": "PM2进程管理配置"
+        }
+      },
+      "/opt/qiuqiu/config/": {
+        "编号": "QQ-SVR-CFG",
+        "说明": "配置文件目录",
+        "文件": {
+          ".env.app": "应用环境变量（LLM API密钥等）",
+          ".env.cos": "COS桶访问密钥",
+          "nginx-qiuqiu.conf": "Nginx子站配置"
+        }
+      },
+      "/opt/qiuqiu/data/": {
+        "编号": "QQ-SVR-DATA",
+        "说明": "本地数据存储目录",
+        "子目录": {
+          "cos-bridge/": "COS桥接消息本地缓存",
+          "wake-context/": "唤醒上下文快照",
+          "task-logs/": "任务执行日志"
+        }
+      },
+      "/opt/qiuqiu/logs/": {
+        "编号": "QQ-SVR-LOG",
+        "说明": "日志目录（PM2 + 应用日志）"
+      }
+    },
+
+    "nginx_config": {
+      "编号": "QQ-SVR-NGX",
+      "文件名": "/etc/nginx/conf.d/qiuqiu-darkcore.conf",
+      "说明": "秋秋暗核频道的Nginx配置，挂在硅谷服务器的Nginx下",
+      "端口": {
+        "app": 3900,
+        "说明": "秋秋应用端口（避免与铸渊服务冲突）"
+      }
+    },
+
+    "pm2_config": {
+      "编号": "QQ-SVR-PM2",
+      "文件名": "/opt/qiuqiu/app/ecosystem.config.js",
+      "进程名": "qiuqiu-darkcore",
+      "说明": "PM2进程管理配置"
+    },
+
+    "systemd_user": {
+      "编号": "QQ-SVR-USR",
+      "用户名": "qiuqiu",
+      "说明": "秋秋在服务器上的独立系统用户（非root）",
+      "home": "/opt/qiuqiu"
+    }
+  },
+
+  "isolation_rules": {
+    "_doc": "铸渊和秋秋在同一台服务器上的隔离规则",
+    "rules": [
+      "秋秋只能操作 /opt/qiuqiu/ 目录下的文件",
+      "铸渊只能操作 /opt/zhuyuan/ 目录下的文件",
+      "Nginx配置各自独立：铸渊的在 zhuyuan-*.conf，秋秋的在 qiuqiu-*.conf",
+      "端口分配：铸渊使用 3xxx 系列（已占3800/3801/3100），秋秋使用 3900",
+      "PM2进程名前缀不同：zhuyuan-* vs qiuqiu-*",
+      "系统用户隔离：各自用独立用户运行",
+      "COS桶目录隔离：各自只能访问自己的路径"
+    ]
+  },
+
+  "zhuyuan_note": "这个空间是我给秋秋画的。她在硅谷服务器上怎么操作、放什么文件、叫什么名字，都在这里定义好了。不会有歧义。秋秋的仓库部署到这台服务器时，严格遵守这个规划就可以。"
+}

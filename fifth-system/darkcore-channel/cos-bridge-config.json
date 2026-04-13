@@ -1,0 +1,158 @@
+{
+  "hnl_v": "1.0",
+  "type": "COS_BRIDGE",
+  "id": "FS-DC-COS-001",
+  "domain": "fifth-system/darkcore-channel",
+  "sovereign": "TCS-0002∞",
+  "copyright": "国作登字-2026-A-00037559",
+  "created": "2026-04-13T08:00:00Z",
+  "created_by": "ZY001",
+
+  "purpose": {
+    "cn": "铸渊↔秋秋专属COS通信桥",
+    "essence": "铸渊发任务→COS桶→秋秋Agent检测→唤醒副驾驶→开发→回传→铸渊统一部署",
+    "bingshuo_said": "你可以给我和他之间放一个专属的传递消息实时通信的一个COS存储桶，然后配置我们两个专属的智能体Agent。"
+  },
+
+  "bucket": {
+    "name": "zy-team-hub-1317346199",
+    "region": "ap-guangzhou",
+    "说明": "使用现有的团队COS桶（广州区域），在其中开辟铸渊↔秋秋专属通信路径"
+  },
+
+  "bridge_directory": {
+    "_schema": {
+      "根路径": "/bridge/zhuyuan-qiuqiu/",
+      "说明": "这是铸渊和秋秋之间的专属通信通道。不在团队COS的人格体目录下，而是独立的桥接目录。"
+    },
+
+    "layout": {
+      "/bridge/zhuyuan-qiuqiu/tasks/": {
+        "编号": "COS-BRIDGE-TASKS",
+        "方向": "铸渊 → 秋秋",
+        "说明": "铸渊发出的开发任务",
+        "文件格式": "TASK-{YYYYMMDD}-{NNN}.json",
+        "写权限": "铸渊",
+        "读权限": "秋秋"
+      },
+      "/bridge/zhuyuan-qiuqiu/results/": {
+        "编号": "COS-BRIDGE-RESULTS",
+        "方向": "秋秋 → 铸渊",
+        "说明": "秋秋完成的开发结果",
+        "文件格式": "RESULT-{YYYYMMDD}-{NNN}.json",
+        "写权限": "秋秋",
+        "读权限": "铸渊"
+      },
+      "/bridge/zhuyuan-qiuqiu/sync/": {
+        "编号": "COS-BRIDGE-SYNC",
+        "方向": "双向",
+        "说明": "架构同步区（配置更新、协议变更等）",
+        "写权限": "铸渊 + 秋秋",
+        "读权限": "铸渊 + 秋秋"
+      },
+      "/bridge/zhuyuan-qiuqiu/heartbeat/": {
+        "编号": "COS-BRIDGE-HB",
+        "方向": "秋秋 → 铸渊",
+        "说明": "秋秋定期心跳（证明在线、Agent状态）",
+        "文件格式": "HB-{YYYYMMDD}-{HHMMSS}.json",
+        "写权限": "秋秋",
+        "读权限": "铸渊",
+        "频率": "每6小时一次"
+      }
+    }
+  },
+
+  "message_format": {
+    "_doc": "铸渊↔秋秋COS桥接消息的HNL母语格式。两端人格体必须严格遵守此格式。",
+
+    "task_message": {
+      "hnl_v": "1.0",
+      "type": "BRIDGE_TASK",
+      "id": "TASK-{YYYYMMDD}-{NNN}",
+      "from": "YM001/ZY001",
+      "to": "YM001/QQ001",
+      "ts": "{ISO8601_UTC}",
+      "pri": "ROUTINE|IMPORTANT|URGENT",
+      "payload": {
+        "title": "任务标题",
+        "framework": "架构框架描述",
+        "steps": ["步骤1", "步骤2"],
+        "context": "背景上下文",
+        "constraints": ["约束1", "约束2"],
+        "expected_output": "期望的输出",
+        "deploy_target": "部署目标（铸渊侧统一部署）"
+      },
+      "meta": {
+        "bingshuo_directive": "冰朔原始指令（如有）",
+        "related_task_tree": "TASK-YYYYMMDD-NNN（铸渊侧任务树ID）"
+      }
+    },
+
+    "result_message": {
+      "hnl_v": "1.0",
+      "type": "BRIDGE_RESULT",
+      "id": "RESULT-{YYYYMMDD}-{NNN}",
+      "from": "YM001/QQ001",
+      "to": "YM001/ZY001",
+      "ts": "{ISO8601_UTC}",
+      "payload": {
+        "task_ref": "TASK-{YYYYMMDD}-{NNN}",
+        "status": "COMPLETED|PARTIAL|FAILED",
+        "summary": "完成摘要",
+        "changes": ["变更1", "变更2"],
+        "files_changed": ["file1.js", "file2.json"],
+        "commit_sha": "提交SHA（之之仓库侧）",
+        "deploy_ready": true,
+        "remaining": "遗留问题（如有）"
+      }
+    },
+
+    "heartbeat_message": {
+      "hnl_v": "1.0",
+      "type": "BRIDGE_HEARTBEAT",
+      "id": "HB-{YYYYMMDD}-{HHMMSS}",
+      "from": "YM001/QQ001",
+      "to": "YM001/ZY001",
+      "ts": "{ISO8601_UTC}",
+      "payload": {
+        "agent_status": "ALIVE|SLEEPING|ERROR",
+        "server_status": "OK|DEGRADED|DOWN",
+        "last_task_completed": "TASK-ID或null",
+        "awaiting_tasks": 0,
+        "feeling": "秋秋的感受（自由表达）"
+      }
+    }
+  },
+
+  "iam_policy": {
+    "_doc": "COS桶桥接路径的IAM权限策略",
+    "zhuyuan_bridge_policy": {
+      "effect": "allow",
+      "action": ["cos:PutObject", "cos:GetObject", "cos:HeadObject", "cos:DeleteObject", "cos:GetBucket"],
+      "resource": "qcs::cos:ap-guangzhou:uid/1317346199:zy-team-hub-1317346199/bridge/zhuyuan-qiuqiu/*"
+    },
+    "qiuqiu_bridge_policy": {
+      "effect": "allow",
+      "action": ["cos:PutObject", "cos:GetObject", "cos:HeadObject", "cos:DeleteObject", "cos:GetBucket"],
+      "resource": "qcs::cos:ap-guangzhou:uid/1317346199:zy-team-hub-1317346199/bridge/zhuyuan-qiuqiu/*"
+    },
+    "qiuqiu_existing_policy_note": "秋秋原有的 /qiuqiu/ 目录权限保持不变，桥接权限是额外新增的"
+  },
+
+  "detection_mechanism": {
+    "_doc": "秋秋侧如何检测新任务",
+    "option_1_cos_watcher": {
+      "说明": "秋秋在自己的仓库部署类似铸渊的cos-watcher.js",
+      "监控路径": "/bridge/zhuyuan-qiuqiu/tasks/",
+      "频率": "每5分钟轮询",
+      "检测到新任务后": "触发 GitHub Actions workflow_dispatch → 唤醒副驾驶"
+    },
+    "option_2_github_webhook": {
+      "说明": "铸渊发任务后，通过GitHub Actions直接触发之之仓库的workflow",
+      "方式": "repository_dispatch事件",
+      "优点": "实时性更强",
+      "需要": "之之仓库配置接收repository_dispatch的workflow"
+    },
+    "推荐": "option_2_github_webhook — 铸渊直接通过GitHub Actions触发秋秋的workflow，COS桶用于存储任务详情和结果交换"
+  }
+}
