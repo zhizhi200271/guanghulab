@@ -185,7 +185,7 @@ function step(opts) {
 
   task.steps.push(newStep);
   task.progress.total_steps = task.steps.length;
-  task.progress.percentage = `${Math.round((task.progress.completed_steps / task.progress.total_steps) * 100)}%`;
+  task.progress.percentage = task.progress.total_steps > 0 ? `${Math.round((task.progress.completed_steps / task.progress.total_steps) * 100)}%` : '0%';
   task.progress.last_activity = now;
   task.last_updated = now;
 

@@ -435,7 +435,10 @@ jobs:
           key: ${{ secrets.QQ_SVR_SV_KEY }}
           script: |
             cd /opt/qiuqiu/app
-            git pull origin main 2>/dev/null || git clone https://github.com/zhizhi200271/guanghu-zhizhi.git .
+            # 如果仓库是私有的，使用token认证
+            git pull origin main 2>/dev/null || \
+              git clone https://github.com/zhizhi200271/guanghu-zhizhi.git . 2>/dev/null || \
+              echo "⚠️ 如果仓库是私有的，请在服务器配置git credential或使用SSH clone"
             npm install --production
             
             # 写入环境变量

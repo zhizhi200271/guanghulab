@@ -54,7 +54,7 @@ jobs:
         id: task_id
         run: |
           DATE=$(TZ='Asia/Shanghai' date +%Y%m%d)
-          SEQ=$(printf '%03d' $((RANDOM % 999 + 1)))
+          SEQ=$(TZ='Asia/Shanghai' date +%H%M%S)
           echo "id=TASK-${DATE}-${SEQ}" >> $GITHUB_OUTPUT
           echo "date=${DATE}" >> $GITHUB_OUTPUT
 
