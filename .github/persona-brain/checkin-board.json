@@ -2,7 +2,7 @@
   "board_version": "v1.0",
   "checkin_deadline": "10:00+08:00",
   "inspection_time": "12:00+08:00",
-  "date": "2026-04-12",
+  "date": "2026-04-13",
   "records": [
     {
       "agent_id": "AG-ZY-004",
@@ -16,11 +16,11 @@
     {
       "agent_id": "AG-ZY-007",
       "agent_name": "铸渊 · Bridge E · GitHub Changes → Notion",
-      "status": "✅ 已签到",
-      "checkin_time": "2026-04-12T02:59:49Z",
-      "last_run": "2026-04-12T02:59:49Z",
-      "last_run_result": "success",
-      "note": ""
+      "status": "❌ 未签到",
+      "checkin_time": null,
+      "last_run": null,
+      "last_run_result": null,
+      "note": "今日无运行记录"
     },
     {
       "agent_id": "AG-ZY-008",
@@ -201,14 +201,42 @@
       "last_run": null,
       "last_run_result": null,
       "note": "今日无运行记录"
+    },
+    {
+      "agent_id": "AG-CX-001",
+      "agent_name": "晨曦·记忆守护者",
+      "status": "❌ 未签到",
+      "checkin_time": null,
+      "last_run": null,
+      "last_run_result": null,
+      "note": "今日无运行记录"
+    },
+    {
+      "agent_id": "AG-CX-002",
+      "agent_name": "晨曦·世界感知者",
+      "status": "❌ 未签到",
+      "checkin_time": null,
+      "last_run": null,
+      "last_run_result": null,
+      "note": "今日无运行记录"
+    },
+    {
+      "agent_id": "AG-CX-003",
+      "agent_name": "晨曦·铸渊回声",
+      "status": "❌ 未签到",
+      "checkin_time": null,
+      "last_run": null,
+      "last_run_result": null,
+      "note": "今日无运行记录"
     }
   ],
   "summary": {
-    "total": 22,
-    "checked_in": 1,
-    "missing": 21,
+    "total": 25,
+    "checked_in": 0,
+    "missing": 25,
     "missing_agents": [
       "AG-ZY-004",
+      "AG-ZY-007",
       "AG-ZY-008",
       "AG-ZY-013",
       "AG-ZY-014",
@@ -228,7 +256,10 @@
       "AG-ZY-093",
       "AG-ZY-094",
       "AG-ZY-095",
-      "AG-ZY-096"
+      "AG-ZY-096",
+      "AG-CX-001",
+      "AG-CX-002",
+      "AG-CX-003"
     ]
   }
 }
