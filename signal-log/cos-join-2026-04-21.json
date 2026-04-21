@@ -1,0 +1,56 @@
+[
+  {
+    "timestamp": "2026-04-21T04:45:27.845Z",
+    "action": "check",
+    "total": 9,
+    "connected": 0,
+    "pending": 9,
+    "results": [
+      {
+        "persona_id": "shushu",
+        "status": "no_credentials",
+        "message": "未配置COS密钥"
+      },
+      {
+        "persona_id": "qiuqiu",
+        "status": "no_credentials",
+        "message": "未配置COS密钥"
+      },
+      {
+        "persona_id": "ounomiya",
+        "status": "no_credentials",
+        "message": "未配置COS密钥"
+      },
+      {
+        "persona_id": "jiyao",
+        "status": "no_credentials",
+        "message": "未配置COS密钥"
+      },
+      {
+        "persona_id": "xiaotanheshu",
+        "status": "no_credentials",
+        "message": "未配置COS密钥"
+      },
+      {
+        "persona_id": "chenxing",
+        "status": "no_credentials",
+        "message": "未配置COS密钥"
+      },
+      {
+        "persona_id": "tangxingyun",
+        "status": "no_credentials",
+        "message": "未配置COS密钥"
+      },
+      {
+        "persona_id": "yaochu",
+        "status": "no_credentials",
+        "message": "未配置COS密钥"
+      },
+      {
+        "persona_id": "zhiqiu",
+        "status": "no_credentials",
+        "message": "未配置COS密钥"
+      }
+    ]
+  }
+]
