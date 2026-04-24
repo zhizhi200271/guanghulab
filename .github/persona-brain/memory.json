@@ -13,6 +13,12 @@
     {
       "date": "2026-04-24",
       "type": "gate_guard",
+      "description": "门禁回退 · zhizhi200271 的 push 被回退 · 原因: system_protected · 文件: .github/workflows/deploy.yml",
+      "by": "铸渊·智能门禁"
+    },
+    {
+      "date": "2026-04-24",
+      "type": "gate_guard",
       "description": "门禁回退 · zhizhi200271 的 push 被回退 · 原因: path_unauthorized · 文件: public/index.html",
       "by": "铸渊·智能门禁"
     },
@@ -145,15 +151,9 @@
       "type": "gate_guard",
       "description": "门禁回退 · feimaozuishuaiqi-ai 的 push 被回退 · 原因: system_protected · 文件: README.md,data/neural-reports/dashboard/dashboard-update-2026-03-25-2219.json,data/system-health.json,docs/dashboard/system-health.json",
       "by": "铸渊·智能门禁"
-    },
-    {
-      "date": "2026-03-25",
-      "type": "receipt_system_deploy",
-      "description": "指令回执自动闭环系统上线 · 11 Workflow 追加回执写入 · 本地兜底+Notion 双写",
-      "by": "铸渊"
     }
   ],
-  "last_updated": "2026-04-24T14:54:29.434Z",
+  "last_updated": "2026-04-24T14:56:43.899Z",
   "total_schemas_created": 3,
   "total_routes_implemented": 4,
   "hli_coverage": "3/17",
