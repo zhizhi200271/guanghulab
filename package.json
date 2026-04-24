@@ -1,14 +1,27 @@
 {
-  "name": "qiuqiu-home",
+  "name": "dingtalk-bot",
   "version": "1.0.0",
-  "description": "秋秋的家",
-  "main": "server.js",
+  "description": "- 负责人：之之 - 状态：环节0已完成 - 技术栈：Node.js + Express - 依赖模块：无",
+  "main": "broadcast-generator.js",
   "scripts": {
-    "start": "node server.js"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test:contract": "node scripts/hli-contract-check.js",
+    "test:route-align": "node scripts/route-align-check.js",
+    "start": "node server.js",
+    "start:test": "node src/index.js",
+    "test:smoke": "node tests/smoke/hli-smoke.test.js"
   },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
-    "express": "^4.18.2",
-    "openai": "^4.28.0",
-    "cors": "^2.8.5"
+    "@notionhq/client": "^5.13.0",
+    "axios": "^1.13.6",
+    "body-parser": "^2.2.2",
+    "cors": "^2.8.6",
+    "dingtalk-encrypt": "^2.1.1",
+    "dingtalk-stream": "^2.1.4",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1"
   }
 }
