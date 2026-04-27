@@ -2,102 +2,39 @@
   "aoac_agent": "AOAC-02",
   "aoac_agent_name": "action-merge-sentinel",
   "status": "half_ready",
-  "timestamp": "2026-04-13 16:24:16+08:00",
-  "timestamp_utc": "2026-04-13T08:24:16.223Z",
+  "timestamp": "2026-04-27 20:23:30+08:00",
+  "timestamp_utc": "2026-04-27T12:23:30.016Z",
   "merge": {
-    "pr_number": 366,
-    "pr_title": "D68-2: 暗核频道(FS-DC-001) · 硅谷服务器秋秋操作区 · COS跨仓库桥接 · 秋秋AGE体系",
-    "merge_commit_sha": "04cdfcd924f29404f9140d6e526166879439d17f",
-    "head_sha": "29f8002fe04a8d6802dca9f435afa09c0596dc55",
+    "pr_number": 1,
+    "pr_title": "Add qiuqiu-deploy.yml with correct GitHub Actions secrets syntax",
+    "merge_commit_sha": "1960ee04a9281fdc4f9692b60e238989ba037a0c",
+    "head_sha": "fa9b1058e0a7e6b18ac18f18c62557f9c59260d7",
     "base_branch": "main"
   },
   "ci": {
     "combined_status": "pending",
     "overall_result": "pending",
     "summary": {
-      "total": 9,
+      "total": 2,
       "passed": 0,
       "failed": 0,
-      "skipped": 5
+      "skipped": 0
     },
     "check_runs": [
-      {
-        "name": "gate-guard",
-        "status": "completed",
-        "conclusion": "skipped",
-        "started_at": "2026-04-13T08:24:08Z",
-        "completed_at": "2026-04-13T08:24:08Z",
-        "output_title": null,
-        "output_summary": ""
-      },
-      {
-        "name": "🚀 预览站→主站 一键推送",
-        "status": "completed",
-        "conclusion": "skipped",
-        "started_at": "2026-04-13T08:24:08Z",
-        "completed_at": "2026-04-13T08:24:08Z",
-        "output_title": null,
-        "output_summary": ""
-      },
-      {
-        "name": "🔒 SSL证书配置",
-        "status": "completed",
-        "conclusion": "skipped",
-        "started_at": "2026-04-13T08:24:08Z",
-        "completed_at": "2026-04-13T08:24:08Z",
-        "output_title": null,
-        "output_summary": ""
-      },
-      {
-        "name": "📊 更新流量仪表盘",
-        "status": "in_progress",
-        "conclusion": null,
-        "started_at": "2026-04-13T08:24:11Z",
-        "completed_at": null,
-        "output_title": null,
-        "output_summary": ""
-      },
-      {
-        "name": "🔧 服务器初始化",
-        "status": "completed",
-        "conclusion": "skipped",
-        "started_at": "2026-04-13T08:24:08Z",
-        "completed_at": "2026-04-13T08:24:08Z",
-        "output_title": null,
-        "output_summary": ""
-      },
-      {
-        "name": "💚 健康检查",
-        "status": "completed",
-        "conclusion": "skipped",
-        "started_at": "2026-04-13T08:24:08Z",
-        "completed_at": "2026-04-13T08:24:08Z",
-        "output_title": null,
-        "output_summary": ""
-      },
       {
         "name": "📡 Bridge E · GitHub Changes → Notion",
         "status": "in_progress",
         "conclusion": null,
-        "started_at": "2026-04-13T08:24:11Z",
+        "started_at": "2026-04-27T12:23:27Z",
         "completed_at": null,
         "output_title": null,
         "output_summary": ""
       },
       {
-        "name": "🚀 部署应用代码",
+        "name": "gate-guard",
         "status": "in_progress",
         "conclusion": null,
-        "started_at": "2026-04-13T08:24:11Z",
-        "completed_at": null,
-        "output_title": null,
-        "output_summary": ""
-      },
-      {
-        "name": "build",
-        "status": "in_progress",
-        "conclusion": null,
-        "started_at": "2026-04-13T08:24:11Z",
+        "started_at": "2026-04-27T12:23:27Z",
         "completed_at": null,
         "output_title": null,
         "output_summary": ""
