@@ -19,7 +19,7 @@
       "name": "action-merge-sentinel",
       "name_cn": "合并哨兵",
       "status": "half_ready",
-      "last_run": "2026-04-27T12:23:30.017Z",
+      "last_run": "2026-04-27T12:50:49.362Z",
       "last_success": null,
       "trigger": "pull_request.closed+merged"
     },

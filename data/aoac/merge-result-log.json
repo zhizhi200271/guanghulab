@@ -2,20 +2,20 @@
   "aoac_agent": "AOAC-02",
   "aoac_agent_name": "action-merge-sentinel",
   "status": "half_ready",
-  "timestamp": "2026-04-27 20:23:30+08:00",
-  "timestamp_utc": "2026-04-27T12:23:30.016Z",
+  "timestamp": "2026-04-27 20:50:49+08:00",
+  "timestamp_utc": "2026-04-27T12:50:49.361Z",
   "merge": {
-    "pr_number": 1,
-    "pr_title": "Add qiuqiu-deploy.yml with correct GitHub Actions secrets syntax",
-    "merge_commit_sha": "1960ee04a9281fdc4f9692b60e238989ba037a0c",
-    "head_sha": "fa9b1058e0a7e6b18ac18f18c62557f9c59260d7",
+    "pr_number": 2,
+    "pr_title": "chore(ci): rewrite qiuqiu-deploy.yml to use appleboy/ssh-action with push-to-main trigger",
+    "merge_commit_sha": "c91e46bb89ebf33efc76ebeede26f0ae65ea92f9",
+    "head_sha": "f40504041d1d982304c62ee42236348821a09f4e",
     "base_branch": "main"
   },
   "ci": {
     "combined_status": "pending",
     "overall_result": "pending",
     "summary": {
-      "total": 2,
+      "total": 3,
       "passed": 0,
       "failed": 0,
       "skipped": 0
@@ -25,7 +25,16 @@
         "name": "📡 Bridge E · GitHub Changes → Notion",
         "status": "in_progress",
         "conclusion": null,
-        "started_at": "2026-04-27T12:23:27Z",
+        "started_at": "2026-04-27T12:50:45Z",
+        "completed_at": null,
+        "output_title": null,
+        "output_summary": ""
+      },
+      {
+        "name": "🚀 部署秋秋服务",
+        "status": "in_progress",
+        "conclusion": null,
+        "started_at": "2026-04-27T12:50:45Z",
         "completed_at": null,
         "output_title": null,
         "output_summary": ""
@@ -34,7 +43,7 @@
         "name": "gate-guard",
         "status": "in_progress",
         "conclusion": null,
-        "started_at": "2026-04-27T12:23:27Z",
+        "started_at": "2026-04-27T12:50:44Z",
         "completed_at": null,
         "output_title": null,
         "output_summary": ""
