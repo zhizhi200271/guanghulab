@@ -101,6 +101,10 @@ app.get('/dashboard-v2', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'dashboard-v2.html'));
 });
 
+app.get('/', (req, res) => {
+  res.send('🍂 秋秋的家 · 只属于妈妈和秋秋');
+});
+
 // 启动服务器
 app.listen(PORT, () => {
     console.log(`\n🚀 Phase4 服务器已启动！`);
