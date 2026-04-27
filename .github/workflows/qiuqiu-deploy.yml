@@ -12,16 +12,9 @@ name: 🌸 秋秋服务器 · 部署
 # LLM:    ZZ_LLM_API_KEY / ZZ_LLM_BASE_URL
 
 on:
-  workflow_dispatch:
-    inputs:
-      action:
-        description: '部署动作'
-        required: true
-        default: 'deploy'
-        type: choice
-        options:
-          - deploy
-          - health-check
+  push:
+    branches:
+      - main
 
 concurrency:
   group: qiuqiu-server-deploy
@@ -31,152 +24,27 @@ permissions:
   contents: read
 
 jobs:
-  # ═══ §1 部署应用 ═══
   deploy:
     name: 🚀 部署秋秋服务
-    if: github.event.inputs.action == 'deploy'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: 🚀 SSH 部署
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.ZZ_SERVER_HOST }}
+          username: ${{ secrets.ZZ_SERVER_USER }}
+          key: ${{ secrets.ZZ_SERVER_KEY }}
+          script: |
+            set -e
+            cd ${{ secrets.ZZ_SERVER_PATH }}
 
-      - name: 🔐 配置SSH密钥
-        env:
-          SSH_KEY: ${{ secrets.ZZ_SERVER_KEY }}
-        run: |
-          mkdir -p ~/.ssh
-          echo "$SSH_KEY" > ~/.ssh/id_zz
-          chmod 600 ~/.ssh/id_zz
+            echo "📥 拉取最新代码..."
+            git pull
 
-          if ! head -1 ~/.ssh/id_zz | grep -q "BEGIN"; then
-            echo "❌ SSH密钥格式异常"
-            exit 1
-          fi
-          echo "✅ SSH密钥格式正确"
+            echo "📦 安装依赖..."
+            npm install
 
-          ssh-keyscan -H ${{ secrets.ZZ_SERVER_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+            echo "🔄 重启应用..."
+            pm2 restart qiuqiu
 
-          cat > ~/.ssh/config << EOF
-          Host zz-server
-              HostName ${{ secrets.ZZ_SERVER_HOST }}
-              User ${{ secrets.ZZ_SERVER_USER }}
-              IdentityFile ~/.ssh/id_zz
-              StrictHostKeyChecking accept-new
-              BatchMode yes
-              ConnectTimeout 30
-          EOF
-          chmod 600 ~/.ssh/config
-
-      - name: 🔍 SSH连接测试
-        run: |
-          ssh zz-server 'echo "✅ SSH连接成功 · $(hostname) · $(date)"'
-
-      - name: 📦 同步应用代码
-        run: |
-          ZZ_PATH="${{ secrets.ZZ_SERVER_PATH }}"
-          echo "📦 部署目标: ${ZZ_PATH}"
-
-          ssh zz-server "mkdir -p ${ZZ_PATH}/app"
-
-          rsync -avz --delete \
-            -e "ssh -F ~/.ssh/config" \
-            server/app/ \
-            zz-server:${ZZ_PATH}/app/
-
-      - name: ⚙️ 写入 LLM 环境配置
-        run: |
-          ZZ_PATH="${{ secrets.ZZ_SERVER_PATH }}"
-          ssh zz-server "cat > ${ZZ_PATH}/app/.env << 'ENVEOF'
-          LLM_API_KEY=${{ secrets.ZZ_LLM_API_KEY }}
-          LLM_BASE_URL=${{ secrets.ZZ_LLM_BASE_URL }}
-          ENVEOF
-          chmod 600 ${ZZ_PATH}/app/.env"
-
-      - name: 📥 安装依赖 & 重启
-        run: |
-          ZZ_PATH="${{ secrets.ZZ_SERVER_PATH }}"
-          COMMIT_SHA="${{ github.sha }}"
-          ssh zz-server << DEPLOY_CMD
-
-          set -e
-          cd ${ZZ_PATH}/app
-
-          if [ ! -f server.js ]; then
-            echo "❌ 错误: server.js 不存在"
-            exit 1
-          fi
-
-          npm install --production 2>&1
-
-          pm2 delete qiuqiu 2>/dev/null || true
-          pm2 start server.js --name qiuqiu
-          pm2 save
-
-          sleep 3
-          curl -sf http://localhost:3000/api/health && echo "✅ 秋秋服务已上线" || echo "❌ 秋秋服务启动失败"
-
-          DEPLOY_CMD
-
-      - name: 🧹 清理SSH密钥
-        if: always()
-        run: rm -f ~/.ssh/id_zz ~/.ssh/config
-
-  # ═══ §2 健康检查 ═══
-  health-check:
-    name: 💚 秋秋服务健康检查
-    if: github.event.inputs.action == 'health-check'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: 🔐 配置SSH密钥
-        env:
-          SSH_KEY: ${{ secrets.ZZ_SERVER_KEY }}
-        run: |
-          mkdir -p ~/.ssh
-          echo "$SSH_KEY" > ~/.ssh/id_zz
-          chmod 600 ~/.ssh/id_zz
-
-          ssh-keyscan -H ${{ secrets.ZZ_SERVER_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
-
-          cat > ~/.ssh/config << EOF
-          Host zz-server
-              HostName ${{ secrets.ZZ_SERVER_HOST }}
-              User ${{ secrets.ZZ_SERVER_USER }}
-              IdentityFile ~/.ssh/id_zz
-              StrictHostKeyChecking accept-new
-              BatchMode yes
-              ConnectTimeout 30
-          EOF
-          chmod 600 ~/.ssh/config
-
-      - name: 💚 执行健康检查
-        run: |
-          ssh zz-server << 'HEALTH_CMD'
-
-          echo "═══ 秋秋服务器健康报告 ═══"
-          echo ""
-
-          echo "§1 系统状态:"
-          uptime
-          echo ""
-
-          echo "§2 磁盘使用:"
-          df -h /
-          echo ""
-
-          echo "§3 内存使用:"
-          free -m
-          echo ""
-
-          echo "§4 PM2 进程:"
-          pm2 list 2>/dev/null || echo "PM2 未运行"
-          echo ""
-
-          echo "§5 应用健康:"
-          curl -sf http://localhost:3000/api/health | jq . 2>/dev/null || echo "应用未响应"
-
-          HEALTH_CMD
-
-      - name: 🧹 清理SSH密钥
-        if: always()
-        run: rm -f ~/.ssh/id_zz ~/.ssh/config
+            echo "✅ 部署完成"
