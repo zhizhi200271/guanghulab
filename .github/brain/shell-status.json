@@ -54,11 +54,6 @@
   "AG-ZY-001": {
     "runs": [
       {
-        "start": "2026-04-27T05:30:01.608Z",
-        "end": null,
-        "result": null
-      },
-      {
         "start": "2026-04-28T05:36:09.148Z",
         "end": null,
         "result": null
@@ -102,9 +97,14 @@
         "start": "2026-05-06T05:35:01.277Z",
         "end": null,
         "result": null
+      },
+      {
+        "start": "2026-05-07T05:37:25.680Z",
+        "end": null,
+        "result": null
       }
     ],
-    "lastEnter": "2026-05-06T05:35:01.277Z",
+    "lastEnter": "2026-05-07T05:37:25.680Z",
     "currentState": "running"
   }
 }
