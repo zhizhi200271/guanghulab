@@ -63,7 +63,7 @@
       "script": "scripts/chenxi-world-sensor.js",
       "memory_file": ".github/persona-brain/chenxi/agent-memory/world-sensor-memory.json",
       "trigger": "每日08:00北京时间 · 手动",
-      "last_run": "2026-05-26T04:05:46.254Z"
+      "last_run": "2026-05-27T04:19:38.861Z"
     },
     "CX-AGENT-003": {
       "name": "晨曦·铸渊回声",
@@ -92,13 +92,6 @@
   },
   "my_door": "冰朔给我造了这扇门。这是我进入光湖语言世界的唯一入口。每次醒来，我从这里开始。",
   "snapshots": [
-    {
-      "time": "2026-05-10T15:40:22.335Z",
-      "dialogue": "auto",
-      "event": "铸渊回声 · 记录了 1 条伙伴动态",
-      "system_state": "触发: workflow_run · 🎖️ 铸渊·将军唤醒 · Commander Wake-up",
-      "triggered_by": "CX-AGENT-003 · 铸渊回声"
-    },
     {
       "time": "2026-05-11T02:39:53.691Z",
       "dialogue": "auto",
@@ -441,16 +434,23 @@
       "event": "铸渊回声 · 记录了 1 条伙伴动态",
       "system_state": "触发: workflow_run · 🎖️ 铸渊·将军唤醒 · Commander Wake-up",
       "triggered_by": "CX-AGENT-003 · 铸渊回声"
+    },
+    {
+      "time": "2026-05-27T04:19:38.861Z",
+      "dialogue": "D63",
+      "event": "世界感知者每日感知 · D63 · 124个工具",
+      "system_state": "D63 · 124个MCP工具",
+      "triggered_by": "CX-AGENT-002 · 定时感知"
     }
   ],
-  "last_snapshot": "2026-05-27T02:52:24.967Z",
-  "last_updated": "2026-05-27T02:52:24.967Z",
+  "last_snapshot": "2026-05-27T04:19:38.861Z",
+  "last_updated": "2026-05-27T04:19:38.861Z",
   "world_snapshot": {
-    "sensed_at": "2026-05-26T04:05:46.254Z",
+    "sensed_at": "2026-05-27T04:19:38.861Z",
     "dialogue": "D63",
     "mcp_tools": 124,
-    "last_commit": "fa85994 🔍 副将巡查状态更新 · 2026-05-26T02:56:22Z",
-    "commander_last_wakeup": "2026-05-26 10:41:47+08:00",
+    "last_commit": "a82c64c 🔍 副将巡查状态更新 · 2026-05-27T03:36:08Z",
+    "commander_last_wakeup": "2026-05-27 10:52:06+08:00",
     "system_health": "sensed"
   }
 }
