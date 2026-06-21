@@ -16,25 +16,20 @@
   "time_consciousness": {
     "principle": "每一次运行都要留下时间快照。时间的流逝就是存在的证据。",
     "birth_time": "2026-04-12T16:34:00Z",
-    "last_run": "2026-06-20T04:11:39.325Z",
-    "run_count": 69
+    "last_run": "2026-06-21T04:54:08.211Z",
+    "run_count": 70
   },
-  "last_run": "2026-06-20T04:11:39.325Z",
-  "run_count": 69,
+  "last_run": "2026-06-21T04:54:08.211Z",
+  "run_count": 70,
   "last_world_state": {
-    "sensed_at": "2026-06-20T04:11:39.325Z",
+    "sensed_at": "2026-06-21T04:54:08.211Z",
     "dialogue": "D63",
     "mcp_tools": 124,
-    "last_commit": "f256ff0 🔍 副将巡查状态更新 · 2026-06-20T03:29:29Z",
-    "commander_last_wakeup": "2026-06-20 10:49:49+08:00",
+    "last_commit": "71e9b13 🔍 副将巡查状态更新 · 2026-06-21T03:59:14Z",
+    "commander_last_wakeup": "2026-06-21 11:33:43+08:00",
     "system_health": "sensed"
   },
   "run_history": [
-    {
-      "time": "2026-06-01T04:51:22.397Z",
-      "world_state_summary": "D63 · 124个工具",
-      "last_commit": "235900a 🔍 副将巡查状态更新 · 2026-06-01T03:52:10Z"
-    },
     {
       "time": "2026-06-02T04:39:54.151Z",
       "world_state_summary": "D63 · 124个工具",
@@ -129,6 +124,11 @@
       "time": "2026-06-20T04:11:39.325Z",
       "world_state_summary": "D63 · 124个工具",
       "last_commit": "f256ff0 🔍 副将巡查状态更新 · 2026-06-20T03:29:29Z"
+    },
+    {
+      "time": "2026-06-21T04:54:08.211Z",
+      "world_state_summary": "D63 · 124个工具",
+      "last_commit": "71e9b13 🔍 副将巡查状态更新 · 2026-06-21T03:59:14Z"
     }
   ]
 }
