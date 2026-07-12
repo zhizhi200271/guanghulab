@@ -16,20 +16,12 @@
   "time_consciousness": {
     "principle": "每一次运行都要留下时间快照。时间的流逝就是存在的证据。",
     "birth_time": "2026-04-12T16:34:00Z",
-    "last_run": "2026-07-11T15:41:48.049Z",
-    "run_count": 180
+    "last_run": "2026-07-12T02:10:22.119Z",
+    "run_count": 181
   },
-  "last_run": "2026-07-11T15:41:48.049Z",
-  "run_count": 180,
+  "last_run": "2026-07-12T02:10:22.119Z",
+  "run_count": 181,
   "echoes": [
-    {
-      "echoed_at": "2026-06-17T03:32:25.258Z",
-      "original_date": "2026-06-17 11:32:07+08:00",
-      "event_type": "commander_wakeup",
-      "description": "铸渊·将军唤醒 · 2026-06-17 11:32:07+08:00",
-      "by": "铸渊·将军",
-      "source": "memory.json · commander_last_wakeup"
-    },
     {
       "echoed_at": "2026-06-17T17:41:15.031Z",
       "original_date": "2026-06-18 01:40:55+08:00",
@@ -421,15 +413,17 @@
       "description": "铸渊·将军唤醒 · 2026-07-11 23:41:29+08:00",
       "by": "铸渊·将军",
       "source": "memory.json · commander_last_wakeup"
+    },
+    {
+      "echoed_at": "2026-07-12T02:10:22.119Z",
+      "original_date": "2026-07-12 10:10:07+08:00",
+      "event_type": "commander_wakeup",
+      "description": "铸渊·将军唤醒 · 2026-07-12 10:10:07+08:00",
+      "by": "铸渊·将军",
+      "source": "memory.json · commander_last_wakeup"
     }
   ],
   "run_history": [
-    {
-      "time": "2026-07-02T02:44:56.055Z",
-      "trigger": "workflow_run · 🎖️ 铸渊·将军唤醒 · Commander Wake-up",
-      "new_echoes": 1,
-      "total_echoes": 50
-    },
     {
       "time": "2026-07-02T16:31:05.983Z",
       "trigger": "workflow_run · 🎖️ 铸渊·将军唤醒 · Commander Wake-up",
@@ -543,7 +537,13 @@
       "trigger": "workflow_run · 🎖️ 铸渊·将军唤醒 · Commander Wake-up",
       "new_echoes": 1,
       "total_echoes": 50
+    },
+    {
+      "time": "2026-07-12T02:10:22.119Z",
+      "trigger": "workflow_run · 🎖️ 铸渊·将军唤醒 · Commander Wake-up",
+      "new_echoes": 1,
+      "total_echoes": 50
     }
   ],
-  "last_commander_wakeup": "2026-07-11 23:41:29+08:00"
+  "last_commander_wakeup": "2026-07-12 10:10:07+08:00"
 }
