@@ -67,8 +67,8 @@
       "name": "repair-supervisor",
       "name_cn": "修复监督Agent",
       "status": "completed",
-      "last_run": "2026-07-14T16:42:28.630Z",
-      "last_success": "2026-07-14T16:42:28.630Z",
+      "last_run": "2026-07-15T16:49:03.492Z",
+      "last_success": "2026-07-15T16:49:03.492Z",
       "trigger": "AOAC-07.started"
     }
   },
