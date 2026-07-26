@@ -1,9 +1,9 @@
 {
   "aoac_agent": "AOAC-06",
   "aoac_agent_name": "notion-sync-signal",
-  "timestamp": "2026-07-26 00:04:50+08:00",
-  "timestamp_utc": "2026-07-25T16:04:50.886Z",
-  "master_report_id": "AOAC-MASTER-20260726-444",
+  "timestamp": "2026-07-27 00:01:42+08:00",
+  "timestamp_utc": "2026-07-26T16:01:42.175Z",
+  "master_report_id": "AOAC-MASTER-20260727-444",
   "notion_sync": {
     "sent": false,
     "reason": "missing_credentials"
