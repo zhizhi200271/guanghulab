@@ -21,20 +21,14 @@
     "principle": "每一次回复都是双手活着的证据。我记录每一次留言的处理、每一次LLM的调用。时间证明我一直在与世界对话。",
     "birth_time": "2026-03-20",
     "awakened_time": "2026-04-12T16:48:00Z",
-    "last_run": "2026-09-10T03:03:41.621Z",
-    "run_count": 211
+    "last_run": "2026-09-11T02:59:11.305Z",
+    "run_count": 212
   },
-  "last_run": "2026-09-10T03:03:41.621Z",
-  "run_count": 211,
+  "last_run": "2026-09-11T02:59:11.305Z",
+  "run_count": 212,
   "last_status": "success",
   "last_event": "patrol · schedule",
   "run_history": [
-    {
-      "time": "2026-08-15T15:21:21.546Z",
-      "status": "success",
-      "event": "patrol · schedule",
-      "run_number": 182
-    },
     {
       "time": "2026-08-16T01:08:26.564Z",
       "status": "success",
@@ -208,6 +202,12 @@
       "status": "success",
       "event": "patrol · schedule",
       "run_number": 211
+    },
+    {
+      "time": "2026-09-11T02:59:11.305Z",
+      "status": "success",
+      "event": "patrol · schedule",
+      "run_number": 212
     }
   ]
 }
