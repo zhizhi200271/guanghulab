@@ -35,8 +35,8 @@
       "name": "readme-sync-module",
       "name_cn": "首页同步模块",
       "status": "completed",
-      "last_run": "2026-09-14T19:44:23.528Z",
-      "last_success": "2026-09-14T19:44:23.528Z",
+      "last_run": "2026-09-15T18:44:07.823Z",
+      "last_success": "2026-09-15T18:44:07.823Z",
       "trigger": "data/aoac/readme-sync-trigger.json.written"
     },
     "AOAC-05": {
