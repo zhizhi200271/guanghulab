@@ -51,7 +51,7 @@
       "name": "notion-sync-signal",
       "name_cn": "Notion同步信号",
       "status": "warning",
-      "last_run": "2026-10-07T20:25:59.126Z",
+      "last_run": "2026-10-08T20:31:56.748Z",
       "last_success": null,
       "trigger": "AOAC-05.completed"
     },
