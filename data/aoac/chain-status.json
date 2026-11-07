@@ -59,8 +59,8 @@
       "name": "chain-repair-agent",
       "name_cn": "链路修复Agent",
       "status": "completed",
-      "last_run": "2026-11-06T20:57:35.424Z",
-      "last_success": "2026-11-06T20:57:35.424Z",
+      "last_run": "2026-11-07T19:30:12.528Z",
+      "last_success": "2026-11-07T19:30:12.528Z",
       "trigger": "receipt_db.red|schedule(23:30 CST)"
     },
     "AOAC-08": {
@@ -75,5 +75,5 @@
   "chain_health": "healthy",
   "last_full_cycle": "2026-11-07T19:16:06.627Z",
   "total_cycles": 210,
-  "total_repairs": 209
+  "total_repairs": 210
 }
